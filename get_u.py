@@ -26,15 +26,8 @@ OutPath  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 
 zonegrp = GetZonegrp(FoldPath)
 with timer("get lines"):
-    line_loc = [-60.0, 0.0, -60.0, 10.0]    
-    GetLine(line_loc,zonegrp,FoldPath,OutPath)
-    line_loc = [-40.0, 0.0, -40.0, 10.0]    
-    GetLine(line_loc,zonegrp,FoldPath,OutPath)
+    line_loc = [-60.0, 0.0, -60.0, 30.0]    
+    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
+    line_loc = [-40.0, 0.0, -40.0, 30.0]    
+    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
 
-
-#        print(dataset.num_solution_times)
-#        print(dataset.VariablesNamedTuple)
-#        print(dataset.num_variables)
-#        print(dataset.num_zones)
-#        print(dataset.title)
-#        print(dataset.variable_names)

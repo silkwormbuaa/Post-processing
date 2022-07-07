@@ -18,3 +18,9 @@ VarList  = ['x',                'y',                    '<u>',                  
             '<T`T`>',           '<T`mu`>',              '<mu`mu`>',             \
             'walldist',         'shocksens',            'entropy']
 '''
+#        print(dataset.num_solution_times)
+#        print(dataset.VariablesNamedTuple)
+#        print(dataset.num_variables)
+#        print(dataset.num_zones)
+#        print(dataset.title)
+#        print(dataset.variable_names)
