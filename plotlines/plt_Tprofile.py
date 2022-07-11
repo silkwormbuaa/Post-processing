@@ -9,8 +9,8 @@ Before run, modify the variable for x axis
 """
 
 #%% plot streamwise velocity profile
-#OutFile  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
-OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
+OutFile  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
+#OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 os.chdir(OutFile)
 lst = os.listdir(OutFile)
 lst.sort()
@@ -50,29 +50,26 @@ for filename in lst:
                 Tplus.append(float( cleanline[13])) 
         fig_label = filename.strip(".dat")    
         print(fig_label)    
-        ax.plot(yplus,uunor,label=r'$u^\prime u^\prime$',ls="--")
-        ax.plot(yplus,uvnor,label=r'$u^\prime v^\prime$',ls="--")
-        ax.plot(yplus,vvnor,label=r'$v^\prime v^\prime$',ls="--")
-        ax.plot(yplus,wwnor,label=r'$w^\prime w^\prime$',ls="--")
+        ax.plot(Tplus,ydelta,label=r'$T^+$',ls="-")
 
 
-ax.minorticks_on()        
-ax.set_xscale("symlog",linthresh = 1)        
-ax.set_xlabel("$y^+$",fontdict={'size':24})  
+ax.minorticks_on()
+#ax.set_xscale("symlog",linthresh = 1)        
+ax.set_xlabel(r"$T^+$",fontdict={'size':24})  
 ax.tick_params(axis='x',labelsize=15)
-ax.set_xlim([1,1000])
-x_minor = matplotlib.ticker.LogLocator(base=10.0, subs = np.arange(1.0,10.0))
-ax.xaxis.set_minor_locator(x_minor)
+#ax.set_xlim([1,1000])
+#x_minor = matplotlib.ticker.LogLocator(base=10.0, subs = np.arange(1.0,10.0))
+#ax.xaxis.set_minor_locator(x_minor)
 
-ax.set_ylabel(r'$\xi u^\prime_i u^\prime_j$',\
+ax.set_ylabel(r'$y/\delta$',\
               fontdict={'size':24})
 ax.tick_params(axis='y',labelsize=15)
-ax.set_ylim([-2,8])
-
+ax.set_xlim([0.5,2.0])
+ax.set_ylim([0.0,2.0])
 ax.legend(prop={'size':20}) 
-ax.set_title("Reynolds Stress profile Flat Plate",size=20) 
+ax.set_title(r"$T^+$ profile wavy wall",size=20)   
+
 ax.grid()
 
-plt.savefig("Reynolds_Stress_profile_flat_plate")
+plt.savefig("temperature_wavy_wall")
 plt.show()
-

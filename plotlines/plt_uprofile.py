@@ -9,8 +9,8 @@ Before run, modify the variable for x axis
 """
 
 #%% plot streamwise velocity profile
-#OutFile  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
-OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
+OutFile  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
+#OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 os.chdir(OutFile)
 lst = os.listdir(OutFile)
 lst.sort()
@@ -52,6 +52,14 @@ for filename in lst:
         print(fig_label)    
         ax.plot(yplus,uplus,label=r'$u^+$',ls="-")
 
+uplus_ref = np.arange(0.0,10.0,0.1)
+yplus_ref = np.arange(0.0,10.0,0.1)
+ax.plot(yplus_ref,uplus_ref,label=r'$u^+=y^+$',ls='--')
+
+uplus_ref = np.arange(10.0,1000.0,1)
+yplus_ref = np.arange(10.0,1000.0,1)
+uplus_ref = np.log(uplus_ref)/0.41+4.3
+ax.plot(yplus_ref,uplus_ref,label=r'$u^+=\frac{1}{\kappa}lny^++C$',ls='--')
 
 ax.minorticks_on()
 ax.set_xscale("symlog",linthresh = 1)        
@@ -68,9 +76,9 @@ ax.tick_params(axis='y',labelsize=15)
 
 
 ax.legend(prop={'size':20}) 
-ax.set_title(r"$u^+$ profile Flat Plate",size=20)   
+ax.set_title(r"$u^+$ profile wavy wall",size=20)   
 
 ax.grid()
 
-plt.savefig("velocity_flat_plate")
+plt.savefig("velocity_profile_wavywall_yplus_log")
 plt.show()

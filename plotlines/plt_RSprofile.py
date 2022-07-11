@@ -2,7 +2,11 @@
 from matplotlib.font_manager import FontProperties
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import os
+"""
+Before run, modify the variable for x axis 
+"""
 
 #%% plot streamwise velocity profile
 OutFile  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
@@ -10,58 +14,65 @@ OutFile  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
 os.chdir(OutFile)
 lst = os.listdir(OutFile)
 lst.sort()
-plt.figure(figsize=[12,10])
+fig, ax = plt.subplots(figsize=[10,8])
 for filename in lst:
-    y  = []
-    uu = []
-    uv = []
-    vv = []
-    ww = []
-    if filename.endswith("wavy.dat"):
+    xlst   = []
+    ylst   = []
+    deltay = []
+    yplus  = []
+    yplus2 = []
+    ydelta = []
+    ulst   = []
+    uplus  = []
+    uunor  = []
+    vvnor  = []
+    wwnor  = []
+    uvnor  = []
+    Tlst   = []
+    Tplus  = []
+    if filename.endswith(".dat"):
         with open(filename) as f:
             for line in f.readlines():
                 cleanline = line.strip().split(" ")
-                y.append(float(cleanline[0]))
-                uu.append(float(cleanline[1]))
-                uv.append(float(cleanline[2]))
-                vv.append(float(cleanline[3]))
-                ww.append(float(cleanline[4]))
+                xlst.append(float(  cleanline[0]))
+                ylst.append(float(  cleanline[1]))  
+                deltay.append(float(cleanline[2]))
+                yplus.append(float( cleanline[3]))
+                yplus2.append(float(cleanline[4])) 
+                ydelta.append(float(cleanline[5]))
+                ulst.append(float(  cleanline[6]))  
+                uplus.append(float( cleanline[7])) 
+                uunor.append(float( cleanline[8])) 
+                vvnor.append(float( cleanline[9])) 
+                wwnor.append(float( cleanline[10])) 
+                uvnor.append(float( cleanline[11])) 
+                Tlst.append(float(  cleanline[12]))  
+                Tplus.append(float( cleanline[13])) 
         fig_label = filename.strip(".dat")    
         print(fig_label)    
-        plt.plot(y,uu,label=r'$u^\prime u^\prime$')
-        plt.plot(y,uv,label=r'$u^\prime v^\prime$')
-        plt.plot(y,vv,label=r'$v^\prime v^\prime$')
-        plt.plot(y,ww,label=r'$w^\prime w^\prime$')
-lst = os.listdir(OutFile)
-lst.sort()
-for filename in lst:
-    y = []
-    uu = []
-    uv = []
-    vv = []
-    ww = []
-    if filename.endswith("flat.dat"):
-        with open(filename) as f:
-            for line in f.readlines():
-                cleanline = line.strip().split(" ")
-                y.append(float(cleanline[0]))
-                uu.append(float(cleanline[1]))
-                uv.append(float(cleanline[2]))
-                vv.append(float(cleanline[3]))
-                ww.append(float(cleanline[4]))
-        fig_label, ext = os.path.splitext(filename)   
-        print(fig_label)    
-        plt.plot(y,uu,label=r'$u^\prime u^\prime$',ls="--")
-        plt.plot(y,uv,label=r'$u^\prime v^\prime$',ls="--")
-        plt.plot(y,vv,label=r'$v^\prime v^\prime$',ls="--")
-        plt.plot(y,ww,label=r'$w^\prime w^\prime$',ls="--")        
-plt.xscale("symlog")        
-plt.ylabel(r"$\sqrt{\langle u^{\prime}_i u^{\prime}_j\rangle^{+}}$",fontdict={'size':24})  
-plt.xticks(size = 20)
-plt.xlabel("$y^+$",fontdict={'size':24})  
-plt.yticks(size = 20)  
-plt.legend(prop={'size':20}) 
-plt.title(fig_label)      
-plt.xlim(0,1000)
-plt.grid()
+        ax.plot(yplus2,uunor,label=r'$u^\prime u^\prime$',ls="--")
+        ax.plot(yplus2,uvnor,label=r'$u^\prime v^\prime$',ls="--")
+        ax.plot(yplus2,vvnor,label=r'$v^\prime v^\prime$',ls="--")
+        ax.plot(yplus2,wwnor,label=r'$w^\prime w^\prime$',ls="--")
+
+
+ax.minorticks_on()        
+ax.set_xscale("symlog",linthresh = 1)        
+ax.set_xlabel("$y^+$",fontdict={'size':24})  
+ax.tick_params(axis='x',labelsize=15)
+ax.set_xlim([1,1000])
+x_minor = matplotlib.ticker.LogLocator(base=10.0, subs = np.arange(1,10.0))
+ax.xaxis.set_minor_locator(x_minor)
+
+ax.set_ylabel(r'$\xi u^\prime_i u^\prime_j$',\
+              fontdict={'size':24})
+ax.tick_params(axis='y',labelsize=15)
+#ax.set_ylim([-2,8])
+
+ax.legend(prop={'size':20}) 
+ax.set_title("Reynolds Stress profile wavy wall",size=20) 
+ax.grid()
+
+plt.savefig("Reynolds_Stress_profile_wavywall_yplus2")
 plt.show()
+
