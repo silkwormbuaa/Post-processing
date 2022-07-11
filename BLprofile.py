@@ -195,7 +195,8 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
         rholst[0] = rholst[1]
         mulst[0]  = mulst[1]
         Tlst[0]   = Tlst[1]
-    dudy      = GetDudy(ulst[1],ulst[2],ylst[1]-ylst[0],ylst[2]-ylst[0])
+    # dudy opt==1, 1st order; opt==2, 2nd order    
+    dudy      = GetDudy(ulst[1],ulst[2],ylst[1]-ylst[0],ylst[2]-ylst[0],2)
     tau       = mulst[0] * dudy
     u_tau     = np.sqrt(tau/rholst[0])
     lv       = mulst[0]/rholst[0]/u_tau 

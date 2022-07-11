@@ -13,8 +13,7 @@ OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 os.chdir(OutFile)
 lst = os.listdir(OutFile)
 lst.sort()
-fig, ax = plt.subplots()
-plt.figure(figsize=[10,8])
+plt.figure(1,figsize=[12,10])
 for filename in lst:
     xlst   = []
     ylst   = []
@@ -50,22 +49,15 @@ for filename in lst:
                 Tplus.append(float( cleanline[13])) 
         fig_label = filename.strip(".dat")    
         print(fig_label)    
-        ax.plot(yplus,uunor,label=r'$u^\prime u^\prime$',ls="--")
-        ax.plot(yplus,uvnor,label=r'$u^\prime v^\prime$',ls="--")
-        ax.plot(yplus,vvnor,label=r'$v^\prime v^\prime$',ls="--")
-        ax.plot(yplus,wwnor,label=r'$w^\prime w^\prime$',ls="--")
+        plt.plot(yplus,uplus,label=fig_label,ls="--")
         
-plt.xscale("symlog")        
-plt.ylabel(r"$\sqrt{\langle u^{\prime}_i u^{\prime}_j\rangle^{+}}$",\
-          fontdict={'size':24})  
+plt.xscale("log")        
+plt.ylabel(r"$u^{+}$",fontdict={'size':24})  
 plt.xticks(size = 20)
 plt.xlabel("$y^+$",fontdict={'size':24})  
+plt.xlim([1,2000])
 plt.yticks(size = 20)  
-#plt.ylim([-2,8])
-plt.minorticks_on()
-#plt.tick_params(direction="out")
 plt.legend(prop={'size':20}) 
-plt.title("Reynolds Stress profile_Flat Plate")      
-plt.xlim(1,1000)
-plt.grid()
+plt.title("Velocity profile")      
+plt.grid(True,which="both")
 plt.show()
