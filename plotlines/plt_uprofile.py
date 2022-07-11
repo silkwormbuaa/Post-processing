@@ -2,6 +2,7 @@
 from matplotlib.font_manager import FontProperties
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import os
 """
 Before run, modify the variable for x axis 
@@ -13,7 +14,7 @@ OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 os.chdir(OutFile)
 lst = os.listdir(OutFile)
 lst.sort()
-plt.figure(1,figsize=[12,10])
+fig, ax = plt.subplots(figsize=[10,8])
 for filename in lst:
     xlst   = []
     ylst   = []
@@ -49,15 +50,27 @@ for filename in lst:
                 Tplus.append(float( cleanline[13])) 
         fig_label = filename.strip(".dat")    
         print(fig_label)    
-        plt.plot(yplus,uplus,label=fig_label,ls="--")
-        
-plt.xscale("log")        
-plt.ylabel(r"$u^{+}$",fontdict={'size':24})  
-plt.xticks(size = 20)
-plt.xlabel("$y^+$",fontdict={'size':24})  
-plt.xlim([1,2000])
-plt.yticks(size = 20)  
-plt.legend(prop={'size':20}) 
-plt.title("Velocity profile")      
-plt.grid(True,which="both")
+        ax.plot(yplus,uplus,label=r'$u^+$',ls="-")
+
+
+ax.minorticks_on()
+ax.set_xscale("symlog",linthresh = 1)        
+ax.set_xlabel("$y^+$",fontdict={'size':24})  
+ax.tick_params(axis='x',labelsize=15)
+#ax.set_ylim([-2,8])
+ax.set_xlim([1,1000])
+x_minor = matplotlib.ticker.LogLocator(base=10.0, subs = np.arange(1.0,10.0))
+ax.xaxis.set_minor_locator(x_minor)
+
+ax.set_ylabel(r'$u^+$',\
+              fontdict={'size':24})
+ax.tick_params(axis='y',labelsize=15)
+
+
+ax.legend(prop={'size':20}) 
+ax.set_title(r"$u^+$ profile Flat Plate",size=20)   
+
+ax.grid()
+
+plt.savefig("velocity_flat_plate")
 plt.show()

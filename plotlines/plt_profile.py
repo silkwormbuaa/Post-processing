@@ -2,6 +2,7 @@
 from matplotlib.font_manager import FontProperties
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import os
 """
 Before run, modify the variable for x axis 
@@ -13,8 +14,7 @@ OutFile  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 os.chdir(OutFile)
 lst = os.listdir(OutFile)
 lst.sort()
-fig, ax = plt.subplots()
-plt.figure(figsize=[10,8])
+fig, ax = plt.subplots(figsize=[10,8])
 for filename in lst:
     xlst   = []
     ylst   = []
@@ -54,18 +54,25 @@ for filename in lst:
         ax.plot(yplus,uvnor,label=r'$u^\prime v^\prime$',ls="--")
         ax.plot(yplus,vvnor,label=r'$v^\prime v^\prime$',ls="--")
         ax.plot(yplus,wwnor,label=r'$w^\prime w^\prime$',ls="--")
-        
-plt.xscale("symlog")        
-plt.ylabel(r"$\sqrt{\langle u^{\prime}_i u^{\prime}_j\rangle^{+}}$",\
-          fontdict={'size':24})  
-plt.xticks(size = 20)
-plt.xlabel("$y^+$",fontdict={'size':24})  
-plt.yticks(size = 20)  
-#plt.ylim([-2,8])
-plt.minorticks_on()
-#plt.tick_params(direction="out")
-plt.legend(prop={'size':20}) 
-plt.title("Reynolds Stress profile_Flat Plate")      
-plt.xlim(1,1000)
-plt.grid()
+
+
+ax.minorticks_on()        
+ax.set_xscale("symlog",linthresh = 1)        
+ax.set_xlabel("$y^+$",fontdict={'size':24})  
+ax.tick_params(axis='x',labelsize=15)
+ax.set_xlim([1,1000])
+x_minor = matplotlib.ticker.LogLocator(base=10.0, subs = np.arange(1.0,10.0))
+ax.xaxis.set_minor_locator(x_minor)
+
+ax.set_ylabel(r'$\xi u^\prime_i u^\prime_j$',\
+              fontdict={'size':24})
+ax.tick_params(axis='y',labelsize=15)
+ax.set_ylim([-2,8])
+
+ax.legend(prop={'size':20}) 
+ax.set_title("Reynolds Stress profile Flat Plate",size=20) 
+ax.grid()
+
+plt.savefig("Reynolds_Stress_profile_flat_plate")
 plt.show()
+
