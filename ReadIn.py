@@ -78,5 +78,5 @@ def GetZonegrp(FoldPath):
         # print the zone groups info
         for group in zonegrp:
             print(group.zonelist)    
-    return zonegrp            
+    return zonegrp 
 

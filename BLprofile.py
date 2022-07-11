@@ -26,7 +26,7 @@ def GetInterpo(x,x1,x2,y1,y2):
     y = slope * (x-x1) + y1
     return y
 #%% Get velocity gradient magnitude at the wall
-def GetDudy(u1,u2,y1,y2,opt=2):
+def GetDudy(u1,u2,y1,y2,opt=1):
     if opt == 1:            #  linear gradient
         dudy = abs(u1/y1)
     if opt == 2:            #  second order accuracy
@@ -198,16 +198,20 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
     dudy      = GetDudy(ulst[1],ulst[2],ylst[1]-ylst[0],ylst[2]-ylst[0])
     tau       = mulst[0] * dudy
     u_tau     = np.sqrt(tau/rholst[0])
-    lnu       = mulst[0]/rholst[0]/u_tau 
+    lv       = mulst[0]/rholst[0]/u_tau 
     delta     = 5.2  
-    Tinfi     = 160.15                                
+    Tinfi     = 160.15 
+    print("u_tau = ",u_tau)
+    print("tau   = ",tau)
+    print("lv    = ",lv)                               
     # plot curve
     os.chdir(OutPath)
     out_file = "x_" + str(line_loc[0]) + ".dat"
     with open(out_file,"w") as f:
         for i in range(len(ylst)):
             deltay = ylst[i] - ylst[0]
-            yplus  = deltay/lnu
+            yplus  = deltay/lv
+            yplus2 = ylst[i]/lv 
             uplus  = ulst[i]/u_tau
             ydelta = deltay/delta
             uunor  = uulst[i]*rholst[i]/rholst[0]/(u_tau*u_tau)
@@ -219,6 +223,7 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
                     str('%.7f'%ylst[i])+' '+\
                     str('%.7f'%deltay) +' '+\
                     str('%.7f'%yplus)  +' '+\
+                    str('%.7f'%yplus2) +' '+\
                     str('%.7f'%ydelta) +' '+\
                     str('%.7f'%ulst[i])+' '+\
                     str('%.7f'%uplus)  +' '+\
