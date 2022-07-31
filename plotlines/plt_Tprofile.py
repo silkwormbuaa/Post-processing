@@ -30,7 +30,7 @@ for filename in lst:
     uvnor  = []
     Tlst   = []
     Tplus  = []
-    if filename.endswith(".dat"):
+    if filename.endswith("flat.dat"):
         with open(filename) as f:
             for line in f.readlines():
                 cleanline = line.strip().split(" ")
@@ -50,7 +50,29 @@ for filename in lst:
                 Tplus.append(float( cleanline[13])) 
         fig_label = filename.strip(".dat")    
         print(fig_label)    
-        ax.plot(Tplus,ydelta,label=r'$T^+$',ls="-")
+        ax.plot(Tplus,ydelta,label=r'$flat plate$',ls="-")
+    elif filename.endswith(".dat"):
+        with open(filename) as f:
+            for line in f.readlines():
+                cleanline = line.strip().split(" ")
+                xlst.append(float(  cleanline[0]))
+                ylst.append(float(  cleanline[1]))  
+                deltay.append(float(cleanline[2]))
+                yplus.append(float( cleanline[3]))
+                yplus2.append(float(cleanline[4])) 
+                ydelta.append(float(cleanline[5]))
+                ulst.append(float(  cleanline[6]))  
+                uplus.append(float( cleanline[7])) 
+                uunor.append(float( cleanline[8])) 
+                vvnor.append(float( cleanline[9])) 
+                wwnor.append(float( cleanline[10])) 
+                uvnor.append(float( cleanline[11])) 
+                Tlst.append(float(  cleanline[12]))  
+                Tplus.append(float( cleanline[13])) 
+        fig_label = filename.strip(".dat")    
+        print(fig_label)    
+        ax.plot(Tplus,ydelta,label=r'$wavy wall$',ls="-")
+        
 
 
 ax.minorticks_on()
@@ -65,11 +87,11 @@ ax.set_ylabel(r'$y/\delta$',\
               fontdict={'size':24})
 ax.tick_params(axis='y',labelsize=15)
 ax.set_xlim([0.5,2.0])
-ax.set_ylim([0.0,2.0])
+ax.set_ylim([-0.1,2.0])
 ax.legend(prop={'size':20}) 
-ax.set_title(r"$T^+$ profile wavy wall",size=20)   
+ax.set_title(r"$T^+$ profile comparison",size=20)   
 
 ax.grid()
 
-plt.savefig("temperature_wavy_wall")
+plt.savefig("temperature_wavy_wall_compare")
 plt.show()

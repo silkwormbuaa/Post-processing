@@ -76,7 +76,11 @@ def GetZonegrp(FoldPath):
         # sort the zonegrp by location ang output the groups
         zonegrp.sort(key=lambda x: (x.yctr,x.xctr))     
         # print the zone groups info
-        for group in zonegrp:
-            print(group.zonelist)    
+        os.chdir(FoldPath)
+        os.chdir(os.pardir)
+        with open("zonelist.dat","w") as f:
+            for group in zonegrp:
+                print(group.zonelist)
+                f.write(str(group.zonelist)+"\n")    
     return zonegrp 
 
