@@ -62,7 +62,7 @@ def GetZonegrp(FoldPath):
             # if the zone is not in the list, add a new zone group 
             # to the zone group list, then add this zone to this
             # new zone group    
-            else:    
+            else:
                 zonegrp.append(ZoneGroup(xctr,yctr))            
                 zonectr.append([xctr,yctr])
                 indx = zonectr.index([xctr,yctr])
@@ -81,6 +81,36 @@ def GetZonegrp(FoldPath):
         with open("zonelist.dat","w") as f:
             for group in zonegrp:
                 print(group.zonelist)
-                f.write(str(group.zonelist)+"\n")    
+                f.write(str('{:<16.6e}'.format(group.xctr)) + ' ')
+                f.write(str('{:<16.6e}'.format(group.yctr)) + ' ')
+                f.write(str('{:<16.6e}'.format(group.xmin)) + ' ')
+                f.write(str('{:<16.6e}'.format(group.ymin)) + ' ')
+                f.write(str('{:<16.6e}'.format(group.xmax)) + ' ')
+                f.write(str('{:<16.6e}'.format(group.xmax)) + ' ')
+                for name in group.zonelist:
+                    f.write(str(name) + ' ')
+                f.write('\n')    
     return zonegrp 
 
+#%% Read in the zone group info from txt file.
+def ReadZonegrp(FoldPath,filename):
+    os.chdir(FoldPath)
+    os.chdir(os.pardir)
+    zonegrp = list()
+    with timer("Read in zone(block) group info from txt file"):
+        with open(filename) as f:
+            i = 0
+            for line in f.readlines():
+                cleanline = line.strip().split()
+                xctr = float(cleanline[0])
+                yctr = float(cleanline[1])
+                zonegrp.append(ZoneGroup(xctr,yctr))
+                zonegrp[i].xmin = float(cleanline[2])
+                zonegrp[i].ymin = float(cleanline[3])
+                zonegrp[i].xmax = float(cleanline[4])
+                zonegrp[i].ymax = float(cleanline[5])
+                for j in range(6,14):
+                    zonegrp[i].zonelist.append(cleanline[j])
+                i = i + 1
+
+                

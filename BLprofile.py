@@ -235,6 +235,128 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
                     str('%.7f'%Tlst[i])+' '+\
                     str('%.7f'%Tplus)  +'\n')
             
-            
+#%% Get the x-z plane averaged data within blocks intersected with a line
+def GetLineAve(line_loc,zonegrp,FoldPath,OutPath):
+    # line_loc = [x1, y1,  x2, y2]
+    # zonegrp is a list of instances of Class ZoneGroup
+    # set an empty list for storing the intersected zone
+    # only vertical line works so far
+    xlst   = [line_loc[0]]
+    ylst   = [line_loc[1]]
+    ulst   = [0.0]
+    uulst  = [0.0]
+    vvlst  = [0.0]
+    wwlst  = [0.0]
+    uvlst  = [0.0]
+    rholst = [0.0]
+    mulst  = [0.0]
+    Tlst   = [0.0]
+    zone_intersect_i = []
+    for i in range(len(zonegrp)):
+        line_intersected =  (line_loc[0] >= zonegrp[i].xmin) and \
+                            (line_loc[0] <  zonegrp[i].xmax) and \
+                            (line_loc[1] <  zonegrp[i].ymax) and \
+                            (line_loc[3] >  zonegrp[i].ymin)                        
+        if line_intersected:
+            # store the index of intersected zones
+            zone_intersect_i.append(i)  
+    # have selected zones intersected | start to read in specific zones   
+    FileList = sorted(GetFileList(FoldPath))
+    dataset  = tp.data.load_tecplot_szl(FileList)
+    zone     = dataset.zone
+    for i in range(len(zone_intersect_i)):
+        # For each zone group, x,y DO NOT need to be averaged
+        # other variables need to be averaged
+        # Firstly get the total number of zones in a zone group
+        zone_span_n = len(zonegrp[zone_intersect_i[i]].zonelist)
+        for j in range(zone_span_n):
+            zonename = zonegrp[zone_intersect_i[i]].zonelist[j] 
+            # read in x and y for the first time  
+            if j==0:
+                Nxi, Nyi, Nzi = dataset.zone(zonename).dimensions
+                x      = zone(zonename).values('x').as_numpy_array() 
+                y      = zone(zonename).values('y').as_numpy_array() 
+                u      = zone(zonename).values('<u>').as_numpy_array()
+                uu     = zone(zonename).values('<u`u`>').as_numpy_array()
+                vv     = zone(zonename).values('<v`v`>').as_numpy_array()
+                ww     = zone(zonename).values('<w`w`>').as_numpy_array()
+                uv     = zone(zonename).values('<u`v`>').as_numpy_array()                
+                rho    = zone(zonename).values('<rho>').as_numpy_array()
+                mu     = zone(zonename).values('<mu>').as_numpy_array()
+                T      = zone(zonename).values('<T>').as_numpy_array()
+                ugrp   = u
+                uugrp  = uu
+                vvgrp  = vv
+                wwgrp  = ww
+                uvgrp  = uv
+                rhogrp = rho                
+                mugrp  = mu
+                Tgrp   = T
+            else:
+                u      = zone(zonename).values('<u>').as_numpy_array()
+                uu     = zone(zonename).values('<u`u`>').as_numpy_array()
+                vv     = zone(zonename).values('<v`v`>').as_numpy_array()
+                ww     = zone(zonename).values('<w`w`>').as_numpy_array()
+                uv     = zone(zonename).values('<u`v`>').as_numpy_array()                
+                rho    = zone(zonename).values('<rho>').as_numpy_array()
+                mu     = zone(zonename).values('<mu>').as_numpy_array()
+                T      = zone(zonename).values('<T>').as_numpy_array()                
+                # ugrp stores u for all spanwise zones(u of the group)
+                ugrp   = np.vstack((ugrp,u))
+                uugrp  = np.vstack((uugrp,uu))
+                vvgrp  = np.vstack((vvgrp,vv))
+                wwgrp  = np.vstack((wwgrp,ww))
+                uvgrp  = np.vstack((uvgrp,uv))             
+                rhogrp = np.vstack((rhogrp,rho))
+                mugrp  = np.vstack((mugrp,mu))
+                Tgrp   = np.vstack((Tgrp,T))
+        # spanwise average the variables for zone group i
+        # when ugrp has only one dimension, no need to to average
+        if np.ndim(ugrp) == 1:
+            # if here use np.mean, will collapse to a single value
+            umean   = ugrp
+            uumean  = uugrp
+            vvmean  = vvgrp 
+            wwmean  = wwgrp
+            uvmean  = uvgrp            
+            rhomean = rhogrp
+            mumean  = mugrp
+            Tmean   = Tgrp         
+        else:                     
+            umean   = np.mean(ugrp,  axis = 0)
+            uumean  = np.mean(uugrp, axis = 0)
+            vvmean  = np.mean(vvgrp, axis = 0)
+            wwmean  = np.mean(wwgrp, axis = 0)
+            uvmean  = np.mean(uvgrp, axis = 0)
+            rhomean = np.mean(rhogrp,axis = 0)
+            mumean  = np.mean(mugrp, axis = 0)
+            Tmean   = np.mean(Tgrp,  axis = 0)
+        # reshape the list of variables into matrix    
+        x = np.unique(x)
+        y = np.unique(y)
+        # notice the order of u
+        umean   = np.reshape(umean,  (Nyi,Nxi))
+        uumean  = np.reshape(uumean, (Nyi,Nxi))
+        vvmean  = np.reshape(vvmean, (Nyi,Nxi))
+        wwmean  = np.reshape(wwmean, (Nyi,Nxi))
+        uvmean  = np.reshape(uvmean, (Nyi,Nxi))
+        rhomean = np.reshape(rhomean,(Nyi,Nxi))
+        mumean  = np.reshape(mumean, (Nyi,Nxi))
+        Tmean   = np.reshape(Tmean,  (Nyi,Nxi))
+        # do average along x direction(plane averaged data)    
+        if i < (len(zone_intersect_i)-1):
+            y_i_max = np.size(y)-1
+        else:
+            y_i_max = np.size(y)             
+        for y_i in range(y_i_max):
+            # axis=1 do average in range Nxi, axis=0 in range Nyi
+            local_u   = np.mean(umean,  axis=1)
+            local_uu  = np.mean(uumean, axis=1)
+            local_vv  = np.mean(vvmean, axis=1)
+            local_ww  = np.mean(wwmean, axis=1)
+            local_uv  = np.mean(uvmean, axis=1)
+            local_rho = np.mean(rhomean,axis=1)
+            local_mu  = np.mean(mumean, axis=1)            
+            local_T   = np.mean(Tmean,  axis=1)
             
             
