@@ -115,7 +115,7 @@ def ReadZonegrp(FoldPath,filename):
 
 #%% Read the blocks in required region
 def ReadBlock(zonegrp,FoldPath):
-    RegionRange = [-71.75, 0.0, -60.6875, 86.0] #22.8044
+    RegionRange = [-71.75, 0.0, -60.6875, 22.8044] #22.8044
 #---Get the zones overlaps with the select region
     zone_overlap_indx = []
     layers_yctr = []
@@ -154,29 +154,57 @@ def ReadBlock(zonegrp,FoldPath):
     FileList = sorted(GetFileList(FoldPath))
     dataset  = tp.data.load_tecplot_szl(FileList)
     zone     = dataset.zone
-
+    
 #---Manipulate the block data, read in variables, reduce dimension
-#    for i in range(len(zonels_y)):
-    for i in range(len(zone_overlap_indx)):
-        zone_span_n = len(zonegrp[zone_overlap_indx[i]].zonelist)
-        for j in range(zone_span_n):
-            zonename = zonegrp[zone_overlap_indx[i]].zonelist[j]
-            if j==0:
-                Nxi, Nyi, Nzi = dataset.zone(zonename).dimensions
-                x      = zone(zonename).values('x').as_numpy_array() 
-                y      = zone(zonename).values('y').as_numpy_array() 
-                u      = zone(zonename).values('<u>').as_numpy_array()
-                ugrp   = u
-            else:
-                u      = zone(zonename).values('<u>').as_numpy_array()
-                
-                ugrp   = np.vstack((ugrp,u))
+    u_ls     = []
+    for i in range(len(zonels_y)):
+        for j in range(len(zonels_y[i])):
+            
+            zone_span_n = len(zonegrp[zonels_y[i][j]].zonelist)
+            for k in range(zone_span_n):
+                zonename = zonegrp[zonels_y[i][j]].zonelist[k]
+                if k==0:
+                    Nxi, Nyi, Nzi = dataset.zone(zonename).dimensions
+                    x      = zone(zonename).values('x').as_numpy_array() 
+                    y      = zone(zonename).values('y').as_numpy_array() 
+                    u      = zone(zonename).values('<u>').as_numpy_array()
+                    ugrp   = u
+                else:
+                    u      = zone(zonename).values('<u>').as_numpy_array()
+                    ugrp   = np.vstack((ugrp,u))
 #---Span-wise average variables for zone_group i
-        if np.ndim(ugrp) == 1:
-            umean      = ugrp
-        else:
-            umean      = np.mean(ugrp,  axis = 0)
+            if np.ndim(ugrp) == 1:
+                umean_z      = ugrp
+            else:
+                umean_z      = np.mean(ugrp,  axis = 0)
 #---Reshape the list of variables into matrix
-        x = np.unique(x)
-        y = np.unique(y)
-        umean   = np.reshape(umean,  (Nyi,Nxi))
+            x = np.unique(x)
+            y = np.unique(y)
+            umean_z   = np.reshape(umean_z,  (Nyi,Nxi))
+            if j == 0:
+                uxstack = umean_z
+                xxstack = x
+            else:
+                #delete the last element of previous block
+                uxstack = np.hstack((np.delete(uxstack,-1,axis=1),umean_z))
+                xxstack = np.hstack((np.delete(xxstack,-1),x))
+        for i in range(len(xxstack)):
+            if xxstack[i] > RegionRange[2]:
+                break         
+            if i == (len(xxstack) - 1):
+                i = len(xxstack)
+#        print(uxstack.shape)
+#        print(xxstack.shape)
+        uxstack = uxstack[:,:i]
+        xxstack = xxstack[:i]
+#        print(xxstack)
+#        print(xxstack.shape)
+        umean   = np.mean(uxstack,axis = 1)
+#        print(umean)
+#        print(umean.shape)
+        if len(u_ls) == 0:
+            u_ls = np.concatenate((u_ls,umean))
+        else:
+            u_ls = np.concatenate((np.delete(u_ls,-1),umean))   
+    print(u_ls)
+    print(u_ls.shape)
