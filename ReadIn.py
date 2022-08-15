@@ -7,6 +7,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Class and functions related to read in data
 '''
+from sre_parse import TYPE_FLAGS
 import tecplot as tp
 import os
 import numpy as np
@@ -114,7 +115,7 @@ def ReadZonegrp(FoldPath,filename):
     return zonegrp
 
 #%% Read the blocks in required region
-def ReadBlock(zonegrp,FoldPath):
+def ReadBlock(zonegrp,FoldPath,filename):
     RegionRange = [-71.75, 0.0, -60.6875, 22.8044] #22.8044
 #---Get the zones overlaps with the select region
     zone_overlap_indx = []
@@ -157,54 +158,169 @@ def ReadBlock(zonegrp,FoldPath):
     
 #---Manipulate the block data, read in variables, reduce dimension
     u_ls     = []
+    uu_ls    = []
+    vv_ls    = []
+    ww_ls    = []
+    uv_ls    = []
+    rho_ls   = []
+    T_ls     = []
+    y_ls     = []
+#---outer loop to get mean variables along y by combining mean variables 
+#   for blocks at different y location.
     for i in range(len(zonels_y)):
+#---loop to get mean variables for blocks at the same y location(x averaging)
         for j in range(len(zonels_y[i])):
-            
+#---inner loop to average variables for blocks at the same x-y location            
             zone_span_n = len(zonegrp[zonels_y[i][j]].zonelist)
             for k in range(zone_span_n):
                 zonename = zonegrp[zonels_y[i][j]].zonelist[k]
+                u      = zone(zonename).values('<u>').as_numpy_array()
+                uu     = zone(zonename).values('<u`u`>').as_numpy_array()
+                vv     = zone(zonename).values('<v`v`>').as_numpy_array()
+                ww     = zone(zonename).values('<w`w`>').as_numpy_array()
+                uv     = zone(zonename).values('<u`v`>').as_numpy_array()
+                rho    = zone(zonename).values('<rho>').as_numpy_array()
+                T      = zone(zonename).values('<T>').as_numpy_array()
                 if k==0:
                     Nxi, Nyi, Nzi = dataset.zone(zonename).dimensions
                     x      = zone(zonename).values('x').as_numpy_array() 
                     y      = zone(zonename).values('y').as_numpy_array() 
-                    u      = zone(zonename).values('<u>').as_numpy_array()
                     ugrp   = u
+                    uugrp  = uu
+                    vvgrp  = vv
+                    wwgrp  = ww
+                    uvgrp  = uv
+                    rhogrp = rho
+                    Tgrp   = T
                 else:
-                    u      = zone(zonename).values('<u>').as_numpy_array()
-                    ugrp   = np.vstack((ugrp,u))
+                    ugrp   = np.vstack((ugrp,  u))
+                    uugrp  = np.vstack((uugrp, uu))
+                    vvgrp  = np.vstack((vvgrp, vv))
+                    wwgrp  = np.vstack((wwgrp, ww))
+                    uvgrp  = np.vstack((uvgrp, uv))
+                    rhogrp = np.vstack((rhogrp,rho))
+                    Tgrp   = np.vstack((Tgrp,  T))
 #---Span-wise average variables for zone_group i
             if np.ndim(ugrp) == 1:
                 umean_z      = ugrp
+                uumean_z     = uugrp
+                vvmean_z     = vvgrp
+                wwmean_z     = wwgrp
+                uvmean_z     = uvgrp
+                rhomean_z    = rhogrp
+                Tmean_z      = Tgrp
             else:
                 umean_z      = np.mean(ugrp,  axis = 0)
+                uumean_z     = np.mean(uugrp, axis = 0)
+                vvmean_z     = np.mean(vvgrp, axis = 0)
+                wwmean_z     = np.mean(wwgrp, axis = 0)
+                uvmean_z     = np.mean(uvgrp, axis = 0)
+                rhomean_z    = np.mean(rhogrp,axis = 0)
+                Tmean_z      = np.mean(Tgrp, axis = 0)
 #---Reshape the list of variables into matrix
             x = np.unique(x)
             y = np.unique(y)
             umean_z   = np.reshape(umean_z,  (Nyi,Nxi))
+            uumean_z  = np.reshape(uumean_z, (Nyi,Nxi))
+            vvmean_z  = np.reshape(vvmean_z, (Nyi,Nxi))
+            wwmean_z  = np.reshape(wwmean_z, (Nyi,Nxi))
+            uvmean_z  = np.reshape(uvmean_z, (Nyi,Nxi))
+            rhomean_z = np.reshape(rhomean_z,(Nyi,Nxi))
+            Tmean_z   = np.reshape(Tmean_z, (Nyi,Nxi))
             if j == 0:
-                uxstack = umean_z
-                xxstack = x
+                uxstack   = umean_z
+                uuxstack  = uumean_z
+                vvxstack  = vvmean_z
+                wwxstack  = wwmean_z
+                uvxstack  = uvmean_z
+                rhoxstack = rhomean_z
+                Txstack   = Tmean_z
+                xxstack   = x
             else:
                 #delete the last element of previous block
-                uxstack = np.hstack((np.delete(uxstack,-1,axis=1),umean_z))
-                xxstack = np.hstack((np.delete(xxstack,-1),x))
-        for i in range(len(xxstack)):
-            if xxstack[i] > RegionRange[2]:
+                uxstack  =np.hstack((np.delete(uxstack,  -1,axis=1),umean_z))
+                uuxstack =np.hstack((np.delete(uuxstack, -1,axis=1),uumean_z))
+                vvxstack =np.hstack((np.delete(vvxstack, -1,axis=1),vvmean_z))
+                wwxstack =np.hstack((np.delete(wwxstack, -1,axis=1),wwmean_z))
+                uvxstack =np.hstack((np.delete(uvxstack, -1,axis=1),uvmean_z))
+                rhoxstack=np.hstack((np.delete(rhoxstack,-1,axis=1),rhomean_z))
+                Txstack = np.hstack((np.delete(Txstack,  -1,axis=1),Tmean_z))
+                xxstack = np.hstack((np.delete(xxstack,  -1),x))
+#---for x-stacked zones, find where to slice
+        for ii in range(len(xxstack)):
+            if xxstack[ii] > RegionRange[2]:
                 break         
-            if i == (len(xxstack) - 1):
-                i = len(xxstack)
+            if ii == (len(xxstack) - 1):
+                ii = len(xxstack)
 #        print(uxstack.shape)
 #        print(xxstack.shape)
-        uxstack = uxstack[:,:i]
-        xxstack = xxstack[:i]
+        uxstack   = uxstack[:,:ii]
+        uuxstack  = uuxstack[:,:ii]
+        vvxstack  = vvxstack[:,:ii]
+        wwxstack  = wwxstack[:,:ii]
+        uvxstack  = uvxstack[:,:ii]
+        rhoxstack = rhoxstack[:,:ii]
+        Txstack   = Txstack[:,:ii]
+        xxstack   = xxstack[:ii]
 #        print(xxstack)
 #        print(xxstack.shape)
-        umean   = np.mean(uxstack,axis = 1)
+#---get the x-averaged variables
+        umean   = np.mean(uxstack,  axis = 1)
+        uumean  = np.mean(uuxstack, axis = 1)
+        vvmean  = np.mean(vvxstack, axis = 1)
+        wwmean  = np.mean(wwxstack, axis = 1)
+        uvmean  = np.mean(uvxstack, axis = 1)
+        rhomean = np.mean(rhoxstack,axis = 1)
+        Tmean   = np.mean(Txstack,  axis = 1)
 #        print(umean)
 #        print(umean.shape)
+#---Combine the variables along y
         if len(u_ls) == 0:
-            u_ls = np.concatenate((u_ls,umean))
+            u_ls   = np.concatenate((u_ls,  umean))
+            uu_ls  = np.concatenate((uu_ls, uumean))
+            vv_ls  = np.concatenate((vv_ls, vvmean))
+            ww_ls  = np.concatenate((ww_ls, wwmean))
+            uv_ls  = np.concatenate((uv_ls, uvmean))
+            rho_ls = np.concatenate((rho_ls,rhomean))
+            T_ls   = np.concatenate((T_ls,  Tmean))
+            y_ls   = np.concatenate((y_ls,  y))
         else:
-            u_ls = np.concatenate((np.delete(u_ls,-1),umean))   
-    print(u_ls)
-    print(u_ls.shape)
+            u_ls   = np.concatenate((np.delete(u_ls,  -1),  umean))
+            uu_ls  = np.concatenate((np.delete(uu_ls, -1), uumean))
+            vv_ls  = np.concatenate((np.delete(vv_ls, -1), vvmean))
+            ww_ls  = np.concatenate((np.delete(ww_ls, -1), wwmean))
+            uv_ls  = np.concatenate((np.delete(uv_ls, -1), uvmean))
+            rho_ls = np.concatenate((np.delete(rho_ls,-1), rhomean))
+            T_ls   = np.concatenate((np.delete(T_ls,  -1), Tmean))
+            y_ls   = np.concatenate((np.delete(y_ls,  -1), y))
+    os.chdir(FoldPath)
+    os.chdir(os.pardir)
+    with open(filename,'w') as f:
+        f.write('{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}'\
+               .format('y', 'u',  'u`u`','v`v`','w`w`','u`v`',\
+               'rho','T') + '\n')
+        for i in range(len(y_ls)):
+            f.write(str('{:<17.8e}'.format(y_ls[i]))  )
+            f.write(str('{:<17.8e}'.format(u_ls[i]))  )
+            f.write(str('{:<17.8e}'.format(uu_ls[i])) )
+            f.write(str('{:<17.8e}'.format(vv_ls[i])) )
+            f.write(str('{:<17.8e}'.format(ww_ls[i])) )
+            f.write(str('{:<17.8e}'.format(uv_ls[i])) )
+            f.write(str('{:<17.8e}'.format(rho_ls[i])))
+            f.write(str('{:<17.8e}'.format(T_ls[i]))  + '\n')
+#    print(u_ls)
+#    print(u_ls.shape)
+#    print(uu_ls)
+#    print(uu_ls.shape)
+#    print(vv_ls)
+#    print(vv_ls.shape)
+#    print(ww_ls)
+#    print(ww_ls.shape)
+#    print(uv_ls)
+#    print(uv_ls.shape)
+#    print(rho_ls)
+#    print(rho_ls.shape)
+#    print(T_ls)
+#    print(T_ls.shape)
+#    print(y_ls)
+#    print(y_ls.shape)

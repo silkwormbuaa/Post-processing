@@ -29,7 +29,7 @@ with timer("Takes time"):
     
     zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 
-    ReadBlock(zonegrp,FoldPath)
+    ReadBlock(zonegrp,FoldPath,"mean_result.dat")
 
 #with timer("get lines"):
 #    line_loc = [-58.25, -0.52, -58.25, 30.0]    
