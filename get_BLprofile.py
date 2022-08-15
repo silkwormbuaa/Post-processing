@@ -24,9 +24,12 @@ log.basicConfig(level=log.INFO)
 FoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
 
-#zonegrp2 = GetZonegrp(FoldPath)
+with timer("Takes time"):
+#    zonegrp2 = GetZonegrp(FoldPath)
+    
+    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 
-ReadZonegrp(FoldPath,'zonelist.dat')
+    ReadBlock(zonegrp,FoldPath)
 
 #with timer("get lines"):
 #    line_loc = [-58.25, -0.52, -58.25, 30.0]    
