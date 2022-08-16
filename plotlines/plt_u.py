@@ -18,14 +18,15 @@ import os
 FoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/"
 OutPath  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
 ForceFoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
+FlatFolder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost"
 
-plt_u  = False
-plt_RS = False
-plt_T  = True
-
+plt_u   = True
+plt_RS  = True
+plt_T   = True
+Compare = False
 #---Read in averaged flow data
 os.chdir(FoldPath)
-y_ls    = []
+y_ls   = []
 u_ls   = []
 uu_ls  = []
 vv_ls  = []
@@ -49,6 +50,7 @@ with open("mean_result.dat") as f:
         T_ls.  append(float(cleanl[7]))
         #read next line until end        
         line = f.readline()
+
 #---Read in averaged statistic data for normalization
 os.chdir(ForceFoldPath)
 os.chdir(os.pardir)
@@ -75,11 +77,42 @@ wwplus  = np.multiply(ww_ls,rho_ls)/abs(tau_av1)
 uvplus  = np.multiply(uv_ls,rho_ls)/abs(tau_av1)
 ydelta  = np.array(y_ls)/delta
 Tnorm   = np.array(T_ls)/T_inf
+#---Read in flat plate result
+if Compare:
+    os.chdir(FlatFolder)
+    yplus_f   = []
+    uplus_f   = []
+    uuplus_f  = []
+    vvplus_f  = []
+    wwplus_f  = []
+    uvplus_f  = []
+    ydelta_f  = []
+    Tnorm_f   = []
+    with open("x_-68.0625.dat") as f:
+        line = f.readline()
+        while line:
+            cleanl = line.strip().split()
+            yplus_f .append(float(cleanl[4]))
+            ydelta_f.append(float(cleanl[5]))
+            uplus_f .append(float(cleanl[7]))
+            uuplus_f.append(float(cleanl[8]))
+            vvplus_f.append(float(cleanl[9]))
+            wwplus_f.append(float(cleanl[10]))
+            uvplus_f.append(float(cleanl[11]))
+            Tnorm_f .append(float(cleanl[13]))
+            #read nex line until end
+            line = f.readline()
+
 #%% plot u profile
 os.chdir(OutPath)
 if plt_u :
     fig, ax = plt.subplots(figsize=[10,8])
-    ax.plot(yplus,uplus,label=r'$u^+$')
+    if Compare:
+        ax.plot(yplus,  uplus,  label=r'$wavy wall$', ls='-')
+        ax.plot(yplus_f,uplus_f,label=r'$flat plate$',ls='--')
+    else:
+        ax.plot(yplus,uplus,label=r'$u^+$')
+    
     ax.minorticks_on()
     ax.set_xscale("symlog",linthresh = 1)
     ax.set_xlabel("$y^+$",fontdict={'size':24})  
@@ -92,7 +125,7 @@ if plt_u :
     ax.xaxis.set_minor_locator(x_minor)
 
     ax.legend(prop={'size':20}) 
-    ax.set_title(r"$u^+$ profile wavy wall",size=20)
+    ax.set_title(r"$u^+$ profile",size=20)
 
     ax.grid()
 
@@ -102,10 +135,20 @@ if plt_u :
 #%% plot Reynolds Stress profile 
 if plt_RS :
     fig, ax = plt.subplots(figsize=[10,8])
-    ax.plot(yplus,uuplus,label=r'$u^\prime u^\prime$',ls="--")
-    ax.plot(yplus,uvplus,label=r'$u^\prime v^\prime$',ls="--")
-    ax.plot(yplus,vvplus,label=r'$v^\prime v^\prime$',ls="--")
-    ax.plot(yplus,wwplus,label=r'$w^\prime w^\prime$',ls="--")
+    if Compare:
+        ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime wavy wall$',ls="-")
+        ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime wavy wall$',ls="-")
+        ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime wavy wall$',ls="-")
+        ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime wavy wall$',ls="-")
+        ax.plot(yplus_f,uuplus_f,'b',label=r'$u^\prime u^\prime$ flat plate',ls="--")
+        ax.plot(yplus_f,uvplus_f,'y',label=r'$u^\prime v^\prime$ flat plate',ls="--")
+        ax.plot(yplus_f,vvplus_f,'g',label=r'$v^\prime v^\prime$ flat plate',ls="--")
+        ax.plot(yplus_f,wwplus_f,'r',label=r'$w^\prime w^\prime$ flat plate',ls="--")        
+    else:    
+        ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime$',ls="-")
+        ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime$',ls="-")
+        ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime$',ls="-")
+        ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime$',ls="-")
     ax.minorticks_on()
     ax.set_xscale("symlog",linthresh = 1)
     ax.set_xlabel("$y^+$",fontdict={'size':24})  
@@ -118,8 +161,8 @@ if plt_RS :
                   fontdict={'size':24})
     ax.tick_params(axis='y',labelsize=15)
 
-    ax.legend(prop={'size':20}) 
-    ax.set_title("Reynolds Stress profile wavy wall",size=20)
+    ax.legend(prop={'size':15}) 
+    ax.set_title("Reynolds Stress profile",size=20)
 
     ax.grid()
 
@@ -128,20 +171,25 @@ if plt_RS :
 #%% plot temperature profile
 if plt_T : 
     fig, ax = plt.subplots(figsize=[10,8])
-    ax.plot(ydelta,Tnorm,label=r'$T/T_{inf}$')
+    if Compare:
+        ax.plot(Tnorm  ,ydelta,  label=r'$T/T_{inf} wavy wall$' ,ls='-')
+        ax.plot(Tnorm_f,ydelta_f,label=r'$T/T_{inf} flat plate$',ls='--')
+    else:
+        ax.plot(Tnorm,ydelta,label=r'$T/T_{inf}$')
     ax.minorticks_on()
 #    ax.set_xscale("symlog",linthresh = 1)
-    ax.set_xlabel(r"$y/\delta$",fontdict={'size':24})  
+    ax.set_xlabel(r'$T/T_{inf}$',fontdict={'size':24})  
     ax.tick_params(axis='x',labelsize=15)
     
-    ax.set_ylabel(r'$T/T_{inf}$',fontdict={'size':24})
+    ax.set_ylabel(r"$y/\delta$",fontdict={'size':24})
     ax.tick_params(axis='y',labelsize=15)
-    ax.set_xlim([0,2])
+    ax.set_xlim([1,2])
+    ax.set_ylim([0,2])
 #    x_minor = matplotlib.ticker.LogLocator(base=10.0, subs = np.arange(1.0,10.0))
 #    ax.xaxis.set_minor_locator(x_minor)
 
     ax.legend(prop={'size':20}) 
-    ax.set_title(r"$T/T_{inf}$ profile wavy wall",size=20)
+    ax.set_title(r"$T/T_{inf}$ profile",size=20)
 
     ax.grid()
 
