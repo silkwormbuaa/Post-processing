@@ -21,16 +21,16 @@ from BLprofile import *
 log.basicConfig(level=log.INFO)
 
 #%% Read plt data from INCA
-'''
+
 FoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
 ForceFoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
 with timer("Takes time"):
-    GetZonegrp(FoldPath)
-    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
-    ReadBlock(zonegrp,FoldPath,"mean_result.dat")
+#    GetZonegrp(FoldPath)
+#    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
+#    ReadBlock(zonegrp,FoldPath,"mean_result.dat")
     ReadForce(ForceFoldPath)
-'''
+
 #%% unfortunately, after loading one case, the dataset cannot
 #   be released, so when trying to load another case, the 
 #   loaded zones will go crazy.
@@ -43,6 +43,7 @@ with timer("get lines"):
     GetLine(line_loc,zonegrp2,FoldPath,OutPath,1)
 """
 
+"""
 FoldPath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 
@@ -57,3 +58,4 @@ with timer("get lines"):
 
     line_loc = [-64.3750, 0.0, -64.3750, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
+"""

@@ -387,6 +387,8 @@ def ReadForce(FoldPath):
         surf_m.append(np.mean(surf_b))
 #---from mean results of each block to get average results        
     tau_av1 = (sum(fx_m) + sum(px_m))/(surf_p*len(surf_m))
+    tau_fx1 = sum(fx_m)/(surf_p*len(surf_m))
+    tau_px1 = sum(px_m)/(surf_p*len(surf_m))
     rho_av1 = sum(np.multiply(rho_m,surf_m))/sum(surf_m)
     u_tau1  = np.sqrt(abs(tau_av1)/rho_av1)
     nu_av1  = sum(np.multiply(nu_m,surf_m))/sum(surf_m)
@@ -397,9 +399,10 @@ def ReadForce(FoldPath):
 #---output statistics averaged results to txt file
     os.chdir(os.pardir)
     with open("statistic_average.dat",'w') as f:
-        f.write('{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}'\
+        f.write('{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}'\
                .format('tau_av1', 'rho_av1', 'u_tau1', 'nu_av1',\
-                       'mu_av1' , 'lv_av1' , 'nu_av2', 'u_tau2') + '\n')
+                       'mu_av1' , 'lv_av1' , 'nu_av2', 'u_tau2',\
+                       'tau_fx1', 'tau_px1') + '\n')
         f.write(str('{:<17.8e}'.format(tau_av1)))
         f.write(str('{:<17.8e}'.format(rho_av1)))
         f.write(str('{:<17.8e}'.format(u_tau1)))
@@ -408,6 +411,8 @@ def ReadForce(FoldPath):
         f.write(str('{:<17.8e}'.format(lv_av1)))
         f.write(str('{:<17.8e}'.format(nu_av2)))
         f.write(str('{:<17.8e}'.format(u_tau2)))
+        f.write(str('{:<17.8e}'.format(tau_fx1)))
+        f.write(str('{:<17.8e}'.format(tau_px1)))
         print("finish write statistic results.")
 #    print(tau_av1)
 #    print(rho_av1)
