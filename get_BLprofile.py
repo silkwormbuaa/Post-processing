@@ -24,7 +24,7 @@ log.basicConfig(level=log.INFO)
 
 FoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
+ForceFoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408(copy)"
 with timer("Takes time"):
 #    GetZonegrp(FoldPath)
 #    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
