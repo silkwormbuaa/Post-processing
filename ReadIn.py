@@ -7,7 +7,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Class and functions related to read in data
 '''
-from sre_parse import TYPE_FLAGS
+
 import tecplot as tp
 import os
 import numpy as np
@@ -115,7 +115,7 @@ def ReadZonegrp(FoldPath,filename):
     return zonegrp
 
 #%% Read the blocks in required region
-def ReadBlock(zonegrp,FoldPath,filename):
+def ReadBlock(zonegrp,FoldPath,filename,block_dim=2):
     RegionRange = [-71.75, 0.0, -60.6875, 22.8044] #22.8044
 #---Get the zones overlaps with the select region
     zone_overlap_indx = []
@@ -218,6 +218,24 @@ def ReadBlock(zonegrp,FoldPath,filename):
                 rhomean_z    = np.mean(rhogrp,axis = 0)
                 Tmean_z      = np.mean(Tgrp, axis = 0)
 #---Reshape the list of variables into matrix
+#--- if block is 3D,need to average block in Z direction firstly
+            if block_dim ==3 :
+                x = np.reshape(x,(Nzi,Nyi*Nxi))
+                y = np.reshape(y,(Nzi,Nyi*Nxi))
+                umean_z   = np.reshape(umean_z,  (Nzi,Nyi*Nxi))
+                uumean_z  = np.reshape(uumean_z, (Nzi,Nyi*Nxi))
+                vvmean_z  = np.reshape(vvmean_z, (Nzi,Nyi*Nxi))
+                wwmean_z  = np.reshape(wwmean_z, (Nzi,Nyi*Nxi))
+                uvmean_z  = np.reshape(uvmean_z, (Nzi,Nyi*Nxi))
+                rhomean_z = np.reshape(rhomean_z,(Nzi,Nyi*Nxi))
+                Tmean_z   = np.reshape(Tmean_z,  (Nzi,Nyi*Nxi))
+                umean_z   = np.mean(umean_z,  axis=0)
+                uumean_z  = np.mean(uumean_z, axis=0)
+                vvmean_z  = np.mean(vvmean_z, axis=0)
+                wwmean_z  = np.mean(wwmean_z, axis=0)
+                uvmean_z  = np.mean(uvmean_z, axis=0)
+                rhomean_z = np.mean(rhomean_z,axis=0)
+                Tmean_z   = np.mean(Tmean_z,  axis=0)
             x = np.unique(x)
             y = np.unique(y)
             umean_z   = np.reshape(umean_z,  (Nyi,Nxi))

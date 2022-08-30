@@ -2,7 +2,7 @@
 """
 Original code credit to Weibo
 """
-from pyexpat.errors import XML_ERROR_INCOMPLETE_PE
+
 import tecplot as tp
 #from tecplot.constant import *
 import pandas as pd
