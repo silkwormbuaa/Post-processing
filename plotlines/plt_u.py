@@ -7,8 +7,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   plot the velocity profile 
 '''
-from tkinter import Y
-from matplotlib.font_manager import FontProperties
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
