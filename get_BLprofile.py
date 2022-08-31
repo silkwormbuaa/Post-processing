@@ -22,13 +22,13 @@ log.basicConfig(level=log.INFO)
 
 #%% Read plt data from INCA
 
-FoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/TP_stat"
-OutPath  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408(copy)"
+FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
+OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
+ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces/forces_3"
 with timer("Takes time"):
 #    GetZonegrp(FoldPath)
 #    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
-#    ReadBlock(zonegrp,FoldPath,"mean_result.dat")
+#    ReadBlock(zonegrp,FoldPath,"mean_result.dat",3)
     ReadForce(ForceFoldPath)
 
 #%% unfortunately, after loading one case, the dataset cannot

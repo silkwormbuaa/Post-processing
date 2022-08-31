@@ -14,15 +14,15 @@ import matplotlib
 import os
 
 #%% Read in data first
-FoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/"
-OutPath  = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
+FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/"
+OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
+ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces/forces_3"
 FlatFolder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost"
 
 plt_u   = True
 plt_RS  = True
 plt_T   = True
-Compare = False
+Compare = True
 #---Read in averaged flow data
 os.chdir(FoldPath)
 y_ls   = []
@@ -108,7 +108,7 @@ if plt_u :
     fig, ax = plt.subplots(figsize=[10,8])
     if Compare:
         ax.plot(yplus,  uplus,  label=r'$wavy wall$', ls='-')
-        ax.plot(yplus_f,uplus_f,label=r'$flat plate$',ls='--')
+        ax.plot(yplus_f,uplus_f,label=r'$smooth$',ls='--')
     else:
         ax.plot(yplus,uplus,label=r'$u^+$')
     
@@ -139,10 +139,10 @@ if plt_RS :
         ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime wavy wall$',ls="-")
         ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime wavy wall$',ls="-")
         ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime wavy wall$',ls="-")
-        ax.plot(yplus_f,uuplus_f,'b',label=r'$u^\prime u^\prime$ flat plate',ls="--")
-        ax.plot(yplus_f,uvplus_f,'y',label=r'$u^\prime v^\prime$ flat plate',ls="--")
-        ax.plot(yplus_f,vvplus_f,'g',label=r'$v^\prime v^\prime$ flat plate',ls="--")
-        ax.plot(yplus_f,wwplus_f,'r',label=r'$w^\prime w^\prime$ flat plate',ls="--")        
+        ax.plot(yplus_f,uuplus_f,'b',label=r'$u^\prime u^\prime$ smooth',ls="--")
+        ax.plot(yplus_f,uvplus_f,'y',label=r'$u^\prime v^\prime$ smooth',ls="--")
+        ax.plot(yplus_f,vvplus_f,'g',label=r'$v^\prime v^\prime$ smooth',ls="--")
+        ax.plot(yplus_f,wwplus_f,'r',label=r'$w^\prime w^\prime$ smooth',ls="--")        
     else:    
         ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime$',ls="-")
         ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime$',ls="-")
@@ -172,7 +172,7 @@ if plt_T :
     fig, ax = plt.subplots(figsize=[10,8])
     if Compare:
         ax.plot(Tnorm  ,ydelta,  label=r'$T/T_{inf} wavy wall$' ,ls='-')
-        ax.plot(Tnorm_f,ydelta_f,label=r'$T/T_{inf} flat plate$',ls='--')
+        ax.plot(Tnorm_f,ydelta_f,label=r'$T/T_{inf} smooth$',ls='--')
     else:
         ax.plot(Tnorm,ydelta,label=r'$T/T_{inf}$')
     ax.minorticks_on()
