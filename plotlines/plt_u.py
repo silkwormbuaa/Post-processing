@@ -18,10 +18,12 @@ FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/"
 OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
 ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces/forces_3"
 FlatFolder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost"
+FoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/"
+ForceFoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
 
 plt_u   = True
 plt_RS  = True
-plt_T   = True
+plt_T   = False
 Compare = True
 #---Read in averaged flow data
 os.chdir(FoldPath)
@@ -49,7 +51,6 @@ with open("mean_result.dat") as f:
         T_ls.  append(float(cleanl[7]))
         #read next line until end        
         line = f.readline()
-
 #---Read in averaged statistic data for normalization
 os.chdir(ForceFoldPath)
 os.chdir(os.pardir)
@@ -76,7 +77,59 @@ wwplus  = np.multiply(ww_ls,rho_ls)/abs(tau_av1)
 uvplus  = np.multiply(uv_ls,rho_ls)/abs(tau_av1)
 ydelta  = np.array(y_ls)/delta
 Tnorm   = np.array(T_ls)/T_inf
-#---Read in flat plate result
+#%%---read spanwise wavy wall case
+os.chdir(FoldPath2)
+spw_y_ls   = []
+spw_u_ls   = []
+spw_uu_ls  = []
+spw_vv_ls  = []
+spw_ww_ls  = []
+spw_uv_ls  = []
+spw_rho_ls = []
+spw_T_ls   = []
+with open("mean_result.dat") as f:
+    #skip the first line    
+    line = f.readline()
+    line = f.readline()
+    while line:
+        cleanl = line.strip().split()
+        spw_y_ls.  append(float(cleanl[0]))
+        spw_u_ls.  append(float(cleanl[1]))
+        spw_uu_ls. append(float(cleanl[2]))
+        spw_vv_ls. append(float(cleanl[3]))
+        spw_ww_ls. append(float(cleanl[4]))
+        spw_uv_ls. append(float(cleanl[5]))
+        spw_rho_ls.append(float(cleanl[6]))
+        spw_T_ls.  append(float(cleanl[7]))
+        #read next line until end        
+        line = f.readline()
+#---Read in averaged statistic data for normalization
+os.chdir(ForceFoldPath2)
+os.chdir(os.pardir)
+with open("statistic_average.dat") as f:
+    line    = f.readline()
+    line    = f.readline()
+    cleanl  = line.strip().split()
+    tau_av1 = float(cleanl[0])
+    rho_av1 = float(cleanl[1])
+    u_tau1  = float(cleanl[2])
+    nu_av1  = float(cleanl[3])
+    mu_av1  = float(cleanl[4])
+    lv_av1  = float(cleanl[5])
+    nu_av2  = float(cleanl[6])
+    u_tau2  = float(cleanl[7])
+#---Get normalized variables
+T_inf   = 160.15
+delta   = 5.2
+spw_yplus   = np.array(spw_y_ls)/lv_av1
+spw_uplus   = np.array(spw_u_ls)/u_tau1
+spw_uuplus  = np.multiply(spw_uu_ls,spw_rho_ls)/abs(tau_av1)
+spw_vvplus  = np.multiply(spw_vv_ls,spw_rho_ls)/abs(tau_av1)
+spw_wwplus  = np.multiply(spw_ww_ls,spw_rho_ls)/abs(tau_av1)
+spw_uvplus  = np.multiply(spw_uv_ls,spw_rho_ls)/abs(tau_av1)
+spw_ydelta  = np.array(spw_y_ls)/delta
+spw_Tnorm   = np.array(spw_T_ls)/T_inf
+#%%---Read in flat plate result
 if Compare:
     os.chdir(FlatFolder)
     yplus_f   = []
@@ -107,8 +160,9 @@ os.chdir(OutPath)
 if plt_u :
     fig, ax = plt.subplots(figsize=[10,8])
     if Compare:
-        ax.plot(yplus,  uplus,  label=r'$wavy wall$', ls='-')
-        ax.plot(yplus_f,uplus_f,label=r'$smooth$',ls='--')
+        ax.plot(yplus_f,uplus_f,'gray',label=r'$smooth$',ls='--')
+        ax.plot(yplus,  uplus, 'blue', label=r'$streamwise\ wave$', ls='-')
+        ax.plot(spw_yplus,  spw_uplus, 'green', label=r'$spanwise\ wave$', ls='-')
     else:
         ax.plot(yplus,uplus,label=r'$u^+$')
     
@@ -128,21 +182,25 @@ if plt_u :
 
     ax.grid()
 
-    plt.savefig("velocity_profile_wavywall")
+    plt.savefig("velocity_profile_wavywall_plusspanwise")
     plt.show()
 
 #%% plot Reynolds Stress profile 
 if plt_RS :
     fig, ax = plt.subplots(figsize=[10,8])
     if Compare:
-        ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime wavy wall$',ls="-")
-        ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime wavy wall$',ls="-")
-        ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime wavy wall$',ls="-")
-        ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime wavy wall$',ls="-")
-        ax.plot(yplus_f,uuplus_f,'b',label=r'$u^\prime u^\prime$ smooth',ls="--")
-        ax.plot(yplus_f,uvplus_f,'y',label=r'$u^\prime v^\prime$ smooth',ls="--")
-        ax.plot(yplus_f,vvplus_f,'g',label=r'$v^\prime v^\prime$ smooth',ls="--")
-        ax.plot(yplus_f,wwplus_f,'r',label=r'$w^\prime w^\prime$ smooth',ls="--")        
+        ax.plot(yplus_f,uuplus_f,'b',label=r'$u^\prime u^\prime$ smooth',ls="-")
+        ax.plot(yplus_f,uvplus_f,'y',label=r'$u^\prime v^\prime$ smooth',ls="-")
+        ax.plot(yplus_f,vvplus_f,'g',label=r'$v^\prime v^\prime$ smooth',ls="-")
+        ax.plot(yplus_f,wwplus_f,'r',label=r'$w^\prime w^\prime$ smooth',ls="-")        
+        ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime streamwise\ wave$',ls="--")
+        ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime streamwise\ wave$',ls="--")
+        ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime streamwise\ wave$',ls="--")
+        ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime streamwise\ wave$',ls="--")
+        ax.plot(spw_yplus,spw_uuplus,'b',label=r'$u^\prime u^\prime spanwise\ wave$',ls=":")
+        ax.plot(spw_yplus,spw_uvplus,'y',label=r'$u^\prime v^\prime spanwise\ wave$',ls=":")
+        ax.plot(spw_yplus,spw_vvplus,'g',label=r'$v^\prime v^\prime spanwise\ wave$',ls=":")
+        ax.plot(spw_yplus,spw_wwplus,'r',label=r'$w^\prime w^\prime spanwise\ wave$',ls=":")
     else:    
         ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime$',ls="-")
         ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime$',ls="-")
@@ -160,12 +218,12 @@ if plt_RS :
                   fontdict={'size':24})
     ax.tick_params(axis='y',labelsize=15)
 
-    ax.legend(prop={'size':15}) 
+    ax.legend(prop={'size':12},loc='upper right') 
     ax.set_title("Reynolds Stress profile",size=20)
 
     ax.grid()
 
-    plt.savefig("Reynolds_Stress_profile_wavywall")
+    plt.savefig("Reynolds_Stress_profile_wavywall_plusspanwise")
     plt.show()
 #%% plot temperature profile
 if plt_T : 
