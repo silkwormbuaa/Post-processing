@@ -98,7 +98,7 @@ def GetIBForce(zonegrp,ForceFolderPath,Outfile):
             p_local.append(p_w)
         fx.append(np.mean(fx_local))
         p .append(np.mean(p_local))
-    Cf = np.divide(fx,d_p)
+    Cf = -np.divide(fx,d_p)
     Pf = np.divide(p,d_p)
     
     with open(Outfile,'w') as f:

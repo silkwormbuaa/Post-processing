@@ -12,7 +12,7 @@ import tecplot as tp
 import os
 import numpy as np
 from timer import timer
-
+'''
 FilePath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/"
 
 os.chdir(FilePath)
@@ -35,8 +35,8 @@ with open("Cf_flat_new.dat",'w') as f:
               + str('%.7f'%Pf[i])+'\n')
 #print(tau)
 '''
-FilePath = "/home/wencanwu/my_simulation/temp/220825_lowRe/"
-
+FilePath = "/home/wencanwu/my_simulation/temp/220825_lowRe/linedata/"
+#---before run this code, change zonename in data file first.
 os.chdir(FilePath)
 
 dataset  = tp.data.load_tecplot("crest_w.dat")
@@ -63,6 +63,7 @@ with open("Cf_crest.dat",'w') as f:
     for i in range(len(x1)):
         f.write(str('%.7f'%x1[i])+' '+str('%.7f'%Cf[i])+' '\
                +str('%.7f'%Pf[i])+'\n')
-'''
+    print("Cf data has been output.")
+
 
 
