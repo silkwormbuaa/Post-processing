@@ -94,6 +94,25 @@ def GetZonegrp(FoldPath):
     return zonegrp 
 
 #%% Read in the zone group info from txt file.
+def ReadZonegrpWall(filename):
+    zonegrp = list()
+    with open(filename) as f:
+        i = 0
+        for line in f.readlines():
+            cleanline = line.strip().split()
+            xctr = float(cleanline[0])
+            yctr = float(cleanline[1])
+            if yctr < 0.0 :
+                zonegrp.append(ZoneGroup(xctr,yctr))
+                zonegrp[i].xmin = float(cleanline[2])
+                zonegrp[i].ymin = float(cleanline[3])
+                zonegrp[i].xmax = float(cleanline[4])
+                zonegrp[i].ymax = float(cleanline[5])
+                for j in range(6,14):
+                    zonegrp[i].zonelist.append(cleanline[j])
+                i = i + 1
+    return zonegrp
+#%% Read in the zone group info from txt file.
 def ReadZonegrp(FoldPath,filename):
     os.chdir(FoldPath)
     os.chdir(os.pardir)
@@ -113,6 +132,7 @@ def ReadZonegrp(FoldPath,filename):
                 zonegrp[i].zonelist.append(cleanline[j])
             i = i + 1
     return zonegrp
+
 
 #%% Read the blocks in required region
 def ReadBlock(zonegrp,FoldPath,filename,block_dim=2):
