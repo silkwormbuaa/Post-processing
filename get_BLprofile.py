@@ -26,10 +26,10 @@ FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
 ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces/forces_3"
 with timer("Takes time"):
-#    GetZonegrp(FoldPath)
+    GetZonegrp(FoldPath)
 #    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 #    ReadBlock(zonegrp,FoldPath,"mean_result.dat",3)
-    ReadForce(ForceFoldPath)
+#    ReadForce(ForceFoldPath)
 
 #%% unfortunately, after loading one case, the dataset cannot
 #   be released, so when trying to load another case, the 

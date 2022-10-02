@@ -66,7 +66,7 @@ ax.plot(x_valley,Cf_valley,'r',label=r'$z=1.3$',ls='-')
 ax.plot(x_point,Cf_point,'black',label=r'$averaged$', marker="s")
 ax.minorticks_on()
 
-ax.set_xlabel("$x/\delta_0$",fontdict={'size':24})
+ax.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':24})
 ax.tick_params(axis='x',labelsize=15)
 ax.set_ylabel("$C_fx10^3$",fontdict={'size':24})
 ax.tick_params(axis='y',labelsize=15)
@@ -78,8 +78,8 @@ ax.grid()
 
 plt.savefig("Cf.png")
 plt.show()
-'''
 
+'''
 fig, ax = plt.subplots(figsize=[10,8])
 ax.plot(x_flat,Pf_flat,'gray',label=r'$smooth$',ls='--')
 ax.plot(x_crest,Pf_crest,'b',label=r'$z=0.0$',ls='-')
@@ -87,7 +87,7 @@ ax.plot(x_valley,Pf_valley,'r',label=r'$z=1.3$',ls='-')
 ax.plot(x_point,Pf_point,'black',label=r'$averaged$',marker = 's')
 ax.minorticks_on()
 
-ax.set_xlabel("$x/\delta_0$",fontdict={'size':24})
+ax.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':24})
 ax.tick_params(axis='x',labelsize=15)
 ax.set_ylabel("$p_w/p_{\infty}$",fontdict={'size':24})
 ax.tick_params(axis='y',labelsize=15)
