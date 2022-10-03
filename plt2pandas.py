@@ -61,8 +61,82 @@ def ReadPlt(FoldPath, VarList=None):
         del dataset, zone, zonename, var
     df = pd.DataFrame(data=ZoneRow, columns=VarList)
     return(df)
+#%% single plt file but have multi-zones
+def ReadPltMultizone(filename, VarList=None, ZoneRow=None):
+    #clear dataset first
+    dataset  = tp.data.load_tecplot(filename)
+
+#    for zone in dataset.zones():
+#        print(zone.name)
+
+#    os.system("read -p 'Press Enter to continue...' var")
+    for zone in dataset.zones():
+        #namelist = dataset.VariablesNamedTuple
+        #zones = dataset.zones()
+        zonename = zone.name
+        if VarList is None:
+            VarList = [v.name for v in dataset.variables()]
+#        print(VarList)
+#        os.system("read -p 'Press Enter to continue...' var")
+        for i in range(np.size(VarList)):
+            var  = dataset.variable(VarList[i])
+            if i == 0:
+                VarCol = var.values(zonename).as_numpy_array()
+                #print(np.size(VarCol))
+            else:
+                Var_index = var.values(zonename).as_numpy_array()
+                VarCol = np.column_stack((VarCol, Var_index))
+        if ZoneRow is None:
+            if (np.size(dataset.solution_times) == 0):
+                SolTime = 0.0
+            else:
+                SolTime = dataset.solution_times[0]
+            #print(SolTime)
+            ZoneRow = VarCol
+        else:
+            ZoneRow = np.row_stack((ZoneRow, VarCol))
+
+        print("finished reading in zone"+zone.name)
+        
+    df = pd.DataFrame(data=ZoneRow, columns=VarList)
+    return(df)
+#%% Read in blocks in the same xy location
+def ReadPltBlocks_xy(dataset, Zonegrp, VarList=None, ZoneRow=None):
+#---ZoneRow, dataset block of a zone(as a row)
+#    os.system("read -p 'Press Enter to continue...' var")
+    for zonename in Zonegrp.zonelist:
+        #namelist = dataset.VariablesNamedTuple
+        #zones = dataset.zones()
+        if VarList is None:
+            VarList = [v.name for v in dataset.variables()]
+#        print(VarList)
+#        os.system("read -p 'Press Enter to continue...' var")
+        for i in range(np.size(VarList)):
+            var  = dataset.variable(VarList[i])
+            if i == 0:
+                VarCol = var.values(zonename).as_numpy_array()
+                #print(np.size(VarCol))
+            else:
+                Var_index = var.values(zonename).as_numpy_array()
+                VarCol = np.column_stack((VarCol, Var_index))
+        if ZoneRow is None:
+            if (np.size(dataset.solution_times) == 0):
+                SolTime = 0.0
+            else:
+                SolTime = dataset.solution_times[0]
+            #print(SolTime)
+            ZoneRow = VarCol
+        else:
+            ZoneRow = np.row_stack((ZoneRow, VarCol))
+
+        print("finished reading in zone" + zonename)
+        
+    df = pd.DataFrame(data=ZoneRow, columns=VarList)
+    return(df)
 
 
+
+#%%
 def ReadINCAResults(FoldPath, VarList, SubZone=None, FileName=None, Equ=None,
                     SpanAve=None, SavePath=None, OutFile=None, skip=0, opt=2):
     if FileName is None:
@@ -454,9 +528,9 @@ def frame2tec3d(dataframe,
     for i in range(len(dataframe.columns)):
         header = '{} "{}"'.format(header, dataframe.columns[i])
     if(isinstance(zname, int)):
-        zonename = 'B' + '{:010}'.format(zname)
+        zonename = 'B' + '{:06}'.format(zname)
     else:
-        zonename = 'B' + '{:010}'.format(1)
+        zonename = 'B' + '{:06}'.format(1)
     zone = 'ZONE T= "{}" \n'.format(zonename)
 
     with timer("save " + filename + " tecplot .dat"):
