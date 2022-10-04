@@ -101,7 +101,11 @@ def ReadPltMultizone(filename, VarList=None, ZoneRow=None):
     df = pd.DataFrame(data=ZoneRow, columns=VarList)
     return(df)
 #%% Read in blocks in the same xy location
-def ReadPltBlocks_xy(dataset, Zonegrp, VarList=None, ZoneRow=None):
+def ReadPltBlocks_xy(dataset, 
+                     Zonegrp, 
+                     VarList=None, 
+                     ZoneRow=None,
+                     SpanwiseAve=False):
 #---ZoneRow, dataset block of a zone(as a row)
 #    os.system("read -p 'Press Enter to continue...' var")
     for zonename in Zonegrp.zonelist:
@@ -132,6 +136,15 @@ def ReadPltBlocks_xy(dataset, Zonegrp, VarList=None, ZoneRow=None):
         print("finished reading in zone" + zonename)
         
     df = pd.DataFrame(data=ZoneRow, columns=VarList)
+#---flat plate case data should be averaged in spanwise direction    
+    if SpanwiseAve == True:
+        df = df.groupby(by=['x','y'],as_index=False).mean()
+        df['z'] = 0.0
+        df1 = df.copy(deep=True)
+        df1['z'] = 5.2
+        df = pd.concat([df,df1])
+#        print(df['x'],df['z'])
+#    os.system("read -p 'Press Enter to continue...' var")
     return(df)
 
 
