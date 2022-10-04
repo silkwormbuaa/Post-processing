@@ -196,15 +196,17 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
         mulst[0]  = mulst[1]
         Tlst[0]   = Tlst[1]
     # dudy opt==1, 1st order; opt==2, 2nd order    
-    dudy      = GetDudy(ulst[1],ulst[2],ylst[1]-ylst[0],ylst[2]-ylst[0],2)
+    dudy      = GetDudy(ulst[1],ulst[2],ylst[1]-ylst[0],ylst[2]-ylst[0],1)
     tau       = mulst[0] * dudy
     u_tau     = np.sqrt(tau/rholst[0])
     lv       = mulst[0]/rholst[0]/u_tau 
     delta     = 5.2  
     Tinfi     = 160.15 
+    print("x = ",line_loc[0])
     print("u_tau = ",u_tau)
     print("tau   = ",tau)
-    print("lv    = ",lv)                               
+    print("lv    = ",lv)     
+    print("==============")                          
     # plot curve
     os.chdir(OutPath)
     out_file = "x_" + str(line_loc[0]) + ".dat"

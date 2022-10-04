@@ -22,11 +22,11 @@ log.basicConfig(level=log.INFO)
 
 #%% Read plt data from INCA
 
-FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
-OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces/forces_3"
-with timer("Takes time"):
-    GetZonegrp(FoldPath)
+#FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
+#OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
+#ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces_x/x100/"
+#with timer("Takes time"):
+#    GetZonegrp(FoldPath)
 #    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 #    ReadBlock(zonegrp,FoldPath,"mean_result.dat",3)
 #    ReadForce(ForceFoldPath)
@@ -43,19 +43,31 @@ with timer("get lines"):
     GetLine(line_loc,zonegrp2,FoldPath,OutPath,1)
 """
 
-"""
+
 FoldPath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 
-zonegrp = GetZonegrp(FoldPath)
+#zonegrp = GetZonegrp(FoldPath)
+zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 with timer("get lines"):
-
-    line_loc = [-71.7500, 0.0, -71.7500, 30.0]    
+    
+    line_loc = [-30.0, 0.0, -30.0, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
 
-    line_loc = [-68.0625, 0.0, -68.0625, 30.0]    
+    line_loc = [0.0, 0.0, 0.0, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
 
-    line_loc = [-64.3750, 0.0, -64.3750, 30.0]    
+    line_loc = [50.4, 0.0, 50.4, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
-"""
+
+    line_loc = [100.0, 0.0, 100.0, 30.0]    
+    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
+
+#    line_loc = [-71.7500, 0.0, -71.7500, 30.0]    
+#    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
+#
+#    line_loc = [-68.0625, 0.0, -68.0625, 30.0]    
+#    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
+#
+#    line_loc = [-64.3750, 0.0, -64.3750, 30.0]    
+#    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)

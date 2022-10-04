@@ -26,9 +26,10 @@ with timer("read in dataset with tecplot"):
 
 with timer("read in plt into dataframe"):
     for i in range(len(zonegrp)):
-        df = ReadPltBlocks_xy(dataset, zonegrp[i])
-        tecfilename = 'TP_stat_' + '{:06}'.format(i)
-        frame2tec3d(df,SaveFolder,tecfilename,zname=i)
+        df = ReadPltBlocks_xy(dataset, zonegrp[i], SpanwiseAve=True)
+        
+        tecfilename = 'TP_stat_' + '{:06}'.format(i+1)
+        frame2tec3d(df,SaveFolder,tecfilename,zname=(i+1))
 #        print(df.index)
 #        print(df['x'])
 #        print(df['y'])
