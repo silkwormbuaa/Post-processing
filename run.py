@@ -8,12 +8,12 @@
 @Desc    :   Used as executable file.
 '''
 import os
-from plt2pandas import *
-from ReadIn import *
+from   plt2pandas        import *
+from   ReadIn            import *
 
-Folder = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/datafolder/'
+Folder     = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/datafolder/'
 SaveFolder = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/savefolder/'
-pltfile = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/datafolder/datawithz.plt'
+pltfile    = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/datafolder/datawithz.plt'
 
 #with timer("read in file into tecplot dataset"):
 #    dataset  = tp.data.load_tecplot(pltfile)

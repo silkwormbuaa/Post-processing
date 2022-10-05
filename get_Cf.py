@@ -8,10 +8,10 @@
 @Desc    :   None
 '''
 
-import tecplot as tp
 import os
-import numpy as np
-from timer import timer
+import tecplot           as     tp
+import numpy             as     np
+from   timer             import timer
 '''
 FilePath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/"
 
@@ -24,10 +24,10 @@ y        = dataset.zone('ZONE 001').values('y').as_numpy_array()
 mu       = dataset.zone('ZONE 001').values('<mu>').as_numpy_array()
 u        = dataset.zone('ZONE 001').values('<u>').as_numpy_array()
 p        = dataset.zone('ZONE 001').values('<p>').as_numpy_array()
-#zones    = dataset.zone()
+#zones   = dataset.zone()
 d_p      = 0.5*0.9886*507*507
-Cf      = np.multiply(mu,np.divide(u,y))/d_p
-Pf      = np.divide(p,d_p)
+Cf       = np.multiply(mu,np.divide(u,y))/d_p
+Pf       = np.divide(p,d_p)
 
 with open("Cf_flat_new.dat",'w') as f:
     for i in range(len(x)):
@@ -39,8 +39,8 @@ FilePath = "/home/wencanwu/my_simulation/temp/220825_lowRe/linedata/"
 #---before run this code, change zonename in data file first.
 os.chdir(FilePath)
 
-dataset  = tp.data.load_tecplot("crest_w.dat")
-dataset  = tp.data.load_tecplot("crest_2.dat")
+dataset   = tp.data.load_tecplot("crest_w.dat")
+dataset   = tp.data.load_tecplot("crest_2.dat")
 x1        = dataset.zone('ZONE001').values('x').as_numpy_array()
 y1        = dataset.zone('ZONE001').values('y').as_numpy_array()
 mu1       = dataset.zone('ZONE001').values('<mu>').as_numpy_array()
@@ -53,11 +53,11 @@ mu2       = dataset.zone('ZONE002').values('<mu>').as_numpy_array()
 u2        = dataset.zone('ZONE002').values('<u>').as_numpy_array()
 p2        = dataset.zone('ZONE002').values('<p>').as_numpy_array()
 #zones    = dataset.zone()
-d_p      = 0.5*0.9886*507*507
-du       = np.subtract(u2,u1)
-dy       = np.subtract(y2,y1)
-Cf      = np.multiply(mu2,np.divide(du,dy))/d_p
-Pf      = np.divide(p2,d_p)
+d_p       = 0.5*0.9886*507*507
+du        = np.subtract(u2,u1)
+dy        = np.subtract(y2,y1)
+Cf        = np.multiply(mu2,np.divide(du,dy))/d_p
+Pf        = np.divide(p2,d_p)
 
 with open("Cf_crest.dat",'w') as f:
     for i in range(len(x1)):

@@ -8,11 +8,11 @@
 @Desc    :   Making 8 layers of statistics data to one file
 '''
 
-import tecplot as tp
+import tecplot           as     tp
 import os
-import numpy as np
-from timer import timer
-from ReadIn import * 
+import numpy             as     np
+from   timer             import timer
+from   ReadIn            import * 
 
 #%% Read the szplt files and manipulate data.
 def ReadInZone(FoldPath):
@@ -30,8 +30,8 @@ FoldPath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/TP_stat"
 #print(type(zone))
 FileList = sorted(GetFileList(FoldPath))
 dataset  = tp.data.load_tecplot_szl(FileList)
-zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
-zone    = dataset.zone
+zonegrp  = ReadZonegrp(FoldPath,'zonelist.dat')
+zone     = dataset.zone
 with timer("adding z values to zones"):
     for grp in zonegrp:
         for i in range(len(grp.zonelist)):

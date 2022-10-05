@@ -5,17 +5,17 @@ Created on Sat Jun 9 10:24:50 2018
     Convert data to pandas dataframe
 @author: Weibo Hu
 """
-import tecplot as tp
-import pandas as pd
 import os
 import sys
 import warnings
-import numpy as np
-from scipy.interpolate import griddata
-from timer import timer
-from time import time
-import logging as log
-from glob import glob
+import numpy             as     np
+import tecplot           as     tp
+import pandas            as     pd
+import logging           as     log
+from   scipy.interpolate import griddata
+from   timer             import timer
+from   time              import time
+from   glob              import glob
 
 log.basicConfig(level=log.INFO)
 

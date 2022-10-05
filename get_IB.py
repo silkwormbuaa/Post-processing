@@ -8,9 +8,9 @@
 @Desc    :   None
 '''
 
-from timer import timer 
-from IB_force import *
 import os
+from   timer             import timer 
+from   IB_force          import *
 
 #%% Get forces and pressure on IB
 ForceFolderPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces_allblocks/"

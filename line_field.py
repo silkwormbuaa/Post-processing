@@ -5,9 +5,9 @@ Created on Mon Apr 10 21:24:50 2019
 @author: Weibo Hu
 """
 
-import pandas as pd
 import sys
-import numpy as np
+import pandas            as pd
+import numpy             as np
 
 
 class LineField(object):

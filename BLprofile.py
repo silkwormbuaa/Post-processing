@@ -8,17 +8,17 @@
 @Desc    :   Read in statistic data and extract data on a line
              to get profile data.   
 '''
-from pyexpat.errors import XML_ERROR_INCOMPLETE_PE
-from re import T
-import tecplot as tp
 import os
-from os import path
 import sys
 import warnings
-import numpy as np
+import numpy             as np
+import tecplot           as tp
 import matplotlib.pyplot as plt
-from timer import timer
-from ReadIn import *
+from   pyexpat.errors    import XML_ERROR_INCOMPLETE_PE
+from   re                import T
+from   os                import path
+from   timer             import timer
+from   ReadIn            import *
 
 #%% Get linear interpolation 
 def GetInterpo(x,x1,x2,y1,y2):

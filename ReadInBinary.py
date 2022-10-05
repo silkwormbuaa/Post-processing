@@ -8,7 +8,7 @@
 @Desc    :   None
 '''
 
-import numpy as np
+import numpy             as     np
 
 # ------------------------------------------------------------------------
 # READ SIGNED INTEGER(S) FROM BYTE STREAM                           (  1 )

@@ -8,11 +8,11 @@
 @Desc    :   Class and functions related to read in data
 '''
 
-import tecplot as tp
 import os
-import numpy as np
-from os import path
-from timer import timer
+import tecplot           as     tp
+import numpy             as     np
+from   os                import path
+from   timer             import timer
 #%% #  Define a class ZoneGroup, this class stores the names of zones 
     #  sharing the same location.
 class ZoneGroup:

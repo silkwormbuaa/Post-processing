@@ -3,20 +3,16 @@
 Original code credit to Weibo
 """
 
-import tecplot as tp
-#from tecplot.constant import *
-import pandas as pd
 import os
-from os import path
-import sys
-import warnings
-import numpy as np
-import matplotlib.pyplot as plt
-from ReadIn import *
-from timer import timer
-#from time import time
-import logging as log
-from BLprofile import *
+import logging           as     log
+import tecplot           as     tp
+import pandas            as     pd
+import numpy             as     np
+import matplotlib.pyplot as     plt
+from   ReadIn            import *
+from   timer             import timer
+from   BLprofile         import *
+from   os                import path
 
 log.basicConfig(level=log.INFO)
 
