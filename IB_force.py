@@ -83,6 +83,7 @@ def ReadAForce(filename):
 def GetIBForce(zonegrp,ForceFolderPath,Outfile):
 
     d_p = 0.5*0.9886*507*507
+    p_i = 45447.289
     x   = []
     fx  = []
     p   = []
@@ -98,8 +99,8 @@ def GetIBForce(zonegrp,ForceFolderPath,Outfile):
             p_local.append(p_w)
         fx.append(np.mean(fx_local))
         p .append(np.mean(p_local))
-    Cf = -np.divide(fx,d_p)
-    Pf = np.divide(p,d_p)
+    Cf = -np.divide(fx,p_i)
+    Pf = np.divide(p,p_i)
     
     with open(Outfile,'w') as f:
         for i in range(len(x)):
