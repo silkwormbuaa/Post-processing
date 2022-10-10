@@ -25,6 +25,8 @@ def GetInterpo(x,x1,x2,y1,y2):
     slope = (y2-y1)/(x2-x1)
     y = slope * (x-x1) + y1
     return y
+
+
 #%% Get velocity gradient magnitude at the wall
 def GetDudy(u1,u2,y1,y2,opt=1):
     if opt == 1:            #  linear gradient

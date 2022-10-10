@@ -8,8 +8,8 @@
 @Desc    :   Making 8 layers of statistics data to one file
 '''
 
-import tecplot           as     tp
 import os
+import tecplot           as     tp
 import numpy             as     np
 from   timer             import timer
 from   ReadIn            import * 
