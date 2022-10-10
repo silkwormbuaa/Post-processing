@@ -21,7 +21,7 @@ os.chdir(os.pardir)
 zonegrp = ReadZonegrpWall(ZonegrpFile)
 
 with timer("Get forces on IB:"):
-    GetIBForce(zonegrp,ForceFolderPath,"Cf_points.dat")
+    GetIBForce(zonegrp,ForceFolderPath,"Cf_points_0825.dat")
 
 
 

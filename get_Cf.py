@@ -12,7 +12,7 @@ import os
 import tecplot           as     tp
 import numpy             as     np
 from   timer             import timer
-'''
+
 FilePath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/"
 
 os.chdir(FilePath)
@@ -26,8 +26,9 @@ u        = dataset.zone('ZONE 001').values('<u>').as_numpy_array()
 p        = dataset.zone('ZONE 001').values('<p>').as_numpy_array()
 #zones   = dataset.zone()
 d_p      = 0.5*0.9886*507*507
+p_i      = 45447.289
 Cf       = np.multiply(mu,np.divide(u,y))/d_p
-Pf       = np.divide(p,d_p)
+Pf       = np.divide(p,p_i)
 
 with open("Cf_flat_new.dat",'w') as f:
     for i in range(len(x)):
@@ -54,16 +55,17 @@ u2        = dataset.zone('ZONE002').values('<u>').as_numpy_array()
 p2        = dataset.zone('ZONE002').values('<p>').as_numpy_array()
 #zones    = dataset.zone()
 d_p       = 0.5*0.9886*507*507
+p_i       = 45447.289
 du        = np.subtract(u2,u1)
 dy        = np.subtract(y2,y1)
 Cf        = np.multiply(mu2,np.divide(du,dy))/d_p
-Pf        = np.divide(p2,d_p)
+Pf        = np.divide(p2,p_i)
 
 with open("Cf_crest.dat",'w') as f:
     for i in range(len(x1)):
         f.write(str('%.7f'%x1[i])+' '+str('%.7f'%Cf[i])+' '\
                +str('%.7f'%Pf[i])+'\n')
     print("Cf data has been output.")
-
+'''
 
 
