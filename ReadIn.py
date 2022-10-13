@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @File    :   ReadIn.py
-@Time    :   2022/07/06 16:25:13
+@Time    :   2022/07/06 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
@@ -9,9 +10,13 @@
 '''
 
 import os
-import tecplot           as     tp
-import numpy             as     np
+
 from   os                import path
+
+import tecplot           as     tp
+
+import numpy             as     np
+
 from   timer             import timer
 #%% #  Define a class ZoneGroup, this class stores the names of zones 
     #  sharing the same location.

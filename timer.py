@@ -24,6 +24,3 @@ class timer():
         print("%s took: %0.2fs" % (self.message, self.interval))
 
 
-# if __name__ == "__main__":
-#     with timer("Test 1+1"):
-#         1+1

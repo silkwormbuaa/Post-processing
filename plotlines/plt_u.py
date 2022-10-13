@@ -16,10 +16,10 @@ import os
 #%% Read in data first
 FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/"
 OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces/forces_3"
+ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces_oneblock/forces_3"
 FlatFolder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost"
-FoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/"
-ForceFoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
+#FoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/"
+#ForceFoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
 
 plt_u   = True
 plt_RS  = True
@@ -78,6 +78,7 @@ uvplus  = np.multiply(uv_ls,rho_ls)/abs(tau_av1)
 ydelta  = np.array(y_ls)/delta
 Tnorm   = np.array(T_ls)/T_inf
 #%%---read spanwise wavy wall case
+'''
 os.chdir(FoldPath2)
 spw_y_ls   = []
 spw_u_ls   = []
@@ -129,6 +130,7 @@ spw_wwplus  = np.multiply(spw_ww_ls,spw_rho_ls)/abs(tau_av1)
 spw_uvplus  = np.multiply(spw_uv_ls,spw_rho_ls)/abs(tau_av1)
 spw_ydelta  = np.array(spw_y_ls)/delta
 spw_Tnorm   = np.array(spw_T_ls)/T_inf
+'''
 #%%---Read in flat plate result
 if Compare:
     os.chdir(FlatFolder)
@@ -161,8 +163,8 @@ if plt_u :
     fig, ax = plt.subplots(figsize=[10,8])
     if Compare:
         ax.plot(yplus_f,uplus_f,'gray',label=r'$smooth$',ls='--')
-        ax.plot(yplus,  uplus, 'blue', label=r'$streamwise\ wave$', ls='-')
-        ax.plot(spw_yplus,  spw_uplus, 'green', label=r'$spanwise\ wave$', ls='-')
+        ax.plot(yplus,  uplus, 'blue', label=r'$D=0.5\delta_0$', ls='-')
+#        ax.plot(spw_yplus,  spw_uplus, 'green', label=r'$spanwise\ wave$', ls='-')
     else:
         ax.plot(yplus,uplus,label=r'$u^+$')
     
@@ -193,14 +195,14 @@ if plt_RS :
         ax.plot(yplus_f,uvplus_f,'y',label=r'$u^\prime v^\prime$ smooth',ls="-")
         ax.plot(yplus_f,vvplus_f,'g',label=r'$v^\prime v^\prime$ smooth',ls="-")
         ax.plot(yplus_f,wwplus_f,'r',label=r'$w^\prime w^\prime$ smooth',ls="-")        
-        ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime streamwise\ wave$',ls="--")
-        ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime streamwise\ wave$',ls="--")
-        ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime streamwise\ wave$',ls="--")
-        ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime streamwise\ wave$',ls="--")
-        ax.plot(spw_yplus,spw_uuplus,'b',label=r'$u^\prime u^\prime spanwise\ wave$',ls=":")
-        ax.plot(spw_yplus,spw_uvplus,'y',label=r'$u^\prime v^\prime spanwise\ wave$',ls=":")
-        ax.plot(spw_yplus,spw_vvplus,'g',label=r'$v^\prime v^\prime spanwise\ wave$',ls=":")
-        ax.plot(spw_yplus,spw_wwplus,'r',label=r'$w^\prime w^\prime spanwise\ wave$',ls=":")
+        ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime \ D=0.5\delta_0$',ls="--")
+        ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime \ D=0.5\delta_0$',ls="--")
+        ax.plot(yplus,vvplus,'g',label=r'$v^\prime v^\prime \ D=0.5\delta_0$',ls="--")
+        ax.plot(yplus,wwplus,'r',label=r'$w^\prime w^\prime \ D=0.5\delta_0$',ls="--")
+#        ax.plot(spw_yplus,spw_uuplus,'b',label=r'$u^\prime u^\prime spanwise\ wave$',ls=":")
+#        ax.plot(spw_yplus,spw_uvplus,'y',label=r'$u^\prime v^\prime spanwise\ wave$',ls=":")
+#        ax.plot(spw_yplus,spw_vvplus,'g',label=r'$v^\prime v^\prime spanwise\ wave$',ls=":")
+#        ax.plot(spw_yplus,spw_wwplus,'r',label=r'$w^\prime w^\prime spanwise\ wave$',ls=":")
     else:    
         ax.plot(yplus,uuplus,'b',label=r'$u^\prime u^\prime$',ls="-")
         ax.plot(yplus,uvplus,'y',label=r'$u^\prime v^\prime$',ls="-")

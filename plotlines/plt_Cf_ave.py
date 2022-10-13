@@ -62,8 +62,8 @@ with open('Cf_points_0927.dat') as f:
 fig, ax = plt.subplots(figsize=[10,8])
 ax.plot(x_flat,Cf_flat,'gray',label=r'$smooth$',ls='--')
 ax.plot(x_1d,Cf_1d,'b',label=r'$D=1.0\delta_0$',marker="s")
-ax.plot(x_hd,Cf_hd,'r',label=r'$D=0.5\delta_0$',marker="s")
-ax.plot(x_qd,Cf_qd,'black',label=r'$D=0.25\delta_0$', marker="s")
+ax.plot(x_hd,Cf_hd,'black',label=r'$D=0.5\delta_0$',marker="s")
+ax.plot(x_qd,Cf_qd,'r',label=r'$D=0.25\delta_0$', marker="s")
 ax.minorticks_on()
 
 ax.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':24})

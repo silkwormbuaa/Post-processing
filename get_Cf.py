@@ -13,6 +13,8 @@ import tecplot           as     tp
 import numpy             as     np
 from   timer             import timer
 
+# from tecplot line to get Cf and Cp
+
 FilePath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/"
 
 os.chdir(FilePath)
