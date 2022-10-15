@@ -55,9 +55,34 @@ class ZoneGroup:
 
         # zones' name, which shares the same x-y location
         
-        self.zonelist = []
-        
+        self.zonelist = list()
+    
+    
+# ----------------------------------------------------------------------
+# >>> SORTED ZONELIST                                           ( 0.1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/15  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
+    def sort_zonelist( self ):
+        
+        # check if the zonelist dictionary is empty
+        
+        if ( len(self.zonelist) == 0 ):
+            
+            raise ValueError("The zonelist is empty")
+        
+        else:
+            
+            self.zonelist = sorted(self.zonelist)
 
 
 # ----------------------------------------------------------------------
@@ -109,17 +134,20 @@ def get_zonegrp( folderpath ):
             
             xmin = round(dataset.zone(zonename).values('x').min(),7)
             ymin = round(dataset.zone(zonename).values('y').min(),7)
+            zmin = round(dataset.zone(zonename).values('z').min(),7)
             xmax = round(dataset.zone(zonename).values('x').max(),7)
             ymax = round(dataset.zone(zonename).values('y').max(),7)
+            zmax = round(dataset.zone(zonename).values('z').max(),7)
             xctr = 0.5 * (xmin + xmax)
             yctr = 0.5 * (ymin + ymax)
+            zctr = 0.5 * (zmin + zmax)
             
             # if the zone's center is in the list, add this zone's 
             # name to the already existed zone group.
             if [ xctr, yctr ] in zonectr:
                 
                 indx = zonectr.index([xctr,yctr])
-                zonegrp[indx].zonelist.append(zonename)
+                zonegrp[indx].zonelist.append((zctr,zonename))
                 
             # if the zone is not in the list, add a new zone group 
             # to the zone group list, then add this zone to this
@@ -131,11 +159,17 @@ def get_zonegrp( folderpath ):
                 zonectr.append([xctr,yctr])
                 
                 indx = zonectr.index([xctr,yctr])
-                zonegrp[indx].zonelist.append(zonename)
+                zonegrp[indx].zonelist.append((zctr,zonename))
                 zonegrp[indx].xmin = xmin
                 zonegrp[indx].ymin = ymin
                 zonegrp[indx].xmax = xmax
                 zonegrp[indx].ymax = ymax
+                
+        # sort the zonelist in each zone group
+        
+        for group in zonegrp:
+            
+            group.sort_zonelist()
 
         # sort the zone center coordinates firstly based on y, then x  
               
@@ -144,13 +178,13 @@ def get_zonegrp( folderpath ):
         # sort the zonegrp by location ang output the groups
         
         zonegrp.sort(key=lambda x: (x.yctr,x.xctr))     
-        
+                
         # print the zone groups info
-        
+                
         os.chdir(folderpath)
         os.chdir(os.pardir)
         
-        with open("zonelist.dat","w") as f:
+        with open("zonelist_sorted.dat","w") as f:
             
             for group in zonegrp:
                 
@@ -163,9 +197,13 @@ def get_zonegrp( folderpath ):
                 f.write(str('{:<17.8e}'.format(group.xmax)) + ' ')
                 f.write(str('{:<17.8e}'.format(group.ymax)) + ' ')
                 
-                for name in group.zonelist:
+                for pair in group.zonelist:
                     
-                    f.write(str(name) + ' ')
+                    f.write(str(pair[1]) + ' ')
+                
+                for pair in group.zonelist:
+                    
+                    f.write(str(pair[0]) + ' ')
                     
                 f.write('\n')    
                 
