@@ -13,10 +13,6 @@ import sys
 import warnings
 import numpy             as np
 import tecplot           as tp
-import matplotlib.pyplot as plt
-from   pyexpat.errors    import XML_ERROR_INCOMPLETE_PE
-from   re                import T
-from   os                import path
 from   timer             import timer
 from   ReadIn            import *
 
