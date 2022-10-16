@@ -3,29 +3,26 @@
 Original code credit to Weibo
 """
 
-import os
 import logging           as     log
-import tecplot           as     tp
-import pandas            as     pd
-import numpy             as     np
-import matplotlib.pyplot as     plt
 from   ReadIn            import *
 from   timer             import timer
 from   BLprofile         import *
-from   os                import path
+
+from   vista_pytecio     import *
 
 log.basicConfig(level=log.INFO)
 
 #%% Read plt data from INCA
 
-FoldPath = "/home/wencanwu/my_simulation/temp/220926_lowRe/TP_stat"
+FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
 #OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/220927_lowRe/forces_3/"
+ForceFoldPath = "/home/wencanwu/my_simulation/temp/220926_lowRe/forces_3/"
 with timer("all works"):
 #    GetZonegrp(FoldPath)
-#    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
-#    ReadBlock(zonegrp,FoldPath,"mean_result.dat",3)
-    ReadForce(ForceFoldPath)
+    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
+    ave_block(zonegrp,FoldPath,"mean_result_test.dat",3)
+#    ReadBlock(zonegrp,FoldPath,"mean_result_test2.dat",3)
+#    ReadForce(ForceFoldPath)
 
 #%% unfortunately, after loading one case, the dataset cannot
 #   be released, so when trying to load another case, the 
