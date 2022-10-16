@@ -42,3 +42,36 @@ def get_filelist( FoldPath ):
             
     return FileList
 
+
+# ----------------------------------------------------------------------
+# >>> IF_OVERLAP                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/15  - created
+#
+# Desc
+#
+# - check if two rectangular region overlap with each other
+#
+# Input
+# 
+# - two lists which contain (xmin,ymin,xmax,ymax) respectively
+#
+# ----------------------------------------------------------------------
+
+def if_overlap( rect1, rect2 ):    
+    
+    notOverlap = ( rect1[2] <= rect2[0] ) or \
+                 ( rect1[0] >= rect2[2] ) or \
+                 ( rect1[3] <= rect2[1] ) or \
+                 ( rect1[1] >= rect2[3] )
+    
+    Overlap = not notOverlap
+    
+    return Overlap
+
+
