@@ -15,6 +15,8 @@ import tecplot           as      tp
 
 import numpy             as      np 
 
+import pandas            as      pd
+
 from   vista_tools       import  *
 
 from   timer             import  timer 
@@ -199,11 +201,11 @@ def get_zonegrp( folderpath ):
                 
                 for pair in group.zonelist:
                     
-                    f.write(str(pair[1]) + ' ')
+                    f.write(str(pair[0]) + ' ')
                 
                 for pair in group.zonelist:
                     
-                    f.write(str(pair[0]) + ' ')
+                    f.write(str(pair[1]) + ' ')
                     
                 f.write('\n')    
                 
@@ -253,7 +255,7 @@ def read_zonelist( listfile, wall=False ):
                     zonegrp[i].ymax = float( cleanline[5] )
                     
                     for j in range( 6, 14 ):
-                        zonegrp[i].zonelist.append( cleanline[j] )
+                        zonegrp[i].zonelist.append( (cleanline[j],cleanline[j+8] ))
                     i = i + 1
                     
             else:
@@ -265,7 +267,7 @@ def read_zonelist( listfile, wall=False ):
                 zonegrp[i].ymax = float( cleanline[5] )
                 
                 for j in range( 6, 14 ):
-                    zonegrp[i].zonelist.append( cleanline[j] )
+                    zonegrp[i].zonelist.append( (cleanline[j],cleanline[j+8] ))
                 i = i + 1
                 
     return zonegrp
@@ -291,20 +293,21 @@ def ave_block( zonegrp, FoldPath, outfile, block_dim=2 ):
     
     RegionRange = [-71.75, 0.0, -60.6875, 22.8044] #22.8044
     
-    # Get the zones overlaps with the select region
+    # Get the zones overlapped with the select region
     
     zone_overlap_indx = []
     layers_yctr = []
     for i in range(len(zonegrp)):
-        notOverlap = (zonegrp[i].xmax <= RegionRange[0]) or \
-                     (zonegrp[i].xmin >= RegionRange[2]) or \
-                     (zonegrp[i].ymax <= RegionRange[1]) or \
-                     (zonegrp[i].ymin >= RegionRange[3])
-        Overlap = not notOverlap
+        
+        zonegrp_range = [zonegrp[i].xmin, zonegrp[i].ymin,
+                         zonegrp[i].xmax, zonegrp[i].ymax]
+        
+        Overlap = if_overlap(zonegrp_range, RegionRange)
+
         if Overlap: 
             zone_overlap_indx.append(i)
             layers_yctr.append(zonegrp[i].yctr)
-            print(i,zonegrp[i].zonelist)
+            print(i,[pair[1] for pair in zonegrp[i].zonelist])
             
     # Group the zones by their y location
     
@@ -359,7 +362,7 @@ def ave_block( zonegrp, FoldPath, outfile, block_dim=2 ):
                        
             zone_span_n = len(zonegrp[zonels_y[i][j]].zonelist)
             for k in range(zone_span_n):
-                zonename = zonegrp[zonels_y[i][j]].zonelist[k]
+                zonename = zonegrp[zonels_y[i][j]].zonelist[k][1]
                 u      = zone(zonename).values('<u>').as_numpy_array()
                 uu     = zone(zonename).values('<u`u`>').as_numpy_array()
                 vv     = zone(zonename).values('<v`v`>').as_numpy_array()
@@ -645,3 +648,137 @@ def timeave_fbl( FoldPath ):
         f.write(str('{:<17.8e}'.format(tau_fx1)))
         f.write(str('{:<17.8e}'.format(tau_px1)))
         print("finish write statistic results.")
+
+
+# ----------------------------------------------------------------------
+# >>> AVERAGE BLOCK WITH IB                                       ( 5 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/15  - created
+#
+# Desc
+#
+# - average blocks into a vertical line for plotting profile 
+# - like ave_block(), but can drop values beneath wall
+# ----------------------------------------------------------------------
+
+def ave_block_ib( folderpath, zonegrp, 
+                  outfile,    regionrange,
+                  var_list=None,
+                  period_ave=None,
+                  zone_row=None ):
+    
+    # get the zones overlapped with the select region
+    
+    zone_overlap_indx = []
+#    layers_yctr = []
+    
+    for i in range(len(zonegrp)):
+        
+        zonegrp_range = [zonegrp[i].xmin, zonegrp[i].ymin,
+                         zonegrp[i].xmax, zonegrp[i].ymax]
+        
+        Overlap = if_overlap(zonegrp_range, regionrange)
+
+        if Overlap: 
+            zone_overlap_indx.append(i)
+#            layers_yctr.append(zonegrp[i].yctr)
+            print(i,[pair[1] for pair in zonegrp[i].zonelist])
+    
+      
+#    layer_n = len( np.unique(layers_yctr))
+    zonels_y = []
+    
+    for i in range(7):
+        zonels_y.append([])
+        
+    for i in range(len(zone_overlap_indx)):
+        if (zonegrp[zone_overlap_indx[i]].yctr < 0.0):
+            zonels_y[0].append(zone_overlap_indx[i])
+        elif (0.0        < zonegrp[zone_overlap_indx[i]].yctr < 1.73695342):
+            zonels_y[1].append(zone_overlap_indx[i])
+        elif (1.73695342 < zonegrp[zone_overlap_indx[i]].yctr < 5.01031265):
+            zonels_y[2].append(zone_overlap_indx[i])        
+        elif (5.01031265 < zonegrp[zone_overlap_indx[i]].yctr < 11.1790910):
+            zonels_y[3].append(zone_overlap_indx[i])
+        elif (11.1790910 < zonegrp[zone_overlap_indx[i]].yctr < 22.8044042):
+            zonels_y[4].append(zone_overlap_indx[i])   
+        elif (22.8044042 < zonegrp[zone_overlap_indx[i]].yctr < 44.7127788):
+            zonels_y[5].append(zone_overlap_indx[i])
+        elif (44.7127788 < zonegrp[zone_overlap_indx[i]].yctr < 86.0000000):
+            zonels_y[6].append(zone_overlap_indx[i])
+   
+    print(zonels_y)
+       
+    
+    filelist = sorted( get_filelist(folderpath) )
+    dataset  = tp.data.load_tecplot_szl( filelist )
+    zone     = dataset.zone
+                
+    if var_list is None:
+        var_list = [v.name for v in dataset.variables()]
+    
+
+    
+    for i in range( len(zonels_y) ):
+
+        for j in range(len(zonels_y[i])):
+            
+            zone_span_n = len(zonegrp[zonels_y[i][j]].zonelist)
+            
+#            check_zone = []
+            
+            for k in range(zone_span_n):
+                zonename = zonegrp[zonels_y[i][j]].zonelist[k][1]
+                
+#                check_zone.append(zonename)
+                
+                for m in range(np.size(var_list)):
+                    
+                    var = dataset.variable(var_list[m])
+                    
+                    if m == 0:
+                        var_col = var.values(zonename).as_numpy_array()
+                    else:
+                        var_index = var.values(zonename).as_numpy_array()
+                        var_col = np.column_stack((var_col,var_index))
+                if zone_row is None:
+#                    if ( np.size(dataset.solution_times) ==0 ):
+#                        sol_time = 0.0
+#                    else:
+#                        sol_time = dataset.solution_times[0]
+                    zone_row = var_col
+                else:
+                    zone_row = np.row_stack((zone_row, var_col))
+#                    print(len(var_col))
+#            print(check_zone)
+#            print(len(zone_row))
+    df = pd.DataFrame( data=zone_row, columns=var_list )   
+
+    print(len(df.index))
+    
+    df = df.groupby(by=['x','y','z'],as_index=False).first()
+    
+    print(df)
+    
+    df = df.drop(df[ df['walldist']<0.0 ].index)
+    
+    print(df)
+    
+    df = df.drop(df[ (df['x'] < regionrange[0]) | 
+                     (df['x'] > regionrange[2])   ].index)
+    
+    print(df)
+    
+    df = df.groupby( by=['y'],as_index=False).mean()
+    
+    print(df)
+    
+    return df
+          
+        
+ 
