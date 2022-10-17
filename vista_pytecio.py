@@ -778,6 +778,21 @@ def ave_block_ib( folderpath, zonegrp,
     
     print(df)
     
+    os.chdir(folderpath)
+    os.chdir(os.pardir)
+    
+    with open(outfile, 'w') as f:
+        
+        for var_name in df.columns:
+            f.write('{:<17}'.format(var_name))
+            
+        f.write('\n')
+        
+        for i in range(df.shape[0]):
+            for var_name in df.columns:
+                f.write(str('{:<17.8e}'.format(df.at[i,var_name])))
+            f.write('\n')
+    
     return df
           
         

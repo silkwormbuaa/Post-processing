@@ -18,7 +18,7 @@ folderpath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
 
 listfile = "/home/wencanwu/my_simulation/temp/220825_lowRe/zonelist_sorted.dat"
 
-with timer("get sorted zone list"):
+with timer("whole processing "):
     
 #    get_zonegrp(folderpath)
 
@@ -26,11 +26,13 @@ with timer("get sorted zone list"):
     
     regionrange = [-71.75, -1.2576, -60.6875, 22.8044]
     
-    var_list = ['x','y','z','<u>','walldist']
+    var_list = ['x',      'y',      'z',      '<u>',
+                '<u`u`>', '<v`v`>', '<w`w`>', '<u`v`>',
+                '<rho>' , 'walldist'                   ]
        
     ave_block_ib( folderpath, 
                   zonegrp, 
-                  "mean_result_test.dat", 
+                  "mean_result_ib.dat", 
                   regionrange,
                   var_list)
 
