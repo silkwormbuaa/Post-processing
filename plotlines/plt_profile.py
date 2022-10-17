@@ -30,8 +30,8 @@ norm3 = '/home/wencanwu/my_simulation/temp/220927_lowRe/statistic_average.dat'
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-68.0625.dat'
 
-plt_u   = True
-plt_RS  = False
+plt_u   = False
+plt_RS  = True
 plt_T   = False
 Compare = True
 
@@ -90,3 +90,50 @@ if plt_u :
     os.chdir(OutPath)
     plt.savefig("u_profile_shifted")
     plt.show()
+
+#%% plot fluctuation
+if plt_RS :
+    
+    fig, ax = plt.subplots(figsize=[10,8])
+    
+    if Compare :
+        ax.plot(d0.df['y_plus'],d0.df['<u`u`>+'],'b',
+                label=r'$u^\prime u^\prime$ smooth',ls="-")
+        ax.plot(d0.df['y_plus'],d0.df['<u`v`>+'],'y',
+                label=r'$u^\prime v^\prime$ smooth',ls="-")
+        ax.plot(d0.df['y_plus'],d0.df['<v`v`>+'],'g',
+                label=r'$v^\prime v^\prime$ smooth',ls="-")
+        ax.plot(d0.df['y_plus'],d0.df['<w`w`>+'],'r',
+                label=r'$w^\prime w^\prime$ smooth',ls="-")
+    
+    ax.plot(d3.df['y_s_plus'],d3.df['<u`u`>+'],'b',
+            label=r'$u^\prime u^\prime \ D=0.25\delta_0$',ls="--")
+    ax.plot(d3.df['y_s_plus'],d3.df['<u`v`>+'],'y',
+            label=r'$u^\prime v^\prime \ D=0.25\delta_0$',ls="--")
+    ax.plot(d3.df['y_s_plus'],d3.df['<v`v`>+'],'g',
+            label=r'$v^\prime v^\prime \ D=0.25\delta_0$',ls="--")
+    ax.plot(d3.df['y_s_plus'],d3.df['<w`w`>+'],'r',
+            label=r'$w^\prime w^\prime \ D=0.25\delta_0$',ls="--")
+
+    ax.minorticks_on()
+    ax.set_xscale("symlog",linthresh = 1)
+    ax.set_xlabel("$y_s^+$",fontdict={'size':24})  
+    ax.tick_params(axis='x',labelsize=15)
+    ax.set_xlim([1,1000])
+    x_minor = matplotlib.ticker.LogLocator(base=10.0, 
+                                           subs = np.arange(1.0,10.0))
+    ax.xaxis.set_minor_locator(x_minor)
+    
+    ax.set_ylabel(r'$\xi u^\prime_i u^\prime_j$',\
+                  fontdict={'size':24})
+    ax.tick_params(axis='y',labelsize=15)
+
+    ax.legend(prop={'size':12},loc='upper right') 
+    ax.set_title("Reynolds Stress profile",size=20)
+
+    ax.grid()
+    
+    os.chdir(OutPath)
+    plt.savefig("quarter_delta_RS")
+    plt.show()
+        
