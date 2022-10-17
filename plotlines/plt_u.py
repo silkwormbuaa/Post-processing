@@ -14,17 +14,17 @@ import matplotlib
 import os
 
 #%% Read in data first
-FoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/"
-OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces_oneblock/forces_3"
+FoldPath = "/home/wencanwu/my_simulation/temp/220927_lowRe/"
+OutPath  = "/home/wencanwu/my_simulation/temp/220927_lowRe/DataPost/"
+ForceFoldPath = "/home/wencanwu/my_simulation/temp/220927_lowRe/forces_3"
 FlatFolder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost"
 #FoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/"
 #ForceFoldPath2 = "/home/wencanwu/my_simulation/temp/090522_lowRe_256/forces/forces_1408"
 
 plt_u   = True
-plt_RS  = True
+plt_RS  = False
 plt_T   = False
-Compare = True
+Compare = False
 #---Read in averaged flow data
 os.chdir(FoldPath)
 y_ls   = []
@@ -77,6 +77,36 @@ wwplus  = np.multiply(ww_ls,rho_ls)/abs(tau_av1)
 uvplus  = np.multiply(uv_ls,rho_ls)/abs(tau_av1)
 ydelta  = np.array(y_ls)/delta
 Tnorm   = np.array(T_ls)/T_inf
+
+#%% add results using new ave_block_ib function
+os.chdir(FoldPath)
+y_ls_n   = []
+u_ls_n   = []
+#uu_ls  = []
+#vv_ls  = []
+#ww_ls  = []
+#uv_ls  = []
+#rho_ls = []
+#T_ls   = []
+with open("mean_result_test.dat") as f:
+    #skip the first line    
+    line = f.readline()
+    line = f.readline()
+    while line:
+        cleanl = line.strip().split()
+        y_ls_n.  append(float(cleanl[0]))
+        u_ls_n.  append(float(cleanl[3]))
+#        uu_ls. append(float(cleanl[2]))
+#        vv_ls. append(float(cleanl[3]))
+#        ww_ls. append(float(cleanl[4]))
+#        uv_ls. append(float(cleanl[5]))
+#        rho_ls.append(float(cleanl[6]))
+#        T_ls.  append(float(cleanl[7]))
+        #read next line until end        
+        line = f.readline()
+
+yplus_n   = np.array(y_ls_n)/lv_av1
+uplus_n   = np.array(u_ls_n)/u_tau1
 #%%---read spanwise wavy wall case
 '''
 os.chdir(FoldPath2)
@@ -167,6 +197,7 @@ if plt_u :
 #        ax.plot(spw_yplus,  spw_uplus, 'green', label=r'$spanwise\ wave$', ls='-')
     else:
         ax.plot(yplus,uplus,label=r'$u^+$')
+        ax.plot(yplus_n,uplus_n,label=r'$u^+_new$')
     
     ax.minorticks_on()
     ax.set_xscale("symlog",linthresh = 1)
@@ -184,7 +215,7 @@ if plt_u :
 
     ax.grid()
 
-    plt.savefig("velocity_profile_wavywall_plusspanwise")
+    plt.savefig("velocity_profile_wavywall_plusspanwise_test")
     plt.show()
 
 #%% plot Reynolds Stress profile 
