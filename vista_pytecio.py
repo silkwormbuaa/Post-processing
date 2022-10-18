@@ -670,7 +670,8 @@ def ave_block_ib( folderpath, zonegrp,
                   outfile,    regionrange,
                   var_list=None,
                   period_ave=None,
-                  zone_row=None ):
+                  zone_row=None,
+                  spf_ave=False):
     
     # get the zones overlapped with the select region
     
@@ -717,7 +718,6 @@ def ave_block_ib( folderpath, zonegrp,
     
     filelist = sorted( get_filelist(folderpath) )
     dataset  = tp.data.load_tecplot_szl( filelist )
-    zone     = dataset.zone
                 
     if var_list is None:
         var_list = [v.name for v in dataset.variables()]
@@ -761,22 +761,43 @@ def ave_block_ib( folderpath, zonegrp,
 
     print(len(df.index))
     
+    # drop overlapped points and only keep the first 
+    
     df = df.groupby(by=['x','y','z'],as_index=False).first()
     
     print(df)
     
-    df = df.drop(df[ df['walldist']<0.0 ].index)
+    # set values for walldist < 0 as 0.0 for superficial averaging
+    
+    if spf_ave is True:
+        df['<u>'].loc[df['walldist']<0] = 0.0
+        df['<u`u`>'].loc[df['walldist']<0] = 0.0
+        df['<v`v`>'].loc[df['walldist']<0] = 0.0
+        df['<w`w`>'].loc[df['walldist']<0] = 0.0
+        df['<u`v`>'].loc[df['walldist']<0] = 0.0
+        df['<rho>'].loc[df['walldist']<0] = 0.0
+    
+    # else drop values for walldist < 0 for arithmatic averaging
+    
+    else:   
+        df = df.drop(df[ df['walldist']<0.0 ].index)
     
     print(df)
+    
+    # drop values that are out of the range
     
     df = df.drop(df[ (df['x'] < regionrange[0]) | 
                      (df['x'] > regionrange[2])   ].index)
     
     print(df)
     
+    # averaging over x-z plane
+    
     df = df.groupby( by=['y'],as_index=False).mean()
     
     print(df)
+    
+    # write results to mean_result.dat
     
     os.chdir(folderpath)
     os.chdir(os.pardir)
