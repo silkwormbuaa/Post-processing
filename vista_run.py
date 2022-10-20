@@ -10,7 +10,9 @@
 '''
 
 from vista_tools         import *
+
 from vista_pytecio       import *
+
 from timer               import timer
 
 
@@ -22,7 +24,7 @@ with timer("whole processing "):
     
 #    get_zonegrp(folderpath)
 
-    zonegrp = read_zonelist( listfile )
+    zonegrps = read_zonelist( listfile )
     
     regionrange = [-71.75, -1.2576, -60.6875, 22.8044]
     
@@ -31,7 +33,7 @@ with timer("whole processing "):
                 '<rho>' , 'walldist'                   ]
        
     ave_block_ib( folderpath, 
-                  zonegrp, 
+                  zonegrps, 
                   "mean_result_ib_spf.dat", 
                   regionrange,
                   var_list,
