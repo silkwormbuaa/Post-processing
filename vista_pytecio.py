@@ -666,7 +666,7 @@ def timeave_fbl( FoldPath ):
 # - like ave_block(), but can drop values beneath wall
 # ----------------------------------------------------------------------
 
-def ave_block_ib( folderpath, zonegrp, 
+def ave_block_ib( folderpath, zonegrps, 
                   outfile,    regionrange,
                   var_list=None,
                   period_ave=None,
@@ -678,17 +678,17 @@ def ave_block_ib( folderpath, zonegrp,
     zone_overlap_indx = []
 #    layers_yctr = []
     
-    for i in range(len(zonegrp)):
+    for i in range(len(zonegrps)):
         
-        zonegrp_range = [zonegrp[i].xmin, zonegrp[i].ymin,
-                         zonegrp[i].xmax, zonegrp[i].ymax]
+        zonegrp_range = [zonegrps[i].xmin, zonegrps[i].ymin,
+                         zonegrps[i].xmax, zonegrps[i].ymax]
         
         Overlap = if_overlap(zonegrp_range, regionrange)
 
         if Overlap: 
             zone_overlap_indx.append(i)
 #            layers_yctr.append(zonegrp[i].yctr)
-            print(i,[pair[1] for pair in zonegrp[i].zonelist])
+            print(i,[pair[1] for pair in zonegrps[i].zonelist])
     
       
 #    layer_n = len( np.unique(layers_yctr))
@@ -698,19 +698,19 @@ def ave_block_ib( folderpath, zonegrp,
         zonels_y.append([])
         
     for i in range(len(zone_overlap_indx)):
-        if (zonegrp[zone_overlap_indx[i]].yctr < 0.0):
+        if (zonegrps[zone_overlap_indx[i]].yctr < 0.0):
             zonels_y[0].append(zone_overlap_indx[i])
-        elif (0.0        < zonegrp[zone_overlap_indx[i]].yctr < 1.73695342):
+        elif (0.0        < zonegrps[zone_overlap_indx[i]].yctr < 1.73695342):
             zonels_y[1].append(zone_overlap_indx[i])
-        elif (1.73695342 < zonegrp[zone_overlap_indx[i]].yctr < 5.01031265):
+        elif (1.73695342 < zonegrps[zone_overlap_indx[i]].yctr < 5.01031265):
             zonels_y[2].append(zone_overlap_indx[i])        
-        elif (5.01031265 < zonegrp[zone_overlap_indx[i]].yctr < 11.1790910):
+        elif (5.01031265 < zonegrps[zone_overlap_indx[i]].yctr < 11.1790910):
             zonels_y[3].append(zone_overlap_indx[i])
-        elif (11.1790910 < zonegrp[zone_overlap_indx[i]].yctr < 22.8044042):
+        elif (11.1790910 < zonegrps[zone_overlap_indx[i]].yctr < 22.8044042):
             zonels_y[4].append(zone_overlap_indx[i])   
-        elif (22.8044042 < zonegrp[zone_overlap_indx[i]].yctr < 44.7127788):
+        elif (22.8044042 < zonegrps[zone_overlap_indx[i]].yctr < 44.7127788):
             zonels_y[5].append(zone_overlap_indx[i])
-        elif (44.7127788 < zonegrp[zone_overlap_indx[i]].yctr < 86.0000000):
+        elif (44.7127788 < zonegrps[zone_overlap_indx[i]].yctr < 86.0000000):
             zonels_y[6].append(zone_overlap_indx[i])
    
     print(zonels_y)
@@ -728,12 +728,12 @@ def ave_block_ib( folderpath, zonegrp,
 
         for j in range(len(zonels_y[i])):
             
-            zone_span_n = len(zonegrp[zonels_y[i][j]].zonelist)
+            zone_span_n = len(zonegrps[zonels_y[i][j]].zonelist)
             
 #            check_zone = []
             
             for k in range(zone_span_n):
-                zonename = zonegrp[zonels_y[i][j]].zonelist[k][1]
+                zonename = zonegrps[zonels_y[i][j]].zonelist[k][1]
                 
 #                check_zone.append(zonename)
                 
@@ -814,7 +814,159 @@ def ave_block_ib( folderpath, zonegrp,
                 f.write(str('{:<17.8e}'.format(df.at[i,var_name])))
             f.write('\n')
     
-    return df
-          
+    return df       
+
+
+# ----------------------------------------------------------------------
+# >>> SPANWISE PERIODIC AVERAGING                                ( 6 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/18  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def spanwise_periodic_ave(dataset,
+                          zonegrp,
+                          period,
+                          width_out,
+                          var_list=None,
+                          zone_row=None):
+    
+
+    for zone in zonegrp.zonelist:
         
- 
+        if var_list is None:
+            var_list = [v.name for v in dataset.variables()]
+        
+        for i in range(np.size(var_list)):
+            
+            var = dataset.variable(var_list[i])
+            
+            if i == 0:
+                var_col = var.values(zone[1]).as_numpy_array()
+            else:
+                var_index = var.values(zone[1]).as_numpy_array()
+                var_col = np.column_stack((var_col,var_index))
+
+        if zone_row is None:
+            zone_row = var_col
+            
+#            np.savetxt("zone_row.dat",zone_row,delimiter=" ")
+
+        else:
+            zone_row = np.row_stack((zone_row, var_col))
+    
+    df = pd.DataFrame(data=zone_row, columns=var_list) 
+    
+#    print("finish reading the zonegrp data")
+    
+#    print(len(df))
+    
+    df = df.drop_duplicates(subset = ['x','y','z'],keep='first')
+    
+#    print(len(df))
+    
+    x = np.array(df['x'])
+    y = np.array(df['y'])
+    z = np.array(df['z'])
+    
+    Nx = len(np.unique(x))
+    Ny = len(np.unique(y))
+    Nz = len(np.unique(z))
+   
+    z = np.reshape(z,(Nz,Ny,Nx))
+    
+    width = max(np.unique(z)) - min(np.unique(z))
+
+#    print('{:17.8e}'.format(width))
+    
+    n_period = round(width/period)
+    
+#    print(n_period)
+
+    n_zpoints = round((Nz-1)/n_period)
+    
+#    print(n_zpoints)
+    
+    z_frame = np.linspace(0.0,period,n_zpoints+1)
+    z_frame = z_frame[0:-1]
+    
+    z_frame = z_frame.round(decimals=5)
+    
+#    for item in z_frame:
+#        print('{:<17.8e}'.format(item))
+    
+    for i in range(len(z)-1):
+        index = i%n_zpoints
+        z[i,:,:] = z_frame[index]
+    z[-1,:,:] = z_frame[0]    
+
+    z = z.ravel()
+    
+#    k = np.unique(z)
+    
+#    for item in k:
+#        print('{:<17.6e}'.format(item))
+    
+    df['z'] = z
+    
+    df = df.groupby(by=['z','y','x'], as_index=False).mean()
+    
+    N_period = round(width_out/period)
+    
+    df_cp   = df.copy(deep=True)
+    z_cp    = np.array(df['z'])
+    df_tail = df.iloc[0:Nx*Ny].copy()
+    
+    z_tail = np.array([width_out]*(Nx*Ny))
+    
+    df_tail['z'] = z_tail
+    
+    for i in range(1,N_period):
+        z_a = np.add(z_cp,i*period)
+        df_cp['z'] = z_a 
+        df = pd.concat([df,df_cp])
+    print(df)
+
+    df = pd.concat([df,df_tail])
+    
+    df = df.reset_index(drop=True)  
+    df = df[var_list]
+    print(df)
+    return df
+    
+#    print(len(df.index))
+    
+#    df.to_csv("pandas.dat",sep=' ')
+    
+#    print(z.size)
+#    print(z.shape)
+#    print(z)
+    
+    
+#    with timer("group z:"):
+       
+#        z = np.array(df['z'])
+        
+    #    z_test = df['z'].loc[(df['x']==-116.0000000) & (df['y']==0.0000000)]
+    #    z_n = []
+        
+    #    for item in z:
+    #        print(item)
+    #        z_n.append(round(item%period,6))
+
+#        z = np.round(np.remainder(z,period),7)
+        
+#        z = np.unique(z)
+        
+    #    df['z`'] = z_n
+        
+#    for i in range(0,len(df)):
+#        print(df.iloc[i]['z'])
+#        df.iloc[i]['z'] = round(df.iloc[i]['z']%period,7)
