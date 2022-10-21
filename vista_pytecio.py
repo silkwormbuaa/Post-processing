@@ -831,142 +831,154 @@ def ave_block_ib( folderpath, zonegrps,
 #
 # ----------------------------------------------------------------------
 
-def spanwise_periodic_ave(dataset,
-                          zonegrp,
-                          period,
-                          width_out,
-                          var_list=None,
-                          zone_row=None):
+def spanwise_periodic_ave( dataset,
+                           zonegrp,
+                           period,
+                           width_out,
+                           var_list=None,
+                           zone_row=None  ):
     
-
+    # loop over all zones (8) within one zonegrp
     for zone in zonegrp.zonelist:
         
-        if var_list is None:
-            var_list = [v.name for v in dataset.variables()]
+        # check if output variables are specified
         
-        for i in range(np.size(var_list)):
+        if var_list is None:
             
-            var = dataset.variable(var_list[i])
+            var_list = [ v.name for v in dataset.variables() ]
+        
+        # read in the variables with tecplot dataset
+        # first read in and stack variable columns within one zone
+        
+        for i in range( np.size(var_list) ):
+            
+            var = dataset.variable( var_list[i] )
             
             if i == 0:
-                var_col = var.values(zone[1]).as_numpy_array()
+                
+                # zone[1] is 'B00xxxx', zone[0] is z location of zone center
+                
+                var_col = var.values( zone[1] ).as_numpy_array()
+            
             else:
-                var_index = var.values(zone[1]).as_numpy_array()
-                var_col = np.column_stack((var_col,var_index))
+                
+                var_index = var.values( zone[1] ).as_numpy_array()
+                var_col = np.column_stack( (var_col,var_index) )
+
+        # then stack zones(vertically)
 
         if zone_row is None:
+            
             zone_row = var_col
             
-#            np.savetxt("zone_row.dat",zone_row,delimiter=" ")
-
         else:
-            zone_row = np.row_stack((zone_row, var_col))
+            
+            zone_row = np.row_stack( (zone_row, var_col) )
     
-    df = pd.DataFrame(data=zone_row, columns=var_list) 
+    # store data into pandas
     
-#    print("finish reading the zonegrp data")
+    df = pd.DataFrame( data=zone_row, columns=var_list ) 
+
+    # drop overlapped data at blocks' interface
+
+    df = df.drop_duplicates( subset = ['x','y','z'], keep='first' )
     
-#    print(len(df))
+    x = np.array( df['x'] )
+    y = np.array( df['y'] )
+    z = np.array( df['z'] )
     
-    df = df.drop_duplicates(subset = ['x','y','z'],keep='first')
+    Nx = len( np.unique(x) )
+    Ny = len( np.unique(y) )
+    Nz = len( np.unique(z) )
+
+    # doing spanwise periodic averaging, need to manipulate z
+    # first, reshape z into a 3D matrix
     
-#    print(len(df))
+    z = np.reshape( z, (Nz,Ny,Nx) )
     
-    x = np.array(df['x'])
-    y = np.array(df['y'])
-    z = np.array(df['z'])
-    
-    Nx = len(np.unique(x))
-    Ny = len(np.unique(y))
-    Nz = len(np.unique(z))
-   
-    z = np.reshape(z,(Nz,Ny,Nx))
+    # get the width (length in z) of this zone group
     
     width = max(np.unique(z)) - min(np.unique(z))
 
-#    print('{:17.8e}'.format(width))
+    # number of periods over the whole span
     
     n_period = round(width/period)
     
-#    print(n_period)
+    # how many points are in one period
 
-    n_zpoints = round((Nz-1)/n_period)
+    n_zpoints = round( (Nz-1)/n_period )
     
-#    print(n_zpoints)
+    # z_frame is the new z coordinate within one period
+    # z_frame need to drop the last points to avoid repetitive 
+    # writing of period interface data
     
-    z_frame = np.linspace(0.0,period,n_zpoints+1)
-    z_frame = z_frame[0:-1]
+    z_frame = np.linspace( 0.0, period, n_zpoints+1)
+    z_frame = z_frame[ 0:-1 ]
+    z_frame = z_frame.round( decimals=5 )   # maybe useless
     
-    z_frame = z_frame.round(decimals=5)
+    # assigning x-y planes with new repetitive z coordinates
     
-#    for item in z_frame:
-#        print('{:<17.8e}'.format(item))
-    
-    for i in range(len(z)-1):
-        index = i%n_zpoints
-        z[i,:,:] = z_frame[index]
+    for i in range( len(z)-1 ):
+        
+        index = i % n_zpoints
+        
+        z[i,:,:] = z_frame[ index ]
+        
     z[-1,:,:] = z_frame[0]    
 
+    # flatten z back into a 1D array, for covenience of being added to pandas
+    
     z = z.ravel()
-    
-#    k = np.unique(z)
-    
-#    for item in k:
-#        print('{:<17.6e}'.format(item))
     
     df['z'] = z
     
-    df = df.groupby(by=['z','y','x'], as_index=False).mean()
+    # finish manipulating z coordinates, z range only within one periodic
+    # now can do grouping and averaging
     
-    N_period = round(width_out/period)
+    df = df.groupby( by=['z','y','x'], as_index=False ).mean()
     
-    df_cp   = df.copy(deep=True)
-    z_cp    = np.array(df['z'])
-    df_tail = df.iloc[0:Nx*Ny].copy()
+    # number of peroid for output file(depending on how width of out zone)
+     
+    N_period = round( width_out/period )
     
-    z_tail = np.array([width_out]*(Nx*Ny))
+    # copy dataframe to help assignvalues for periodic zones
+    
+    df_cp   = df.copy( deep=True )
+    z_cp    = np.array( df['z'] )
+    
+    # leave a copy of the first x-y plane, later will be added to tail
+    
+    df_tail = df.iloc[ 0 : Nx*Ny ].copy()
+    
+    # assign z coordiantes for the tail x-y layer
+    # (the only difference between the first and last x-y layer)
+    
+    z_tail = np.array( [width_out] * (Nx*Ny) )
     
     df_tail['z'] = z_tail
     
-    for i in range(1,N_period):
-        z_a = np.add(z_cp,i*period)
-        df_cp['z'] = z_a 
+    # when output file requires not only one period
+    # need to write extra repetitive; N always >= 1, no worry
+    
+    for i in range( 1, N_period ):
+        
+        # extra block need to shif z 
+        
+        z_extra = np.add( z_cp, i*period )
+        
+        df_cp['z'] = z_extra 
+        
         df = pd.concat([df,df_cp])
-    print(df)
+    
+    # get final dataframe
 
     df = pd.concat([df,df_tail])
     
+    # adjust index and order of columns variables before output
+    
     df = df.reset_index(drop=True)  
     df = df[var_list]
+    
     print(df)
+    
     return df
-    
-#    print(len(df.index))
-    
-#    df.to_csv("pandas.dat",sep=' ')
-    
-#    print(z.size)
-#    print(z.shape)
-#    print(z)
-    
-    
-#    with timer("group z:"):
-       
-#        z = np.array(df['z'])
-        
-    #    z_test = df['z'].loc[(df['x']==-116.0000000) & (df['y']==0.0000000)]
-    #    z_n = []
-        
-    #    for item in z:
-    #        print(item)
-    #        z_n.append(round(item%period,6))
-
-#        z = np.round(np.remainder(z,period),7)
-        
-#        z = np.unique(z)
-        
-    #    df['z`'] = z_n
-        
-#    for i in range(0,len(df)):
-#        print(df.iloc[i]['z'])
-#        df.iloc[i]['z'] = round(df.iloc[i]['z']%period,7)

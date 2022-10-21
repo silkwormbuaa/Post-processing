@@ -6,7 +6,7 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   script doing spanwise periodic averaging
 '''
 
 
@@ -43,13 +43,16 @@ with timer("whole processing "):
     
     dataset = tp.data.load_tecplot_szl(filelist)
 
-#    for i in range(len(zonegrps)):
     os.chdir(outfolder)
-    for i in range(1):    
+    
+    for i in range(len(zonegrps)):
+            
         df = spanwise_periodic_ave(dataset,
                                    zonegrps[i],
                                    1.3,
                                    5.2,
                                    var_list)
+        
         frame2tec3d(df,outfolder,str(i))
+        
         print("finish writing zone group %s"%i)
