@@ -44,7 +44,7 @@ def get_filelist( FoldPath ):
 
 
 # ----------------------------------------------------------------------
-# >>> IF_OVERLAP                                                (Nr.)
+# >>> IF_OVERLAP                                                ( 1 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -75,3 +75,27 @@ def if_overlap( rect1, rect2 ):
     return Overlap
 
 
+# ----------------------------------------------------------------------
+# >>> If Segment Penetrate Zone                                  ( 2 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/24  - created
+#
+# Desc
+#
+# - Check if a streamwise segment penetrate a zone
+#
+# ----------------------------------------------------------------------
+
+def if_penetrate( zone_range, segment ):
+    
+    Penetrate = ( segment[0] < zone_range[3] ) and \
+                ( segment[0] > zone_range[1] ) and \
+                ( segment[1] < zone_range[0] ) and \
+                ( segment[2] > zone_range[2] )
+    
+    return Penetrate

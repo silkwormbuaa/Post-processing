@@ -19,6 +19,8 @@ import pandas            as      pd
 
 from   vista_tools       import  *
 
+from   vista_math        import  *
+
 from   timer             import  timer 
 
 
@@ -664,6 +666,10 @@ def timeave_fbl( FoldPath ):
 #
 # - average blocks into a vertical line for plotting profile 
 # - like ave_block(), but can drop values beneath wall
+#
+# Input
+#
+# - spf_ave : if do superficial averaging, otherwise arithmatic averaging
 # ----------------------------------------------------------------------
 
 def ave_block_ib( folderpath, zonegrps, 
@@ -678,12 +684,12 @@ def ave_block_ib( folderpath, zonegrps,
     zone_overlap_indx = []
 #    layers_yctr = []
     
-    for i in range(len(zonegrps)):
+    for i in range( len(zonegrps) ):
         
         zonegrp_range = [zonegrps[i].xmin, zonegrps[i].ymin,
                          zonegrps[i].xmax, zonegrps[i].ymax]
         
-        Overlap = if_overlap(zonegrp_range, regionrange)
+        Overlap = if_overlap( zonegrp_range, regionrange )
 
         if Overlap: 
             zone_overlap_indx.append(i)
@@ -982,3 +988,164 @@ def spanwise_periodic_ave( dataset,
     print(df)
     
     return df
+
+
+# ----------------------------------------------------------------------
+# >>> Streamwise Mean Line                                       ( 7 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/24  - created
+#
+# Desc
+#
+# - get a streamwise line with spanwise mean results at certain y_0
+#
+# ----------------------------------------------------------------------
+
+def get_xline( folderpath, zonegrps,
+               loc_y,    segment, 
+               outfile,
+               var_list=None,
+               spf_ave=False) : 
+    
+    # values used for normalization
+    
+    p_i   = 45447.289
+    x_imp = 50.4
+    delta = 5.2
+    
+    # get the zones penetrated by the segment
+    
+    zone_penetr_indx = []
+    zonels = []
+    
+    for i in range(len(zonegrps)):
+        
+        zonegrp_range = [zonegrps[i].xmin, zonegrps[i].ymin,
+                         zonegrps[i].xmax, zonegrps[i].ymax]
+        
+        Penetrate = if_penetrate( zonegrp_range, segment )
+        
+        if Penetrate:
+            zone_penetr_indx.append(i)
+            zonels.append( [pair[1] for pair in zonegrps[i].zonelist] )
+            print(i,zonegrps[i].xctr,[pair[1] for pair in zonegrps[i].zonelist])
+    
+#    print(zonels)
+
+    filelist = sorted( get_filelist(folderpath) )
+    dataset  = tp.data.load_tecplot_szl( filelist )
+                
+    if var_list is None:
+        var_list = [v.name for v in dataset.variables()]
+        
+    zone_row = None
+    
+    for i in range( (len(zonels)) ):
+        
+        zone_span_n = len(zonels[i])
+        
+        for j in range( zone_span_n ):
+            
+            zonename = zonels[i][j]
+            
+            for k in range( np.size(var_list) ):
+                
+                var = dataset.variable(var_list[k])
+                
+                if k == 0:
+                    var_col = var.values( zonename ).as_numpy_array()
+                else:
+                    var_index = var.values( zonename ).as_numpy_array()
+                    var_col = np.column_stack(( var_col, var_index))
+            
+            if zone_row is None:
+                
+                zone_row = var_col
+            
+            else:
+                
+                zone_row = np.row_stack(( zone_row, var_col ))
+    
+    df = pd.DataFrame( data=zone_row, columns=var_list )
+    
+#    print(len(df.index))
+    
+    # drop repetitive data
+    
+    df = df.groupby(by=['x','y','z'], as_index=False).first()
+    
+    # drop points in solid
+    
+    if spf_ave is True:
+        df['p`p`'].loc[df['walldist']<0] = 0.0
+    else:
+        df = df.drop(df[ df['walldist']<0.0 ].index)
+    
+    # do spanwise averaging
+    
+    df = df.groupby( by=['x','y'], as_index=False).mean()
+    
+    # get the interval where the target y falls
+    
+    y = np.array( df['y'] )
+    
+    y = np.sort( np.unique(y) )
+    
+    print(y)
+    
+    if (loc_y < min(y)) or (loc_y > max(y)):
+        
+        raise ValueError("y_loc is out of data's range")
+    
+    else:
+        
+        for index in range( len(y) ):
+            if (y[index] >= loc_y):
+                break
+    
+    print(index)
+    
+    df1 = df.loc[df['y']==y[index-1]].copy()
+    df2 = df.loc[df['y']==y[index]].copy()
+    
+    df1['<p`>'] = df1['<p`p`>'].apply(np.sqrt)
+    df2['<p`>'] = df2['<p`p`>'].apply(np.sqrt)
+    
+    p1 = np.array(df1['<p`>'])
+    p2 = np.array(df2['<p`>'])
+    
+    p_interpo = []
+    
+    for i in range(len(p1)):
+        p = lin_interpo(loc_y,y[index-1],p1[i],y[index],p2[i])
+        p_interpo.append(p)
+    
+    x = np.array(df1['x'])
+    df_out = pd.DataFrame(data=x,columns=['x'])
+    df_out['<p`>'] = p_interpo
+    
+    # normalization
+    
+    df_out['(x-x_imp)/δ'] = np.subtract(x,x_imp)/delta
+    
+    df_out['<p`>_'] = np.divide(p_interpo,p_i)
+
+    os.chdir(folderpath)
+    os.chdir(os.pardir)
+    
+    fmt = '%.7f'
+    df_out.to_csv(outfile, sep=' ', float_format=fmt, index=False)
+        
+    
+    print(df_out)
+#    y = np.array(df['y'])
+#    
+#    y = np.unique(y)
+#    
+#    print(y)
+    

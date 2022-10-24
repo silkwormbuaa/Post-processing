@@ -25,7 +25,7 @@ data1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/line_crest.dat'
 
 data2 = '/home/wencanwu/my_simulation/temp/220825_lowRe/line_crest.dat'
 
-data3 = '/home/wencanwu/my_simulation/temp/220927_lowRe/line_crest.dat'
+data3 = '/home/wencanwu/my_simulation/temp/220927_lowRe/streamwise_line.dat'
 
 d1 = PlotDataframe(data1)
 d2 = PlotDataframe(data2)
