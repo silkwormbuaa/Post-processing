@@ -95,11 +95,11 @@ class PlotDataframe():
 
     def fetch_xy( self, var_x, var_y ):
 
-        value_x = np.array(self.df[var_x])
+        value_x = np.array( self.df[var_x] )
         
-        value_y = np.array(self.df[var_y])
+        value_y = np.array( self.df[var_y] )
         
-        return (value_x,value_y) 
+        return ( value_x, value_y ) 
     
 
 # ----------------------------------------------------------------------
@@ -118,21 +118,21 @@ class PlotDataframe():
 #
 # ----------------------------------------------------------------------
 
-    def read_norm(self, filename):
+    def read_norm( self, filename ):
         
-        with open(filename, 'r') as f:
+        with open( filename, 'r' ) as f:
             
             # skip header
             
             line = f.readline()
             
             line = f.readline().strip().split()
-            self.tau_w = float(line[0])
-            self.rho_w = float(line[1])
-            self.u_tau = float(line[2])
-            self.nu    = float(line[3])
-            self.mu    = float(line[4])
-            self.lv    = float(line[5])
+            self.tau_w = float( line[0] )
+            self.rho_w = float( line[1] )
+            self.u_tau = float( line[2] )
+            self.nu    = float( line[3] )
+            self.mu    = float( line[4] )
+            self.lv    = float( line[5] )
 
 # ----------------------------------------------------------------------
 # >>> SHIFT Y COORDINATE                                          ( 4 )
@@ -150,7 +150,7 @@ class PlotDataframe():
 
     def shift_y( self, dy ):
         
-        y = np.array(self.df['y'])
+        y = np.array( self.df['y'] )
         
         y_s = np.add( y, dy )
 
@@ -181,11 +181,11 @@ class PlotDataframe():
 
         u_plus   = np.array(self.df['<u>']) / self.u_tau
         
-        rho = np.array(self.df['<rho>'])
-        uu = np.array(self.df['<u`u`>'])
-        vv = np.array(self.df['<v`v`>'])
-        ww = np.array(self.df['<w`w`>'])
-        uv = np.array(self.df['<u`v`>'])
+        rho = np.array( self.df['<rho>']  )
+        uu  = np.array( self.df['<u`u`>'] )
+        vv  = np.array( self.df['<v`v`>'] )
+        ww  = np.array( self.df['<w`w`>'] )
+        uv  = np.array( self.df['<u`v`>'] )
         
         uu_plus  = np.multiply(rho,uu) / abs(self.tau_w)
         vv_plus  = np.multiply(rho,vv) / abs(self.tau_w)
@@ -202,39 +202,3 @@ class PlotDataframe():
         self.df['<v`v`>+']  = vv_plus
         self.df['<w`w`>+']  = ww_plus
         self.df['<u`v`>+']  = uv_plus
-
-    
-'''  #test scripts  
-file = '/home/wencanwu/my_simulation/temp/220927_lowRe/mean_result_ib.dat' 
-norm_file = '/home/wencanwu/my_simulation/temp/220927_lowRe/statistic_average.dat'
-
-u_1 = PlotDataframe(file)
-
-print(u_1.df)
-
-x,y = u_1.fetch_xy('y','<u>')
-   
-u_1.shift_y(1)
-
-u_1.read_norm(norm_file)
-
-u_1.get_norm()
-
-
-
-print(u_1.df)
-
-'''
-#y,u = fetch_xy(df, 'y', '<u>')
-
-#print(x)
-#print(y)
-
-
-
-#fig, ax = plt.subplots(figsize=[10,8])
-#
-#ax.plot(u_1.df['y'],u_1.df['<u>'])
-#
-#plt.show()
-#print(type(y[0]))
