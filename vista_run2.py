@@ -9,6 +9,7 @@
 @Desc    :   script doing spanwise periodic averaging
 '''
 
+import gc
 
 from vista_tools         import *
 
@@ -19,11 +20,11 @@ from plt2pandas          import *
 from timer               import timer
 
 
-folder = "/home/wencanwu/my_simulation/temp/220927_lowRe/TP_stat"
+folder = "/home/wencanwu/my_simulation/temp/221014_lowRe/TP_stat"
 
-outfolder = "/home/wencanwu/my_simulation/temp/220927_lowRe/stat_per_ave/"
+outfolder = "/home/wencanwu/my_simulation/temp/221014_lowRe/stat_per_ave/"
 
-listfile = "/home/wencanwu/my_simulation/temp/220927_lowRe/zonelist_sorted.dat"
+listfile = "/home/wencanwu/my_simulation/temp/221014_lowRe/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
@@ -31,11 +32,12 @@ with timer("whole processing "):
 
     zonegrps = read_zonelist( listfile )
     
-#    var_list = ['x',      'y',      'z',      '<u>',
-#                '<u`u`>', '<v`v`>', '<w`w`>', '<u`v`>',
-#                '<rho>' , '<p`p`>', 'walldist'         ]
+    var_list = ['x',      'y',      'z',      '<u>',
+                '<v>',    '<w>',    '<T>',    '<rho>',
+                '<u`u`>', '<v`v`>', '<w`w`>', '<u`v`>',
+                '<p`p`>', '<p>',    'walldist'         ]
 
-    var_list = ['x','y','z','<u>']
+
     
     filelist = sorted( get_filelist(folder) )
     
@@ -46,13 +48,18 @@ with timer("whole processing "):
     os.chdir(outfolder)
     
     for i in range(len(zonegrps)):
-            
+        
+#        dataset = tp.data.load_tecplot_szl(filelist)
+        
         df = spanwise_periodic_ave(dataset,
                                    zonegrps[i],
-                                   1.3,
-                                   5.2,
+                                   10.4,
+                                   10.4,
                                    var_list)
         
-        frame2tec3d(df,outfolder,str(i))
+        frame2tec3d(df,outfolder,str(i),zname=i)
         
+        del df
+        
+        gc.collect()
         print("finish writing zone group %s"%i)

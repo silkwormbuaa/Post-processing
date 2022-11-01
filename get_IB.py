@@ -13,15 +13,15 @@ from   timer             import timer
 from   IB_force          import *
 
 #%% Get forces and pressure on IB
-ForceFolderPath = "/home/wencanwu/my_simulation/temp/220825_lowRe/forces_allblocks/"
-ZonegrpFile = "/home/wencanwu/my_simulation/temp/220825_lowRe/zonelist.dat"
+ForceFolderPath = "/home/wencanwu/my_simulation/temp/221014_lowRe/forces_allblocks/"
+ZonegrpFile = "/home/wencanwu/my_simulation/temp/221014_lowRe/zonelist.dat"
 
 os.chdir(ForceFolderPath)
 os.chdir(os.pardir)
 zonegrp = ReadZonegrpWall(ZonegrpFile)
 
 with timer("Get forces on IB:"):
-    GetIBForce(zonegrp,ForceFolderPath,"Cf_points_0825.dat")
+    GetIBForce(zonegrp,ForceFolderPath,"Cf_points_1014.dat")
 
 
 

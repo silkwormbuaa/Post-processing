@@ -17,7 +17,7 @@ import matplotlib.pyplot as     plt
 
 import matplotlib
 
-OutPath  = "/home/wencanwu/my_simulation/temp/220927_lowRe/DataPost/"
+OutPath  = "/home/wencanwu/my_simulation/temp/221014_lowRe/DataPost/"
 
 data1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/mean_result_ib_spf.dat'
 norm1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/statistic_average.dat' 
@@ -28,9 +28,12 @@ norm2 = '/home/wencanwu/my_simulation/temp/220825_lowRe/statistic_average.dat'
 data3 = '/home/wencanwu/my_simulation/temp/220927_lowRe/mean_result_ib_spf.dat'
 norm3 = '/home/wencanwu/my_simulation/temp/220927_lowRe/statistic_average.dat'
 
+data4 = '/home/wencanwu/my_simulation/temp/221014_lowRe/mean_result_ib_spf.dat'
+norm4 = '/home/wencanwu/my_simulation/temp/221014_lowRe/statistic_average.dat'
+
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-68.0625.dat'
 
-plt_u   = False
+plt_u   = True
 plt_RS  = True
 plt_T   = False
 Compare = True
@@ -50,6 +53,11 @@ d3.shift_y(0.312)
 d3.read_norm(norm3)
 d3.get_norm()
 
+d4 = PlotDataframe(data4)
+d4.shift_y(0.494)
+d4.read_norm(norm4)
+d4.get_norm()
+
 d0 = PlotDataframe(data0)
 
 #%% plt
@@ -61,6 +69,9 @@ if plt_u :
         
         ax.plot(d0.df['y_plus'], d0.df['u_plus'],
                 'gray', label=r'$smooth$', ls='--')
+
+    ax.plot(d4.df['y_s_plus'], d4.df['u_plus'],
+            'green',   label=r'$D=2.0\delta_0$', ls='-')
     
     ax.plot(d1.df['y_s_plus'], d1.df['u_plus'],
             'blue',  label=r'$D=1.0\delta_0$', ls='-')
@@ -106,14 +117,14 @@ if plt_RS :
         ax.plot(d0.df['y_plus'],d0.df['<w`w`>+'],'r',
                 label=r'$w^\prime w^\prime$ smooth',ls="-")
     
-    ax.plot(d1.df['y_s_plus'],d1.df['<u`u`>+'],'b',
-            label=r'$u^\prime u^\prime \ D=1.0\delta_0$',ls="--")
-    ax.plot(d1.df['y_s_plus'],d1.df['<u`v`>+'],'y',
-            label=r'$u^\prime v^\prime \ D=1.0\delta_0$',ls="--")
-    ax.plot(d1.df['y_s_plus'],d1.df['<v`v`>+'],'g',
-            label=r'$v^\prime v^\prime \ D=1.0\delta_0$',ls="--")
-    ax.plot(d1.df['y_s_plus'],d1.df['<w`w`>+'],'r',
-            label=r'$w^\prime w^\prime \ D=1.0\delta_0$',ls="--")
+    ax.plot(d4.df['y_s_plus'],d4.df['<u`u`>+'],'b',
+            label=r'$u^\prime u^\prime \ D=2.0\delta_0$',ls="--")
+    ax.plot(d4.df['y_s_plus'],d4.df['<u`v`>+'],'y',
+            label=r'$u^\prime v^\prime \ D=2.0\delta_0$',ls="--")
+    ax.plot(d4.df['y_s_plus'],d4.df['<v`v`>+'],'g',
+            label=r'$v^\prime v^\prime \ D=2.0\delta_0$',ls="--")
+    ax.plot(d4.df['y_s_plus'],d4.df['<w`w`>+'],'r',
+            label=r'$w^\prime w^\prime \ D=2.0\delta_0$',ls="--")
 
     ax.minorticks_on()
     ax.set_xscale("symlog",linthresh = 1)
@@ -134,5 +145,5 @@ if plt_RS :
     ax.grid()
     
     os.chdir(OutPath)
-    plt.savefig("1_delta_RS")
+    plt.savefig("2_delta_RS")
     plt.show()

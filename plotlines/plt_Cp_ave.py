@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import os
 
-FoldPath = '/home/wencanwu/my_simulation/temp/220927_lowRe/linedata'
+FoldPath = '/home/wencanwu/my_simulation/temp/221014_lowRe/linedata'
 
 os.chdir(FoldPath)
 
@@ -58,6 +58,16 @@ with open('Cf_points_0927.dat') as f:
         x_qd. append((float(cleanl[0])-x_imp)/delta)
         Cf_qd.append(float(cleanl[1])*1000)
         Pf_qd.append(float(cleanl[2]))
+        
+x_2d  = []
+Cf_2d = []
+Pf_2d = []
+with open('Cf_points_1014.dat') as f:
+    for line in f.readlines():
+        cleanl = line.strip().split()
+        x_2d. append((float(cleanl[0])-x_imp)/delta)
+        Cf_2d.append(float(cleanl[1])*1000)
+        Pf_2d.append(float(cleanl[2]))
 '''
 fig, ax = plt.subplots(figsize=[10,8])
 ax.plot(x_flat,Cf_flat,'gray',label=r'$smooth$',ls='--')
@@ -82,6 +92,7 @@ plt.show()
 '''
 fig, ax = plt.subplots(figsize=[10,8])
 ax.plot(x_flat,Pf_flat,'gray',label=r'$smooth$',ls='--')
+ax.plot(x_2d,Pf_2d,'green',label=r'$D=2.0\delta_0$',marker = 's')
 ax.plot(x_1d,Pf_1d,'b',label=r'$D=1.0\delta_0$',marker = 's')
 ax.plot(x_hd,Pf_hd,'black',label=r'$D=0.5\delta_0$',marker = 's')
 ax.plot(x_qd,Pf_qd,'r',label=r'$D=0.25\delta_0$',marker = 's')

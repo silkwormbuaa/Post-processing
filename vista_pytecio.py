@@ -1007,7 +1007,7 @@ def spanwise_periodic_ave( dataset,
 # ----------------------------------------------------------------------
 
 def get_xline( folderpath, zonegrps,
-               loc_y,    segment, 
+               segment, 
                outfile,
                var_list=None,
                spf_ave=False) : 
@@ -1098,14 +1098,14 @@ def get_xline( folderpath, zonegrps,
     
     print(y)
     
-    if (loc_y < min(y)) or (loc_y > max(y)):
+    if (segment[0] < min(y)) or (segment[0] > max(y)):
         
         raise ValueError("y_loc is out of data's range")
     
     else:
         
         for index in range( len(y) ):
-            if (y[index] >= loc_y):
+            if (y[index] >= segment[0]):
                 break
     
     print(index)
@@ -1122,7 +1122,7 @@ def get_xline( folderpath, zonegrps,
     p_interpo = []
     
     for i in range(len(p1)):
-        p = lin_interpo(loc_y,y[index-1],p1[i],y[index],p2[i])
+        p = lin_interpo(segment[0],y[index-1],p1[i],y[index],p2[i])
         p_interpo.append(p)
     
     x = np.array(df1['x'])
