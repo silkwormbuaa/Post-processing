@@ -134,8 +134,9 @@ class PlotDataframe():
             self.mu    = float( line[4] )
             self.lv    = float( line[5] )
 
+
 # ----------------------------------------------------------------------
-# >>> SHIFT Y COORDINATE                                          ( 4 )
+# >>> NORMALIZE VALUES                                            ( 4 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -145,29 +146,8 @@ class PlotDataframe():
 # 2022/10/17  - created
 #
 # Desc
-#
-# ----------------------------------------------------------------------
-
-    def shift_y( self, dy ):
-        
-        y = np.array( self.df['y'] )
-        
-        y_s = np.add( y, dy )
-
-        self.df['y_s'] = y_s
-
-
-# ----------------------------------------------------------------------
-# >>> NORMALIZE VALUES                                            ( 5 )
-# ----------------------------------------------------------------------
-#
-# Wencan Wu : w.wu-3@tudelft.nl
-#
-# History
-#
-# 2022/10/17  - created
-#
-# Desc
+#  
+# - normalize profile data(y+,u+,u'v' etc) with data from read_norm()
 #
 # ----------------------------------------------------------------------
 
@@ -202,3 +182,59 @@ class PlotDataframe():
         self.df['<v`v`>+']  = vv_plus
         self.df['<w`w`>+']  = ww_plus
         self.df['<u`v`>+']  = uv_plus
+
+
+# ----------------------------------------------------------------------
+# >>> SHIFT Y COORDINATE                                          ( 4 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/10/17  - created
+#
+# Desc
+#
+# - shift y coordinate based on roughness average elevation
+#
+# ----------------------------------------------------------------------
+
+    def shift_y( self, dy ):
+        
+        y = np.array( self.df['y'] )
+        
+        y_s = np.add( y, dy )
+
+        self.df['y_s'] = y_s
+        
+
+# ----------------------------------------------------------------------
+# >>> SHIFT X COORDINATE                                         ( 5 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/11/01  - created
+#
+# Desc
+#
+# - shift x coordinate from x_imp
+#
+# ----------------------------------------------------------------------
+
+    def shift_x( self, x_imp, delta=None ):
+        
+        x = np.array( self.df['x'] )
+        
+        x_s = np.subtract( x, x_imp )
+        
+        self.df['x_s'] = x_s 
+        
+        if delta is not None:
+            
+            self.df['x_s'] = np.divide( x_s, delta)
+        
+        
