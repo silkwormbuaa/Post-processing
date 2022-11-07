@@ -17,6 +17,8 @@ import matplotlib.pyplot as     plt
 
 import matplotlib
 
+plt.rcParams.update({'font.size': 18})
+
 OutPath  = "/home/wencanwu/my_simulation/temp/221014_lowRe/DataPost/"
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/line_p_prime.dat'
@@ -37,7 +39,7 @@ d3 = PlotDataframe(data3)
 d4 = PlotDataframe(data4)
 d0 = PlotDataframe(data0)
 
-fig, ax = plt.subplots(figsize=[16,8])
+fig, ax = plt.subplots(figsize=[10,8.5], constrained_layout=True)
     
 ax.plot(d0.df['(x-x_imp)/δ'], d0.df['<p`>_'],
             'gray', label=r'$smooth$', ls='--')
@@ -56,16 +58,16 @@ ax.plot(d4.df['(x-x_imp)/δ'], d4.df['<p`>_'],
 
 ax.minorticks_on()
 
-ax.set_xlabel("$(x-x_{imp})/δ$",fontdict={'size':24})  
-ax.tick_params(axis='x',labelsize=15)
+ax.set_xlabel("$(x-x_{imp})/δ_0$",fontdict={'size':40})  
+ax.tick_params(axis='x',labelsize=32)
 
-ax.set_ylabel('$p\'/p_{\infty}$',fontdict={'size':24})
-ax.tick_params(axis='y',labelsize=15)
+ax.set_ylabel('$p\'/p_{\infty}$',fontdict={'size':40})
+ax.tick_params(axis='y',labelsize=32)
 ax.set_xlim([-20,10])
 
 
-ax.legend(prop={'size':20}) 
-ax.set_title(r"$u^+$ profile",size=20)
+ax.legend(prop={'size':28}) 
+
 
 ax.grid()
 

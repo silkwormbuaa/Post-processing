@@ -47,8 +47,8 @@ norm4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/statistic_average.dat'
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-68.0625.dat'
 
-plt_u   = True
-plt_RS  = True
+plt_u   = False
+plt_RS  = False
 plt_T   = False
 Compare = True
 
@@ -90,6 +90,13 @@ d4.get_norm()
 d0 = PlotDataframe( data0 )
 
 os.chdir( OutPath )
+
+#d0.df.to_excel("smooth.xlsx")
+#d1.df.to_excel("1014.xlsx")
+#d2.df.to_excel("0926.xlsx")
+#d3.df.to_excel("0825.xlsx")
+#d4.df.to_excel("0927.xlsx")
+
 # ----------------------------------------------------------------------
 # >>> Plot u profile                                             ( 1 )
 # ----------------------------------------------------------------------

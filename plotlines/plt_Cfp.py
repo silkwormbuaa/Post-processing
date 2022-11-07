@@ -100,7 +100,7 @@ d0_p.shift_x( x_imp, delta )
 
 if plt_Cf is True:
     
-    fig1, ax1 = plt.subplots( figsize=[10,8] )
+    fig1, ax1 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
     
     ax1.plot( d0_f.df['x_s'], 
              d0_f.df['Cf']*1000,
@@ -134,16 +134,16 @@ if plt_Cf is True:
     
     ax1.minorticks_on()
 
-    ax1.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':24}) 
-    ax1.tick_params(axis='x',labelsize=15)
+    ax1.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40}) 
+    ax1.tick_params(axis='x',labelsize=32)
     
-    ax1.set_ylabel("$C_fx10^3$",fontdict={'size':24})
-    ax1.tick_params(axis='y',labelsize=15)
+    ax1.set_ylabel("$C_fx10^3$",fontdict={'size':40})
+    ax1.tick_params(axis='y',labelsize=32)
     
-    ax1.set_xlim([-20.0,15.0])
+    ax1.set_xlim([-20.0,12.0])
     ax1.set_ylim([-1.5,4.5])
 
-    ax1.legend(prop={'size':15})
+    ax1.legend(prop={'size':28},loc='best')
     
     ax1.grid()
 
@@ -167,7 +167,7 @@ if plt_Cf is True:
 
 if plt_Cp is True:
     
-    fig2, ax2 = plt.subplots( figsize=[10,8] )
+    fig2, ax2 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
 
     ax2.plot( d0_p.df['x_s'], 
              d0_p.df['Cp'],
@@ -201,16 +201,16 @@ if plt_Cp is True:
     
     ax2.minorticks_on()
 
-    ax2.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':24})
-    ax2.tick_params(axis='x',labelsize=15)
+    ax2.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40})
+    ax2.tick_params(axis='x',labelsize=32)
     
-    ax2.set_ylabel("$p_w/p_{\infty}$",fontdict={'size':24})
-    ax2.tick_params(axis='y',labelsize=15)
+    ax2.set_ylabel("$p_w/p_{\infty}$",fontdict={'size':40})
+    ax2.tick_params(axis='y',labelsize=32)
     
-    ax2.set_xlim([-20.0,15.0])
+    ax2.set_xlim([-20.0,12.0])
     #ax.set_ylim([0.3,0.85])
 
-    ax2.legend(prop={'size':15})
+    ax2.legend(prop={'size':28})
     
     ax2.grid()
 
