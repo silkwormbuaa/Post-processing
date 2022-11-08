@@ -41,20 +41,43 @@ d0 = PlotDataframe(data0)
 
 fig, ax = plt.subplots(figsize=[10,8.5], constrained_layout=True)
     
-ax.plot(d0.df['(x-x_imp)/δ'], d0.df['<p`>_'],
-            'gray', label=r'$smooth$', ls='--')
+ax.plot( d0.df['(x-x_imp)/δ'], 
+         d0.df['<p`>_'],
+         'gray', 
+         label=r'$smooth$', 
+         ls   ='--')
 
-ax.plot(d1.df['(x-x_imp)/δ'], d1.df['<p`>_'],
-        'green',   label=r'$D=2.0\delta_0$', ls='-')
+ax.plot( d1.df['(x-x_imp)/δ'], 
+         d1.df['<p`>_'],
+         'green',
+         label=r'$D=2.0\delta_0$', 
+         ls='-',
+         marker = 's',
+         markevery = 30)
 
-ax.plot(d2.df['(x-x_imp)/δ'], d2.df['<p`>_'],
-        'blue',  label=r'$D=1.0\delta_0$', ls='-')
+ax.plot( d2.df['(x-x_imp)/δ'], 
+         d2.df['<p`>_'],
+         'blue',  
+         label=r'$D=1.0\delta_0$', 
+         ls='-',
+         marker = 's',
+         markevery = 30)
 
-ax.plot(d3.df['(x-x_imp)/δ'], d3.df['<p`>_'],
-        'black', label=r'$D=0.5\delta_0$', ls='-')
+ax.plot( d3.df['(x-x_imp)/δ'], 
+         d3.df['<p`>_'],
+         'black', 
+         label=r'$D=0.5\delta_0$', 
+         ls='-',
+         marker = 's',
+         markevery = 30)
 
-ax.plot(d4.df['(x-x_imp)/δ'], d4.df['<p`>_'],
-        'red',   label=r'$D=0.25\delta_0$', ls='-')
+ax.plot( d4.df['(x-x_imp)/δ'], 
+         d4.df['<p`>_'],
+         'red',
+         label=r'$D=0.25\delta_0$', 
+         ls='-',
+         marker = 's',
+         markevery = 30)
 
 ax.minorticks_on()
 
@@ -72,5 +95,5 @@ ax.legend(prop={'size':28})
 ax.grid()
 
 os.chdir(OutPath)
-plt.savefig("pressure_fluctuation_mean")
+plt.savefig("pressure_fluctuation_mean_marker")
 plt.show()
