@@ -53,7 +53,7 @@ ax.plot( d1.df['(x-x_imp)/δ'],
          label=r'$D=2.0\delta_0$', 
          ls='-',
          marker = 's',
-         markevery = 30)
+         markevery = 28)
 
 ax.plot( d2.df['(x-x_imp)/δ'], 
          d2.df['<p`>_'],
@@ -61,7 +61,7 @@ ax.plot( d2.df['(x-x_imp)/δ'],
          label=r'$D=1.0\delta_0$', 
          ls='-',
          marker = 's',
-         markevery = 30)
+         markevery = 29)
 
 ax.plot( d3.df['(x-x_imp)/δ'], 
          d3.df['<p`>_'],
