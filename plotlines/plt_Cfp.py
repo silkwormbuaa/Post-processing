@@ -102,36 +102,40 @@ if plt_Cf is True:
     
     fig1, ax1 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
     
-    ax1.plot( d0_f.df['x_s'], 
-             d0_f.df['Cf']*1000,
-             'gray', 
-             label = r'$smooth$', 
-             ls    = '--')
-    
     ax1.plot( d1.df['x_s'],
-             d1.df['Cf']*1000,
-             'green',
-             label  = r'$D=2.0\delta_0$',
-             marker = "s")
+              d1.df['Cf']*1000,
+              'green',
+              label  = r'$D=2.0\delta_0$',
+              marker = "s",
+              markersize = 10)
     
     ax1.plot( d2.df['x_s'],
-             d2.df['Cf']*1000,
-             'blue',
-             label  = r'$D=1.0\delta_0$',
-             marker = "s")
+              d2.df['Cf']*1000,
+              'blue',
+              label  = r'$D=1.0\delta_0$',
+              marker = "o",
+              markersize = 10)
     
     ax1.plot( d3.df['x_s'],
-             d3.df['Cf']*1000,
-             'black',
-             label  = r'$D=0.5\delta_0$',
-             marker = "s")
+              d3.df['Cf']*1000,
+              'black',
+              label  = r'$D=0.5\delta_0$',
+              marker = "v",
+              markersize = 10)
     
     ax1.plot( d4.df['x_s'],
-             d4.df['Cf']*1000,
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             marker = "s")
-    
+              d4.df['Cf']*1000,
+              'red',
+              label  = r'$D=0.25\delta_0$', 
+              marker = "D",
+              markersize = 10)
+
+    ax1.plot( d0_f.df['x_s'], 
+              d0_f.df['Cf']*1000,
+              'gray', 
+              label = r'$smooth$', 
+              ls    = '--')
+        
     ax1.minorticks_on()
 
     ax1.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40}) 
@@ -143,7 +147,7 @@ if plt_Cf is True:
     ax1.set_xlim([-20.0,12.0])
     ax1.set_ylim([-1.5,4.5])
 
-    ax1.legend(prop={'size':28},loc='best')
+#    ax1.legend(prop={'size':28},loc='best')
     
     ax1.grid()
 
@@ -169,48 +173,52 @@ if plt_Cp is True:
     
     fig2, ax2 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
 
-    ax2.plot( d0_p.df['x_s'], 
-             d0_p.df['Cp'],
-             'gray', 
-             label = r'$smooth$', 
-             ls    = '--')
-    
     ax2.plot( d1.df['x_s'],
-             d1.df['Cp'],
-             'green',
-             label  = r'$D=2.0\delta_0$',
-             marker = "s")
+              d1.df['Cp'],
+              'green',
+              label  = r'$D=2.0\delta_0$',
+              marker = "s",
+              markersize = 10)
     
     ax2.plot( d2.df['x_s'],
-             d2.df['Cp'],
-             'blue',
-             label  = r'$D=1.0\delta_0$',
-             marker = "s")
+              d2.df['Cp'],
+              'blue',
+              label  = r'$D=1.0\delta_0$',
+              marker = "o",
+              markersize = 10)
     
     ax2.plot( d3.df['x_s'],
-             d3.df['Cp'],
-             'black',
-             label  = r'$D=0.5\delta_0$',
-             marker = "s")
+              d3.df['Cp'],
+              'black',
+              label  = r'$D=0.5\delta_0$',
+              marker = "v",
+              markersize = 10 )
     
     ax2.plot( d4.df['x_s'],
-             d4.df['Cp'],
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             marker = "s")
-    
+              d4.df['Cp'],
+              'red',
+              label  = r'$D=0.25\delta_0$', 
+              marker = "D",
+              markersize = 10)
+
+    ax2.plot( d0_p.df['x_s'], 
+              d0_p.df['Cp'],
+              'gray', 
+              label = r'$smooth$', 
+              ls    = '--')
+
     ax2.minorticks_on()
 
     ax2.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40})
     ax2.tick_params(axis='x',labelsize=32)
     
-    ax2.set_ylabel("$p_w/p_{\infty}$",fontdict={'size':40})
+    ax2.set_ylabel("$<p_w>/p_{\infty}$",fontdict={'size':40})
     ax2.tick_params(axis='y',labelsize=32)
     
     ax2.set_xlim([-20.0,12.0])
     #ax.set_ylim([0.3,0.85])
 
-    ax2.legend(prop={'size':28})
+#    ax2.legend(prop={'size':28})
     
     ax2.grid()
 

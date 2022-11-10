@@ -53,43 +53,48 @@ ax.plot( d1.df['(x-x_imp)/δ'],
          label=r'$D=2.0\delta_0$', 
          ls='-',
          marker = 's',
-         markevery = 28)
+         markevery = 28,
+         markersize = 10)
 
 ax.plot( d2.df['(x-x_imp)/δ'], 
          d2.df['<p`>_'],
          'blue',  
          label=r'$D=1.0\delta_0$', 
          ls='-',
-         marker = 's',
-         markevery = 29)
+         marker = 'o',
+         markevery = 29,
+         markersize = 10)
 
 ax.plot( d3.df['(x-x_imp)/δ'], 
          d3.df['<p`>_'],
          'black', 
          label=r'$D=0.5\delta_0$', 
          ls='-',
-         marker = 's',
-         markevery = 30)
+         marker = 'v',
+         markevery = 30,
+         markersize = 10)
 
 ax.plot( d4.df['(x-x_imp)/δ'], 
          d4.df['<p`>_'],
          'red',
          label=r'$D=0.25\delta_0$', 
          ls='-',
-         marker = 's',
-         markevery = 30)
+         marker = 'D',
+         markevery = 30,
+         markersize = 10)
 
 ax.minorticks_on()
 
 ax.set_xlabel("$(x-x_{imp})/δ_0$",fontdict={'size':40})  
 ax.tick_params(axis='x',labelsize=32)
 
-ax.set_ylabel('$p\'/p_{\infty}$',fontdict={'size':40})
+ax.set_ylabel(r"$\sqrt{<p'p'>}/p_{\infty}$",
+              fontdict={'size':40})
 ax.tick_params(axis='y',labelsize=32)
 ax.set_xlim([-20,10])
 
 
-ax.legend(prop={'size':28}) 
+#ax.legend(prop={'size':28}) 
 
 
 ax.grid()
