@@ -15,7 +15,7 @@ import numpy             as     np
 
 import pandas            as     pd
 
-import scipy             as     sp
+from   scipy             import signal
 
 
 # ----------------------------------------------------------------------
@@ -119,24 +119,20 @@ class ProbeData:
         self.df = self.df[cut_index:]
         
 #       drop data to meet Welch's method(has to be multiple of segments)        
+#
+#        nr_drop = len(self.df)%Nseg
+#        
+#        print("now drop last %d lines data to meet Welch's method."%nr_drop)
+#        
+#        self.df = self.df[0:-nr_drop]
+#              
+#        self.df = self.df.reset_index()
         
-        nr_drop = len(self.df)%Nseg
-        
-        print("now drop last %d lines data to meet Welch's method."%nr_drop)
-        
-        self.df = self.df[0:-nr_drop]
-              
-        self.df = self.df.reset_index()
-
 #       get mean time interval and frequency
 
-        intervallist = list()
+        timespan = timelist[-1] - timelist[0] 
         
-        for i in range( 1, len(timelist) ):
-            
-            intervallist.append( timelist[i] - timelist[i-1] )
-            
-        self.meaninterval = round( np.mean(intervallist), 7 )
+        self.meaninterval = round( timespan/(len(timelist)-1), 7 )
         
         self.frequency = 1.0/self.meaninterval
         
@@ -149,7 +145,6 @@ class ProbeData:
         pprime = np.subtract( p, self.meanp )
         
         self.df['pprime'] = pprime
-
 
 
 # ----------------------------------------------------------------------
@@ -168,9 +163,19 @@ class ProbeData:
 #
 # ----------------------------------------------------------------------
 
-    def psd( self ):
+    def psd( self, n_seg, p_overlap ):
         
         pprime = np.array( self.df['pprime'] )
+        
+        self.nperseg = int( len(pprime)//(1+(n_seg-1)*(1-p_overlap)) )
+        
+        self.noverlap = int( self.nperseg*p_overlap )
+                
+        self.freq, self.pprime_psd = signal.welch(
+            pprime,       fs=self.frequency,  window='hann', 
+            nperseg=self.nperseg, noverlap=self.noverlap )
+        
+        
         
         pass
         

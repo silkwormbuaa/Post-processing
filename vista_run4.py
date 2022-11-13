@@ -36,4 +36,19 @@ with timer("clean data"):
     print(probe1.frequency)
     
     print(probe1.meanp)
+    
+    print(probe1.meaninterval)
 
+    print("=============")
+    
+with timer('psd'):
+    
+    probe1.psd( 8, 0.5 )
+    
+    print(probe1.nperseg)
+    
+    print(probe1.noverlap)
+    
+    print(len(probe1.freq))
+    
+    print(len(probe1.pprime_psd))
