@@ -17,6 +17,10 @@ import pandas            as     pd
 
 from   scipy             import signal
 
+import matplotlib.pyplot as     plt
+
+import matplotlib
+
 
 # ----------------------------------------------------------------------
 # >>> Class - Probe Data                                           ( 0 )
@@ -80,7 +84,13 @@ class ProbeData:
   
             self.df = pd.DataFrame( data=row, columns=self.var_list )
 
-
+        # set case related constant parameters
+        # - boundary layer thickness; freestream velocity
+        
+        self.delta_0 = 5.2
+        self.U_inf   = 507
+        
+        
 # ----------------------------------------------------------------------
 # >>>  Clean Data                                              ( 1 )
 # ----------------------------------------------------------------------
@@ -134,7 +144,7 @@ class ProbeData:
         
         self.meaninterval = round( timespan/(len(timelist)-1), 7 )
         
-        self.frequency = 1.0/self.meaninterval
+        self.freq_sample = 1.0/self.meaninterval
         
 #       get mean pressure and p'
 
@@ -172,12 +182,55 @@ class ProbeData:
         self.noverlap = int( self.nperseg*p_overlap )
                 
         self.freq, self.pprime_psd = signal.welch(
-            pprime,       fs=self.frequency,  window='hann', 
-            nperseg=self.nperseg, noverlap=self.noverlap )
+            pprime,                fs=self.freq_sample,  
+            window='hann',         nperseg=self.nperseg, 
+            noverlap=self.noverlap,scaling='density')
+        
+        self.mean_power = np.sum(self.pprime_psd) * self.freq[1]
+        
+        self.pprime_fwpsd = np.multiply(self.freq,self.pprime_psd) 
+        
+        self.nd_pprime_fwpsd = self.pprime_fwpsd / self.mean_power
+        
+        self.St = self.freq * self.delta_0 / self.U_inf
         
         
+ # ----------------------------------------------------------------------
+ # >>> Plot psd                                                ( 3 )
+ # ----------------------------------------------------------------------
+ #
+ # Wencan Wu : w.wu-3@tudelft.nl
+ #
+ # History
+ #
+ # 2022/11/13  - created
+ #
+ # Desc
+ #
+ # ----------------------------------------------------------------------
         
-        pass
+    def plot_psd( self ):
+        
+        fig, ax = plt.subplots( figsize=[10,8], constrained_layout=True )
+        
+#        ax.plot( self.St,
+#                 self.nd_pprime_fwpsd )
+        
+        ax.minorticks_on()
+        
+#        ax.set_xscale( 'symlog', linthresh = 1)
+        ax.semilogx(self.St, self.nd_pprime_fwpsd,'k', linewidth=1)
+        
+        ax.set_xlim( [0.01,10] )
+        
+#        x_minor = matplotlib.ticker.LogLocator( 
+#                            base = 10.0, subs = np.arange(0.001,10.0) )
+#        
+#        ax.xaxis.set_minor_locator( x_minor )
+        
+        plt.show()
+        
+        
         
         
         

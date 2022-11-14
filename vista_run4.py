@@ -30,14 +30,6 @@ with timer("reading one probe"):
 with timer("clean data"):
     
     probe1.cleandata(starttime=20,Nseg=8)
-    
-    print(probe1.df)
-    
-    print(probe1.frequency)
-    
-    print(probe1.meanp)
-    
-    print(probe1.meaninterval)
 
     print("=============")
     
@@ -52,3 +44,17 @@ with timer('psd'):
     print(len(probe1.freq))
     
     print(len(probe1.pprime_psd))
+    
+    os.chdir(os.pardir)
+    with open("psd.dat",'w') as f:
+        for i in range(len(probe1.freq)):
+            f.write(str('{:<17.8e}'.format(probe1.freq[i])))
+            f.write(str('{:<17.8e}'.format(probe1.pprime_psd[i])))
+            f.write(str('{:<17.8e}'.format(probe1.St[i])))
+            f.write(str('{:<17.8e}'.format(probe1.nd_pprime_fwpsd[i])))
+            f.write('\n')
+
+with timer("plot psd"):
+    
+    probe1.plot_psd()
+    
