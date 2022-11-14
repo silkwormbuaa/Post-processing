@@ -39,6 +39,8 @@ def get_filelist( FoldPath ):
             # Filelist need to contain the whole path
             
             FileList.append( os.path.join(home,filename) )
+    
+    FileList.sort()
             
     return FileList
 
