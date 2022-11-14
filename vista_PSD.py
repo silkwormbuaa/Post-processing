@@ -42,6 +42,8 @@ class ProbeData:
     
     def __init__( self, datafile ):
         
+        self.probe_index = int( datafile[-9:-4] )
+        
         self.var_list = [
                           'step',
                           'time',
@@ -67,11 +69,11 @@ class ProbeData:
             
             row = None
             
-            for i in range(1,len(lines)):
+            for i in range( 1, len(lines) ):
                 
                 cleanl = lines[i].strip().split()
                 
-                cleanl = [float(item) for item in cleanl]
+                cleanl = [ float(item) for item in cleanl ]
 
                 if row is None: 
                     
@@ -110,7 +112,7 @@ class ProbeData:
 #
 # ----------------------------------------------------------------------
 
-    def cleandata( self, starttime, Nseg=None):
+    def cleandata( self, starttime ):
 
 #        - this line can also work, but slower
 #        self.df = self.df.drop(self.df[self.df['time']<starttime].index)
@@ -196,7 +198,7 @@ class ProbeData:
         
         
  # ----------------------------------------------------------------------
- # >>> Plot psd                                                ( 3 )
+ # >>> Plot PSD                                                ( 3 )
  # ----------------------------------------------------------------------
  #
  # Wencan Wu : w.wu-3@tudelft.nl
@@ -230,6 +232,39 @@ class ProbeData:
         
         plt.show()
         
+
+# ----------------------------------------------------------------------
+# >>> Write PSD                                                ( 4 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/11/14  - created
+#
+# Desc
+#
+# - write PSD data into a file 
+# - with header of location
+#
+# ----------------------------------------------------------------------
+
+    def write_psd( self ):
+        
+        outfile = 'psd_%05d.dat'%self.probe_index
+        
+        with open( outfile, 'w') as f:
+            
+            f.write( 'x=%15.6e  y=%15.6e  z=%15.6e'%(self.x,self.y,self.z) )
+            f.write('\n')
+
+            for i in range(len(self.freq)):
+                f.write(str('{:<17.8e}'.format(self.freq[i])))
+                f.write(str('{:<17.8e}'.format(self.pprime_psd[i])))
+                f.write(str('{:<17.8e}'.format(self.St[i])))
+                f.write(str('{:<17.8e}'.format(self.nd_pprime_fwpsd[i])))
+                f.write('\n')
         
         
         

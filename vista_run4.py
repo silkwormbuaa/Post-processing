@@ -15,46 +15,51 @@ from   vista_PSD         import *
 
 from   timer             import timer
 
-folderpath = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/'
+from   vista_tools       import *
 
-probefile1 = 'probe_00001.dat'
+
+folderpath = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/probe_x'
+
+outpath = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/psd_x'
 
 os.chdir(folderpath)
 
+filelist = get_filelist( folderpath )
+
+n_probe = len(filelist)
+
+print( "we have got %5d probes data"%( n_probe ) )
+
+os.chdir(outpath)
+
+with timer('PSD for one case'):
+    
+    for i, probefile in enumerate(filelist):
+        
+        with timer('%.0f%% Get psd for %s probe'%(float(i)/n_probe,probefile[-9:-4])):
+            
+            probe = ProbeData( probefile )
+            
+            probe.cleandata( starttime=20 )
+            
+            probe.psd( 8, 0.5 )
+
+            probe.write_psd()
+        
+'''
 with timer("reading one probe"):
     
-    probe1 = ProbeData(probefile1)
-
-#    print(probe1.df)
+    probe1 = ProbeData( filelist[0] )
     
 with timer("clean data"):
     
-    probe1.cleandata(starttime=20,Nseg=8)
-
-    print("=============")
+    probe1.cleandata(starttime=20)
     
 with timer('psd'):
     
     probe1.psd( 8, 0.5 )
     
-    print(probe1.nperseg)
-    
-    print(probe1.noverlap)
-    
-    print(len(probe1.freq))
-    
-    print(len(probe1.pprime_psd))
-    
     os.chdir(os.pardir)
-    with open("psd.dat",'w') as f:
-        for i in range(len(probe1.freq)):
-            f.write(str('{:<17.8e}'.format(probe1.freq[i])))
-            f.write(str('{:<17.8e}'.format(probe1.pprime_psd[i])))
-            f.write(str('{:<17.8e}'.format(probe1.St[i])))
-            f.write(str('{:<17.8e}'.format(probe1.nd_pprime_fwpsd[i])))
-            f.write('\n')
-
-with timer("plot psd"):
     
-    probe1.plot_psd()
-    
+    probe1.write_psd()
+'''
