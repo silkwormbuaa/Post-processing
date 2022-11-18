@@ -98,12 +98,6 @@ x_reatt = [2.468831, 2.468831]
 y_reatt = [0.001,100]
 
 
-top = cm.get_cmap('Blues_r', 128) # r means reversed version
-bottom = cm.get_cmap('Oranges', 128)  # combine it all
-newcolors = np.vstack((top(np.linspace(0, 1, 128)),
-                       bottom(np.linspace(0, 1, 128))))# create a new colormaps with a name of OrangeBlue
-orange_blue = ListedColormap(newcolors, name='OrangeBlue')
-
 fig, ax = plt.subplots( figsize=[9,4],
                        constrained_layout=True)
 

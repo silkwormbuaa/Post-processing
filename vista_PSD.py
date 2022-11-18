@@ -214,9 +214,11 @@ class ProbeData:
  #
  # ----------------------------------------------------------------------
         
-    def plot_psd( self ):
+    def plot_psd( self, Lsep ):
         
         fig, ax = plt.subplots( figsize=[10,8], constrained_layout=True )
+        
+        St_Lsep = self.St * Lsep
         
 #        ax.plot( self.St,
 #                 self.nd_pprime_fwpsd )
@@ -224,9 +226,10 @@ class ProbeData:
         ax.minorticks_on()
         
 #        ax.set_xscale( 'symlog', linthresh = 1)
-        ax.semilogx(self.St, self.nd_pprime_fwpsd,'k', linewidth=1)
+
+        ax.semilogx(St_Lsep, self.nd_pprime_fwpsd,'k', linewidth=1)
         
-        ax.set_xlim( [0.01,10] )
+        ax.set_xlim( [0.01,100] )
         
 #        x_minor = matplotlib.ticker.LogLocator( 
 #                            base = 10.0, subs = np.arange(0.001,10.0) )

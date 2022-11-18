@@ -30,7 +30,6 @@ n_probe = len(filelist)
 
 print( "we have got %5d probes data"%( n_probe ) )
 
-os.chdir(outpath)
 
 #with timer('PSD for one case'):
 #    
@@ -45,11 +44,16 @@ os.chdir(outpath)
 #            probe.psd( 8, 0.5 )
 #
 #            probe.write_psd()
-        
+
+#probefile = 'probe_00142.dat'
+#Lsep      = 13.12627403
+
+probefile = 'probe_00135.dat'
+Lsep      = 11.340638
 
 with timer("reading one probe"):
     
-    probe1 = ProbeData( filelist[0] )
+    probe1 = ProbeData( probefile )
     
 with timer("clean data"):
     
@@ -57,13 +61,17 @@ with timer("clean data"):
     
 with timer('psd'):
     
+    os.chdir(os.pardir)
+    
     probe1.psd( 8, 0.5 )
     
-    print(probe1.nperseg)
+    probe1.plot_psd( Lsep )
     
-    print(probe1.df['pprime'])
+#    print(probe1.nperseg)
     
-    os.chdir(os.pardir)
+#    print(probe1.df['pprime'])
+    
+    
     
 #    probe1.write_psd()
 
