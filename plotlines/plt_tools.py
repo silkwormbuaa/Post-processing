@@ -8,6 +8,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Functions which will facilitate plotting 
 '''
+import re
 
 import numpy             as     np
 
@@ -16,7 +17,7 @@ import pandas            as     pd
 import matplotlib.pyplot as     plt
 
 # ----------------------------------------------------------------------
-# >>> CLASS - DATAFRAME FOR PLOTTING                               ( 0 )
+# >>> CLASS - DATAFRAME FOR PLOTTING                            ( 1-0 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -33,7 +34,7 @@ import matplotlib.pyplot as     plt
 class PlotDataframe():
 
 # ----------------------------------------------------------------------
-# >>> Initialization by reading in data                           ( 1 )
+# >>> Initialization by reading in data                         ( 1-1 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -80,7 +81,7 @@ class PlotDataframe():
 
 
 # ----------------------------------------------------------------------
-# >>> FETCH DATA FOR X,Y AXIS                                     ( 2 )
+# >>> FETCH DATA FOR X,Y AXIS                                  ( 1-2 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -103,7 +104,7 @@ class PlotDataframe():
     
 
 # ----------------------------------------------------------------------
-# >>> READ NORMALIZATION VALUES                                   ( 3 )
+# >>> READ NORMALIZATION VALUES                                ( 1-3 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -136,7 +137,7 @@ class PlotDataframe():
 
 
 # ----------------------------------------------------------------------
-# >>> NORMALIZE VALUES                                            ( 4 )
+# >>> NORMALIZE VALUES                                         ( 1-4 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -185,7 +186,7 @@ class PlotDataframe():
 
 
 # ----------------------------------------------------------------------
-# >>> SHIFT Y COORDINATE                                          ( 4 )
+# >>> SHIFT Y COORDINATE                                       ( 1-5 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -210,7 +211,7 @@ class PlotDataframe():
         
 
 # ----------------------------------------------------------------------
-# >>> SHIFT X COORDINATE                                         ( 5 )
+# >>> SHIFT X COORDINATE                                       ( 1-6 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -236,5 +237,70 @@ class PlotDataframe():
         if delta is not None:
             
             self.df['x_s'] = np.divide( x_s, delta)
+        
+# ----------------------------------------------------------------------
+# >>> Read psd data                                          ( 2-1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/11/14  - created
+#
+# Desc
+#
+# - reading psd_00xxx.dat file
+#
+# ----------------------------------------------------------------------
+
+def read_psd( filename ):
+    
+    with open( filename, 'r' ) as f:
+        
+        lines = f.readlines()
+        
+        # regular expression to read probe location
+        
+        xp = float( re.search(r'x=(.*?) y',lines[0]).group(1) )
+        yp = float( re.search(r'y=(.*?) z',lines[0]).group(1) )
+        zp = float( re.search(r'z=(.*?)(?:\n)',lines[0]).group(1) )
+        
+        # var_list 
+        
+        var_list = [
+            'freq',
+            'pprime_fwpsd',
+            'St',
+            'nd_pprime_fwpsd'
+        ]
+        
+        # read in data body
+        
+        row = None
+        
+        for i in range( 1, len(lines) ):
+            
+            cleanl = lines[i].strip().split()
+            
+            cleanl = [ float(item) for item in cleanl ]
+            
+            if row is None:
+                
+                row = list()
+                row.append( cleanl )
+                
+            else:
+                
+                row.append( cleanl )
+        
+    df = pd.DataFrame( data=row, columns=var_list )
+     
+    St = np.array( df['St'] ).tolist()
+    nd_fwpsd = np.array( df['nd_pprime_fwpsd'] ).tolist()
+    x = (np.array([xp] * len(St))-50.4)/5.2
+    
+    return ( x, St, nd_fwpsd )
+        
         
         
