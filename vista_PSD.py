@@ -91,6 +91,8 @@ class ProbeData:
         
         self.delta_0 = 5.2
         self.U_inf   = 507
+#        self.Lsep    = 9.805522
+        
         
         
 # ----------------------------------------------------------------------
@@ -188,7 +190,7 @@ class ProbeData:
             window='hann',         nperseg=self.nperseg, 
             noverlap=self.noverlap,scaling='density')
         
-        self.mean_power = np.sum(self.pprime_psd) * self.freq[1]
+        self.mean_power = np.sum(self.pprime_psd * self.freq[1])
         
         self.pprime_fwpsd = np.multiply(self.freq,self.pprime_psd) 
         
@@ -196,6 +198,7 @@ class ProbeData:
         
         self.St = self.freq * self.delta_0 / self.U_inf
         
+#        self.St_Lsep = self.freq * self.Lsep / self.U_inf
         
  # ----------------------------------------------------------------------
  # >>> Plot PSD                                                ( 3 )
@@ -261,7 +264,7 @@ class ProbeData:
 
             for i in range(len(self.freq)):
                 f.write(str('{:<17.8e}'.format(self.freq[i])))
-                f.write(str('{:<17.8e}'.format(self.pprime_psd[i])))
+                f.write(str('{:<17.8e}'.format(self.pprime_fwpsd[i])))
                 f.write(str('{:<17.8e}'.format(self.St[i])))
                 f.write(str('{:<17.8e}'.format(self.nd_pprime_fwpsd[i])))
                 f.write('\n')

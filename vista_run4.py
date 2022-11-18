@@ -32,21 +32,21 @@ print( "we have got %5d probes data"%( n_probe ) )
 
 os.chdir(outpath)
 
-with timer('PSD for one case'):
-    
-    for i, probefile in enumerate(filelist):
+#with timer('PSD for one case'):
+#    
+#    for i, probefile in enumerate(filelist):
+#        
+#        with timer('%5.3f%% Get psd for %s probe'%(float(i)/n_probe*100,probefile[-9:-4])):
+#            
+#            probe = ProbeData( probefile )
+#            
+#            probe.cleandata( starttime=20 )
+#            
+#            probe.psd( 8, 0.5 )
+#
+#            probe.write_psd()
         
-        with timer('%.0f%% Get psd for %s probe'%(float(i)/n_probe,probefile[-9:-4])):
-            
-            probe = ProbeData( probefile )
-            
-            probe.cleandata( starttime=20 )
-            
-            probe.psd( 8, 0.5 )
 
-            probe.write_psd()
-        
-'''
 with timer("reading one probe"):
     
     probe1 = ProbeData( filelist[0] )
@@ -59,7 +59,11 @@ with timer('psd'):
     
     probe1.psd( 8, 0.5 )
     
+    print(probe1.nperseg)
+    
+    print(probe1.df['pprime'])
+    
     os.chdir(os.pardir)
     
-    probe1.write_psd()
-'''
+#    probe1.write_psd()
+
