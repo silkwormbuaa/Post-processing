@@ -17,11 +17,12 @@ import numpy             as      np
 
 import pandas            as      pd
 
-from   vista_tools       import  *
+from   utils.timer       import  timer 
 
-from   vista_math        import  *
+from   utils.tools       import  *
 
-from   timer             import  timer 
+from   math_opr          import  *
+
 
 
 # ----------------------------------------------------------------------

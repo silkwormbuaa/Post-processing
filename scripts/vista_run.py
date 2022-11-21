@@ -9,11 +9,16 @@
 @Desc    :   executive script
 '''
 
-from vista_tools         import *
+import sys
 
-from vista_pytecio       import *
+sys.path.append('..')
 
-from timer               import timer
+from utils.tools         import *
+
+from utils.timer         import timer
+
+from vista.pytecio       import *
+
 
 
 folderpath = "/home/wencanwu/my_simulation/temp/221014_lowRe/TP_stat"

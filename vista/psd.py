@@ -19,8 +19,6 @@ from   scipy             import signal
 
 import matplotlib.pyplot as     plt
 
-import matplotlib
-
 
 # ----------------------------------------------------------------------
 # >>> Class - Probe Data                                           ( 0 )

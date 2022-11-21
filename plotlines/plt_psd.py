@@ -25,11 +25,11 @@ from   matplotlib.colors import ListedColormap,LinearSegmentedColormap
 
 from   plt_tools         import *
 
-sys.path.append("..") 
+# sys.path.append("..") 
 
-from   vista_tools       import *
+from   utils.tools       import *
 
-from   timer             import timer
+from   utils.timer       import timer
 
 plt.rcParams.update({'font.size': 16})
 

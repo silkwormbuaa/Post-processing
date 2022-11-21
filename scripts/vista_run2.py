@@ -9,15 +9,21 @@
 @Desc    :   script doing spanwise periodic averaging
 '''
 
+import sys
+
+sys.path.append('..')
+
 import gc
 
-from vista_tools         import *
+from   utils.tools         import *
 
-from vista_pytecio       import *
+from   utils.timer         import timer
 
-from plt2pandas          import *
+from   vista.pytecio       import *
 
-from timer               import timer
+from   plt2pandas          import *
+
+
 
 
 folder = "/home/wencanwu/my_simulation/temp/221014_lowRe/TP_stat"

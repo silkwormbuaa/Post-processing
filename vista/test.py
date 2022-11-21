@@ -14,13 +14,12 @@ import tecplot           as      tp
 
 import numpy             as      np 
 
-import pandas            as      pd
+from   utils.timer       import  timer 
 
-from   vista_tools       import  *
+from   vista.pytecio     import  *
 
-from   vista_pytecio     import  *
+from   utils.tools       import  *
 
-from   timer             import  timer 
 
 folder = "/home/wencanwu/my_simulation/temp/220927_lowRe/TP_stat"
 
