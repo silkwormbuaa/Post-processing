@@ -20,11 +20,11 @@ from plt2pandas          import *
 from timer               import timer
 
 
-folder = "/home/wencanwu/my_simulation/temp/221014_lowRe/TP_stat"
+folder = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 
-outfolder = "/home/wencanwu/my_simulation/temp/221014_lowRe/stat_per_ave/"
+outfolder = "/home/wencanwu/my_simulation/temp/221125_lowRe/stat_per_ave/"
 
-listfile = "/home/wencanwu/my_simulation/temp/221014_lowRe/zonelist_sorted.dat"
+listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
@@ -53,7 +53,7 @@ with timer("whole processing "):
         
         df = spanwise_periodic_ave(dataset,
                                    zonegrps[i],
-                                   10.4,
+                                   0.65,
                                    10.4,
                                    var_list)
         

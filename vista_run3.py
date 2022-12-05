@@ -17,9 +17,9 @@ from vista_pytecio       import *
 from timer               import timer
 
 
-folderpath = "/home/wencanwu/my_simulation/temp/221014_lowRe/TP_stat"
+folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 
-listfile = "/home/wencanwu/my_simulation/temp/221014_lowRe/zonelist_sorted.dat"
+listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
@@ -27,11 +27,11 @@ with timer("whole processing "):
 
     zonegrps = read_zonelist( listfile )
     
-    segment = [-0.494, -110.0, 115.0]
+    segment = [-0.260, -110.0, 115.0]
     
     var_list = ['x','y','z', 'walldist', '<p`p`>']
     
     get_xline( folderpath, zonegrps,
                segment, 
-               "streamwise_line_1014.dat",
+               "streamwise_line_1125.dat",
                var_list             )

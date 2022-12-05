@@ -16,9 +16,9 @@ from vista_pytecio       import *
 from timer               import timer
 
 
-folderpath = "/home/wencanwu/my_simulation/temp/221014_lowRe/TP_stat"
+folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 
-listfile = "/home/wencanwu/my_simulation/temp/221014_lowRe/zonelist_sorted.dat"
+listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
 
 with timer("whole processing "):
     

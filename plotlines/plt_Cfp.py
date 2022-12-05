@@ -34,7 +34,7 @@ from   plt_tools         import *
 # ----------------------------------------------------------------------
 
 
-FoldPath = '/home/wencanwu/my_simulation/temp/221014_lowRe/linedata'
+FoldPath = '/home/wencanwu/my_simulation/temp/221125_lowRe/linedata'
 
 data1    = "Cf_points_1014.dat"
 
@@ -43,6 +43,8 @@ data2    = "Cf_points_0926.dat"
 data3    = "Cf_points_0825.dat"
 
 data4    = "Cf_points_0927.dat"
+
+data5    = "Cf_points_1125.dat"
 
 data0_f  = "x_cf_STBLI_Wencan.dat"
 
@@ -74,6 +76,7 @@ d1   = PlotDataframe( data1 )
 d2   = PlotDataframe( data2 )
 d3   = PlotDataframe( data3 )
 d4   = PlotDataframe( data4 )
+d5   = PlotDataframe( data5 )
 d0_f = PlotDataframe( data0_f )
 d0_p = PlotDataframe( data0_p )
 
@@ -81,6 +84,7 @@ d1.shift_x( x_imp, delta )
 d2.shift_x( x_imp, delta )
 d3.shift_x( x_imp, delta )
 d4.shift_x( x_imp, delta )
+d5.shift_x( x_imp, delta )
 d0_f.shift_x( x_imp, delta )
 d0_p.shift_x( x_imp, delta )
 
@@ -129,6 +133,13 @@ if plt_Cf is True:
               label  = r'$D=0.25\delta_0$', 
               marker = "D",
               markersize = 10)
+    
+    ax1.plot( d5.df['x_s'],
+              d5.df['Cf']*1000,
+              'purple',
+              label  = r'$D=0.125\delta_0$', 
+              marker = "^",
+              markersize = 10)
 
     ax1.plot( d0_f.df['x_s'], 
               d0_f.df['Cf']*1000,
@@ -145,9 +156,9 @@ if plt_Cf is True:
     ax1.tick_params(axis='y',labelsize=32)
     
     ax1.set_xlim([-20.0,12.0])
-    ax1.set_ylim([-1.5,4.5])
+    ax1.set_ylim([-2.0,4.5])
 
-#    ax1.legend(prop={'size':28},loc='best')
+    ax1.legend(prop={'size':20},loc='best')
     
     ax1.grid()
 
@@ -201,6 +212,13 @@ if plt_Cp is True:
               marker = "D",
               markersize = 10)
 
+    ax2.plot( d5.df['x_s'],
+              d5.df['Cp'],
+              'purple',
+              label  = r'$D=0.125\delta_0$', 
+              marker = "^",
+              markersize = 10)
+
     ax2.plot( d0_p.df['x_s'], 
               d0_p.df['Cp'],
               'gray', 
@@ -218,7 +236,7 @@ if plt_Cp is True:
     ax2.set_xlim([-20.0,12.0])
     #ax.set_ylim([0.3,0.85])
 
-#    ax2.legend(prop={'size':28})
+    ax2.legend(prop={'size':20})
     
     ax2.grid()
 

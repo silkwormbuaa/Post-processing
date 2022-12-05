@@ -19,7 +19,7 @@ import matplotlib
 
 plt.rcParams.update({'font.size': 18})
 
-OutPath  = "/home/wencanwu/my_simulation/temp/221014_lowRe/DataPost/"
+OutPath  = "/home/wencanwu/my_simulation/temp/221125_lowRe/DataPost/"
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/line_p_prime.dat'
 
@@ -31,12 +31,15 @@ data3 = '/home/wencanwu/my_simulation/temp/220825_lowRe/streamwise_line_0825.dat
 
 data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/streamwise_line_0927.dat'
 
+data5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/streamwise_line_1125.dat'
+
 
 
 d1 = PlotDataframe(data1)
 d2 = PlotDataframe(data2)
 d3 = PlotDataframe(data3)
 d4 = PlotDataframe(data4)
+d5 = PlotDataframe(data5)
 d0 = PlotDataframe(data0)
 
 fig, ax = plt.subplots(figsize=[10,8.5], constrained_layout=True)
@@ -83,6 +86,15 @@ ax.plot( d4.df['(x-x_imp)/δ'],
          markevery = 30,
          markersize = 10)
 
+ax.plot( d5.df['(x-x_imp)/δ'], 
+         d5.df['<p`>_'],
+         'purple',
+         label=r'$D=0.125\delta_0$', 
+         ls='-',
+         marker = '^',
+         markevery = 30,
+         markersize = 10)
+
 ax.minorticks_on()
 
 ax.set_xlabel("$(x-x_{imp})/δ_0$",fontdict={'size':40})  
@@ -94,7 +106,7 @@ ax.tick_params(axis='y',labelsize=32)
 ax.set_xlim([-20,10])
 
 
-#ax.legend(prop={'size':28}) 
+ax.legend(prop={'size':20}) 
 
 
 ax.grid()
