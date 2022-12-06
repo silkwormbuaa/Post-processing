@@ -27,14 +27,17 @@ from   plt_tools         import *
 
 sys.path.append("..") 
 
-from   vista_tools       import *
+from   utils.tools       import get_filelist
 
-from   timer             import timer
+from   utils.timer       import timer
 
 plt.rcParams.update({'font.size': 16})
 
-folderpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/psd_x'
-outpath    = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes'
+folderpath = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
+outpath    = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes'
+
+#folderpath = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x'
+#outpath    = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes'
 
 filelist   = get_filelist(folderpath)
 
@@ -47,9 +50,10 @@ nd_fwpsd = None
 with timer("import psd data"):
     for i, psdfile in enumerate( filelist ):
         
-        print(i)
+        print(i, psdfile[-9:])
         with timer("read one psd file"):
             x_temp, St_temp, nd_fwpsd_temp = read_psd( psdfile )
+            print(len(St_temp))
         
         if i == 0:
             
@@ -81,6 +85,7 @@ with timer("import psd data"):
 #    y_sep = [0.001,100]
 #    x_reatt = [1.3595199, 1.3595199]
 #    y_reatt = [0.001,100]
+
 #    #0825
 #   St_Lsep = (np.array(St) * 11.340638).tolist()
 #   print(St_Lsep[0][:10])
@@ -88,21 +93,33 @@ with timer("import psd data"):
 #   y_sep = [0.001,100]
 #   x_reatt = [2.1609445, 2.1609445]
 #   y_reatt = [0.001,100]
+
 ##0927
-St_Lsep = (np.array(St) * 13.12627).tolist()
+# St_Lsep = (np.array(St) * 13.12627).tolist()
+# print(St_Lsep[0][:10])
+# print(St_Lsep[0][-10:])
+# x_sep = [-10.65744, -10.65744]
+# y_sep = [0.001,100]
+# x_reatt = [2.468831, 2.468831]
+# y_reatt = [0.001,100]
+
+##1125
+St_Lsep = (np.array(St) * 13.1286891).tolist()
 print(St_Lsep[0][:10])
 print(St_Lsep[0][-10:])
-x_sep = [-10.65744, -10.65744]
+x_sep = [-10.55859, -10.55859]
 y_sep = [0.001,100]
-x_reatt = [2.468831, 2.468831]
+x_reatt = [2.570097, 2.570097]
 y_reatt = [0.001,100]
 
-
-top = cm.get_cmap('Blues_r', 128) # r means reversed version
-bottom = cm.get_cmap('Oranges', 128)  # combine it all
-newcolors = np.vstack((top(np.linspace(0, 1, 128)),
-                       bottom(np.linspace(0, 1, 128))))# create a new colormaps with a name of OrangeBlue
-orange_blue = ListedColormap(newcolors, name='OrangeBlue')
+##flat_Luis
+#St_Lsep = (np.array(St) * 9.628729).tolist()
+#print(St_Lsep[0][:10])
+#print(St_Lsep[0][-10:])
+#x_sep = [-8.560779, -8.560779]
+#y_sep = [0.001, 100]
+#x_reatt = [1.06795, 1.06795]
+#y_reatt = [0.001, 100]
 
 fig, ax = plt.subplots( figsize=[9,4],
                        constrained_layout=True)
@@ -111,6 +128,10 @@ fwpsd = ax.pcolormesh(x,St_Lsep,nd_fwpsd,
                       shading='gouraud',
                       cmap='Greys',
                       vmin=0, vmax=0.3)
+
+#fwpsd = ax.contourf(x,St_Lsep,nd_fwpsd,np.linspace(0,0.3,num=31),
+#                      cmap='Greys',vmin=0, vmax=0.3)
+
 fig.colorbar( fwpsd )
 
 ax.plot(x_sep,y_sep,'r',linewidth=0.3)
@@ -126,6 +147,6 @@ ax.set_title( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$',
              size=18)
 
 os.chdir(os.pardir)
-plt.savefig('psd0927_Lsep_gray.png')
+plt.savefig('psd1125_Lsep_gray.png')
 #plt.show()
 

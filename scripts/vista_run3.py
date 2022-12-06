@@ -9,12 +9,16 @@
 @Desc    :   Script for getting a streamwise line data
 '''
 
+import sys
 
-from vista_tools         import *
+sys.path.append('..')
 
-from vista_pytecio       import *
+from utils.tools         import *
 
-from timer               import timer
+from utils.timer         import timer
+
+from vista.pytecio       import *
+
 
 
 folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
