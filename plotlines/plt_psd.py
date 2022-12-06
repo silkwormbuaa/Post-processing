@@ -147,6 +147,6 @@ ax.set_title( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$',
              size=18)
 
 os.chdir(os.pardir)
-plt.savefig('psd1125_Lsep_gray_notfinished.png')
+plt.savefig('psd1125_Lsep_gray.png')
 #plt.show()
 
