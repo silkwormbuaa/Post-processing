@@ -9,19 +9,18 @@
              to get profile data.   
 '''
 import os
-import sys
-import warnings
+
 import numpy             as np
+
 import tecplot           as tp
-from   timer             import timer
-from   ReadIn            import *
+
+from   utils.tools       import get_filelist
 
 #%% Get linear interpolation 
 def GetInterpo(x,x1,x2,y1,y2):
     slope = (y2-y1)/(x2-x1)
     y = slope * (x-x1) + y1
     return y
-
 
 #%% Get velocity gradient magnitude at the wall
 def GetDudy(u1,u2,y1,y2,opt=1):
@@ -31,7 +30,8 @@ def GetDudy(u1,u2,y1,y2,opt=1):
         temp1 = u1*y2*y2 - u2*y1*y1
         temp2 = y1*y2*(y2-y1)
         dudy = abs(temp1/temp2)
-    return dudy 
+    return dudy
+
 #%% Get the profile along a normal line
 def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
     # line_loc = [x1, y1,  x2, y2]
@@ -59,7 +59,7 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
             # store the index of intersected zones
             zone_intersect_i.append(i)  
     # have selected zones intersected | start to read in specific zones   
-    FileList = sorted(GetFileList(FoldPath))
+    FileList = sorted(get_filelist(FoldPath))
     dataset  = tp.data.load_tecplot_szl(FileList)
     zone     = dataset.zone
     for i in range(len(zone_intersect_i)):
@@ -261,7 +261,7 @@ def GetLineAve(line_loc,zonegrp,FoldPath,OutPath):
             # store the index of intersected zones
             zone_intersect_i.append(i)  
     # have selected zones intersected | start to read in specific zones   
-    FileList = sorted(GetFileList(FoldPath))
+    FileList = sorted(get_filelist(FoldPath))
     dataset  = tp.data.load_tecplot_szl(FileList)
     zone     = dataset.zone
     for i in range(len(zone_intersect_i)):

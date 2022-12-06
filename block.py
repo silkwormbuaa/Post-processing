@@ -11,14 +11,15 @@
 import os
 import tecplot           as     tp
 import numpy             as     np
-from   timer             import timer
+from   utils.timer       import timer
+from   utils.tools       import get_filelist
 from   ReadIn            import * 
 
 #%% Read the szplt files and manipulate data.
 def ReadInZone(FoldPath):
     with timer("Read in statistic data"):
         # get the all szplt file's path+name            
-        FileList = sorted(GetFileList(FoldPath))
+        FileList = sorted(get_filelist(FoldPath))
         print(np.size(FileList))
         # read in szplt file
         dataset  = tp.data.load_tecplot_szl(FileList)
@@ -28,7 +29,7 @@ def ReadInZone(FoldPath):
 FoldPath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/TP_stat"
 #zone = ReadInZone(FoldPath)
 #print(type(zone))
-FileList = sorted(GetFileList(FoldPath))
+FileList = sorted(get_filelist(FoldPath))
 dataset  = tp.data.load_tecplot_szl(FileList)
 zonegrp  = ReadZonegrp(FoldPath,'zonelist.dat')
 zone     = dataset.zone

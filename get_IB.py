@@ -9,8 +9,12 @@
 '''
 
 import os
-from   timer             import timer 
-from   IB_force          import *
+
+from   utils.timer       import timer 
+
+from   IB_force          import GetIBForce
+
+from   ReadIn            import ReadZonegrpWall
 
 #%% Get forces and pressure on IB
 ForceFolderPath = "/home/wencanwu/my_simulation/temp/221125_lowRe/forces_allblocks/"

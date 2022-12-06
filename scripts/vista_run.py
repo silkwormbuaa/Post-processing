@@ -6,14 +6,12 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   executive script
+@Desc    :   get sorted zonelist and mean_result_ib_superficial average
 '''
 
 import sys
 
 sys.path.append('..')
-
-from utils.tools         import *
 
 from utils.timer         import timer
 
@@ -26,6 +24,8 @@ folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
 
 with timer("whole processing "):
+    
+    # output zonelist_sorted.dat
     
     get_zonegrp(folderpath)
 

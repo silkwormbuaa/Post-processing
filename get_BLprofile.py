@@ -3,14 +3,17 @@
 Original code credit to Weibo
 """
 
-import logging           as     log
-from   ReadIn            import *
-from   timer             import timer
-from   BLprofile         import *
+from   utils.timer       import timer
 
-from   vista_pytecio     import *
+from   ReadIn            import GetZonegrp
 
-log.basicConfig(level=log.INFO)
+from   ReadIn            import ReadZonegrp
+
+from   BLprofile         import GetLine
+
+from   vista.pytecio     import ave_block
+
+from   vista.pytecio     import timeave_fbl
 
 #%% Read plt data from INCA
 
@@ -22,7 +25,7 @@ with timer("all works"):
     zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 #    ave_block(zonegrp,FoldPath,"mean_result_test.dat",3)
 #    ReadBlock(zonegrp,FoldPath,"mean_result_test2.dat",3)
-    ReadForce(ForceFoldPath)
+    timeave_fbl(ForceFoldPath)
 
 #%% unfortunately, after loading one case, the dataset cannot
 #   be released, so when trying to load another case, the 

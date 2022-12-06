@@ -11,18 +11,17 @@
 
 import os 
 
-import tecplot           as      tp
+import tecplot           as     tp
 
-import numpy             as      np 
+import numpy             as     np 
 
-import pandas            as      pd
+import pandas            as     pd
 
-from   utils.timer       import  timer 
+from   utils.timer       import timer 
 
-from   utils.tools       import  *
+from   vista.math_opr    import lin_interpo
 
-from   math_opr          import  *
-
+from   utils.tools       import *
 
 
 # ----------------------------------------------------------------------

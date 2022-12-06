@@ -17,7 +17,9 @@ import tecplot           as     tp
 
 import numpy             as     np
 
-from   timer             import timer
+from   utils.timer       import timer
+
+from   utils.tools       import get_filelist
 #%% #  Define a class ZoneGroup, this class stores the names of zones 
     #  sharing the same location.
 class ZoneGroup:
@@ -29,19 +31,12 @@ class ZoneGroup:
     ymin     = 0.0
     xmax     = 0.0
     ymax     = 0.0
-#%%  Get all files list within a directory(contains sub-folders)    
-def GetFileList(FoldPath):
-    FileList = []
-    for home, dirs, files in os.walk(FoldPath):
-        for filename in files:
-            # Filelist contains the whole path
-            FileList.append(os.path.join(home,filename))
-    return FileList
+
 #%%  get the zone groups(same x-y location) from statistic data.
 def GetZonegrp(FoldPath):
     with timer("Read in statistic data"):
         # get the all szplt file's path+name            
-        FileList = sorted(GetFileList(FoldPath))
+        FileList = sorted(get_filelist(FoldPath))
         print(np.size(FileList))
         # read in szplt file
         dataset  = tp.data.load_tecplot_szl(FileList)
@@ -177,7 +172,7 @@ def ReadBlock(zonegrp,FoldPath,filename,block_dim=2):
 #    zonels_y   = [[76,77,78],[134,135],[163],[179],[195],[211]]
          
 #---Read in the szplt file with tecplot
-    FileList = sorted(GetFileList(FoldPath))
+    FileList = sorted(get_filelist(FoldPath))
     dataset  = tp.data.load_tecplot_szl(FileList)
     zone     = dataset.zone
     
@@ -352,93 +347,3 @@ def ReadBlock(zonegrp,FoldPath,filename,block_dim=2):
             f.write(str('{:<17.8e}'.format(rho_ls[i])))
             f.write(str('{:<17.8e}'.format(T_ls[i]))  + '\n')
 
-
-#%% Read the forces on immersed boundary
-def ReadForce(FoldPath):
-#---mean(time averaged) variables
-    fx_m   = []
-    px_m   = []
-    fx_d_m = []
-    px_d_m = []
-    rho_m  = []
-    mu_m   = []
-    nu_m   = []
-    surf_m = []
-    surf_p = 9.5875
-    os.chdir(FoldPath)
-    FileList = sorted(GetFileList(FoldPath))
-    for filename in FileList:
-        t_b    = []
-        fx_b   = []
-        fy_b   = []
-        fz_b   = []
-        px_b   = []
-        py_b   = []
-        pz_b   = []
-        fx_d_b = []
-        fy_d_b = []
-        fz_d_b = []
-        px_d_b = []
-        py_d_b = []
-        pz_d_b = []
-        rho_b  = []
-        mu_b   = []
-        nu_b   = []
-        surf_b = []
-        with open(filename) as f:
-            for line in f.readlines():
-                cleanl = line.strip().split()
-                t_b.   append(float(cleanl[0]))
-                fx_b.  append(float(cleanl[1]))  
-                fy_b.  append(float(cleanl[2]))  
-                fz_b.  append(float(cleanl[3]))  
-                px_b.  append(float(cleanl[4]))  
-                py_b.  append(float(cleanl[5]))  
-                pz_b.  append(float(cleanl[6]))  
-                fx_d_b.append(float(cleanl[7]))
-                fy_d_b.append(float(cleanl[8]))
-                fz_d_b.append(float(cleanl[9]))
-                px_d_b.append(float(cleanl[10]))
-                py_d_b.append(float(cleanl[11]))
-                pz_d_b.append(float(cleanl[12]))
-                rho_b. append(float(cleanl[13])) 
-                mu_b.  append(float(cleanl[14]))  
-                nu_b.  append(float(cleanl[15]))  
-                surf_b.append(float(cleanl[16]))
-        fx_m  .append(np.mean(fx_b))
-        px_m  .append(np.mean(px_b))
-        fx_d_m.append(np.mean(fx_d_b))
-        px_d_m.append(np.mean(px_d_b))
-        rho_m .append(np.mean(rho_b))
-        mu_m  .append(np.mean(mu_b))
-        nu_m  .append(np.mean(nu_b))
-        surf_m.append(np.mean(surf_b))
-#---from mean results of each block to get average results        
-    tau_av1 = (sum(fx_m) + sum(px_m))/(surf_p*len(surf_m))
-    tau_fx1 = sum(fx_m)/(surf_p*len(surf_m))
-    tau_px1 = sum(px_m)/(surf_p*len(surf_m))
-    rho_av1 = sum(np.multiply(rho_m,surf_m))/sum(surf_m)
-    u_tau1  = np.sqrt(abs(tau_av1)/rho_av1)
-    nu_av1  = sum(np.multiply(nu_m,surf_m))/sum(surf_m)
-    mu_av1  = sum(np.multiply(mu_m,surf_m))/sum(surf_m)
-    lv_av1  = nu_av1/u_tau1
-    nu_av2  = mu_av1/rho_av1
-    u_tau2  = np.sqrt((abs(sum(fx_d_m)+sum(px_d_m)))/(surf_p*len(surf_m)))
-#---output statistics averaged results to txt file
-    os.chdir(os.pardir)
-    with open("statistic_average.dat",'w') as f:
-        f.write('{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}'\
-               .format('tau_av1', 'rho_av1', 'u_tau1', 'nu_av1',\
-                       'mu_av1' , 'lv_av1' , 'nu_av2', 'u_tau2',\
-                       'tau_fx1', 'tau_px1') + '\n')
-        f.write(str('{:<17.8e}'.format(tau_av1)))
-        f.write(str('{:<17.8e}'.format(rho_av1)))
-        f.write(str('{:<17.8e}'.format(u_tau1)))
-        f.write(str('{:<17.8e}'.format(nu_av1)))
-        f.write(str('{:<17.8e}'.format(mu_av1)))
-        f.write(str('{:<17.8e}'.format(lv_av1)))
-        f.write(str('{:<17.8e}'.format(nu_av2)))
-        f.write(str('{:<17.8e}'.format(u_tau2)))
-        f.write(str('{:<17.8e}'.format(tau_fx1)))
-        f.write(str('{:<17.8e}'.format(tau_px1)))
-        print("finish write statistic results.")

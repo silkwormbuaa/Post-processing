@@ -8,8 +8,11 @@
 @Desc    :   Used as executable file.
 '''
 import os
-from   plt2pandas        import *
-from   ReadIn            import *
+import tecplot           as     tp
+from   utils.timer       import timer
+from   plt2pandas        import ReadPltBlocks_xy
+from   plt2pandas        import frame2tec3d
+from   ReadIn            import ReadZonegrp
 
 Folder     = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/datafolder/'
 SaveFolder = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/savefolder/'

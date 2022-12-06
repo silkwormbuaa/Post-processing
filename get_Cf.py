@@ -9,9 +9,12 @@
 '''
 
 import os
+
 import tecplot           as     tp
+
 import numpy             as     np
-from   timer             import timer
+
+from   utils.timer       import timer
 
 # from tecplot line to get Cf and Cp
 

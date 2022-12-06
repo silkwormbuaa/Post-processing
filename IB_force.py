@@ -9,9 +9,9 @@
 '''
 
 import os
+
 import numpy             as     np
-from   ReadIn            import *
-from   BLprofile         import *
+
 
 #%% Read in forces, pressure... on immersed boundary.
 def ReadAForce(filename):
