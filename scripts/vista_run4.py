@@ -25,38 +25,38 @@ from   utils.tools       import get_filelist
 
 
 folderpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/probe_x'
-folderpath1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/probe_x'
+folderpath1 = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/probe_x'
 
 outpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x_new'
-
+outpath1 = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
 #%%
 
-#os.chdir(folderpath0)
-#
-#filelist = get_filelist( folderpath0 )
-#
-#n_probe = len(filelist)
-#
-#print( "we have got %5d probes data"%( n_probe ) )
-#
-#with timer('PSD for one case'):
-#    
-#    os.chdir( outpath0 )
-#    
-#    for i, probefile in enumerate(filelist):
-#        
-#        with timer('%5.3f%% Get psd for %s probe'%(float(i)/n_probe*100,probefile[-9:-4])):
-#            
-#            probe = ProbeData( probefile )
-#            
-#            probe.cleandata( starttime=20 )
-#            
-#            probe.psd( 12, 0.5 )
-#
-#            probe.write_psd()
-#
-#%% print single line
+os.chdir(folderpath1)
 
+filelist = get_filelist( folderpath1 )
+
+n_probe = len(filelist)
+
+print( "we have got %5d probes data"%( n_probe ) )
+
+with timer('PSD for one case'):
+    
+    os.chdir( outpath1 )
+    
+    for i, probefile in enumerate(filelist):
+        
+        with timer('%5.3f%% Get psd for %s probe'%(float(i)/n_probe*100,probefile[-9:-4])):
+            
+            probe = ProbeData( probefile )
+            
+            probe.cleandata( starttime=20 )
+            
+            probe.psd( 4, 0.5 )
+
+            probe.write_psd()
+
+#%% print single line
+"""
 #
 with timer("reading smooth wall probe"):
     os.chdir( folderpath0 )
@@ -86,6 +86,13 @@ with timer("reading smooth wall probe"):
 #    probe1 = ProbeData( probefile1 )
 
 #0927
+#with timer("reading one probe"):
+#    os.chdir( folderpath1 )
+#    probefile1 = 'probe_00118.dat'
+#    Lsep1      = 13.12627
+#    probe1 = ProbeData( probefile1 )
+    
+#1125
 with timer("reading one probe"):
     os.chdir( folderpath1 )
     probefile1 = 'probe_00118.dat'
@@ -131,8 +138,8 @@ with timer('psd'):
 #    print(probe1.df['pprime'])
 
 #    probe1.write_psd()
-
-#%% fix probe data without headers
+"""
+#%% fix probe data without headers of Luis case
 '''
 os.chdir( folderpath0 )
 

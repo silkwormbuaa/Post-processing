@@ -33,8 +33,11 @@ from   utils.timer       import timer
 
 plt.rcParams.update({'font.size': 16})
 
-folderpath = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x'
-outpath    = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes'
+folderpath = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
+outpath    = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes'
+
+#folderpath = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x'
+#outpath    = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes'
 
 filelist   = get_filelist(folderpath)
 
@@ -100,14 +103,23 @@ with timer("import psd data"):
 # x_reatt = [2.468831, 2.468831]
 # y_reatt = [0.001,100]
 
-##flat_Luis
-St_Lsep = (np.array(St) * 9.628729).tolist()
+##1125
+St_Lsep = (np.array(St) * 13.1286891).tolist()
 print(St_Lsep[0][:10])
 print(St_Lsep[0][-10:])
-x_sep = [-8.560779, -8.560779]
-y_sep = [0.001, 100]
-x_reatt = [1.06795, 1.06795]
-y_reatt = [0.001, 100]
+x_sep = [-10.55859, -10.55859]
+y_sep = [0.001,100]
+x_reatt = [2.570097, 2.570097]
+y_reatt = [0.001,100]
+
+##flat_Luis
+#St_Lsep = (np.array(St) * 9.628729).tolist()
+#print(St_Lsep[0][:10])
+#print(St_Lsep[0][-10:])
+#x_sep = [-8.560779, -8.560779]
+#y_sep = [0.001, 100]
+#x_reatt = [1.06795, 1.06795]
+#y_reatt = [0.001, 100]
 
 fig, ax = plt.subplots( figsize=[9,4],
                        constrained_layout=True)
@@ -135,6 +147,6 @@ ax.set_title( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$',
              size=18)
 
 os.chdir(os.pardir)
-plt.savefig('psdsmooth_Lsep_gray_new.png')
+plt.savefig('psd1125_Lsep_gray_notfinished.png')
 #plt.show()
 
