@@ -34,7 +34,7 @@ import glob
 
 # input the step of your backup (where you want to continue computation)
 
-backupstep = int( 862900 )
+backupstep = int( 9999999 )
 
 trim_snapshots = True
 trim_probe     = True
@@ -43,10 +43,19 @@ trim_ibforce   = True
 
 folder = os.getcwd()
 
-folder = '/home/wencanwu/testdir/case'
+#folder = '/home/wencanwu/testdir/case'
 
 print( folder )
-print( 'start cleanning ...\n')
+
+# --- Fail-safe measures
+
+if folder[0:35] == '/home/wencanwu/Code/Post-processing':
+    
+    raise KeyError("The working path is wrong!")
+
+else: 
+
+    print( 'start cleanning ...\n')
 
 # ----------------------------------------------------------------------
 # >>> Cleaning Snapshots                                          ( 2 )
