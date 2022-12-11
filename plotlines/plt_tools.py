@@ -237,9 +237,50 @@ class PlotDataframe():
         if delta is not None:
             
             self.df['x_s'] = np.divide( x_s, delta)
-        
+
+  
 # ----------------------------------------------------------------------
-# >>> Read psd data                                          ( 2-1 )
+# >>> van Driest transform                                     ( 1-7 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/12/11  - created
+#
+# Desc
+#
+# - van Driest transform mean velocity^+
+# - Must do 
+#   (1) read_norm( statistic_average.dat ) to have rho_w
+#   (1) get_norm() to have u+ first
+# ----------------------------------------------------------------------
+
+    def vd_transform( self ):
+        
+        rho = np.array( self.df['<rho>'] )
+        u_plus = np.array( self.df['u_plus'])
+        
+        if self.rho_w is None:
+            
+            raise ValueError("Please read_norm() to have rho_w!")
+        
+        else:
+                        
+            rho_ratio = np.sqrt( rho/self.rho_w )
+        
+        u_plus_vd = np.zeros( np.size(u_plus) )
+        
+        for i in range( len(u_plus_vd) ):
+            
+            u_plus_vd[i] = np.trapz( rho_ratio[:i],u_plus[:i])
+        
+        self.df['u_plus_vd'] = u_plus_vd      
+        
+           
+# ----------------------------------------------------------------------
+# >>> Read psd data                                            ( 2-1 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl

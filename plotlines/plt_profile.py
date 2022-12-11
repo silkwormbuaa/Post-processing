@@ -50,8 +50,8 @@ norm5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/statistic_average.dat'
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-68.0625.dat'
 
-plt_u   = True
-plt_RS  = True
+plt_u   = False
+plt_RS  = False
 plt_T   = False
 Compare = True
 
@@ -74,26 +74,32 @@ d1 = PlotDataframe( data1 )
 d1.shift_y( 0.494 )
 d1.read_norm( norm1 )
 d1.get_norm()
+d1.vd_transform()
 
 d2 = PlotDataframe( data2 )
 d2.shift_y( 0.468 )
 d2.read_norm( norm2 )
 d2.get_norm()
+d2.vd_transform()
 
 d3 = PlotDataframe( data3 )
 d3.shift_y( 0.416 )
 d3.read_norm( norm3 )
 d3.get_norm()
+d3.vd_transform()
 
 d4 = PlotDataframe( data4 )
 d4.shift_y( 0.312 )
 d4.read_norm( norm4 )
 d4.get_norm()
+d4.vd_transform()
 
 d5 = PlotDataframe( data5 )
 d5.shift_y( 0.26 )
 d5.read_norm( norm5 )
 d5.get_norm()
+d5.vd_transform()
+    
 
 d0 = PlotDataframe( data0 )
 
@@ -170,7 +176,7 @@ if plt_u :
     ax.set_ylabel( r'$u^+$', fontdict={'size':24} )
     ax.tick_params( axis='y', labelsize=15 )
     
-    ax.set_xlim( [1,1000] )
+#    ax.set_xlim( [1,1000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0) )
@@ -182,7 +188,7 @@ if plt_u :
 
     ax.grid()
     
-    plt.savefig( "u_profile_shifted" )
+    plt.savefig( "u_profile_shifted_test" )
     plt.show()
 
 
