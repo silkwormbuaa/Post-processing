@@ -274,7 +274,7 @@ class PlotDataframe():
         
         for i in range( len(u_plus_vd) ):
             
-            u_plus_vd[i] = np.trapz( rho_ratio[:i],u_plus[:i])
+            u_plus_vd[i] = np.trapz( rho_ratio[0:i+1],u_plus[0:i+1])
         
         self.df['u_plus_vd'] = u_plus_vd      
         

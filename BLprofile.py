@@ -203,7 +203,8 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
     print("x = ",line_loc[0])
     print("u_tau = ",u_tau)
     print("tau   = ",tau)
-    print("lv    = ",lv)     
+    print("lv    = ",lv)  
+    print("rho_w = ",rholst[0])   
     print("==============")                          
     # plot curve
     os.chdir(OutPath)
@@ -233,7 +234,8 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
                     str('%.7f'%wwnor)  +' '+\
                     str('%.7f'%uvnor)  +' '+\
                     str('%.7f'%Tlst[i])+' '+\
-                    str('%.7f'%Tplus)  +'\n')
+                    str('%.7f'%Tplus)  +' '+\
+                    str('%.7f'%rholst[i])+'\n')
             
 #%% Get the x-z plane averaged data within blocks intersected with a line
 def GetLineAve(line_loc,zonegrp,FoldPath,OutPath):
