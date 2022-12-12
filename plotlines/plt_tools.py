@@ -167,7 +167,7 @@ class PlotDataframe():
         vv  = np.array( self.df['<v`v`>'] )
         ww  = np.array( self.df['<w`w`>'] )
         uv  = np.array( self.df['<u`v`>'] )
-        
+
         uu_plus  = np.multiply(rho,uu) / abs(self.tau_w)
         vv_plus  = np.multiply(rho,vv) / abs(self.tau_w)
         ww_plus  = np.multiply(rho,ww) / abs(self.tau_w)
@@ -184,6 +184,15 @@ class PlotDataframe():
         self.df['<w`w`>+']  = ww_plus
         self.df['<u`v`>+']  = uv_plus
 
+        # normalize temperature profile 
+        
+        self.T_inf = 160.15
+        
+        T    = np.array( self.df['<T>'] )
+        T_nd = T/self.T_inf        
+        
+        self.df['T_nd'] = T_nd 
+        
 
 # ----------------------------------------------------------------------
 # >>> SHIFT Y COORDINATE                                       ( 1-5 )

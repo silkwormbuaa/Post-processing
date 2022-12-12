@@ -782,6 +782,7 @@ def ave_block_ib( folderpath, zonegrps,
         df['<w`w`>'].loc[df['walldist']<0] = 0.0
         df['<u`v`>'].loc[df['walldist']<0] = 0.0
         df['<rho>'].loc[df['walldist']<0] = 0.0
+        df['<T>'].loc[df['walldist']<0] = 0.0
     
     # else drop values for walldist < 0 for arithmatic averaging
     

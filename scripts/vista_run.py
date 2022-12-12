@@ -27,7 +27,7 @@ with timer("whole processing "):
     
     # output zonelist_sorted.dat
     
-    get_zonegrp(folderpath)
+#    get_zonegrp(folderpath)
 
     zonegrps = read_zonelist( listfile )
     
@@ -35,7 +35,7 @@ with timer("whole processing "):
     
     var_list = ['x',      'y',      'z',      '<u>',
                 '<u`u`>', '<v`v`>', '<w`w`>', '<u`v`>',
-                '<rho>' , 'walldist'                   ]
+                '<rho>' , 'walldist','<T>'              ]
        
     ave_block_ib( folderpath, 
                   zonegrps, 

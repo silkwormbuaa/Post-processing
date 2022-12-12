@@ -53,8 +53,8 @@ data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-68.0625.dat'
 plt_u_vd = False
 plt_u    = False
 plt_RS   = False
-plt_T    = False
-plt_rho  = True
+plt_rho  = False
+plt_T    = True
 Compare  = True
 
 
@@ -106,6 +106,8 @@ d5.vd_transform()
 d0 = PlotDataframe( data0 )
 d0.rho_w = d0.df['<rho>'][0]
 d0.vd_transform()
+d0.T_inf = 160.15
+d0.df['T_nd'] = np.array(d0.df['<T>']) / d0.T_inf
 
 os.chdir( OutPath )
 
@@ -117,7 +119,7 @@ d1.df.to_excel("1014_vd.xlsx")
 d5.df.to_excel("1125.xlsx")
 
 # ----------------------------------------------------------------------
-# >>> Plot u profile                                             ( 1 )
+# >>> Plot van Driest transformed u profile                      ( 1 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -198,7 +200,7 @@ if plt_u_vd :
 
 
 # ----------------------------------------------------------------------
-# >>> Plot van Driest transformed u profile                      ( 2 )
+# >>> Plot u profile                                             ( 2 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -454,3 +456,83 @@ if plt_rho :
     plt.savefig( "rho_shifted_test" )
     plt.show()
 
+
+# ----------------------------------------------------------------------
+# >>> Plot temperature profile                                  ( 5 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2022/11/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_T :
+    
+    fig, ax = plt.subplots(figsize=[10,8])
+    
+    if Compare :
+        
+        ax.plot( d0.df['y_plus'], 
+                 d0.df['T_nd'],
+                 'gray', 
+                 label = r'$smooth$', 
+                 ls    = '--')
+
+    ax.plot( d1.df['y_s_plus'], 
+             d1.df['T_nd'],
+             'green',   
+             label = r'$D=2.0\delta_0$', 
+             ls    = '-')
+    
+    ax.plot( d2.df['y_s_plus'], 
+             d2.df['T_nd'],
+             'blue',  
+             label = r'$D=1.0\delta_0$', 
+             ls    = '-')
+    
+    ax.plot( d3.df['y_s_plus'], 
+             d3.df['T_nd'],
+             'black', 
+             label = r'$D=0.5\delta_0$', 
+             ls    = '-')
+    
+    ax.plot( d4.df['y_s_plus'], 
+             d4.df['T_nd'],
+             'red',
+             label  = r'$D=0.25\delta_0$', 
+             ls     = '-')
+
+    ax.plot( d5.df['y_s_plus'], 
+             d5.df['T_nd'],
+             'purple',
+             label  = r'$D=0.125\delta_0$', 
+             ls     = '-')
+
+    ax.minorticks_on()
+    
+    ax.set_xscale( "symlog", linthresh = 1 )
+    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+    ax.tick_params( axis='x', labelsize=15 )
+    
+    ax.set_ylabel( r'$T/T_{\infty}$', fontdict={'size':24} )
+    ax.tick_params( axis='y', labelsize=15 )
+    
+    ax.set_xlim( [1,1000] )
+    
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base=10.0, subs = np.arange(1.0,10.0) )
+    
+    ax.xaxis.set_minor_locator( x_minor )
+
+    ax.legend( prop={'size':20} ) 
+#    ax.set_title( r"$u^+_{VD}$ profile", size=20 )
+
+    ax.grid()
+    
+    plt.savefig( "T_shifted_test" )
+    plt.show()
