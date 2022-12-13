@@ -50,11 +50,13 @@ norm5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/statistic_average.dat'
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-68.0625.dat'
 
-plt_u_vd = False
+plt_u_vd = True
+vd_mode  = 'bottom'
+
 plt_u    = False
 plt_RS   = False
 plt_rho  = False
-plt_T    = True
+plt_T    = False
 Compare  = True
 
 
@@ -76,31 +78,31 @@ d1 = PlotDataframe( data1 )
 d1.shift_y( 0.494 )
 d1.read_norm( norm1 )
 d1.get_norm()
-d1.vd_transform()
+d1.vd_transform(mode=vd_mode)
 
 d2 = PlotDataframe( data2 )
 d2.shift_y( 0.468 )
 d2.read_norm( norm2 )
 d2.get_norm()
-d2.vd_transform()
+d2.vd_transform(mode=vd_mode)
 
 d3 = PlotDataframe( data3 )
 d3.shift_y( 0.416 )
 d3.read_norm( norm3 )
 d3.get_norm()
-d3.vd_transform()
+d3.vd_transform(mode=vd_mode)
 
 d4 = PlotDataframe( data4 )
 d4.shift_y( 0.312 )
 d4.read_norm( norm4 )
 d4.get_norm()
-d4.vd_transform()
+d4.vd_transform(mode=vd_mode)
 
 d5 = PlotDataframe( data5 )
 d5.shift_y( 0.26 )
 d5.read_norm( norm5 )
 d5.get_norm()
-d5.vd_transform()
+d5.vd_transform(mode=vd_mode)
     
 
 d0 = PlotDataframe( data0 )
@@ -114,7 +116,7 @@ os.chdir( OutPath )
 d0.df.to_excel("smooth_vd.xlsx")
 d1.df.to_excel("1014_vd.xlsx")
 #d2.df.to_excel("0926.xlsx")
-#d3.df.to_excel("0825.xlsx")
+d3.df.to_excel("0825.xlsx")
 #d4.df.to_excel("0927.xlsx")
 d5.df.to_excel("1125.xlsx")
 

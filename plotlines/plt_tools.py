@@ -266,11 +266,20 @@ class PlotDataframe():
 #   (1) get_norm() to have u+ first
 # ----------------------------------------------------------------------
 
-    def vd_transform( self ):
+    def vd_transform( self, mode="bottom" ):
         
         rho = np.array( self.df['<rho>'] )
         u_plus = np.array( self.df['u_plus'])
         
+        # if integrate from the crest ( y=0 )
+        if mode == "crest" :
+            
+            y0_index = int( self.df[self.df['y']==0].index[0] ) 
+            
+            rho[:y0_index-1] = 0
+            u_plus[:y0_index] = 0
+
+        # by default, integrate from the bottom ( wall_dist=0 )
         if self.rho_w is None:
             
             raise ValueError("Please read_norm() to have rho_w!")
@@ -283,10 +292,11 @@ class PlotDataframe():
         
         for i in range( len(u_plus_vd) ):
             
-            u_plus_vd[i] = np.trapz( rho_ratio[0:i+1],u_plus[0:i+1])
+            u_plus_vd[i] = np.trapz( rho_ratio[0:i+1],u_plus[0:i+1] )
         
         self.df['u_plus_vd'] = u_plus_vd      
-        
+            
+
            
 # ----------------------------------------------------------------------
 # >>> Read psd data                                            ( 2-1 )
