@@ -103,6 +103,7 @@ def GetIBForce(zonegrp,ForceFolderPath,Outfile):
     Pf = np.divide(p,p_i)
     
     with open(Outfile,'w') as f:
+        f.write("x           Cf        Cp\n")
         for i in range(len(x)):
             f.write(str('%.7f'%x[i])+' '+str('%.7f'%Cf[i])+' '\
                 + str('%.7f'%Pf[i])+'\n')
