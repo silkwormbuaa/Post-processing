@@ -19,9 +19,9 @@ from vista.pytecio       import *
 
 
 
-folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
+folderpath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
 
-listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
+listfile = "/home/wencanwu/my_simulation/temp/220825_lowRe/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
@@ -31,7 +31,7 @@ with timer("whole processing "):
 
     zonegrps = read_zonelist( listfile )
     
-    regionrange = [-71.75, -1.2576, -60.6875, 22.8044]
+    regionrange = [-57, -1.2576, -49.625, 22.8044]
     
     var_list = ['x',      'y',      'z',      '<u>',
                 '<u`u`>', '<v`v`>', '<w`w`>', '<u`v`>',
