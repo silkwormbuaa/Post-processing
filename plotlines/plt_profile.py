@@ -52,13 +52,14 @@ norm5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/statistic_average.dat'
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-53.6_1storder.dat'
 
-plt_u_vd = True
+plt_u_vd = False
 vd_mode  = 'bottom'
 
-plt_u    = True
+plt_u    = False
 plt_RS   = False
 plt_rho  = False
 plt_T    = False
+plt_Mt   = True
 Compare  = True
 
 
@@ -82,6 +83,7 @@ d1.shift_y( 0.494 )
 d1.read_norm( norm1 )
 d1.get_norm()
 d1.vd_transform(mode=vd_mode)
+d1.get_Mt()
 
 d2 = PlotDataframe( data2 )
 d2.shift_y( 0.468 )
@@ -89,6 +91,7 @@ d2.shift_y( 0.468 )
 d2.read_norm( norm2 )
 d2.get_norm()
 d2.vd_transform(mode=vd_mode)
+d2.get_Mt()
 
 d3 = PlotDataframe( data3 )
 d3.shift_y( 0.416 )
@@ -96,6 +99,7 @@ d3.shift_y( 0.416 )
 d3.read_norm( norm3 )
 d3.get_norm()
 d3.vd_transform(mode=vd_mode)
+d3.get_Mt()
 
 d4 = PlotDataframe( data4 )
 d4.shift_y( 0.312 )
@@ -103,6 +107,7 @@ d4.shift_y( 0.312 )
 d4.read_norm( norm4 )
 d4.get_norm()
 d4.vd_transform(mode=vd_mode)
+d4.get_Mt()
 
 d5 = PlotDataframe( data5 )
 d5.shift_y( 0.26 )
@@ -110,13 +115,14 @@ d5.shift_y( 0.26 )
 d5.read_norm( norm5 )
 d5.get_norm()
 d5.vd_transform(mode=vd_mode)
-    
+d5.get_Mt()    
 
 d0 = PlotDataframe( data0 )
 d0.rho_w = d0.df['<rho>'][0]
 d0.vd_transform()
 d0.T_inf = 160.15
 d0.df['T_nd'] = np.array(d0.df['<T>']) / d0.T_inf
+d0.get_Mt()
 
 os.chdir( OutPath )
 
@@ -544,4 +550,84 @@ if plt_T :
     ax.grid()
     
     plt.savefig( "T_shifted_new" )
+    plt.show()
+
+# ----------------------------------------------------------------------
+# >>> Plot Mach_prime(fluctuating Mach) number                   ( 6 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/01/29  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_Mt :
+    
+    fig, ax = plt.subplots(figsize=[10,8])
+    
+    if Compare :
+        
+        ax.plot( d0.df['y_plus'], 
+                 d0.df['Mt'],
+                 'gray', 
+                 label = r'$smooth$', 
+                 ls    = '--')
+
+    ax.plot( d1.df['y_s_plus'], 
+             d1.df['Mt'],
+             'green',   
+             label = r'$D=2.0\delta_0$', 
+             ls    = '-')
+    
+    ax.plot( d2.df['y_s_plus'], 
+             d2.df['Mt'],
+             'blue',  
+             label = r'$D=1.0\delta_0$', 
+             ls    = '-')
+    
+    ax.plot( d3.df['y_s_plus'], 
+             d3.df['Mt'],
+             'black', 
+             label = r'$D=0.5\delta_0$', 
+             ls    = '-')
+    
+    ax.plot( d4.df['y_s_plus'], 
+             d4.df['Mt'],
+             'red',
+             label  = r'$D=0.25\delta_0$', 
+             ls     = '-')
+
+    ax.plot( d5.df['y_s_plus'], 
+             d5.df['Mt'],
+             'purple',
+             label  = r'$D=0.125\delta_0$', 
+             ls     = '-')
+
+    ax.minorticks_on()
+    
+    ax.set_xscale( "symlog", linthresh = 1 )
+    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+    ax.tick_params( axis='x', labelsize=15 )
+    
+    ax.set_ylabel( r'$M_t$', fontdict={'size':24} )
+    ax.tick_params( axis='y', labelsize=15 )
+    
+    ax.set_xlim( [1,1000] )
+    
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base=10.0, subs = np.arange(1.0,10.0) )
+    
+    ax.xaxis.set_minor_locator( x_minor )
+
+    ax.legend( prop={'size':20} ) 
+#    ax.set_title( r"$M_t$ profile", size=20 )
+
+    ax.grid()
+    
+    plt.savefig( "Mt_profile_shifted" )
     plt.show()

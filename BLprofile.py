@@ -221,21 +221,24 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
             wwnor  = wwlst[i]*rholst[i]/rholst[0]/(u_tau*u_tau)
             uvnor  = uvlst[i]*rholst[i]/rholst[0]/(u_tau*u_tau)
             Tplus  = Tlst[i]/Tinfi
-            f.write(str('%.7f'%xlst[i])+' '+\
-                    str('%.7f'%ylst[i])+' '+\
-                    str('%.7f'%deltay) +' '+\
-                    str('%.7f'%yplus)  +' '+\
-                    str('%.7f'%yplus2) +' '+\
-                    str('%.7f'%ydelta) +' '+\
-                    str('%.7f'%ulst[i])+' '+\
-                    str('%.7f'%uplus)  +' '+\
-                    str('%.7f'%uunor)  +' '+\
-                    str('%.7f'%vvnor)  +' '+\
-                    str('%.7f'%wwnor)  +' '+\
-                    str('%.7f'%uvnor)  +' '+\
-                    str('%.7f'%Tlst[i])+' '+\
-                    str('%.7f'%Tplus)  +' '+\
-                    str('%.7f'%rholst[i])+'\n')
+            f.write(str('%.7f'%xlst[i])  +' '+\
+                    str('%.7f'%ylst[i])  +' '+\
+                    str('%.7f'%deltay)   +' '+\
+                    str('%.7f'%yplus)    +' '+\
+                    str('%.7f'%yplus2)   +' '+\
+                    str('%.7f'%ydelta)   +' '+\
+                    str('%.7f'%ulst[i])  +' '+\
+                    str('%.7f'%uplus)    +' '+\
+                    str('%.7f'%uunor)    +' '+\
+                    str('%.7f'%vvnor)    +' '+\
+                    str('%.7f'%wwnor)    +' '+\
+                    str('%.7f'%uvnor)    +' '+\
+                    str('%.7f'%Tlst[i])  +' '+\
+                    str('%.7f'%Tplus)    +' '+\
+                    str('%.7f'%rholst[i])+' '+\
+                    str('%.7f'%uulst[i]) +' '+\
+                    str('%.7f'%vvlst[i]) +' '+\
+                    str('%.7f'%wwlst[i]) +'\n')
             
 #%% Get the x-z plane averaged data within blocks intersected with a line
 def GetLineAve(line_loc,zonegrp,FoldPath,OutPath):

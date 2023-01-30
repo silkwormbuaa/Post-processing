@@ -296,7 +296,43 @@ class PlotDataframe():
         
         self.df['u_plus_vd'] = u_plus_vd      
             
-
+# ----------------------------------------------------------------------
+# >>> Get turbulent Mach number                                 ( 1-8 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/01/29  - created
+#
+# Desc
+#
+# - get the turbulent Mach number data
+#
+# ----------------------------------------------------------------------
+    def get_Mt( self ):
+        
+        uu = np.array( self.df['<u`u`>'] )
+        vv = np.array( self.df['<v`v`>'] )
+        ww = np.array( self.df['<w`w`>'] )
+        
+        #Vp - fluctuating velocity
+        Vp = np.sqrt( uu + vv + ww )
+        
+        T = np.array( self.df['<T>'] )
+        gamma = 1.4
+        R = 287.06
+        c = np.sqrt(gamma*R*T)
+        
+        # avoid c = 0 as dominator
+        Mt = np.zeros( (np.size(c)) )
+        for i in range( np.size(c)) :
+            if c[i] > 0.0:
+                Mt[i] = Vp[i]/c[i]
+        
+        self.df['Mt'] = Mt
+        
            
 # ----------------------------------------------------------------------
 # >>> Read psd data                                            ( 2-1 )
