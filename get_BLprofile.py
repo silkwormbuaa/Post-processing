@@ -65,5 +65,5 @@ with timer("get lines"):
 #    line_loc = [-68.0625, 0.0, -68.0625, 30.0]    
 #    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
     
-    line_loc = [-53.6, 0.0, -53.6, 30.0]    
+    line_loc = [-20, 0.0, -20, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,1)

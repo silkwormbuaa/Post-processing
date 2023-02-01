@@ -629,5 +629,5 @@ if plt_Mt :
 
     ax.grid()
     
-    plt.savefig( "Mt_profile_shifted" )
+    plt.savefig( "Mxt_profile_shifted" )
     plt.show()
