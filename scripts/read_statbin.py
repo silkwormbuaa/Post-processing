@@ -46,3 +46,5 @@ with open( gridpath, 'rb' ) as f:
     G.read_grid_header( f )
     
     G.read_grid_body( f )
+    
+    G.get_sorted_groups()

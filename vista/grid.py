@@ -13,6 +13,10 @@ import sys
 
 import os
 
+import numpy             as np
+
+import pandas            as pd
+
 sys.path.append('..')
 
 from utils.read_binary   import read_int_bin
@@ -165,6 +169,55 @@ class GridData:
             
             if self.pos >= self.fsize: end_of_file = True
 
+# ----------------------------------------------------------------------
+# >>> Get Sorted Block Grids Groups                             ( 1-3 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/02/05  - created
+#
+# Desc
+#
+# - based on lx0,ly0,lz0, sorting block grids
+# - same x-y location blocks form a block group
+#
+# ----------------------------------------------------------------------
+    def get_sorted_groups( self ):
+        
+        if len(self.g) == 0:
+            raise ValueError('Please read grid blocks first!')
+        
+        lx0 = list()
+        ly0 = list()
+        lz0 = list()
+        bl_index = list()
+        
+        # get lx0,ly0,lz0 and bl_index lists
+        for i in range(self.bl_num):
+            
+            lx0.append(self.g[i].lx0)
+            ly0.append(self.g[i].ly0)
+            lz0.append(self.g[i].lz0)
+            bl_index.append(self.g[i].num)
+        
+        df = pd.DataFrame(lx0,columns=['lx0'])
+        df['ly0'] = ly0
+        df['lz0'] = lz0
+        df['bl_index'] = bl_index
+        
+        # sort based on lx0,ly0,lz0
+        df_sorted = df.sort_values(by=['lx0','ly0','lz0'])
+        
+        # group pd raws and aggregate lz0 and bl_index into lists
+        grouped  = df_sorted.groupby(by=['lx0','ly0']).agg(list)
+        
+        grouped = grouped.reset_index()
+        
+        self.g_group = np.array( grouped['bl_index'] )
+        
 
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
@@ -221,7 +274,6 @@ class BlockGrid:
         self.lz1 = read_flt_bin( file.read(sfl), sfl )
         
         self.size += 6*sfl
-        if self.verbose: print( 'lx0 = ', self.lx0 )
         
         # read parameters of grid: 3 components in each direction
         self.paramx = read_flt_bin( file.read(3*sfl), sfl )
@@ -316,6 +368,7 @@ class BlockGrid:
         self.size += 4
         
         # read grid geometric parameters
+        # geometric parameters include ghost cells
         # - gx(y,z) cell center coordinates
         # - dx(y,z) distance between cell centers
         # - hx(y,z) cell widths
