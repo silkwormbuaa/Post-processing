@@ -152,7 +152,8 @@ class GridData:
         self.pos = self.header_size
         
         # give every blockgrid an index
-        i = 0
+        # number start from 1
+        i = 1
         
 #        self.g.append( BlockGrid( file, 0,self.grid_with_solver))
         
