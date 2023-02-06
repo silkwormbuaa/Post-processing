@@ -11,6 +11,8 @@
 
 import os 
 
+import math
+
 
 # ----------------------------------------------------------------------
 # >>> GET FILE LIST                                               ( 0 )
@@ -101,3 +103,68 @@ def if_penetrate( zone_range, segment ):
                 ( segment[2] > zone_range[2] )
     
     return Penetrate
+
+# ----------------------------------------------------------------------
+# >>> If a point is above wall                                   ( 3 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/02/06  - created
+#
+# Desc
+#
+# - special routine for wavy wall case to check if a point is 
+#   above or below wall
+#
+# - select which wavy wall case
+#
+#   1 : 1014 case, D/delta = 2
+#   2 : 0926 case, D/delta = 1
+#   3 : 0825 case, D/delta = 0.5
+#   4 : 0927 case, D/delta = 0.25
+#
+# - wave length lambda = 1.04
+#
+# ----------------------------------------------------------------------
+
+def is_above_wavywall( z, y, case = 1):
+    
+    A = 0.26
+    
+    len_w = 1.04
+    
+    if   case == 1:   D = 10.4
+    elif case == 2:   D = 5.2    
+    elif case == 3:   D = 2.6       
+    elif case == 4:   D = 1.3
+    
+    z0 = z % D 
+    
+    # when z0 is less than half wave length
+    if abs(z0) <= (len_w*0.5):
+    
+        y_w = -A + A*math.cos( z0/len_w*2*math.pi )
+    
+    elif abs(z0-D) <= (len_w*0.5):
+    
+        y_w = -A + A*math.cos( (z0-D)/len_w*2*math.pi )
+    
+    else:
+    
+        y_w = -2*A
+    
+    # compare wall with cell center location
+    if y >= y_w: 
+    
+        above_wall = True
+    
+    else:
+    
+        above_wall = False
+    
+    return above_wall
+
+
