@@ -27,6 +27,12 @@ from utils.read_binary   import read_log_bin
 
 from utils.read_binary   import read_chr_bin
 
+from utils.tools         import is_above_wavywall
+
+from utils.tools         import if_overlap
+
+from utils.tools         import mean_of_list
+
 # ----------------------------------------------------------------------
 # >>> Initialize a grid from binary file                        ( 1-0 )
 # ----------------------------------------------------------------------
@@ -193,6 +199,8 @@ class GridData:
         
         lx0 = list()
         ly0 = list()
+        lx1 = list()
+        ly1 = list()
         lz0 = list()
         bl_index = list()
         
@@ -201,24 +209,65 @@ class GridData:
             
             lx0.append(self.g[i].lx0)
             ly0.append(self.g[i].ly0)
+            lx1.append(self.g[i].lx1)
+            ly1.append(self.g[i].ly1)
             lz0.append(self.g[i].lz0)
             bl_index.append(self.g[i].num)
         
         df = pd.DataFrame(lx0,columns=['lx0'])
         df['ly0'] = ly0
+        df['lx1'] = lx1
+        df['ly1'] = ly1
         df['lz0'] = lz0
         df['bl_index'] = bl_index
         
         # sort based on lx0,ly0,lz0
-        df_sorted = df.sort_values(by=['lx0','ly0','lz0'])
+        df_sorted = df.sort_values(by=['lz0','ly0','lx0'])
         
-        # group pd raws and aggregate lz0 and bl_index into lists
-        grouped  = df_sorted.groupby(by=['lx0','ly0']).agg(list)
+        # group pd rows and aggregate lz0 and bl_index into lists
+        self.grouped  = df_sorted.groupby(by=['ly0','lx0']).agg(list).\
+                                  reset_index()
+
+        self.grouped['lx1'] = self.grouped['lx1'].apply(mean_of_list)
+        self.grouped['ly1'] = self.grouped['ly1'].apply(mean_of_list)
         
-        grouped = grouped.reset_index()
+# ----------------------------------------------------------------------
+# >>> Get Selected Block Grids                                 ( 1-4 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/02/06  - created
+#
+# Desc
+#
+# - input a rect1(xmin,ymin,xmax,ymax)
+# - record which block grids groups are partly or fully overlapped
+#   with rect1. 
+#
+# ----------------------------------------------------------------------
+
+    def select_blockgrids( self, rect1 ):
         
-        self.g_group = np.array( grouped['bl_index'] )
+        lx0 = np.array( self.grouped['lx0'] )
+        ly0 = np.array( self.grouped['ly0'] )
+        lx1 = np.array( self.grouped['lx1'] )
+        ly1 = np.array( self.grouped['ly1'] )
+        bl_index = np.array( self.grouped['bl_index'] )
         
+        self.blockgrids_sel = list()
+        
+        for i in range(len(bl_index)):
+            
+            rect2 = [ lx0[i],ly0[i],lx1[i],ly1[i] ]
+            
+            if if_overlap( rect1, rect2 ):
+                
+                self.blockgrids_sel.append(bl_index[i])
+
+
 
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
@@ -258,7 +307,8 @@ class BlockGrid:
         file.read(4)
         self.size += 4
         
-        # read grid dimension
+        # read grid dimension 
+        # npx, npy, npz do not include ghost cells
         self.npx = read_int_bin( file.read(sin), sin )
         self.npy = read_int_bin( file.read(sin), sin )
         self.npz = read_int_bin( file.read(sin), sin )
@@ -397,4 +447,55 @@ class BlockGrid:
         file.read(4)
         self.size += 4
         
+# ----------------------------------------------------------------------
+# >>> Define Cut Cell                                          ( 2-1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/02/05  - created
+#
+# Desc
+#
+# - using dataframe containing i,j,k and volume fraction
+# - 1. assign cut-cells volume fractions
+# - 2. for cells, which is above wall and is not cut cell, vol_fra = 1.0
+# ----------------------------------------------------------------------
+
+    def assign_vol_fra( self, df ):
+        
+        # check block number
+        if df.iloc[0,4] != self.num :
+            raise ValueError("block number does not match!")
+        
+        # take out data from df
+        i = np.array( df['i'] )
+        j = np.array( df['j'] )
+        k = np.array( df['k'] )
+        vol = np.array( df['vol'] )
+        
+        self.vol_fra = np.zeros( shape=(self.npx+6,self.npy+6,self.npz+6) )
+        
+        # df['i'], df['j'], df['k'] all count from 1 like Fortran
+        # well in python, array count from 0.
+        for index, value in enumerate( vol ):
+            
+            self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
+        
+        # for cells that above wall and not cut cell, set vol_fra = 1
+        for kk in range( 3,self.npz+3 ):
+            for jj in range( 3,self.npy+3 ):
+                
+                y = self.gy[jj]
+                z = self.gz[kk]
+                above_wall = is_above_wavywall( y, z, case = 4 )
+                
+                if above_wall and (self.vol_fra[3][jj][kk]-0.0)<0.0000001 :
+                    
+                    # now because in x direction, the geometry is uniform, 
+                    # so set vol_fra in x direction constant
+                    self.vol_fra[3:self.npx+3,jj,kk] = 1.0
+
         

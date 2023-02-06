@@ -130,7 +130,7 @@ def if_penetrate( zone_range, segment ):
 #
 # ----------------------------------------------------------------------
 
-def is_above_wavywall( z, y, case = 1):
+def is_above_wavywall( y, z, case = 1):
     
     A = 0.26
     
@@ -167,4 +167,21 @@ def is_above_wavywall( z, y, case = 1):
     
     return above_wall
 
+# ----------------------------------------------------------------------
+# >>> Mean of a list                                            ( 4 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/02/06  - created
+#
+# Desc
+#
+# - simple function applied in pandas 
+#
+# ----------------------------------------------------------------------
+def mean_of_list(lst):
+    return sum(lst) / len(lst)
 
