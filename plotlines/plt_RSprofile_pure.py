@@ -124,43 +124,43 @@ os.chdir( OutPath )
 #
 # ----------------------------------------------------------------------
 
-fig, ax = plt.subplots( figsize=[10,10] )
+fig, ax = plt.subplots( figsize=[8,8] )
  
 ax.plot(d0.df['y_plus'],
         d0.df['<u`u`>+'],
         'gray',
-        label = r'$smooth$',
+        label = r'$u^\prime u^\prime$ smooth',
         ls    = "--")
     
 ax.plot(d1.df['y_s_plus'],
         d1.df['<u`u`>+'],
         'green',
-        label  = r'$\mathrm{D/\delta_0=2.0}$',
+        label  = r'$u^\prime u^\prime \ D/\delta_0=2.0$',
         ls     = ":")
 
 ax.plot(d2.df['y_s_plus'],
         d2.df['<u`u`>+'],
         'blue',
-        label  = r'$\mathrm{D/\delta_0=1.0}$',
+        label  = r'$u^\prime u^\prime \ D/\delta_0=1.0$',
         ls     = "-.")
 
 ax.plot(d3.df['y_s_plus'], 
         d3.df['<u`u`>+'],
         'black',
-        label = r'$\mathrm{D/\delta_0=0.5}$',
+        label = r'$u^\prime u^\prime \ D/\delta_0=0.5$',
         ls    = (0, (3, 1, 1, 1, 1, 1)))
 
 ax.plot(d4.df['y_s_plus'], 
         d4.df['<u`u`>+'],
         'red',
-        label = r'$\mathrm{D/\delta_0=0.25}$',
+        label = r'$u^\prime u^\prime \ D/\delta_0=0.25$',
         ls    = (0, (10, 3)))
 
 ax.set_xscale( "symlog", linthresh=1 )
 
-ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-ax.set_ylabel( r'$\xi u^\prime u^\prime$',
-                fontdict={'size':24} )
+#ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+#ax.set_ylabel( r'$\xi u^\prime u^\prime$',
+#                fontdict={'size':24} )
 
 ax.set_xlim( [1,1000] )
 ax.set_ylim( [-1,8]   )
@@ -179,18 +179,20 @@ ax.tick_params(which='minor',
 x_minor = matplotlib.ticker.LogLocator( 
                     base = 10.0, subs = np.arange(1.0,10.0) )
 ax.xaxis.set_minor_locator( x_minor )
-ax.tick_params( axis='x', labelsize=15 )
-ax.tick_params( axis='y', labelsize=15 )
 
+#ax.tick_params( axis='x', labelsize=15 )
+#ax.tick_params( axis='y', labelsize=15 )
+ax.xaxis.set_ticklabels([])
+ax.yaxis.set_ticklabels([])
 
-ax.legend( prop={'size':20}, loc='upper right' ) 
-ax.set_title( "Reynolds Stress profile uu", size=20 )
+#ax.legend( prop={'size':15}, loc='upper right' ) 
+#ax.set_title( "Reynolds Stress profile uu", size=20 )
 
 ax.grid(visible=True, which='both',axis='both',color='gray',
         linestyle='--',linewidth=0.2)
 
 os.chdir( OutPath )
-plt.savefig( "RS_uu" )
+plt.savefig( "RS_uu_pure" )
 plt.show()
 
 # ----------------------------------------------------------------------
@@ -241,9 +243,9 @@ ax.plot(d4.df['y_s_plus'],
 
 ax.set_xscale( "symlog", linthresh=1 )
 
-ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-ax.set_ylabel( r'$\xi v^\prime v^\prime$',
-                fontdict={'size':24} )
+#ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+#ax.set_ylabel( r'$\xi v^\prime v^\prime$',
+#                fontdict={'size':24} )
 
 ax.set_xlim( [1,1000] )
 ax.set_ylim( [-0.1,1.5]   )
@@ -262,18 +264,20 @@ ax.tick_params(which='minor',
 x_minor = matplotlib.ticker.LogLocator( 
                     base = 10.0, subs = np.arange(1.0,10.0) )
 ax.xaxis.set_minor_locator( x_minor )
-ax.tick_params( axis='x', labelsize=15 )
-ax.tick_params( axis='y', labelsize=15 )
 
+#ax.tick_params( axis='x', labelsize=15 )
+#ax.tick_params( axis='y', labelsize=15 )
+ax.xaxis.set_ticklabels([])
+ax.yaxis.set_ticklabels([])
 
-ax.legend( prop={'size':15}, loc='upper left' ) 
-ax.set_title( "Reynolds Stress profile vv", size=20 )
+#ax.legend( prop={'size':15}, loc='upper left' ) 
+#ax.set_title( "Reynolds Stress profile vv", size=20 )
 
 ax.grid(visible=True, which='both',axis='both',color='gray',
         linestyle='--',linewidth=0.2)
 
 os.chdir( OutPath )
-plt.savefig( "RS_vv" )
+plt.savefig( "RS_vv_pure" )
 plt.show()
 
 # ----------------------------------------------------------------------
@@ -324,9 +328,9 @@ ax.plot(d4.df['y_s_plus'],
 
 ax.set_xscale( "symlog", linthresh=1 )
 
-ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-ax.set_ylabel( r'$\xi w^\prime w^\prime$',
-                fontdict={'size':24} )
+#ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+#ax.set_ylabel( r'$\xi w^\prime w^\prime$',
+#                fontdict={'size':24} )
 
 ax.set_xlim( [1,1000] )
 ax.set_ylim( [-0.1,2]   )
@@ -345,18 +349,20 @@ ax.tick_params(which='minor',
 x_minor = matplotlib.ticker.LogLocator( 
                     base = 10.0, subs = np.arange(1.0,10.0) )
 ax.xaxis.set_minor_locator( x_minor )
-ax.tick_params( axis='x', labelsize=15 )
-ax.tick_params( axis='y', labelsize=15 )
 
+#ax.tick_params( axis='x', labelsize=15 )
+#ax.tick_params( axis='y', labelsize=15 )
+ax.xaxis.set_ticklabels([])
+ax.yaxis.set_ticklabels([])
 
-ax.legend( prop={'size':15}, loc='upper left' ) 
-ax.set_title( "Reynolds Stress profile ww", size=20 )
+#ax.legend( prop={'size':15}, loc='upper left' ) 
+#ax.set_title( "Reynolds Stress profile ww", size=20 )
 
 ax.grid(visible=True, which='both',axis='both',color='gray',
         linestyle='--',linewidth=0.2)
 
 os.chdir( OutPath )
-plt.savefig( "RS_ww" )
+plt.savefig( "RS_ww_pure" )
 plt.show()
 
 # ----------------------------------------------------------------------
@@ -407,9 +413,9 @@ ax.plot(d4.df['y_s_plus'],
 
 ax.set_xscale( "symlog", linthresh=1 )
 
-ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-ax.set_ylabel( r'$\xi u^\prime v^\prime$',
-                fontdict={'size':24} )
+#ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+#ax.set_ylabel( r'$\xi u^\prime v^\prime$',
+#                fontdict={'size':24} )
 
 ax.set_xlim( [1,1000] )
 ax.set_ylim( [-1,0.2]   )
@@ -428,16 +434,18 @@ ax.tick_params(which='minor',
 x_minor = matplotlib.ticker.LogLocator( 
                     base = 10.0, subs = np.arange(1.0,10.0) )
 ax.xaxis.set_minor_locator( x_minor )
-ax.tick_params( axis='x', labelsize=15 )
-ax.tick_params( axis='y', labelsize=15 )
 
+#ax.tick_params( axis='x', labelsize=15 )
+#ax.tick_params( axis='y', labelsize=15 )
+ax.xaxis.set_ticklabels([])
+ax.yaxis.set_ticklabels([])
 
-ax.legend( prop={'size':15}, loc='upper left' ) 
-ax.set_title( "Reynolds Stress profile uv", size=20 )
+#ax.legend( prop={'size':15}, loc='upper left' ) 
+#ax.set_title( "Reynolds Stress profile uv", size=20 )
 
 ax.grid(visible=True, which='both',axis='both',color='gray',
         linestyle='--',linewidth=0.2)
 
 os.chdir( OutPath )
-plt.savefig( "RS_uv" )
+plt.savefig( "RS_uv_pure" )
 plt.show()
