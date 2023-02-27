@@ -394,7 +394,8 @@ def read_psd( filename ):
      
     St = np.array( df['St'] ).tolist()
     nd_fwpsd = np.array( df['nd_pprime_fwpsd'] ).tolist()
-    x = (np.array([xp] * len(St))-50.4)/5.2
+    x = (np.array([xp] * len(St))-50.4)/5.2  
+    # get a xp array,length equals the number of frequency
     
     return ( x, St, nd_fwpsd )
         

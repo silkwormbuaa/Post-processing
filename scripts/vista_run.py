@@ -19,15 +19,15 @@ from vista.pytecio       import *
 
 
 
-folderpath = "/home/wencanwu/my_simulation/temp/220825_lowRe/TP_stat"
+folderpath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/TP_stat"
 
-listfile = "/home/wencanwu/my_simulation/temp/220825_lowRe/zonelist_sorted.dat"
+listfile = "/media/wencanwu/Seagate Expansion Drive/temp/221221/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
     # output zonelist_sorted.dat
     
-#    get_zonegrp(folderpath)
+    get_zonegrp(folderpath)
 
     zonegrps = read_zonelist( listfile )
     

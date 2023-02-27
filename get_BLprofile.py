@@ -16,17 +16,17 @@ from   vista.pytecio     import ave_block
 from   vista.pytecio     import timeave_fbl
 
 #%% Read plt data from INCA
-'''
-FoldPath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
+
+#FoldPath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 #OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
-ForceFoldPath = "/home/wencanwu/my_simulation/temp/221125_lowRe/forces_3/"
-with timer("all works"):
+#ForceFoldPath = "/home/wencanwu/my_simulation/temp/221014_lowRe/forces_2/"
+#with timer("all works"):
 #    GetZonegrp(FoldPath)
-    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
+#    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 #    ave_block(zonegrp,FoldPath,"mean_result_test.dat",3)
 #    ReadBlock(zonegrp,FoldPath,"mean_result_test2.dat",3)
-    timeave_fbl(ForceFoldPath)
-'''
+#    timeave_fbl(ForceFoldPath)
+
 #%% unfortunately, after loading one case, the dataset cannot
 #   be released, so when trying to load another case, the 
 #   loaded zones will go crazy.
@@ -65,5 +65,5 @@ with timer("get lines"):
 #    line_loc = [-68.0625, 0.0, -68.0625, 30.0]    
 #    GetLine(line_loc,zonegrp,FoldPath,OutPath,2)
     
-    line_loc = [-20, 0.0, -20, 30.0]    
+    line_loc = [-53.6, 0.0, -53.6, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,1)

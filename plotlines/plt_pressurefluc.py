@@ -11,7 +11,7 @@
 
 import os
 
-from   plt_tools         import *
+from   plt_tools         import PlotDataframe
 
 import matplotlib.pyplot as     plt
 
@@ -19,7 +19,7 @@ import matplotlib
 
 plt.rcParams.update({'font.size': 18})
 
-OutPath  = "/home/wencanwu/my_simulation/temp/221125_lowRe/DataPost/"
+OutPath  = "/home/wencanwu/my_simulation/temp/DataPost/"
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/line_p_prime.dat'
 
@@ -42,7 +42,7 @@ d4 = PlotDataframe(data4)
 d5 = PlotDataframe(data5)
 d0 = PlotDataframe(data0)
 
-fig, ax = plt.subplots(figsize=[10,8.5], constrained_layout=True)
+fig, ax = plt.subplots(figsize=[10,10], constrained_layout=True)
     
 ax.plot( d0.df['(x-x_imp)/δ'], 
          d0.df['<p`>_'],

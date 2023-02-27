@@ -27,32 +27,22 @@ from   vista.grid        import GridData
 
 from   utils.timer       import timer
 
+datapath = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/'
 
-datapath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/statistics.bin'
-gridpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
-outpath  = '/home/wencanwu/my_simulation/temp/results/'
-outfile  = 'header.dat'
-ccfile   = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/cutcells_setup.dat'
+datafile = datapath + 'statistics.bin'
+gridfile = datapath + 'inca_grid.bin'
 
-#%%
-'''
-A = StatisticData(datapath)
+outpath  = datapath
 
-#os.chdir(outpath)
+ccfile   = datapath + 'cutcells_setup.dat'
 
-with open(datapath,'br') as f:   
-        
-    A.read_stat_header(f)
+outfile  = 'mean_profile.dat'
 
-    A.read_stat_body(f,[3,4])
-'''
-#%% read grid
-
-G = GridData( gridpath )
+G = GridData( gridfile )
 
 #os.chdir( outpath )
 
-with open( gridpath, 'rb' ) as f:
+with open( gridfile, 'rb' ) as f:
     
     G.verbose = True
     
@@ -76,14 +66,131 @@ with open( gridpath, 'rb' ) as f:
                             ,'fax0','fay0','faz0'
                             ,'fax1','fay1','faz1']
                             , inplace=True )
+        
+    with timer("assign volume fractions "):
+        
+        for num in block_list:
+
+            # dataframe slice for a certain block
+            temp = cc_df[cc_df['block_number'] == num ]
+            
+            # block number starts from 1, but python list index
+            # starts from 0
+            
+            G.g[num-1].assign_vol_fra( temp )
+
+S = StatisticData( datafile )
+
+with timer("read block statistics data "):
+    with open( datafile, 'br' ) as f:   
+            
+        S.read_stat_header(f)
+
+        S.read_stat_body(f,block_list)
+
+with timer("calculating profile "):
     
-    for num in block_list:
-
-        # dataframe slice for a certain block
-        temp = cc_df[cc_df['block_number'] == num ]
+    npy = G.g[block_list[0]-1].npy
+    
+    u_ls   = list()
+    rho_ls = list()
+    T_ls   = list()
+    uu_ls  = list()
+    uv_ls  = list()
+    vv_ls  = list()
+    ww_ls  = list()
+    
+    # ignore warning when numpy does 0/0 operation 
+    np.seterr(invalid='ignore')
+    
+    for j in range(3,npy+3):
         
-        # block number starts from 1, but python list index
-        # starts from 0
+        vol = list()
+        u   = list()
+        rho = list()
+        T   = list()
+        uu  = list()
+        uv  = list()
+        vv  = list()
+        ww  = list()
         
-        G.g[num-1].assign_vol_fra( temp )
+        # now the code can only do averaging in the 
+        #     bottom block
+        
+        
+        for num in block_list:
+            
+            vol.append( G.g[num-1].vol_fra[:,j,:] )
+            u.append( S.bl[num-1].mean[:,j,:,0])
+            rho.append( S.bl[num-1].mean[:,j,:,3])
+            T.append( S.bl[num-1].mean[:,j,:,6])
+            uu.append( S.bl[num-1].uu[:,j,:])
+            uv.append( S.bl[num-1].uv[:,j,:])
+            vv.append( S.bl[num-1].vv[:,j,:])
+            ww.append( S.bl[num-1].ww[:,j,:])
+            
+        vol = np.array(vol)
+        u   = np.array(u)
+        rho = np.array(rho)
+        T   = np.array(T)
+        uu  = np.array(uu)
+        uv  = np.array(uv)
+        vv  = np.array(vv)
+        ww  = np.array(ww)
+        
+        up = np.multiply(vol,u)        
+        u_mean = np.divide(np.sum(up),np.sum(vol))
+        u_mean = np.nan_to_num(u_mean)
+        u_ls.append( u_mean )
 
+        up = np.multiply(vol,rho)        
+        rho_mean = np.divide(np.sum(up),np.sum(vol))
+        rho_mean = np.nan_to_num(rho_mean)
+        rho_ls.append( rho_mean )
+
+        up = np.multiply(vol,T)        
+        T_mean = np.divide(np.sum(up),np.sum(vol))
+        T_mean = np.nan_to_num(T_mean)
+        T_ls.append( T_mean )
+        
+        up = np.multiply(vol,uu)        
+        uu_mean = np.divide(np.sum(up),np.sum(vol))
+        uu_mean = np.nan_to_num(uu_mean)
+        uu_ls.append( uu_mean )
+
+        up = np.multiply(vol,uv)        
+        uv_mean = np.divide(np.sum(up),np.sum(vol))
+        uv_mean = np.nan_to_num(uv_mean)
+        uv_ls.append( uv_mean )
+
+        up = np.multiply(vol,vv)        
+        vv_mean = np.divide(np.sum(up),np.sum(vol))
+        vv_mean = np.nan_to_num(vv_mean)
+        vv_ls.append( vv_mean )
+        
+        up = np.multiply(vol,ww)        
+        ww_mean = np.divide(np.sum(up),np.sum(vol))
+        ww_mean = np.nan_to_num(ww_mean)
+        ww_ls.append( ww_mean )
+#        u_profile = np.nan_to_num(u_profile)
+
+    y_ls = G.g[block_list[0]-1].gy[3:npy+3]
+    
+os.chdir( outpath )
+    
+with open(outfile, 'w') as f:
+    f.write('{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}'\
+            .format('y', '<u>', '<rho>', '<T>', \
+            '<u`u`>','<u`v`>','<v`v`>' ,'<w`w`>') + '\n')
+    
+    for i in range(len(y_ls)):
+        f.write(str('{:<17.8e}'.format(y_ls[i]))  )
+        f.write(str('{:<17.8e}'.format(u_ls[i]))  )
+        f.write(str('{:<17.8e}'.format(rho_ls[i])))
+        f.write(str('{:<17.8e}'.format(T_ls[i]))  )
+        f.write(str('{:<17.8e}'.format(uu_ls[i])) )
+        f.write(str('{:<17.8e}'.format(uv_ls[i])) )
+        f.write(str('{:<17.8e}'.format(vv_ls[i])) )
+        f.write(str('{:<17.8e}'.format(ww_ls[i])) + '\n' )
+        
+        

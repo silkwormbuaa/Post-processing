@@ -16,8 +16,9 @@ import numpy             as     np
 
 import matplotlib.pyplot as     plt
 
-from   plt_tools         import PlotDataframe
+import matplotlib.ticker as     ticker
 
+from   plt_tools         import PlotDataframe
 
 # ----------------------------------------------------------------------
 # >>> Input Info                                                
@@ -106,50 +107,73 @@ d0_p.shift_x( x_imp, delta )
 
 if plt_Cf is True:
     
-    fig1, ax1 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
+    fig1, ax1 = plt.subplots( figsize=[8,8], constrained_layout=True )
     
-    ax1.plot( d1.df['x_s'],
-              d1.df['Cf']*1000,
-              'green',
-              label  = r'$D=2.0\delta_0$',
-              marker = "s",
-              markersize = 10)
     
     ax1.plot( d2.df['x_s'],
               d2.df['Cf']*1000,
               'blue',
-              label  = r'$D=1.0\delta_0$',
-              marker = "o",
-              markersize = 10)
+              label  = r'$D/\delta_0=1.0$',
+              ls     = '-.',
+              linewidth=4)
     
     ax1.plot( d3.df['x_s'],
               d3.df['Cf']*1000,
               'black',
-              label  = r'$D=0.5\delta_0$',
-              marker = "v",
-              markersize = 10)
+              label  = r'$D/\delta_0=0.5$',
+              ls     = (0, (3, 1, 1, 1, 1, 1)),
+              linewidth=4)
     
     ax1.plot( d4.df['x_s'],
               d4.df['Cf']*1000,
               'red',
-              label  = r'$D=0.25\delta_0$', 
-              marker = "D",
-              markersize = 10)
+              label  = r'$D/\delta_0=0,25$', 
+              ls     = (0, (10, 3)),
+              linewidth=4)
     
-    ax1.plot( d5.df['x_s'],
-              d5.df['Cf']*1000,
-              'purple',
-              label  = r'$D=0.125\delta_0$', 
-              marker = "^",
-              markersize = 10)
+#    ax1.plot( d5.df['x_s'],
+#              d5.df['Cf']*1000,
+#              'purple',
+#              label  = r'$D=0.125\delta_0$', 
+##              marker = "^",
+#              markersize = 10)
 
     ax1.plot( d0_f.df['x_s'], 
               d0_f.df['Cf']*1000,
               'gray', 
               label = r'$smooth$', 
-              ls    = '--')
-        
+              ls    = '--',
+              linewidth = 4)
+    
+    # dotted line are too easy to be covered, so put it at a upper layer.
+    ax1.plot( d1.df['x_s'],
+              d1.df['Cf']*1000,
+              'green',
+              label  = r'$D/\delta_0=2.0$',
+              ls     = ':',
+              linewidth=4)
+    
+    ax1.plot( [-20,12],
+              [0,0],
+              'black',
+              ls = '--',
+              linewidth=1 )
+    
+    
     ax1.minorticks_on()
+    ax1.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=15,
+                    width=2)
+    ax1.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1)
+
+    ax1.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax1.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
 
     ax1.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40}) 
     ax1.tick_params(axis='x',labelsize=32)
@@ -160,11 +184,16 @@ if plt_Cf is True:
     ax1.set_xlim([-20.0,12.0])
     ax1.set_ylim([-2.0,4.5])
 
-    ax1.legend(prop={'size':20},loc='best')
+#    ax1.legend(prop={'size':20},loc='best')
     
-    ax1.grid()
 
-    fig1.savefig("Cf_test.png")
+# Adjust the spacing around the plot to remove the white margin
+    fig1.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax1.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    os.chdir( outpath )
+    fig1.savefig("Cf_pure.png")
     plt.show()
 
     
@@ -184,50 +213,65 @@ if plt_Cf is True:
 
 if plt_Cp is True:
     
-    fig2, ax2 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
+    fig2, ax2 = plt.subplots( figsize=[8,8], constrained_layout=True )
 
-    ax2.plot( d1.df['x_s'],
-              d1.df['Cp'],
-              'green',
-              label  = r'$D=2.0\delta_0$',
-              marker = "s",
-              markersize = 10)
     
     ax2.plot( d2.df['x_s'],
               d2.df['Cp'],
               'blue',
-              label  = r'$D=1.0\delta_0$',
-              marker = "o",
-              markersize = 10)
+              label  = r'$D/\delta_0=1.0$',
+              ls     = '-.',
+              linewidth=4)
     
     ax2.plot( d3.df['x_s'],
               d3.df['Cp'],
               'black',
-              label  = r'$D=0.5\delta_0$',
-              marker = "v",
-              markersize = 10 )
+              label  = r'$D/\delta_0=0.5$',
+              ls     = (0, (3, 1, 1, 1, 1, 1)),
+              linewidth=4)
     
     ax2.plot( d4.df['x_s'],
               d4.df['Cp'],
               'red',
-              label  = r'$D=0.25\delta_0$', 
-              marker = "D",
-              markersize = 10)
+              label  = r'$D/\delta_0=0.25$', 
+              ls     = (0, (10, 3)),
+              linewidth=4)
 
-    ax2.plot( d5.df['x_s'],
-              d5.df['Cp'],
-              'purple',
-              label  = r'$D=0.125\delta_0$', 
-              marker = "^",
-              markersize = 10)
+#    ax2.plot( d5.df['x_s'],
+#              d5.df['Cp'],
+#              'purple',
+#              label  = r'$D=0.125\delta_0$', 
+#              marker = "^",
+#              markersize = 10)
 
     ax2.plot( d0_p.df['x_s'], 
               d0_p.df['Cp'],
               'gray', 
               label = r'$smooth$', 
-              ls    = '--')
+              ls    = '--',
+              linewidth=4)
 
+    ax2.plot( d1.df['x_s'],
+              d1.df['Cp'],
+              'green',
+              label  = r'$D\delta_0=2.0$',
+              ls     = ':',
+              linewidth=4)
+    
     ax2.minorticks_on()
+    ax2.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=15,
+                    width=2)
+    ax2.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1)
+
+    ax2.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax2.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
     ax2.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40})
     ax2.tick_params(axis='x',labelsize=32)
@@ -236,13 +280,16 @@ if plt_Cp is True:
     ax2.tick_params(axis='y',labelsize=32)
     
     ax2.set_xlim([-20.0,12.0])
-    #ax.set_ylim([0.3,0.85])
+    ax2.set_ylim([0.8,2.3])
 
-    ax2.legend(prop={'size':20})
+ #   ax2.legend(prop={'size':20})
     
-    ax2.grid()
+ # Adjust the spacing around the plot to remove the white margin
+    fig2.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax2.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
 
-    fig2.savefig("Cp_test.png")
+    fig2.savefig("Cp_pure.png")
     plt.show()
 
 

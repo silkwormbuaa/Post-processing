@@ -17,6 +17,8 @@ import os
 
 import matplotlib.pyplot as     plt
 
+import matplotlib.ticker as     ticker
+
 from   vista.psd         import ProbeData
 
 from   utils.timer       import timer
@@ -25,10 +27,14 @@ from   utils.tools       import get_filelist
 
 
 folderpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/probe_x'
-folderpath1 = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/probe_x'
+folderpath1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/probe_x'
+#folderpath1 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/probes/probe_x'
 
 outpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x_new'
 outpath1 = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
+outpath  = '/home/wencanwu/my_simulation/temp/DataPost/'
+
+Pure = False # if output pure figure for latex
 #%%
 #
 #os.chdir(folderpath1)
@@ -57,41 +63,41 @@ outpath1 = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
 
 #%% print single line
 
-#
+# smooth wall
 with timer("reading smooth wall probe"):
     os.chdir( folderpath0 )
     probefile_s  = 'probe_00142.dat'
     Lsep_s       = 13.12627403
     probe_s = ProbeData( probefile_s )
 """
+"""
 #1014
-#with timer("reading one probe"):
-#    os.chdir( folderpath1 )
-#    probefile1 = 'probe_00144.dat'
-#    Lsep1      = 9.805522
-#    probe1 = ProbeData( probefile1 )
+with timer("reading one probe"):
+    os.chdir( folderpath1 )
+    probefile1 = 'probe_00144.dat'
+    Lsep1      = 9.805522
+    probe1 = ProbeData( probefile1 )
+"""    
 
 #0926
-#with timer("reading one probe"):
-#    os.chdir( folderpath1 )
-#    probefile1 = 'probe_00145.dat'
-#    Lsep1      = 9.676337
-#    probe1 = ProbeData( probefile1 )
+with timer("reading one probe"):
+    os.chdir( folderpath1 )
+    probefile1 = 'probe_00145.dat'
+    Lsep1      = 9.676337
+    probe1 = ProbeData( probefile1 )
 
 #0825
-#with timer("reading one probe"):
-#    os.chdir( folderpath1 )
-#    probefile1 = 'probe_00135.dat'
-#    Lsep1      = 11.340638
-#    probe1 = ProbeData( probefile1 )
-
+with timer("reading one probe"):
+    os.chdir( folderpath1 )
+    probefile1 = 'probe_00135.dat'
+    Lsep1      = 11.340638
+    probe1 = ProbeData( probefile1 )
 #0927
-#with timer("reading one probe"):
-#    os.chdir( folderpath1 )
-#    probefile1 = 'probe_00118.dat'
-#    Lsep1      = 13.12627
-#    probe1 = ProbeData( probefile1 )
-"""    
+with timer("reading one probe"):
+    os.chdir( folderpath1 )
+    probefile1 = 'probe_00118.dat'
+    Lsep1      = 13.12627
+    probe1 = ProbeData( probefile1 )
 #1125
 with timer("reading one probe"):
     os.chdir( folderpath1 )
@@ -99,38 +105,55 @@ with timer("reading one probe"):
     probefile1 = 'probe_00189.dat'
     Lsep1      = 13.12627
     probe1 = ProbeData( probefile1 )
-    
+"""   
 with timer("clean data"):
     probe_s.cleandata(starttime=20)
     probe1.cleandata(starttime=20)
     
 with timer('psd'):
     
-    os.chdir(os.pardir)
+    os.chdir(outpath)
     
     probe_s.psd( 8, 0.5 )
-    probe1.psd( 5, 0.5 )
+    probe1.psd( 8, 0.5 )
     
-    fig, ax = plt.subplots( figsize=[10,8], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=[8,8], constrained_layout=True )
     
     St_Lsep_s = probe_s.St * Lsep_s
     St_Lsep1 = probe1.St * Lsep1
     
     ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=15,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1)
 
-    ax.semilogx(St_Lsep_s, probe_s.nd_pprime_fwpsd,'r', linewidth=1)
-    ax.semilogx(St_Lsep1, probe1.nd_pprime_fwpsd,'b', linewidth=1)
+#    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+
+    ax.semilogx(St_Lsep_s, probe_s.nd_pprime_fwpsd,'red', linewidth=1)
+    ax.semilogx(St_Lsep1, probe1.nd_pprime_fwpsd,'blue', linewidth=1)
     
     ax.set_xlim( [0.01,100] )
+    ax.set_ylim( [0.0,1.0] )
     
     ax.set_xlabel( r'$St=f\cdot L_{sep}/U_{\infty}$', 
                   fontdict={'size':24} )
     ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$', 
                   fontdict={'size':24} )
+    if Pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
     
-    ax.grid( True, which = 'both', ls='--' )
-    
-    plt.savefig("1125_psd_xnearsep")
+    plt.savefig("1014_psd")
     
     plt.show()
   

@@ -26,11 +26,11 @@ from   plt2pandas          import *
 
 
 
-folder = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
+folder = "/media/wencanwu/Seagate Expansion Drive/temp/221221/TP_stat"
 
-outfolder = "/home/wencanwu/my_simulation/temp/221125_lowRe/stat_per_ave/"
+outfolder = "/media/wencanwu/Seagate Expansion Drive/temp/221221/stat_per_ave/"
 
-listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
+listfile = "/media/wencanwu/Seagate Expansion Drive/temp/221221/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
