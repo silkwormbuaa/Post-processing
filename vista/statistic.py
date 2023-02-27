@@ -203,6 +203,7 @@ class StatisticData:
 #
 # - opened file
 # - a list of block numbers whose data chunk will be filled
+#   (no index issue)
 # ----------------------------------------------------------------------
 
     def read_stat_body( self, file , fill ):
@@ -238,7 +239,8 @@ class StatisticData:
 #
 # Desc
 #
-# - initialize an object of block data and read block data
+# - initialize an object of block data.
+# - for selected block, block data is read and RS is calculated.
 #
 # ----------------------------------------------------------------------
 
@@ -306,6 +308,18 @@ class BlockData:
             tmp = read_flt_bin( file.read(self.np*36*sfl), sfl )
             
             self.cor2 = np.reshape( tmp, (36,npz,npy,npx) ).T
+            
+            # calculate Reynolds Stress 
+            # uu represent <u`u`> actually
+            
+            u = self.mean[:,:,:,0]
+            v = self.mean[:,:,:,1]
+            w = self.mean[:,:,:,2]            
+            
+            self.uu = self.cor2[:,:,:,0] - np.multiply(u,u)
+            self.uv = self.cor2[:,:,:,1] - np.multiply(u,v)
+            self.vv = self.cor2[:,:,:,8] - np.multiply(v,v)
+            self.ww = self.cor2[:,:,:,15]- np.multiply(w,w)         
         
             print("Block %d data is read."%self.num)
         # skip data chunk if fill is False

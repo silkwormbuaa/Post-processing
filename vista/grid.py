@@ -497,5 +497,7 @@ class BlockGrid:
                     # now because in x direction, the geometry is uniform, 
                     # so set vol_fra in x direction constant
                     self.vol_fra[3:self.npx+3,jj,kk] = 1.0
+        
+        print("Block %d cut cell volume fractions are assigned."%self.num)
 
         
