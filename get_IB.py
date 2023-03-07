@@ -17,15 +17,15 @@ from   IB_force          import GetIBForce
 from   ReadIn            import ReadZonegrpWall
 
 #%% Get forces and pressure on IB
-ForceFolderPath = "/home/wencanwu/my_simulation/temp/221125_lowRe/forces_allblocks/"
-ZonegrpFile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist.dat"
+ForceFolderPath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/forces_allblocks/"
+ZonegrpFile = "/media/wencanwu/Seagate Expansion Drive/temp/221221/zonelist.dat"
 
 os.chdir(ForceFolderPath)
 os.chdir(os.pardir)
 zonegrp = ReadZonegrpWall(ZonegrpFile)
 
 with timer("Get forces on IB:"):
-    GetIBForce(zonegrp,ForceFolderPath,"Cf_points_1125.dat")
+    GetIBForce(zonegrp,ForceFolderPath,"Cf_points_1221.dat")
 
 
 

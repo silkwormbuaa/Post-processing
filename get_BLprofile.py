@@ -20,12 +20,15 @@ from   vista.pytecio     import timeave_fbl
 #FoldPath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 #OutPath  = "/home/wencanwu/my_simulation/temp/220825_lowRe/DataPost/"
 #ForceFoldPath = "/home/wencanwu/my_simulation/temp/221014_lowRe/forces_2/"
-#with timer("all works"):
+FoldPath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/TP_stat_old"
+OutPath  = "/media/wencanwu/Seagate Expansion Drive/temp/221221/DataPost/"
+ForceFoldPath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/forces_2/"
+with timer("all works"):
 #    GetZonegrp(FoldPath)
 #    zonegrp = ReadZonegrp(FoldPath,'zonelist.dat')
 #    ave_block(zonegrp,FoldPath,"mean_result_test.dat",3)
 #    ReadBlock(zonegrp,FoldPath,"mean_result_test2.dat",3)
-#    timeave_fbl(ForceFoldPath)
+    timeave_fbl(ForceFoldPath)
 
 #%% unfortunately, after loading one case, the dataset cannot
 #   be released, so when trying to load another case, the 
@@ -39,7 +42,7 @@ with timer("get lines"):
     GetLine(line_loc,zonegrp2,FoldPath,OutPath,1)
 """
 
-
+"""
 FoldPath = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/TP_stat"
 OutPath  = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/DataPost/"
 
@@ -67,3 +70,4 @@ with timer("get lines"):
     
     line_loc = [-53.6, 0.0, -53.6, 30.0]    
     GetLine(line_loc,zonegrp,FoldPath,OutPath,1)
+"""

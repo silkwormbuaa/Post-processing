@@ -33,8 +33,8 @@ from   utils.timer       import timer
 
 plt.rcParams.update({'font.size': 16})
 
-folderpath = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
-outpath    = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes'
+folderpath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/probes/psd_x'
+outpath    = '/media/wencanwu/Seagate Expansion Drive/temp/221221/probes'
 
 #folderpath = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x'
 #outpath    = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes'
@@ -104,12 +104,21 @@ with timer("import psd data"):
 # y_reatt = [0.001,100]
 
 ##1125
-St_Lsep = (np.array(St) * 13.1286891).tolist()
+#St_Lsep = (np.array(St) * 13.1286891).tolist()
+#print(St_Lsep[0][:10])
+#print(St_Lsep[0][-10:])
+#x_sep = [-10.55859, -10.55859]
+#y_sep = [0.001,100]
+#x_reatt = [2.570097, 2.570097]
+#y_reatt = [0.001,100]
+
+##1221
+St_Lsep = (np.array(St) * 13.266).tolist()
 print(St_Lsep[0][:10])
 print(St_Lsep[0][-10:])
-x_sep = [-10.55859, -10.55859]
+x_sep = [-10.6786859, -10.6786859]
 y_sep = [0.001,100]
-x_reatt = [2.570097, 2.570097]
+x_reatt = [2.58732, 2.58732]
 y_reatt = [0.001,100]
 
 ##flat_Luis
@@ -147,6 +156,6 @@ ax.set_title( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$',
              size=18)
 
 os.chdir(os.pardir)
-plt.savefig('psd1125_Lsep_gray.png')
+plt.savefig('psd1221_Lsep_gray.png')
 #plt.show()
 

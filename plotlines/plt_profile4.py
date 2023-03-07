@@ -149,8 +149,8 @@ dP = PlotDataframe( data_piro )
 
 if plt_u_vd :
     
-    x1 = np.linspace(1,20,50)
-    y1 = np.linspace(1,20,50)
+    x1 = np.linspace(1,12,50)
+    y1 = np.linspace(1,12,50)
     
     x2 = np.linspace(8,400,300)
     y2  = np.log(x2)/0.41 + 5.1    

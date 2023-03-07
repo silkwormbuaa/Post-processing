@@ -34,9 +34,9 @@ from   plt_tools         import PlotDataframe
 # ----------------------------------------------------------------------
 
 
-FoldPath = '/home/wencanwu/my_simulation/temp/221125_lowRe/linedata'
+FoldPath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/linedata'
 
-outpath  = '/home/wencanwu/my_simulation/temp/DataPost'
+outpath  = '/media/wencanwu/Seagate Expansion Drive/temp/221221/linedata'
 
 data1    = "Cf_points_1014.dat"
 
@@ -46,7 +46,7 @@ data3    = "Cf_points_0825.dat"
 
 data4    = "Cf_points_0927.dat"
 
-data5    = "Cf_points_1125.dat"
+data5    = "Cf_points_1221.dat"
 
 data0_f  = "x_cf_STBLI_Wencan.dat"
 
@@ -108,46 +108,55 @@ if plt_Cf is True:
     
     fig1, ax1 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
     
-    ax1.plot( d1.df['x_s'],
-              d1.df['Cf']*1000,
-              'green',
-              label  = r'$D=2.0\delta_0$',
-              marker = "s",
-              markersize = 10)
-    
-    ax1.plot( d2.df['x_s'],
-              d2.df['Cf']*1000,
-              'blue',
-              label  = r'$D=1.0\delta_0$',
-              marker = "o",
-              markersize = 10)
-    
-    ax1.plot( d3.df['x_s'],
-              d3.df['Cf']*1000,
-              'black',
-              label  = r'$D=0.5\delta_0$',
-              marker = "v",
-              markersize = 10)
+    ax1.plot( d5.df['x_s'],
+              d5.df['Cf']*1000,
+              'purple',
+              label  = r'$D/\delta_0=0.125$', 
+#              marker = "^",
+              markersize = 10,
+              linewidth=4)
     
     ax1.plot( d4.df['x_s'],
               d4.df['Cf']*1000,
               'red',
-              label  = r'$D=0.25\delta_0$', 
-              marker = "D",
-              markersize = 10)
+              label  = r'$D/\delta_0=0.25$', 
+              ls     = (0, (7, 3)),
+              linewidth=4)
     
-    ax1.plot( d5.df['x_s'],
-              d5.df['Cf']*1000,
-              'purple',
-              label  = r'$D=0.125\delta_0$', 
-              marker = "^",
-              markersize = 10)
+    ax1.plot( d3.df['x_s'],
+              d3.df['Cf']*1000,
+              'black',
+              label  = r'$D/\delta_0=0.5$',
+              ls     = (0, (3, 1, 1, 1, 1, 1)),
+              linewidth=4)
+    
+    ax1.plot( d2.df['x_s'],
+              d2.df['Cf']*1000,
+              'blue',
+              label  = r'$D/\delta_0=1.0$',
+              ls     = '-.',
+              linewidth=4)
 
+    ax1.plot( d1.df['x_s'],
+              d1.df['Cf']*1000,
+              'green',
+              label  = r'$D/\delta_0=2.0$',
+              ls     = ':',
+              linewidth=4)
+    
     ax1.plot( d0_f.df['x_s'], 
               d0_f.df['Cf']*1000,
               'gray', 
               label = r'$smooth$', 
-              ls    = '--')
+              ls    = '--',
+              linewidth = 4)
+    
+    ax1.plot( [-20,12],
+              [0,0],
+              'black',
+              ls = '--',
+              linewidth=1 )
+    
         
     ax1.minorticks_on()
 
@@ -164,7 +173,7 @@ if plt_Cf is True:
     
     ax1.grid()
 
-    fig1.savefig("Cf_test.png")
+    fig1.savefig("Cf_1221.png")
     plt.show()
 
     
@@ -186,46 +195,49 @@ if plt_Cp is True:
     
     fig2, ax2 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
 
-    ax2.plot( d1.df['x_s'],
-              d1.df['Cp'],
-              'green',
-              label  = r'$D=2.0\delta_0$',
-              marker = "s",
-              markersize = 10)
-    
-    ax2.plot( d2.df['x_s'],
-              d2.df['Cp'],
-              'blue',
-              label  = r'$D=1.0\delta_0$',
-              marker = "o",
-              markersize = 10)
-    
-    ax2.plot( d3.df['x_s'],
-              d3.df['Cp'],
-              'black',
-              label  = r'$D=0.5\delta_0$',
-              marker = "v",
-              markersize = 10 )
-    
-    ax2.plot( d4.df['x_s'],
-              d4.df['Cp'],
-              'red',
-              label  = r'$D=0.25\delta_0$', 
-              marker = "D",
-              markersize = 10)
-
     ax2.plot( d5.df['x_s'],
               d5.df['Cp'],
               'purple',
               label  = r'$D=0.125\delta_0$', 
-              marker = "^",
-              markersize = 10)
+#              marker = "^",
+#              markersize = 10,
+              linewidth=4)
+    
+    ax2.plot( d4.df['x_s'],
+              d4.df['Cp'],
+              'red',
+              label  = r'$D/\delta_0=0.25$', 
+              ls     = (0, (7, 3)),
+              linewidth=4)
+    
+    ax2.plot( d3.df['x_s'],
+              d3.df['Cp'],
+              'black',
+              label  = r'$D/\delta_0=0.5$',
+              ls     = (0, (3, 1, 1, 1, 1, 1)),
+              linewidth=4)
+    
+    ax2.plot( d2.df['x_s'],
+              d2.df['Cp'],
+              'blue',
+              label  = r'$D/\delta_0=1.0$',
+              ls     = '-.',
+              linewidth=4)
+    
+    ax2.plot( d1.df['x_s'],
+              d1.df['Cp'],
+              'green',
+              label  = r'$D\delta_0=2.0$',
+              ls     = ':',
+              linewidth=4)
 
     ax2.plot( d0_p.df['x_s'], 
               d0_p.df['Cp'],
               'gray', 
               label = r'$smooth$', 
-              ls    = '--')
+              ls    = '--',
+              linewidth=4)
+
 
     ax2.minorticks_on()
 
@@ -242,7 +254,7 @@ if plt_Cp is True:
     
     ax2.grid()
 
-    fig2.savefig("Cp_test.png")
+    fig2.savefig("Cp_1221.png")
     plt.show()
 
 

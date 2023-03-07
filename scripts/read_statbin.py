@@ -7,6 +7,7 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   read statistic binary data.
+           ! Set the headers for cutcell_setup first
 '''
 
 import sys
@@ -27,7 +28,7 @@ from   vista.grid        import GridData
 
 from   utils.timer       import timer
 
-datapath = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/'
+datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
 
 datafile = datapath + 'statistics.bin'
 gridfile = datapath + 'inca_grid.bin'

@@ -33,32 +33,32 @@ from   plt_tools         import PlotDataframe
 #
 # ----------------------------------------------------------------------
 
-OutPath  = "/home/wencanwu/my_simulation/temp/221125_lowRe/DataPost/"
+OutPath  = "/media/wencanwu/Seagate Expansion Drive/temp/221221/DataPost/"
 
-data1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/mean_result_ib_spf.dat'
+data1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/mean_result_ib_real.dat'
 norm1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/statistic_average.dat'
 
-data2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/mean_result_ib_spf.dat'
+data2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/mean_result_ib_real.dat'
 norm2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/statistic_average.dat' 
 
-data3 = '/home/wencanwu/my_simulation/temp/220825_lowRe/mean_result_ib_spf.dat'
-norm3 = '/home/wencanwu/my_simulation/temp/220825_lowRe/statistic_average.dat'
+data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/mean_result_ib_real.dat'
+norm3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/statistic_average.dat'
 
-data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/mean_result_ib_spf.dat'
+data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/mean_result_ib_real.dat'
 norm4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/statistic_average.dat'
 
-data5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/mean_result_ib_spf.dat'
-norm5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/statistic_average.dat'
+data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/mean_result_ib_real.dat'
+norm5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/statistic_average.dat'
 
 data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-53.6_1storder.dat'
 
-plt_u_vd = False
+plt_u_vd = True
 vd_mode  = 'bottom'
 
-plt_u    = False
-plt_RS   = False
-plt_rho  = False
-plt_T    = False
+plt_u    = True
+plt_RS   = True
+plt_rho  = True
+plt_T    = True
 plt_Mt   = True
 Compare  = True
 
@@ -131,7 +131,7 @@ d1.df.to_excel("1014.xlsx")
 d2.df.to_excel("0926.xlsx")
 d3.df.to_excel("0825.xlsx")
 d4.df.to_excel("0927.xlsx")
-d5.df.to_excel("1125.xlsx")
+d5.df.to_excel("1221.xlsx")
 
 # ----------------------------------------------------------------------
 # >>> Plot van Driest transformed u profile                      ( 1 )

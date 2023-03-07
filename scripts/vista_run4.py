@@ -26,50 +26,50 @@ from   utils.timer       import timer
 from   utils.tools       import get_filelist
 
 
-folderpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/probe_x'
-folderpath1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/probe_x'
-#folderpath1 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/probes/probe_x'
+folderpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes'
+#folderpath1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/probe_x'
+folderpath1 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/probes/probe_x'
 
-outpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x_new'
-outpath1 = '/home/wencanwu/my_simulation/temp/221125_lowRe/probes/psd_x'
-outpath  = '/home/wencanwu/my_simulation/temp/DataPost/'
+#outpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x_new'
+outpath1 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/probes/psd_x'
+#outpath  = '/home/wencanwu/my_simulation/temp/DataPost/'
 
 Pure = False # if output pure figure for latex
 #%%
-#
-#os.chdir(folderpath1)
-#
-#filelist = get_filelist( folderpath1 )
-#
-#n_probe = len(filelist)
-#
-#print( "we have got %5d probes data"%( n_probe ) )
-#
-#with timer('PSD for one case'):
-#    
-#    os.chdir( outpath1 )
-#    
-#    for i, probefile in enumerate(filelist):
-#        
-#        with timer('%5.3f%% Get psd for %s probe'%(float(i)/n_probe*100,probefile[-9:-4])):
-#            
-#            probe = ProbeData( probefile )
-#            
-#            probe.cleandata( starttime=20 )
-#            
-#            probe.psd( 5, 0.5 )
-#
-#            probe.write_psd()
+"""
+os.chdir(folderpath1)
 
+filelist = get_filelist( folderpath1 )
+
+n_probe = len(filelist)
+
+print( "we have got %5d probes data"%( n_probe ) )
+
+with timer('PSD for one case'):
+    
+    os.chdir( outpath1 )
+    
+    for i, probefile in enumerate(filelist):
+        
+        with timer('%5.3f%% Get psd for %s probe'%(float(i)/n_probe*100,probefile[-9:-4])):
+            
+            probe = ProbeData( probefile )
+            
+            probe.cleandata( starttime=20 )
+            
+            probe.psd( 8, 0.5 )
+
+            probe.write_psd()
+
+"""
 #%% print single line
 
 # smooth wall
 with timer("reading smooth wall probe"):
     os.chdir( folderpath0 )
-    probefile_s  = 'probe_00142.dat'
+    probefile_s  = 'probe_sep.dat'
     Lsep_s       = 13.12627403
     probe_s = ProbeData( probefile_s )
-"""
 """
 #1014
 with timer("reading one probe"):
@@ -77,6 +77,7 @@ with timer("reading one probe"):
     probefile1 = 'probe_00144.dat'
     Lsep1      = 9.805522
     probe1 = ProbeData( probefile1 )
+"""
 """    
 
 #0926
@@ -106,13 +107,23 @@ with timer("reading one probe"):
     Lsep1      = 13.12627
     probe1 = ProbeData( probefile1 )
 """   
+    
+#1221
+with timer("reading one probe"):
+    os.chdir( folderpath1 )
+#    probefile1 = 'probe_00176.dat'
+    probefile1 = 'probe_00175.dat'
+    Lsep1      = 13.266
+    probe1 = ProbeData( probefile1 )    
+
+
 with timer("clean data"):
     probe_s.cleandata(starttime=20)
     probe1.cleandata(starttime=20)
     
 with timer('psd'):
     
-    os.chdir(outpath)
+    os.chdir(outpath1)
     
     probe_s.psd( 8, 0.5 )
     probe1.psd( 8, 0.5 )
@@ -153,7 +164,7 @@ with timer('psd'):
     ax.grid(visible=True, which='both',axis='both',color='gray',
             linestyle='--',linewidth=0.2)
     
-    plt.savefig("1014_psd")
+    plt.savefig("1221_psd")
     
     plt.show()
   

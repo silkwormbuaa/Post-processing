@@ -21,9 +21,13 @@ from vista.pytecio       import *
 
 
 
-folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
+#folderpath = "/home/wencanwu/my_simulation/temp/221125_lowRe/TP_stat"
 
-listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
+#listfile = "/home/wencanwu/my_simulation/temp/221125_lowRe/zonelist_sorted.dat"
+
+folderpath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/TP_stat"
+
+listfile = "/media/wencanwu/Seagate Expansion Drive/temp/221221/zonelist_sorted.dat"
 
 with timer("whole processing "):
     
@@ -37,5 +41,5 @@ with timer("whole processing "):
     
     get_xline( folderpath, zonegrps,
                segment, 
-               "streamwise_line_1125.dat",
+               "streamwise_line_1221.dat",
                var_list             )

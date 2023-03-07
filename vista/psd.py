@@ -50,7 +50,8 @@ class ProbeData:
                           'w',
                           'rho',
                           'rhoE',
-                          'p'                          
+                          'p',
+                          'T'       # updated inca since Jan 2023, by default, T is added                          
                         ]
 
         with open( datafile, 'r' ) as f:
