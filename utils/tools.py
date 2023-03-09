@@ -125,21 +125,26 @@ def if_penetrate( zone_range, segment ):
 #   2 : 0926 case, D/delta = 1
 #   3 : 0825 case, D/delta = 0.5
 #   4 : 0927 case, D/delta = 0.25
+#   5 : 1221 case, D/delta = 0.125
 #
 # - wave length lambda = 1.04
 #
 # ----------------------------------------------------------------------
 
-def is_above_wavywall( y, z, case = 1):
+def is_above_wavywall( y, z, Case = 1):
     
     A = 0.26
     
     len_w = 1.04
     
-    if   case == 1:   D = 10.4
-    elif case == 2:   D = 5.2    
-    elif case == 3:   D = 2.6       
-    elif case == 4:   D = 1.3
+    if   Case == 1:   D = 10.4
+    elif Case == 2:   D = 5.2    
+    elif Case == 3:   D = 2.6       
+    elif Case == 4:   D = 1.3
+    # Case 5: the wavelength is smaller and do not have flat valley
+    elif Case == 5:
+        len_w = 0.65
+        D     = 0.65
     
     z0 = z % D 
     
@@ -153,7 +158,7 @@ def is_above_wavywall( y, z, case = 1):
         y_w = -A + A*math.cos( (z0-D)/len_w*2*math.pi )
     
     else:
-    
+        # for case 5, this will not happen
         y_w = -2*A
     
     # compare wall with cell center location
