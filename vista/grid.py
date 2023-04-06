@@ -188,7 +188,7 @@ class GridData:
 #
 # Desc
 #
-# - based on lx0,ly0,lz0, sorting block grids
+# - based on lx0,ly0,lz0, sorting block grids index (not Blockgrid!)
 # - same x-y location blocks form a block group
 #
 # ----------------------------------------------------------------------
@@ -464,40 +464,45 @@ class BlockGrid:
 # - 2. for cells, which is above wall and is not cut cell, vol_fra = 1.0
 # ----------------------------------------------------------------------
 
-    def assign_vol_fra( self, df ):
+    def assign_vol_fra( self, df, Case ):
         
-        # check block number
-        if df.iloc[0,4] != self.num :
-            raise ValueError("block number does not match!")
-        
-        # take out data from df
-        i = np.array( df['i'] )
-        j = np.array( df['j'] )
-        k = np.array( df['k'] )
-        vol = np.array( df['vol'] )
-        
-        self.vol_fra = np.zeros( shape=(self.npx+6,self.npy+6,self.npz+6) )
-        
-        # df['i'], df['j'], df['k'] all count from 1 like Fortran
-        # well in python, array count from 0.
-        for index, value in enumerate( vol ):
+        if len(df) > 0:
+                
+            # check block number
+            if df.iloc[0,4] != self.num :
+                raise ValueError("block number does not match!")
             
-            self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
-        
-        # for cells that above wall and not cut cell, set vol_fra = 1
-        for kk in range( 3,self.npz+3 ):
-            for jj in range( 3,self.npy+3 ):
+            # take out data from df
+            i = np.array( df['i'] )
+            j = np.array( df['j'] )
+            k = np.array( df['k'] )
+            vol = np.array( df['vol'] )
+            
+            self.vol_fra = np.zeros( shape=(self.npx+6,self.npy+6,self.npz+6) )
+            
+            # df['i'], df['j'], df['k'] all count from 1 like Fortran
+            # well in python, array count from 0.
+            for index, value in enumerate( vol ):
                 
-                y = self.gy[jj]
-                z = self.gz[kk]
-                above_wall = is_above_wavywall( y, z, case = 4 )
-                
-                if above_wall and (self.vol_fra[3][jj][kk]-0.0)<0.0000001 :
+                self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
+            
+            # for cells that above wall and not cut cell, set vol_fra = 1
+            for kk in range( 3,self.npz+3 ):
+                for jj in range( 3,self.npy+3 ):
                     
-                    # now because in x direction, the geometry is uniform, 
-                    # so set vol_fra in x direction constant
-                    self.vol_fra[3:self.npx+3,jj,kk] = 1.0
-        
-        print("Block %d cut cell volume fractions are assigned."%self.num)
+                    y = self.gy[jj]
+                    z = self.gz[kk]
+                    above_wall = is_above_wavywall( y, z, Case )
+                    
+                    if above_wall and (self.vol_fra[3][jj][kk] < 0.0000001) :
+                        
+                        # now because in x direction, the geometry is uniform, 
+                        # so set vol_fra in x direction constant
+                        self.vol_fra[3:self.npx+3,jj,kk] = 1.0
+            
+            print("Block %d cut cell volume fractions are assigned."%self.num)
 
-        
+        elif len(df) == 0:
+            
+            self.vol_fra = np.ones( shape=(self.npx+6,self.npy+6,self.npz+6) )
+            
