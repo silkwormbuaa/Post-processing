@@ -15,14 +15,15 @@ import os
 
 import numpy             as     np
 
-
 sys.path.append('..')
 
-from utils.read_binary   import read_int_bin
+from   vista.block       import BlockData
 
-from utils.read_binary   import read_flt_bin
+from   utils.read_binary import read_int_bin
 
-from utils.read_binary   import read_log_bin
+from   utils.read_binary import read_flt_bin
+
+from   utils.read_binary import read_log_bin
 
 #%% 
 class StatisticData:
@@ -219,6 +220,7 @@ class StatisticData:
         while not end_of_file:
         
             # read in block one by one
+            # only blocks in fill list will be filled with data chunk
         
             self.bl.append( BlockData( file, self.n_var, fill ) )
             
@@ -226,7 +228,7 @@ class StatisticData:
                                     
             if self.pos >= self.fsize: end_of_file = True
 
-
+"""
 # ----------------------------------------------------------------------
 # >>> Class Statistic Block Data                                ( 1 )
 # ----------------------------------------------------------------------
@@ -334,3 +336,4 @@ class BlockData:
         # calculate the block data size in byte
         
         self.size = self.np*self.n_var*sfl + 4*sin
+"""

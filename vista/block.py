@@ -34,15 +34,21 @@ from utils.read_binary   import read_log_bin
 #
 # Desc
 #
-# - initialize an object of block and read in block data
+# - initialize an object of block data.
+# - for selected block, block data is read and RS is calculated.
 #
 # ----------------------------------------------------------------------
 
 class BlockData:
     
-    def __init__( self, file, n_var ):
+    def __init__( self, file, n_var, fill ):
         
+        self.verbose = False
+        
+        # index of block, can be read from blockdata itself
         self.num = 0
+        
+        # size of this BlockData (in bytes)
         self.size = 0
         self.n_var = n_var
         self.dim = []
@@ -51,12 +57,8 @@ class BlockData:
         self.mean = []
         self.cor2 = []
         self.cc_vf = []
-        
-        # empty BlockGrid
-        
-        self.g = BlockGrid()
 
-        # size of int 
+        # size of type 
         
         sin = 4
         sfl = 8
@@ -73,33 +75,58 @@ class BlockData:
         
         self.np  = npx * npy * npz
         
-        # read primitive variables + 'p T mu'
+        # if this block chunk will be read?
+        # by default, to_fill is False
+        self.to_fill = False
+        if self.num in fill: self.to_fill = True
+      
+        # read primitive variables + 'p T mu', when fill is true.
+        if self.to_fill:
+            
+            tmp = read_flt_bin( file.read(self.np*8*sfl), sfl)
+            
+            self.mean = np.reshape( tmp, (8,npz,npy,npx) ).T
+            
+            if self.verbose:
+                print(type(self.mean))
+                print('self.mean[:,0,0,0]')
+                print(self.mean[:,0,0,0])
+                print('self.mean[0,:,0,0]')
+                print(self.mean[0,:,0,0])
+                print('self.mean[0,0,:,0]')
+                print(self.mean[0,0,:,0])
+                print('self.mean[0,0,0,:]')
+                print(self.mean[0,0,0,:])
+            
+            # read double correlations: #36 is the correlations' number 
+            
+            tmp = read_flt_bin( file.read(self.np*36*sfl), sfl )
+            
+            self.cor2 = np.reshape( tmp, (36,npz,npy,npx) ).T
+            
+            # calculate Reynolds Stress 
+            # uu represent <u`u`> actually
+            
+            u = self.mean[:,:,:,0]
+            v = self.mean[:,:,:,1]
+            w = self.mean[:,:,:,2]            
+            
+            self.uu = self.cor2[:,:,:,0] - np.multiply(u,u)
+            self.uv = self.cor2[:,:,:,1] - np.multiply(u,v)
+            self.vv = self.cor2[:,:,:,8] - np.multiply(v,v)
+            self.ww = self.cor2[:,:,:,15]- np.multiply(w,w)         
         
-        tmp = read_flt_bin( file.read(self.np*8*sfl), sfl)
-        
-        self.mean = np.reshape( tmp, (8,npz,npy,npx) ).T
-        
-        print(type(self.mean))
-        print('self.mean[:,0,0,0]')
-        print(self.mean[:,0,0,0])
-        print('self.mean[0,:,0,0]')
-        print(self.mean[0,:,0,0])
-        print('self.mean[0,0,:,0]')
-        print(self.mean[0,0,:,0])
-        print('self.mean[0,0,0,:]')
-        print(self.mean[0,0,0,:])
-        
-        
-        # read double correlations 
-        
-        tmp = read_flt_bin( file.read(self.np*36*sfl), sfl )
-        
-        self.cor2 = np.reshape( tmp, (36,npz,npy,npx) ).T
+            print("Block %d data is read."%self.num)
+        # skip data chunk if fill is False
+        else:
+            
+            # skip mean data
+            file.seek( self.np*8*sfl, 1 )
+            
+            # skip correlation data
+            file.seek( self.np*36*sfl, 1 )
         
         # calculate the block data size in byte
         
         self.size = self.np*self.n_var*sfl + 4*sin
-
-        
-
         
