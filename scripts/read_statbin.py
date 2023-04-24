@@ -28,7 +28,9 @@ from   vista.grid        import GridData
 
 from   utils.timer       import timer
 
-datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
+#datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
+
+datapath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/'
 
 datafile = datapath + 'statistics.bin'
 gridfile = datapath + 'inca_grid.bin'
@@ -37,7 +39,17 @@ outpath  = datapath
 
 ccfile   = datapath + 'cutcells_setup.dat'
 
-outfile  = 'mean_profile.dat'
+outfile  = 'mean_profile_test.dat'
+
+# - select which wavy wall case
+#
+#   1 : 1014 case, D/delta = 2
+#   2 : 0926 case, D/delta = 1
+#   3 : 0825 case, D/delta = 0.5
+#   4 : 0927 case, D/delta = 0.25
+#   5 : 1221 case, D/delta = 0.125
+
+geo_case = 4
 
 G = GridData( gridfile )
 
@@ -47,13 +59,23 @@ with open( gridfile, 'rb' ) as f:
     
     G.verbose = True
     
+    
+    ## read in whole grid info
+    
+    # 1. grid headers: containing what will be read
+    # 2. grid body: inputting every block's grids
+    # 3. sorted_group: sort and group block index basd on x,y,z
+    
     G.read_grid_header( f )
     
     G.read_grid_body( f )
     
     G.get_sorted_groups()
     
-    rect1 = [-57, -1.2576, -49.625, 0]
+    
+    # given a rectangular region, get a list of blocks within the region
+    
+    rect1 = [-57, -1.2576, -49.625, 1.73695342]
     
     G.select_blockgrids( rect1 )
     
@@ -73,22 +95,25 @@ with open( gridfile, 'rb' ) as f:
         for num in block_list:
 
             # dataframe slice for a certain block
-            temp = cc_df[cc_df['block_number'] == num ]
+            temp_df = cc_df[cc_df['block_number'] == num ]
             
             # block number starts from 1, but python list index
             # starts from 0
             
-            G.g[num-1].assign_vol_fra( temp )
+            G.g[num-1].assign_vol_fra( temp_df, geo_case )
 
 S = StatisticData( datafile )
 
 with timer("read block statistics data "):
     with open( datafile, 'br' ) as f:   
             
-        S.read_stat_header(f)
+        S.read_stat_header( f )
 
-        S.read_stat_body(f,block_list)
+        # only blocks in the list will be filled data chunk
+        S.read_stat_body( f, block_list )
+        
 
+"""
 with timer("calculating profile "):
     
     npy = G.g[block_list[0]-1].npy
@@ -194,4 +219,5 @@ with open(outfile, 'w') as f:
         f.write(str('{:<17.8e}'.format(vv_ls[i])) )
         f.write(str('{:<17.8e}'.format(ww_ls[i])) + '\n' )
         
+"""
         

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   pli_p_prime.py
+@File    :   plt_p_prime.py
 @Time    :   2022/10/18 
 @Author  :   Wencan WU 
 @Version :   1.0

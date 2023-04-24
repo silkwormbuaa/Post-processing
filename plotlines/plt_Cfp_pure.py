@@ -181,7 +181,7 @@ if plt_Cf is True:
     ax1.set_ylabel("$C_fx10^3$",fontdict={'size':40})
     ax1.tick_params(axis='y',labelsize=32)
     
-    ax1.set_xlim([-20.0,12.0])
+    ax1.set_xlim([-20.0,10.0])
     ax1.set_ylim([-2.0,4.5])
 
 #    ax1.legend(prop={'size':20},loc='best')
@@ -279,7 +279,7 @@ if plt_Cp is True:
     ax2.set_ylabel("$<p_w>/p_{\infty}$",fontdict={'size':40})
     ax2.tick_params(axis='y',labelsize=32)
     
-    ax2.set_xlim([-20.0,12.0])
+    ax2.set_xlim([-20.0,10.0])
     ax2.set_ylim([0.8,2.3])
 
  #   ax2.legend(prop={'size':20})
