@@ -158,7 +158,6 @@ def read_flt_bin( byte_stream, precision ):
             return struct.unpack_from( 'd', byte_stream, offset=0)[0]
 
 
-
     else:
         raise ValueError('Float precision not supported')
 
@@ -256,3 +255,32 @@ def read_chr_bin( byte_stream ):
     # Read data (if output is an array, it is in column-major order)
     return struct.unpack_from( '%ds'%n, byte_stream
                              , offset = 0 )[0].decode('utf-8')
+
+
+# ----------------------------------------------------------------------
+# >>> read_bin_3Dflt                                            ( 4 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/04/24  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def read_bin_3Dflt( pos, file, N1, N2, N3, kind ):
+    
+    # Get number of floats that should be read
+    
+    n = N1 * N2 * N3
+    
+    # move the file pointer to where reading starts
+    
+    file.seek( pos )
+    
+    flt_buf = read_flt_bin( file.read( n*kind ), kind )
+    
+    return flt_buf
