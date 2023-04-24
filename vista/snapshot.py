@@ -509,20 +509,20 @@ class Snapshot:
  
             # Initialize solution buffer
  
-            sol = np.zeros( shape=(N1*N2*N3, self.n_vars), dtype=np.float32 )
+            sol = np.zeros( shape=(self.n_vars, N1*N2*N3), dtype=np.float32 )
  
  
             # Read solution fields
  
             for v in range( self.n_vars ):
  
-                sol[:,v] = read_bin_3Dflt( self.pos, file, N1,N2,N3, self.kind )
+                sol[v,:] = read_bin_3Dflt( self.pos, file, N1,N2,N3, self.kind )
  
-                self.pos += (N1 * N2 * N3) * self.kind
+                self.pos += ( N1*N2*N3 ) * self.kind
  
                 # Sanity check on the pressure
  
-                if v == 4 and np.all( ( sol[:,v] == 0.0 ) ): io_alert = True
+                if v == 4 and np.all( ( sol[v,:] == 0.0 ) ): io_alert = True
 
 
             # Evaluate
@@ -553,8 +553,169 @@ class Snapshot:
  
                 self.snap_data.append( [ bl_num, N1, N2, N3, GX, sol ] )
 
+
 # ----------------------------------------------------------------------
-# >>> Main during test                                           ( -1 )
+# >>> check the range of snapshot                                ( 4 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/04/24  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def check_range( self ):
+        
+        # check if data is available
+        
+        if len(self.snap_data) == 0:
+            
+            print('please read in snapshot data first!')
+        
+        # when data is loaded
+            
+        else:
+            
+            # check data with ghost cells
+            
+            xmin =  999999.0;   xmax = -999999.0
+            ymin =  999999.0;   ymax = -999999.0
+            zmin =  999999.0;   zmax = -999999.0
+            
+            for bl_data in self.snap_data:
+                
+                xmin = min( min(bl_data[4][0]), xmin )
+                xmax = max( max(bl_data[4][0]), xmax )
+                ymin = min( min(bl_data[4][1]), ymin )
+                ymax = max( max(bl_data[4][1]), ymax )
+                zmin = min( min(bl_data[4][2]), zmin )
+                zmax = max( max(bl_data[4][2]), zmax )
+                
+            print('before dropping ghost cells')
+            print( 'x range [ %f, %f ]' % (xmin,xmax) )
+            print( 'y range [ %f, %f ]' % (ymin,ymax) )
+            print( 'z range [ %f, %f ]' % (zmin,zmax) )
+
+        
+        # check if data is available
+        
+        if len(self.snap_cleandata) == 0:
+            
+            print('please clean snapshot data first!')
+        
+        # when data is loaded
+            
+        else:
+
+            # check range after drop ghost cells
+            
+            xmin =  999999.0;   xmax = -999999.0
+            ymin =  999999.0;   ymax = -999999.0
+            zmin =  999999.0;   zmax = -999999.0
+            
+            for bl_data in self.snap_cleandata:
+                
+                xmin = min( min(bl_data[4][0]), xmin )
+                xmax = max( max(bl_data[4][0]), xmax )
+                ymin = min( min(bl_data[4][1]), ymin )
+                ymax = max( max(bl_data[4][1]), ymax )
+                zmin = min( min(bl_data[4][2]), zmin )
+                zmax = max( max(bl_data[4][2]), zmax )
+                
+            print('after dropping ghost cells:')
+            print( 'x range [ %f, %f ]' % (xmin,xmax) )
+            print( 'y range [ %f, %f ]' % (ymin,ymax) )
+            print( 'z range [ %f, %f ]' % (zmin,zmax) )
+
+
+# ----------------------------------------------------------------------
+# >>> Drop ghost point data                                     ( 5 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/04/24  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+   
+    def drop_ghost( self , buff ):
+
+        # check if data is available
+        
+        if len(self.snap_data) == 0:
+            
+            raise  ValueError('please read in snapshot data first!')
+        
+        # when data is loaded
+            
+        else:    
+            
+            # clean data(with out ghost cells)
+            
+            self.snap_cleandata = []  
+            
+            
+            # Loop over all snap_data's elements
+            # Snap_data_bl = [ bl_num, N1, N2, N3, GX, sol ]
+            
+            for snap_data_bl in self.snap_data:
+                
+                bl_num = snap_data_bl[0]
+                
+                N1     = snap_data_bl[1]
+                N2     = snap_data_bl[2]
+                N3     = snap_data_bl[3]
+                
+                
+                Nx     = N1 - buff*2
+                Ny     = N2 - buff*2
+                Nz     = N3 - buff*2
+                
+                # Grid buffer
+                
+                GX = []
+                
+                # Loop over gx(:), gy(:), gz(:)
+                
+                for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+                    
+                # Solution buffer
+                
+                sol = np.zeros( shape=(self.n_vars,Nx*Ny*Nz), dtype=np.float32 )
+                
+                # solution field without ghost cells
+                
+                sol_buff = np.array(snap_data_bl[5]).reshape( self.n_vars, N1, N2, N3 )
+                
+                sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
+                
+                # this is wrong !!!
+                sol_buff = sol_buff.reshape(( self.n_vars, Nx*Ny*Nz ))
+                
+                for v in range( self.n_vars ):
+                    
+                    sol[v,:] = sol_buff[v,:]
+                
+                # Append to snap_data_clean
+                
+                self.snap_cleandata.append( [bl_num, Nx, Ny, Nz, GX, sol] )
+                    
+                    
+                
+                  
+        
+
+
+# ----------------------------------------------------------------------
+# >>> Main: for test and debugging                               ( -1 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -573,7 +734,7 @@ if __name__ == "__main__":
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
     
-    test_dir = test_dir2 + '/snapshot.bin'
+    test_dir = test_dir1 + '/snapshot.bin'
     
     snapshot1 = Snapshot( test_dir )
     
@@ -582,6 +743,10 @@ if __name__ == "__main__":
     with timer('read one snapshot:'):
     
         snapshot1.read_snapshot()
+        
+        snapshot1.drop_ghost( buff=3 )
+        
+        snapshot1.check_range()
     
 #    with open( snapshot1.dir,'rb' ) as fs:
         
