@@ -79,7 +79,8 @@ class BlockData:
         # by default, to_fill is False
         self.to_fill = False
         if self.num in fill: self.to_fill = True
-      
+
+        # primitive variables 'rho, rhou, rhov, rhow, rhoE'
         # read primitive variables + 'p T mu', when fill is true.
         if self.to_fill:
             
