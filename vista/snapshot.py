@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @File    :   snapshot.py
@@ -7,7 +6,7 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Class and methods of reading snapshots.
-         :   Adapted from Luis Laguarda
+         :   Adapted from Luis Laguarda's RAPTOR
 '''
 
 import os
@@ -16,7 +15,9 @@ import sys
 
 import numpy             as np
 
-import pandas            as pd
+import pyvista           as pv
+
+import matplotlib.pyplot        as plt
 
 sys.path.append('..')
 
@@ -670,10 +671,13 @@ class Snapshot:
                 
                 bl_num = snap_data_bl[0]
                 
+                # N1, N2, N3 are dimensions with ghost cells
+                
                 N1     = snap_data_bl[1]
                 N2     = snap_data_bl[2]
                 N3     = snap_data_bl[3]
                 
+                # Nx, Ny, Nz are dimensions without ghost cells
                 
                 Nx     = N1 - buff*2
                 Ny     = N2 - buff*2
@@ -687,35 +691,97 @@ class Snapshot:
                 
                 for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
                     
-                # Solution buffer
                 
-                sol = np.zeros( shape=(self.n_vars,Nx*Ny*Nz), dtype=np.float32 )
+                # Solution buffer to get solution field without ghost cells
                 
-                # solution field without ghost cells
-                
-                sol_buff = np.array(snap_data_bl[5]).reshape( self.n_vars, N1, N2, N3 )
+                # Notice the binary data storage order [n_var, Z, Y, X]
+                # reshape to chunk -> slice -> reshape to vector
+
+                sol_buff = np.array(snap_data_bl[5]).reshape( self.n_vars, N3, N2, N1 )
                 
                 sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
                 
-                # this is wrong !!!
                 sol_buff = sol_buff.reshape(( self.n_vars, Nx*Ny*Nz ))
                 
-                for v in range( self.n_vars ):
-                    
-                    sol[v,:] = sol_buff[v,:]
                 
                 # Append to snap_data_clean
                 
-                self.snap_cleandata.append( [bl_num, Nx, Ny, Nz, GX, sol] )
+                self.snap_cleandata.append( [bl_num, Nx, Ny, Nz, GX, sol_buff] )
                     
                     
-                
-                  
-        
-
-
 # ----------------------------------------------------------------------
-# >>> Main: for test and debugging                               ( -1 )
+# >>> Testing section                                           ( -1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/04/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+def Testing():
+    
+    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00514923'
+    
+    test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
+    
+    test_dir = test_dir2 + '/snapshot.bin'
+    
+    snapshot1 = Snapshot( test_dir )
+    
+#    snapshot1.verbose = False
+
+    with timer('read one snapshot:'):
+    
+        snapshot1.read_snapshot()
+                
+        snapshot1.drop_ghost( buff=3 )
+        
+        snapshot1.check_range()
+        
+    with timer('check one data block:'):
+        
+        # [bl_num, Nx, Ny, Nz, GX, sol_buff]
+        
+        snap_bl = snapshot1.snap_cleandata[0]
+        
+        Nx = snap_bl[1]
+        Ny = snap_bl[2]
+        Nz = snap_bl[3]
+        
+        x = snap_bl[4][0]
+        y = snap_bl[4][1]
+        
+        u = np.array(snap_bl[5][0]).reshape(Nz,Ny,Nx)
+        
+        u_slice = u[0,:,:]
+        
+        u_slice = u_slice.T
+        
+        print(type(u_slice))
+        print(type(u_slice[0][0]))
+        print(u_slice.shape)
+        
+#        for l in u_slice:  print(l)
+
+'''        
+        X,Y = np.meshgrid( x, y )
+        
+        print(type(X),type(Y))
+        print(X.shape,Y.shape)
+        
+        fig, ax = plt.subplots()
+        contour = ax.contourf(X,Y, u_slice)
+#        ax.clabel(contour, inline=True, fontsize=10)
+        ax.set_title('Contour Plot')
+        plt.show()
+
+'''
+# ----------------------------------------------------------------------
+# >>> Main: for test and debugging                              ( -- )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -730,24 +796,4 @@ class Snapshot:
 
 if __name__ == "__main__":
     
-    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00514923'
-    
-    test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
-    
-    test_dir = test_dir1 + '/snapshot.bin'
-    
-    snapshot1 = Snapshot( test_dir )
-    
-#    snapshot1.verbose = False
-
-    with timer('read one snapshot:'):
-    
-        snapshot1.read_snapshot()
-        
-        snapshot1.drop_ghost( buff=3 )
-        
-        snapshot1.check_range()
-    
-#    with open( snapshot1.dir,'rb' ) as fs:
-        
-#        snapshot1.read_snap_header( fs )
+    Testing()
