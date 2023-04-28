@@ -121,6 +121,7 @@ class Snapshot:
         self.verbose = True
 
 
+
 # ----------------------------------------------------------------------
 # >>> Read snapshot                                              ( 1 )
 # ----------------------------------------------------------------------
@@ -180,6 +181,8 @@ class Snapshot:
         if self.verbose: print( '%d blocks were read.'%self.n_bl )
         
         if self.verbose: print( 'Completed.' ); sys.stdout.flush()
+
+
 
 # ----------------------------------------------------------------------
 # >>> Read snapshot header                                       ( 2 )
@@ -376,6 +379,8 @@ class Snapshot:
             
             print( '' ); sys.stdout.flush()
 
+
+
 # ----------------------------------------------------------------------
 # >>> Read snapshot block                                        ( 3 )
 # ----------------------------------------------------------------------
@@ -459,9 +464,7 @@ class Snapshot:
             # Block dimensions
  
             N1 = bl_dim[0]
- 
             N2 = bl_dim[1]
- 
             N3 = bl_dim[2]
  
             # Update file pointer
@@ -475,43 +478,38 @@ class Snapshot:
             
  
             # Read grid vectors
+            # if read in 3D blocks
     
-            if self.snap_with_gx:
+            if self.snap_with_gx and self.type=='block':
                 
-    
+                              
                 # First direction
-                
-                if N1 > 1:
     
-                    G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
-        
-                    self.pos += N1*self.kind
-        
-                    GX.append( G1 )
+                G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
+
+                self.pos += N1*self.kind
+
+                GX.append( G1 )
                 
     
                 # Second direction
-                if N2 > 1:
     
-                    G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
-        
-                    self.pos += N2*self.kind
-        
-                    GX.append( G2 )
+                G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
+    
+                self.pos += N2*self.kind
+    
+                GX.append( G2 )
                 
     
                 # Third direction
     
-                if N3 > 1:
-    
-                    G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
-    
-                    self.pos     += N3*self.kind
-    
-                    GX.append( G3 )
-    
-    
-    
+                G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
+
+                self.pos     += N3*self.kind
+
+                GX.append( G3 )
+                
+
                     # Sanity check
     
 #                    if np.all( ( G3 == 0.0 ) ): io_alert = True 
@@ -521,6 +519,64 @@ class Snapshot:
  
 #                if np.all( ( G1 == 0.0 ) ) \
 #                    or np.all( ( G2 == 0.0 ) ): io_alert = True
+
+            # if read in slice snapshot
+            
+            elif self.snap_with_gx and self.type == 'slice':
+                
+                # slice normal to X
+                
+                if self.slic_type == 'X':
+                    
+                    
+                    G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
+                    
+                    self.pos += N2*self.kind
+                    
+                    GX.append( G2 )
+                    
+                    
+                    G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
+                    
+                    self.pos += N3*self.kind
+                    
+                    GX.append( G3 )
+                    
+                    
+                # slice normal to Y
+                
+                elif self.slic_type == 'Y' or self.slic_type == 'W':
+                    
+                    G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
+                    
+                    self.pos += N1*self.kind
+                    
+                    GX.append( G1 )
+                    
+
+                    G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
+                    
+                    self.pos += N3*self.kind
+                    
+                    GX.append( G3 )
+                
+                
+                # slice normal to Z
+                
+                elif self.slic_type == 'Z': 
+
+                    G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
+                    
+                    self.pos += N1*self.kind
+                    
+                    GX.append( G1 )
+                    
+                    
+                    G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
+                    
+                    self.pos += N2*self.kind
+                    
+                    GX.append( G2 )
  
  
  
@@ -528,7 +584,7 @@ class Snapshot:
  
             sol = np.zeros( shape=(self.n_vars, N1*N2*N3), dtype=np.float32 )
  
- 
+
             # Read solution fields
  
             for v in range( self.n_vars ):
@@ -540,6 +596,7 @@ class Snapshot:
                 # Sanity check on the pressure
  
                 if v == 4 and np.all( ( sol[v,:] == 0.0 ) ): io_alert = True
+
 
 
             # Evaluate
@@ -573,7 +630,7 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
-# >>> check the range of snapshot                                ( 4 )
+# >>> Drop ghost point data                                     ( 4 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -584,94 +641,6 @@ class Snapshot:
 #
 # Desc
 #
-#  - not applicable to slice now
-#
-# ----------------------------------------------------------------------
-
-    def check_range( self ):
-        
-        # check if data is available
-        
-        if len(self.snap_data) == 0:
-            
-            print('please read in snapshot data first!')
-        
-        # when data is loaded
-
-            
-        else:
-            
-            # check data with ghost cells
-            
-            xmin =  999999.0;   xmax = -999999.0
-            ymin =  999999.0;   ymax = -999999.0
-            zmin =  999999.0;   zmax = -999999.0
-            
-            for bl_data in self.snap_data:
-                
-                xmin = min( min(bl_data[4][0]), xmin )
-                xmax = max( max(bl_data[4][0]), xmax )
-                ymin = min( min(bl_data[4][1]), ymin )
-                ymax = max( max(bl_data[4][1]), ymax )
-                print(len(bl_data[4]))
-                if len(bl_data[4])==3:
-                    zmin = min( min(bl_data[4][2]), zmin )
-                    zmax = max( max(bl_data[4][2]), zmax )
-                
-            print('before dropping ghost cells')
-            
-            print( 'x range [ %f, %f ]' % (xmin,xmax) )
-            print( 'y range [ %f, %f ]' % (ymin,ymax) )
-            if len(bl_data[4])==3:
-                print( 'z range [ %f, %f ]' % (zmin,zmax) )
-
-        
-        # check if data is available
-        
-        if len(self.snap_cleandata) == 0:
-            
-            print('please clean snapshot data first!')
-        
-        # when data is loaded
-            
-        else:
-
-            # check range after drop ghost cells
-            
-            xmin =  999999.0;   xmax = -999999.0
-            ymin =  999999.0;   ymax = -999999.0
-            zmin =  999999.0;   zmax = -999999.0
-            
-            for bl_data in self.snap_cleandata:
-                
-                xmin = min( min(bl_data[4][0]), xmin )
-                xmax = max( max(bl_data[4][0]), xmax )
-                ymin = min( min(bl_data[4][1]), ymin )
-                ymax = max( max(bl_data[4][1]), ymax )
-                if len(bl_data[4])==3:
-                    zmin = min( min(bl_data[4][2]), zmin )
-                    zmax = max( max(bl_data[4][2]), zmax )
-                
-            print('after dropping ghost cells:')
-            print( 'x range [ %f, %f ]' % (xmin,xmax) )
-            print( 'y range [ %f, %f ]' % (ymin,ymax) )
-            if len(bl_data[4])==3:
-                print( 'z range [ %f, %f ]' % (zmin,zmax) )
-
-
-# ----------------------------------------------------------------------
-# >>> Drop ghost point data                                     ( 5 )
-# ----------------------------------------------------------------------
-#
-# Wencan Wu : w.wu-3@tudelft.nl
-#
-# History
-#
-# 2023/04/24  - created
-#
-# Desc
-#
-#     - not applicable to slice now
 #
 # ----------------------------------------------------------------------
    
@@ -705,38 +674,226 @@ class Snapshot:
                 N2     = snap_data_bl[2]
                 N3     = snap_data_bl[3]
                 
+                
                 # Nx, Ny, Nz are dimensions without ghost cells
                 
-                Nx     = N1 - buff*2
-                Ny     = N2 - buff*2
-                Nz     = N3 - buff*2
-                
-                # Grid buffer
-                
-                GX = []
-                
-                # Loop over gx(:), gy(:), gz(:)
-                
-                for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+                if self.type == 'block':
+                    
+                    Nx     = N1 - buff*2
+                    Ny     = N2 - buff*2
+                    Nz     = N3 - buff*2
                     
                 
-                # Solution buffer to get solution field without ghost cells
-                
-                # Notice the binary data storage order [n_var, Z, Y, X]
-                # reshape to chunk -> slice -> reshape to vector
+                    # Grid buffer
+                    
+                    GX = []
+                    
+                    # Loop over gx(:), gy(:), gz(:)
+                    
+                    for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+                        
+                    
+                    # Solution buffer to get solution field without ghost cells
+                    
+                    # Notice the binary data storage order [n_var, Z, Y, X]
+                    # reshape to chunk -> slice -> reshape to vector
 
-                sol_buff = np.array(snap_data_bl[5]).reshape( self.n_vars, N3, N2, N1 )
+                    sol_buff = np.array(snap_data_bl[5]).\
+                                  reshape( self.n_vars, N3, N2, N1 )
+                    
+                    sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
                 
-                sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
                 
+                elif self.type == 'slice':
+                    
+                    if self.slic_type == 'X':
+                        
+                        Nx     = 1
+                        Ny     = N2 - buff*2
+                        Nz     = N3 - buff*2
+                        
+                        # Grid buffer
+                        
+                        GX = []
+                        
+                        # Loop over gy(:), gz(:)
+                        
+                        for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+
+                        sol_buff = np.array(snap_data_bl[5]).\
+                                    reshape( self.n_vars, N3, N2 )
+                        
+                        sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+
+                    
+                    if self.slic_type == 'Y' or self.slic_type == 'W':
+                        
+                        Nx     = N1 - buff*2
+                        Ny     = 1
+                        Nz     = N3 - buff*2
+                        
+                        # Grid buffer
+                        
+                        GX = []
+                        
+                        # Loop over gx(:), gz(:)
+                        
+                        for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+
+                        sol_buff = np.array(snap_data_bl[5]).\
+                                    reshape( self.n_vars, N3, N1 )
+                        
+                        sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+                    
+                    
+                    if self.slic_type == 'Z':
+                        
+                        Nx     = N1 - buff*2
+                        Ny     = N2 - buff*2
+                        Nz     = 1
+                        
+                        # Grid buffer
+                        
+                        GX = []
+                        
+                        # Loop over gx(:), gy(:)
+                        
+                        for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+
+                        sol_buff = np.array(snap_data_bl[5]).\
+                                    reshape( self.n_vars, N3, N2 )
+                        
+                        sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+                    
+                
+                # reshape the matrix ( no matter 2D or 3D) to long vectors
+                       
                 sol_buff = sol_buff.reshape(( self.n_vars, Nx*Ny*Nz ))
-                
                 
                 # Append to snap_data_clean
                 
-                self.snap_cleandata.append( [bl_num, Nx, Ny, Nz, GX, sol_buff] )
+                self.snap_cleandata.append([bl_num, Nx, Ny, Nz, GX, sol_buff])  
+                        
+
+
+# ----------------------------------------------------------------------
+# >>> check the range of snapshot                                ( 5 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/04/24  - created
+#
+# Desc
+#
+#
+# ----------------------------------------------------------------------
+
+    def check_range( self, clean=True ):
+        
+        # check if data is available
+    
+            
+            # data without ghost cells is clean data
+        
+        if clean:
+            
+            if len(self.snap_cleandata) == 0:
+                
+                raise ValueError('please clean data first!')
+            
+            else:
+                
+                all_block_data = self.snap_cleandata
+        
+        else: 
+            
+            if len(self.snap_data) == 0:
+                
+                raise ValueError('please read in data first')
+
+            else:
+                
+                all_block_data = self.snap_data
+        
+        
+        # set original range
+        
+        xmin =  999999.0;   xmax = -999999.0
+        ymin =  999999.0;   ymax = -999999.0
+        zmin =  999999.0;   zmax = -999999.0
+        
+        
+        # check range based on different snapshot type
+        
+        if self.type == 'block':
+        
+            for bl_data in all_block_data:
+                
+                xmin = min( min(bl_data[4][0]), xmin )
+                xmax = max( max(bl_data[4][0]), xmax )
+                ymin = min( min(bl_data[4][1]), ymin )
+                ymax = max( max(bl_data[4][1]), ymax )
+                zmin = min( min(bl_data[4][2]), zmin )
+                zmax = max( max(bl_data[4][2]), zmax )
+                
+            print('snapshot range in three dimensions:')
+            
+            print( 'x range [ %f, %f ]' % (xmin,xmax) )
+            print( 'y range [ %f, %f ]' % (ymin,ymax) )
+            print( 'z range [ %f, %f ]' % (zmin,zmax) )
+        
+        
+        elif self.type == 'slice':
+            
+            if self.slic_type == 'X':
+                
+                for bl_data in all_block_data:
                     
+                    ymin = min( min(bl_data[4][0]), ymin )
+                    ymax = max( max(bl_data[4][0]), ymax )
+                    zmin = min( min(bl_data[4][1]), zmin )
+                    zmax = max( max(bl_data[4][1]), zmax )
                     
+                print('snapshot range in two dimensions:')
+                
+                print( 'y range [ %f, %f ]' % (ymin,ymax) )
+                print( 'z range [ %f, %f ]' % (zmin,zmax) )
+            
+            
+            elif self.slic_type == 'Y' or self.slic_type == 'W':
+                
+                for bl_data in all_block_data:
+                    
+                    xmin = min( min(bl_data[4][0]), xmin )
+                    xmax = max( max(bl_data[4][0]), xmax )
+                    zmin = min( min(bl_data[4][1]), zmin )
+                    zmax = max( max(bl_data[4][1]), zmax )
+                    
+                print('snapshot range in two dimensions:')
+                
+                print( 'x range [ %f, %f ]' % (xmin,xmax) )
+                print( 'z range [ %f, %f ]' % (zmin,zmax) )
+            
+            elif self.slic_type == 'Z':
+
+                for bl_data in all_block_data:
+                    
+                    xmin = min( min(bl_data[4][0]), xmin )
+                    xmax = max( max(bl_data[4][0]), xmax )
+                    ymin = min( min(bl_data[4][1]), ymin )
+                    ymax = max( max(bl_data[4][1]), ymax )
+                    
+                print('snapshot range in two dimensions:')
+                
+                print( 'x range [ %f, %f ]' % (xmin,xmax) )
+                print( 'y range [ %f, %f ]' % (ymin,ymax) )
+
+
+
+                  
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -752,12 +909,12 @@ class Snapshot:
 # ----------------------------------------------------------------------
 def Testing():
     
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00514923'
-    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00842376'
+    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00514923'
+#    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00842376'
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_dir = test_dir1 + '/snapshot_W_002.bin'
+    test_dir = test_dir1 + '/snapshot.bin'
     
     snapshot1 = Snapshot( test_dir )
     
@@ -767,9 +924,9 @@ def Testing():
     
         snapshot1.read_snapshot()
                 
-#        snapshot1.drop_ghost( buff=3 )
+        snapshot1.drop_ghost( buff=3 )
         
-#        snapshot1.check_range()
+        snapshot1.check_range()
         
     with timer('check one data block:'):
         
@@ -786,7 +943,7 @@ def Testing():
         x = snap_bl[4][0]
         y = snap_bl[4][1]
         
-        u = np.array(snap_bl[5][0]).reshape(Nz,Nx)
+        u = np.array(snap_bl[5][0]).reshape(Nz,Ny,Nx)
  
         u_slice = u.T     
         
