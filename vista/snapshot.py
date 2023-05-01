@@ -15,6 +15,10 @@ import sys
 
 import numpy             as np
 
+from   collections       import Counter
+
+import pandas            as pd
+
 import pyvista           as pv
 
 import matplotlib.pyplot        as plt
@@ -112,10 +116,15 @@ class Snapshot:
         # Number of variables
   
         self.n_vars = 0  
+        
+        # Name list string of variables
+        
+        self.vars_name = ''
 
         # Number of blocks
         
         self.n_bl = 0
+        
         # Verbose
   
         self.verbose = True
@@ -310,33 +319,75 @@ class Snapshot:
             if self.slic_type == 'W' and not self.snap_with_cf:
   
                 self.snap_with_cf = True
+                
   
             if self.slic_type == 'Z' and not self.snap_with_wd:
   
                 self.snap_with_wd = True
   
+        
         # Count variables
   
-        if self.snap_lean   : self.n_vars += 3
+        if self.snap_lean: 
+            
+            self.n_vars += 3
+            
+            self.vars_name += 'u v w '
   
-        else                : self.n_vars += 5
+        else: 
+            
+            self.n_vars += 5
+        
+            self.vars_name += 'u v w xx xx '
+            
   
-        if self.snap_with_tp: self.n_vars += 2
+        if self.snap_with_tp: 
+            
+            self.n_vars += 2
+            
+            self.vars_name += 'T p '
+            
   
-        if self.snap_with_wd: self.n_vars += 1
+        if self.snap_with_vp: 
+            
+            self.n_vars += 1
+        
+            self.vars_name += 'vapor '
+            
+            
+        if self.snap_with_cp: 
+            
+            self.n_vars += 2
+            
+            self.vars_name += 'cappa cp '
+            
   
-        if self.snap_with_vp: self.n_vars += 1
-  
-        if self.snap_with_cp: self.n_vars += 2
-  
-        if self.snap_with_mu: self.n_vars += 1
-  
-
+        if self.snap_with_mu: 
+            
+            self.n_vars += 1
+        
+            self.vars_name += 'mu '
+        
+        
         # Special case - skin-friction
   
         if self.snap_with_cf and self.type == 'slice':
   
-            if self.slic_type == 'W': self.n_vars += 1
+            if self.slic_type == 'W': 
+                
+                self.n_vars += 1
+                
+                self.vars_name += 'cf '
+            
+            
+        if self.snap_with_wd: 
+            
+            self.n_vars += 1
+            
+            self.vars_name += 'wd '
+            
+            
+
   
   
         # Inform user
@@ -774,7 +825,19 @@ class Snapshot:
                 
                 self.snap_cleandata.append([bl_num, Nx, Ny, Nz, GX, sol_buff])  
                         
-
+            
+            # release memory occupied by snap_data
+            
+            del self.snap_data
+            
+            
+            # count total number of cells in the snapshots
+            
+            self.n_cells = 0
+            
+            for snap_bl in self.snap_cleandata:
+                
+                self.n_cells += snap_bl[1] * snap_bl[2] * snap_bl[3]
 
 # ----------------------------------------------------------------------
 # >>> check the range of snapshot                                ( 5 )
@@ -796,7 +859,7 @@ class Snapshot:
         # check if data is available
     
             
-            # data without ghost cells is clean data
+        # data without ghost cells is clean data
         
         if clean:
             
@@ -893,6 +956,102 @@ class Snapshot:
 
 
 
+# ----------------------------------------------------------------------
+# >>>  Assemble block snap_cleandata                              ( 6 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/04/28  - created
+#
+# Desc
+#   - first version only applicable to evenly-spaced, 
+#
+# ----------------------------------------------------------------------
+
+    def assemble_block( self ):
+        
+        # different ways of assemble blocks with different shapes
+        
+        if self.type == 'block':
+            
+            pass
+        
+        
+        
+        elif self.type == 'slice':
+            
+            if self.slic_type == 'X':
+                
+                pass
+            
+            
+            
+            elif self.slic_type == 'W' or self.slic_type == 'Y':
+                
+                bl_number = []
+                x = []
+                z = []
+                
+                
+                # compose long vectors of coordinates x,z
+                
+                for snap_bl in self.snap_cleandata:
+                    
+                    
+                    bl_number.append(snap_bl[0])
+                    
+                    x_bl = snap_bl[4][0]
+                    z_bl = snap_bl[4][1]
+                    
+                    X, Z = np.meshgrid( x_bl, z_bl )
+                    
+                    x.append( X.ravel() )
+                    z.append( Z.ravel() )
+
+                x = np.array(x).ravel()
+                z = np.array(z).ravel()
+                
+                GX = np.stack([x.ravel(),z.ravel()])
+                
+                GX_header = 'x z '
+
+                # compose long vectors of solutions
+                
+                sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                
+                pos_s = 0 
+                
+                for snap_bl in self.snap_cleandata:
+                                        
+                    pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                        
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                        
+                    pos_s = pos_e
+
+            
+            elif self.slic_type == 'Z':
+                
+                pass
+            
+        
+        # return pandas dataframe
+        
+        
+        df = pd.DataFrame( GX.T, columns=GX_header.strip().split() )
+        
+        df_sol = pd.DataFrame( sol_bl.T, columns=self.vars_name.strip().split() )
+        
+        df = pd.concat([df, df_sol], axis=1)
+        
+        
+        return df
+        
+        
+
                   
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
@@ -914,13 +1073,13 @@ def Testing():
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_dir = test_dir1 + '/snapshot.bin'
+    test_dir = test_dir1 + '/snapshot_W_002.bin'
     
     snapshot1 = Snapshot( test_dir )
     
 #    snapshot1.verbose = False
 
-    with timer('read one snapshot:'):
+    with timer('read one snapshot '):
     
         snapshot1.read_snapshot()
                 
@@ -928,11 +1087,23 @@ def Testing():
         
         snapshot1.check_range()
         
+    with timer("assembly time "):
+    
+        df = snapshot1.assemble_block()
+        
+
+    
+    with timer("sort data in a snapshot"):
+        
+        df.sort_values(by=['z','x'],inplace=True)
+        
+
+'''   
     with timer('check one data block:'):
         
         # [bl_num, Nx, Ny, Nz, GX, sol_buff]
         
-        snap_bl = snapshot1.snap_data[0]
+        snap_bl = snapshot1.snap_cleandata[0]
         
         Nx = snap_bl[1]
         Ny = snap_bl[2]
@@ -941,21 +1112,27 @@ def Testing():
         print(Nx,Ny,Nz)
         
         x = snap_bl[4][0]
-        y = snap_bl[4][1]
+        z = snap_bl[4][1]
+        X,Z = np.meshgrid( x, z )
         
-        u = np.array(snap_bl[5][0]).reshape(Nz,Ny,Nx)
+        print(len(x),len(z))
+        
+        u = np.array(snap_bl[5][0]).reshape(Nz,Nx)
  
         u_slice = u.T     
         
+        print(X.shape)
+        print(Z.shape)
         print(u_slice.shape)   
+        
+        fig, ax = plt.subplots()
+        contour = ax.contourf(X.T,Z.T, u_slice)
+        ax.set_title('Contour Plot')
+        plt.show()
+'''         
+        
 '''        
-#        u_slice = u[0,:,:]
-#        
-#        u_slice = u_slice.T
-#        
-#        print(type(u_slice))
-#        print(type(u_slice[0][0]))
-#        print(u_slice.shape)
+
         
 #        for l in u_slice:  print(l)
 
@@ -975,13 +1152,9 @@ def Testing():
         print(type(X),type(Y))
         print(X.shape,Y.shape)
         
-        fig, ax = plt.subplots()
-        contour = ax.contourf(X,Y, u_slice)
-#        ax.clabel(contour, inline=True, fontsize=10)
-        ax.set_title('Contour Plot')
-        plt.show()
-
 '''
+
+
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -- )
 # ----------------------------------------------------------------------
