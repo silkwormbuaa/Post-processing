@@ -977,18 +977,111 @@ class Snapshot:
         
         if self.type == 'block':
             
-            pass
+            bl_number = []
+            x = []
+            y = []
+            z = []
+            
+            
+            # compose long vectors of coordinates x,y,z
+            
+            for snap_bl in self.snap_cleandata:
+                
+                
+                bl_number.append( snap_bl[0] )
+                
+                x_bl = snap_bl[4][0]
+                y_bl = snap_bl[4][1]
+                z_bl = snap_bl[4][2]
+                
+                # Notice the order of output X,Y,Z !
+                # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
+                
+                X,Y,Z = np.meshgrid( x_bl, y_bl, z_bl, indexing='ij' )
+                
+                # x,y,z are lists of nparrays
+                
+                x.append( np.ravel( X.T ) )
+                y.append( np.ravel( Y.T ) )
+                z.append( np.ravel( Z.T ) )
+                
+            x = np.array( x ).ravel()
+            y = np.array( y ).ravel()
+            z = np.array( z ).ravel()
+            
+            GX = np.stack( [ x.ravel(), y.ravel(), z.ravel() ] )
+            
+            GX_header = 'x y z '
+            
+            
+            # compose long vectors of solutions
+            
+            sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
         
-        
-        
+            pos_s = 0
+            
+            for snap_bl in self.snap_cleandata:
+                
+                pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                
+                sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                
+                pos_s = pos_e
+                
+                
+                
         elif self.type == 'slice':
+            
             
             if self.slic_type == 'X':
                 
-                pass
-            
-            
-            
+                bl_number = []
+                y = []
+                z = []
+                
+                
+                # compose long vectors of coordinates y,z
+                
+                for snap_bl in self.snap_cleandata:
+                    
+                    
+                    bl_number.append(snap_bl[0])
+                    
+                    # GX => snap_bl[4] 
+                    # for slice, only two coordinates vectors
+                    
+                    y_bl = snap_bl[4][0]
+                    z_bl = snap_bl[4][1]
+                    
+                    Y, Z = np.meshgrid( y_bl, z_bl )
+                    
+                    y.append( np.ravel( Y ) )
+                    z.append( np.ravel( Z ) )
+
+                y = np.array( y ).ravel()
+                z = np.array( z ).ravel()
+                
+                GX = np.stack( [ y.ravel(), z.ravel() ] )
+                
+                GX_header = 'y z '
+                
+
+                # compose long vectors of solutions
+                
+                sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                
+                pos_s = 0 
+                
+                for snap_bl in self.snap_cleandata:
+                                        
+                    pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                        
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                        
+                    pos_s = pos_e
+                    
+                    
+
             elif self.slic_type == 'W' or self.slic_type == 'Y':
                 
                 bl_number = []
@@ -1008,15 +1101,16 @@ class Snapshot:
                     
                     X, Z = np.meshgrid( x_bl, z_bl )
                     
-                    x.append( X.ravel() )
-                    z.append( Z.ravel() )
+                    x.append( np.ravel( X ) )
+                    z.append( np.ravel( Z ) )
 
-                x = np.array(x).ravel()
-                z = np.array(z).ravel()
+                x = np.array( x ).ravel()
+                z = np.array( z ).ravel()
                 
-                GX = np.stack([x.ravel(),z.ravel()])
+                GX = np.stack( [ x.ravel(), z.ravel() ] )
                 
                 GX_header = 'x z '
+                
 
                 # compose long vectors of solutions
                 
@@ -1032,10 +1126,51 @@ class Snapshot:
                         
                     pos_s = pos_e
 
+
             
             elif self.slic_type == 'Z':
                 
-                pass
+                bl_number = []
+                x = []
+                y = []
+                
+                
+                # compose long vectors of coordinates x,y
+                
+                for snap_bl in self.snap_cleandata:
+                    
+                    
+                    bl_number.append(snap_bl[0])
+                    
+                    x_bl = snap_bl[4][0]
+                    y_bl = snap_bl[4][1]
+                    
+                    X, Y = np.meshgrid( x_bl, y_bl )
+                    
+                    x.append( np.ravel( X ) )
+                    y.append( np.ravel( Y ) )
+
+                x = np.array( x ).ravel()
+                y = np.array( y ).ravel()
+                
+                GX = np.stack( [ x.ravel(), y.ravel() ] )
+                
+                GX_header = 'x y '
+                
+
+                # compose long vectors of solutions
+                
+                sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                
+                pos_s = 0 
+                
+                for snap_bl in self.snap_cleandata:
+                                        
+                    pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                        
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                        
+                    pos_s = pos_e
             
         
         # return pandas dataframe
@@ -1073,7 +1208,7 @@ def Testing():
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_dir = test_dir1 + '/snapshot_W_002.bin'
+    test_dir = test_dir1 + '/snapshot.bin'
     
     snapshot1 = Snapshot( test_dir )
     
@@ -1091,13 +1226,44 @@ def Testing():
     
         df = snapshot1.assemble_block()
         
-
+        print(df)
     
     with timer("sort data in a snapshot"):
         
-        df.sort_values(by=['z','x'],inplace=True)
+        df.sort_values(by=['z','y','x'],inplace=True)
         
-
+#        print(df)
+        
+    with timer('show one slice '):
+        
+        x = np.array(df['x'])
+        
+        y = np.array(df['y'])
+        
+        z = np.array(df['z'])
+        
+        p = np.array(df['p'])
+        
+#        print(np.unique(x))
+        
+        N_x = len(np.unique(x))
+        N_y = len(np.unique(y))
+        N_z = len(np.unique(z))
+        
+        x = x.reshape(N_z,N_y,N_x)
+        y = y.reshape(N_z,N_y,N_x)
+        z = z.reshape(N_z,N_y,N_x)
+        p = p.reshape(N_z,N_y,N_x)
+        
+        x = x[50,:,:]
+        y = y[50,:,:]
+        p = p[50,:,:]
+        
+        
+        fig, ax = plt.subplots()
+        contour = ax.pcolormesh(x,y,p)
+        ax.set_title('Contour Plot')
+        plt.show()
 '''   
     with timer('check one data block:'):
         
