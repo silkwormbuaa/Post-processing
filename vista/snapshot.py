@@ -192,6 +192,17 @@ class Snapshot:
         if self.verbose: print( 'Completed.' ); sys.stdout.flush()
 
 
+        # Drop ghost points 
+        
+        self.drop_ghost( buff=3 )
+        
+        
+        # Assemble blocks data to one whole snapshot
+        # (sorting is included in self.assemble_block() )
+        
+        self.df = self.assemble_block()
+        
+        
 
 # ----------------------------------------------------------------------
 # >>> Read snapshot header                                       ( 2 )
@@ -386,9 +397,7 @@ class Snapshot:
             
             self.vars_name += 'wd '
             
-            
 
-  
   
         # Inform user
   
@@ -697,17 +706,17 @@ class Snapshot:
    
     def drop_ghost( self , buff ):
 
-        # check if data is available
+        # Check if data is available
         
         if len(self.snap_data) == 0:
             
             raise  ValueError('please read in snapshot data first!')
         
-        # when data is loaded
+        # When data is loaded
             
         else:    
             
-            # clean data(with out ghost cells)
+            # Clean data(with out ghost cells)
             
             self.snap_cleandata = []  
             
@@ -747,7 +756,7 @@ class Snapshot:
                     # Solution buffer to get solution field without ghost cells
                     
                     # Notice the binary data storage order [n_var, Z, Y, X]
-                    # reshape to chunk -> slice -> reshape to vector
+                    # Reshape to chunk -> slice -> reshape to vector
 
                     sol_buff = np.array(snap_data_bl[5]).\
                                   reshape( self.n_vars, N3, N2, N1 )
@@ -817,7 +826,7 @@ class Snapshot:
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
                     
                 
-                # reshape the matrix ( no matter 2D or 3D) to long vectors
+                # Reshape the matrix ( no matter 2D or 3D) to long vectors
                        
                 sol_buff = sol_buff.reshape(( self.n_vars, Nx*Ny*Nz ))
                 
@@ -826,12 +835,12 @@ class Snapshot:
                 self.snap_cleandata.append([bl_num, Nx, Ny, Nz, GX, sol_buff])  
                         
             
-            # release memory occupied by snap_data
+            # Release memory occupied by snap_data
             
             del self.snap_data
             
             
-            # count total number of cells in the snapshots
+            # Count total number of cells in the snapshots
             
             self.n_cells = 0
             
@@ -856,10 +865,10 @@ class Snapshot:
 
     def check_range( self, clean=True ):
         
-        # check if data is available
+        # Check if data is available
     
             
-        # data without ghost cells is clean data
+        # Data without ghost cells is clean data
         
         if clean:
             
@@ -882,14 +891,14 @@ class Snapshot:
                 all_block_data = self.snap_data
         
         
-        # set original range
+        # Set original range
         
         xmin =  999999.0;   xmax = -999999.0
         ymin =  999999.0;   ymax = -999999.0
         zmin =  999999.0;   zmax = -999999.0
         
         
-        # check range based on different snapshot type
+        # Check range based on different snapshot type
         
         if self.type == 'block':
         
@@ -973,7 +982,7 @@ class Snapshot:
 
     def assemble_block( self ):
         
-        # different ways of assemble blocks with different shapes
+        # Different ways of assemble blocks with different shapes
         
         if self.type == 'block':
             
@@ -983,7 +992,7 @@ class Snapshot:
             z = []
             
             
-            # compose long vectors of coordinates x,y,z
+            # Compose long vectors of coordinates x,y,z
             
             for snap_bl in self.snap_cleandata:
                 
@@ -1014,7 +1023,7 @@ class Snapshot:
             GX_header = 'x y z '
             
             
-            # compose long vectors of solutions
+            # Compose long vectors of solutions
             
             sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
         
@@ -1040,7 +1049,7 @@ class Snapshot:
                 z = []
                 
                 
-                # compose long vectors of coordinates y,z
+                # Compose long vectors of coordinates y,z
                 
                 for snap_bl in self.snap_cleandata:
                     
@@ -1048,7 +1057,7 @@ class Snapshot:
                     bl_number.append(snap_bl[0])
                     
                     # GX => snap_bl[4] 
-                    # for slice, only two coordinates vectors
+                    # For slice, only two coordinates vectors
                     
                     y_bl = snap_bl[4][0]
                     z_bl = snap_bl[4][1]
@@ -1066,7 +1075,7 @@ class Snapshot:
                 GX_header = 'y z '
                 
 
-                # compose long vectors of solutions
+                # Compose long vectors of solutions
                 
                 sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
                 
@@ -1089,7 +1098,7 @@ class Snapshot:
                 z = []
                 
                 
-                # compose long vectors of coordinates x,z
+                # Compose long vectors of coordinates x,z
                 
                 for snap_bl in self.snap_cleandata:
                     
@@ -1112,7 +1121,7 @@ class Snapshot:
                 GX_header = 'x z '
                 
 
-                # compose long vectors of solutions
+                # Compose long vectors of solutions
                 
                 sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
                 
@@ -1135,7 +1144,7 @@ class Snapshot:
                 y = []
                 
                 
-                # compose long vectors of coordinates x,y
+                # Compose long vectors of coordinates x,y
                 
                 for snap_bl in self.snap_cleandata:
                     
@@ -1158,7 +1167,7 @@ class Snapshot:
                 GX_header = 'x y '
                 
 
-                # compose long vectors of solutions
+                # Compose long vectors of solutions
                 
                 sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
                 
@@ -1173,7 +1182,7 @@ class Snapshot:
                     pos_s = pos_e
             
         
-        # return pandas dataframe
+        # Return pandas dataframe
         
         
         df = pd.DataFrame( GX.T, columns=GX_header.strip().split() )
@@ -1181,6 +1190,31 @@ class Snapshot:
         df_sol = pd.DataFrame( sol_bl.T, columns=self.vars_name.strip().split() )
         
         df = pd.concat([df, df_sol], axis=1)
+        
+        
+        # Sort data frame based on coordinate z,y,x (x changes fastest)
+        
+        if self.type == 'block': 
+            
+            df.sort_values(by=['z','y','x'],inplace=True)
+        
+        
+        elif self.type == 'slice':
+            
+            if self.slic_type == 'X':
+                
+                df.sort_values(by=['z','y'],inplace=True)
+                
+            
+            elif self.slic_type == 'Y' or self.slic_type == 'W':
+                
+                df.sort_values(by=['z','x'],inplace=True)
+                
+            
+            elif self.slic_type == 'Z':
+                
+                df.sort_values(by=['y','x'],inplace=True)
+        
         
         
         return df
@@ -1217,32 +1251,19 @@ def Testing():
     with timer('read one snapshot '):
     
         snapshot1.read_snapshot()
-                
-        snapshot1.drop_ghost( buff=3 )
         
-        snapshot1.check_range()
-        
-    with timer("assembly time "):
-    
-        df = snapshot1.assemble_block()
-        
-        print(df)
-    
-    with timer("sort data in a snapshot"):
-        
-        df.sort_values(by=['z','y','x'],inplace=True)
         
 #        print(df)
         
     with timer('show one slice '):
         
-        x = np.array(df['x'])
+        x = np.array(snapshot1.df['x'])
         
-        y = np.array(df['y'])
+        y = np.array(snapshot1.df['y'])
         
-        z = np.array(df['z'])
+        z = np.array(snapshot1.df['z'])
         
-        p = np.array(df['p'])
+        p = np.array(snapshot1.df['p'])
         
 #        print(np.unique(x))
         
