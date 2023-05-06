@@ -13,15 +13,11 @@ import os
 
 import sys
 
-import numpy             as np
+import numpy             as     np
 
-from   collections       import Counter
+import pandas            as     pd
 
-import pandas            as pd
-
-import pyvista           as pv
-
-import matplotlib.pyplot        as plt
+import matplotlib.pyplot as     plt
 
 sys.path.append('..')
 
@@ -79,6 +75,10 @@ class Snapshot:
         # Position pointers
   
         self.pos = 0
+        
+        # List of position pointers to var_data chunk start
+        
+        self.pos_var_start = []
   
         # Characteristics
   
@@ -125,6 +125,10 @@ class Snapshot:
         
         self.n_bl = 0
         
+        # List of blocks numbers
+        
+        self.bl_nums = []
+        
         # Verbose
   
         self.verbose = True
@@ -142,6 +146,10 @@ class Snapshot:
 # 2023/04/23  - created
 #
 # Desc
+#
+#   - reading one snapshot's header, block data
+#   - dropping ghost cells and assembling clean block data into 
+#     a snapshot
 #
 # ----------------------------------------------------------------------
 
@@ -181,28 +189,98 @@ class Snapshot:
 
                 if self.pos >= self.fsize: end_of_file = True
 
-        # Close file
-
-        fs.close()
 
         # Inform user
 
         if self.verbose: print( '%d blocks were read.'%self.n_bl )
         
         if self.verbose: print( 'Completed.' ); sys.stdout.flush()
+        
+        
+        print("snapshot %d is read."%self.itstep)
+        
 
 
-        # Drop ghost points 
+# ----------------------------------------------------------------------
+# >>> Read snapshot structure                                  ( 0 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/06  - created
+#
+# Desc
+#
+#   - reading one snapshot's header, body 
+#   - write snapshot structure into file for parallel reading
+#   - write snapshot info for parallel dmd
+#
+# ----------------------------------------------------------------------
+
+    def get_snapshot_struct( self ):
+
+       
+        # Read snapshot file
+
+        self.read_snapshot()  
         
-        self.drop_ghost( buff=3 )
+
+        # Get  the list of '| bl_num | pos_var_start | datachunk_size |' 
+        
+        # the number of floats, numbers of cells in x,y,z with ghost cells
+        
+        size = []       
+        N1   = []     
+        N2   = []
+        N3   = []
+        
+        for snap_bl in self.snap_data:
+            
+            # size = N1 * N2 * N3 * n_var
+            
+            size.append( snap_bl[1]*snap_bl[2]*snap_bl[3]*self.n_vars )
+            
+            N1.append( snap_bl[1] )
+            N2.append( snap_bl[2] )
+            N3.append( snap_bl[3] )
         
         
-        # Assemble blocks data to one whole snapshot
-        # (sorting is included in self.assemble_block() )
+        # Output | bl_num | pos_var_start | datachunk_size | N1 | N2 | N3 |
         
-        self.df = self.assemble_block()
+        struct_data = np.stack(( self.bl_nums, 
+                                 self.pos_var_start, 
+                                 size,
+                                 N1,
+                                 N2,
+                                 N3                   ))
+        
+        df_header = ['bl_num','pos','size','N1','N2','N3']
+        
+        df = pd.DataFrame( struct_data.T, columns=df_header )
+        
+        df.to_csv('snap_struct.csv',sep=' ')     
+        
+        print(f'snap_struct of snapshot {self.itstep} is output.')
         
         
+        # Write snapshots info into a file
+        
+        with open('snap_info.dat','w') as fi:
+            
+            fi.write(f'kind      {self.kind}\n')
+            
+            fi.write(f'n_bl      {self.n_bl}\n')
+            
+            fi.write(f'snap_type {self.type}\n')
+            
+            if self.type == 'slice':
+                
+                fi.write(f'slic_type {self.slic_type}\n')
+            
+            fi.write(f'vars_name {self.vars_name}\n')
+            
 
 # ----------------------------------------------------------------------
 # >>> Read snapshot header                                       ( 2 )
@@ -474,9 +552,11 @@ class Snapshot:
         # Read global block number and block dimensions
  
         bl_num = read_int_bin( file.read(   sin ), sin )
- 
+        
+        self.bl_nums.append( bl_num )
+        
         bl_dim = read_int_bin( file.read( 3*sin ), sin )
- 
+         
         # This is a sanity check - related to an old IO bug
  
         if bl_num == 0:
@@ -644,7 +724,12 @@ class Snapshot:
  
             sol = np.zeros( shape=(self.n_vars, N1*N2*N3), dtype=np.float32 )
  
-
+            
+            # Record the starting position of var chunk
+            
+            self.pos_var_start.append( self.pos )
+            
+            
             # Read solution fields
  
             for v in range( self.n_vars ):
@@ -976,7 +1061,8 @@ class Snapshot:
 # 2023/04/28  - created
 #
 # Desc
-#   - first version only applicable to evenly-spaced, 
+#   - assembling cleandata(without ghost cells) blocks into a
+#     snapshot's full data, return a pandas data frame.
 #
 # ----------------------------------------------------------------------
 
@@ -1216,11 +1302,9 @@ class Snapshot:
                 df.sort_values(by=['y','x'],inplace=True)
         
         
-        
-        return df
-        
-        
+        self.df = df
 
+   
                   
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
@@ -1242,18 +1326,36 @@ def Testing():
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_dir = test_dir1 + '/snapshot.bin'
+    test_file = test_dir1 + '/snapshot_W_002.bin'
     
-    snapshot1 = Snapshot( test_dir )
+    os.chdir( test_dir1 )
+    
+    snapshot1 = Snapshot( test_file )
+    
+    with timer('get snapshot struct'):
+        
+        snapshot1.get_snapshot_struct()
+        
     
 #    snapshot1.verbose = False
 
+'''
     with timer('read one snapshot '):
     
         snapshot1.read_snapshot()
+
+        # Drop ghost points 
+        
+        snapshot1.drop_ghost( buff=3 )
         
         
-#        print(df)
+        # Assemble blocks data to one whole snapshot
+        # (sorting is included in self.assemble_block() )
+        
+        snapshot1.assemble_block()
+        
+        
+        print(snapshot1.df)
         
     with timer('show one slice '):
         
@@ -1282,9 +1384,10 @@ def Testing():
         
         
         fig, ax = plt.subplots()
-        contour = ax.pcolormesh(x,y,p)
-        ax.set_title('Contour Plot')
+        contour = ax.pcolor(x,y,p)
+        ax.set_title('pressure')
         plt.show()
+'''
 '''   
     with timer('check one data block:'):
         
