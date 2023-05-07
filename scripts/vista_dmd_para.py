@@ -24,83 +24,45 @@ from   utils.timer       import timer
 
 from   utils.tools       import get_filelist
 
-from   vista.snapshot    import Snapshot
+from   vista.paradmd     import ParaDmd
 
 
-# ----------------------------------------------------------------------
-# >>> Input area                                                
-# ----------------------------------------------------------------------
+snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
 
-snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snap_test'
+snap_file = snap_dir+'/snap_test/snapshot_00600031/snapshot_W_002.bin'
 
-# ==============================================================
+paradmd = ParaDmd( snap_dir )
 
-# Setup the communicator for parallel computation
+paradmd.comm.barrier()
 
-comm = MPI.COMM_WORLD
-
-rank = comm.Get_rank()
-
-n_procs = comm.Get_size()
-
-
-# Reading the filelist from the root process
-
-files = None
-
-n_snap_total = None
-
-if (rank == 0):
+with timer('Work '):
     
-    files = get_filelist( snap_dir )
-    
-    n_snap_total = len( files )
-    
+    paradmd.read_info_file()
 
-# Broadcasting the total number of "snapshots n_snap_total" in root
-# into variable "n_snap_total"
+    paradmd.read_struct_file()
 
-files = comm.bcast( files, root=0 )
+    paradmd.assign_block()
 
-n_snap_total = comm.bcast( n_snap_total, root=0 )
+    print('I am process %d out of %d, got the total block number %d.\
+            I take care of blocks from %d(%d) .. %d(%d)'
+            %(paradmd.rank, paradmd.n_procs, paradmd.n_bl,
+            paradmd.i_start+1, paradmd.bl_num[paradmd.i_start], 
+            paradmd.i_end, paradmd.bl_num[paradmd.i_end-1])) 
 
-# Calculating the snapshots that I should take care: "n_snap"
-# Calculating the start index "i_start" within 0..n_snap_total-1
-# or i_start = None and n_snap = 0 if there is no snapshots
+    paradmd.comm.barrier()
 
-# The following algorithm divides snapshots in a dealing way
-# (I mean the number of snapshots instead of the actual snapshots)
+    snap_files = None
 
-n_snap = n_snap_total // n_procs  # floor dividing, i.e. rounding off
+    if paradmd.rank == 0:
+        
+        snap_files = get_filelist( snap_dir + '/snap_test' )
+        
+    snap_files = paradmd.comm.bcast( snap_files, root=0 )
 
-left_procs = n_snap_total - n_procs*n_snap
+    paradmd.select = 'p'
 
+    for snap_file in snap_files:
+        
+        paradmd.para_read_data( snap_file )
 
-if ( rank < left_procs ):
-    
-    n_snap = n_snap + 1
-    
-    i_start = 0 + rank*n_snap
-    
-    i_end = i_start + n_snap
-
-    
-elif ( n_snap > 0 ):
-    
-    i_start = 0 + rank*n_snap + left_procs
-    
-    i_end = i_start + n_snap
-
-
-else:
-    
-    n_snap = 0
-    
-    i_start = None
-    
-    i_end = None
-    
-
-
-print(f'I am process {rank} out of {n_procs}, got the total snapshot number \
-      {n_snap_total}. I take care of snapshots {i_start+1} .. {i_end}') 
+    print(np.shape( paradmd.snapshots ))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jun 14 19:04:17 2018
-    This class is a context manager which show the running time of a code block.
+    This class is a context manager which shows the running time of a code block.
 @author: weibo
 """
 
