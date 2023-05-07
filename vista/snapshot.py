@@ -238,9 +238,10 @@ class Snapshot:
         
         for snap_bl in self.snap_data:
             
-            # size = N1 * N2 * N3 * n_var
+            # size = N1 * N2 * N3 * n_var * self.kind
             
-            size.append( snap_bl[1]*snap_bl[2]*snap_bl[3]*self.n_vars )
+            size.append( snap_bl[1] * snap_bl[2] * snap_bl[3]
+                        * self.n_vars * self.kind )
             
             N1.append( snap_bl[1] )
             N2.append( snap_bl[2] )
@@ -260,9 +261,9 @@ class Snapshot:
         
         df = pd.DataFrame( struct_data.T, columns=df_header )
         
-        df.to_csv('snap_struct.csv',sep=' ')     
+        df.to_csv( 'snap_struct.csv', sep=' ',index=False )     
         
-        print(f'snap_struct of snapshot {self.itstep} is output.')
+        print( f'snap_struct of snapshot {self.itstep} is output.' )
         
         
         # Write snapshots info into a file
