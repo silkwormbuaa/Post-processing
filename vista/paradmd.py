@@ -12,6 +12,8 @@ import os
 
 import sys
 
+import gc 
+
 import numpy             as np
 
 import pandas            as pd
@@ -24,6 +26,11 @@ from   utils.timer       import timer
 
 from   utils.tools       import get_filelist
 
+from   utils.init_empty  import init_1Dflt_empty
+
+from   utils.init_empty  import init_2Dflt_empty
+
+from   utils.init_empty  import init_2Dcmx_empty
 
 class ParaDmd:
 # ----------------------------------------------------------------------
@@ -95,6 +102,8 @@ class ParaDmd:
         # - snapshots matrix for dmd
         
         self.snapshots = []
+        
+        self.Ns = None
         
 
 
@@ -313,8 +322,9 @@ class ParaDmd:
             
             
             # Create a buffer and read data chunk into buffer
-            
-            buff_data = np.empty( int(self.size[bl]/self.kind), dtype=np.float32)
+            buff_data = init_1Dflt_empty( int(self.size[bl]/self.kind),
+                                          self.kind )
+#            buff_data = np.empty( int(self.size[bl]/self.kind), dtype=np.float32)
         
             fh.Read( buff_data )
             
@@ -330,8 +340,12 @@ class ParaDmd:
                 
                 data = np.hstack((data, self.drop_ghost(buff_data, bl)))
         
+            del buff_data
+#            gc.collect()
         
         self.snapshots.append( data )
+
+        fh.Close()
         
 
 # ----------------------------------------------------------------------
@@ -422,6 +436,180 @@ class ParaDmd:
         
 
 
+# ----------------------------------------------------------------------
+# >>> Parallel DMD                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/07  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def do_paradmd( self ):
+        
+        # Check if the snapshots data are available
+        
+        self.N_t = len( self.snapshots )
+        
+        if self.Ns == 0:
+            
+            raise ValueError('Please read snapshots first!')     
+        
+        
+        # just for shortening name
+        
+        Ns = self.N_t - 1
+        n_procs = self.n_procs
+        rank = self.rank
+        
+        # ==============================================================
+        # Do QR factorization in parallel
+        # ==============================================================
+        
+        # 1. Direct QR factorization of Ai(1 => Ns)
+                
+        Ai = np.array(self.snapshots).T
+        
+        del self.snapshots
+        
+        Q1i, Ri = np.linalg.qr( Ai[:,:-1], mode='reduced' )
+        
+        
+        # 2. Build the buffer also form the Rprime matrix
+        
+        Rprime =  init_1Dflt_empty( Ns*Ns*n_procs, self.kind )
+
+        Rprime[ Ns*Ns*rank : Ns*Ns*(rank+1) ] = Ri.ravel()
+        
+        for r in range( n_procs ):
+            
+            self.comm.Bcast( Rprime[ Ns*Ns*r : Ns*Ns*(r+1) ], root=r )
+        
+        del Ri
+        gc.collect()
+        
+        
+        # 3. QR factorization of Rprime and get R, Q2i
+        
+        Q2i, R = np.linalg.qr( Rprime.reshape(Ns*n_procs, Ns), mode='reduced')
+
+        del Rprime
+        gc.collect()
+        
+        
+        # 4. Compute Qi = Q1i x Q2i
+        
+        Qi = np.matmul( Q1i, Q2i[Ns*rank:Ns*(rank+1), : ] )
+        
+        del Q1i, Q2i
+        gc.collect()
+        
+        
+        # ==============================================================
+        # Compute SVD of Ai = Qi x R
+        # ==============================================================
+        
+        # 1. Compute SVD of R
+        
+        Ur, S, Vt = np.linalg.svd( R, full_matrices=False )
+        
+        
+        # 2. Build up sigma
+        
+        sigma = np.diag( S )
+        
+        
+        # 3. Compute Ui = Qi x Ur
+        
+        Ui = np.matmul( Qi, Ur )
+        
+        del Ur, S
+        gc.collect()
+        
+        
+        # ==============================================================
+        # Solve eigenvalue problem of S tilde
+        # ==============================================================
+        
+        # 1. Project S onto POD basis of Ai(2 => Ns+1) 
+        #    Ui* x Ai(2 => Ns+1)
+        
+        B = np.matmul( Ui.conj().T, Ai[:,1:] )
+        
+        
+        # 2. Sum Ui* x Ai(2 => Ns+1) over all processors
+        
+        C = init_2Dflt_empty( Ns, Ns, self.kind )
+        
+        self.comm.Allreduce( B, C, op=MPI.SUM )
+        
+        
+        # 3. Compute C x V = Ui* x Ai(2 => Ns+1) x V
+        
+        '''why C.transpose()'''
+        
+        B = np.array( np.matmul( C.transpose(), Vt.conj().T ), order='F' )
+        
+        del C
+        gc.collect()
+        
+        
+        # 4. Compute S tilde
+        
+        Si_td = np.matmul( B, np.linalg.inv( sigma) )
+        
+        del B 
+        gc.collect()
+        
+        
+        # 5. Compute the eig(Si_st), with Si_d = Ui* x Ai(2=>Ns) x V x sigma^-1
+        
+        mu, Y = np.linalg.eig( Si_td )
+        
+        del Ai
+        gc.collect()
+        
+#        print(mu)
+        
+        # ==============================================================
+        # DMD modes in real space and amplitude
+        # ==============================================================
+        
+        # DMD modes
+        
+        Phi_i = np.matmul( Ui, Y )
+        
+        
+        # Build Vandermonde matrix
+        
+        Vand = init_2Dcmx_empty( Ns, Ns, self.kind*2 )
+        
+        Vand[:,0] = 1.0
+        
+        Vand[:,1] = mu
+
+        for j in range(2, Ns): 
+            Vand[:,j] = Vand[:,j-1] * mu
+            
+        
+        # Build objective function matrices
+        P = np.multiply( np.dot( Y.conj().T, Y )
+                    , np.conj( np.dot( Vand, Vand.conj().T ) ) )
+        q = np.conj( np.diag( np.dot( np.dot( np.dot( Vand, Vt.conj().T ), 
+                                             sigma.conj().T ), Y ) ) )
+        s = np.trace( np.dot( sigma.conj().T, sigma ) )
+
+        
+        # Find amplitudes directly
+        alphas = np.linalg.solve( P, q )
+        
+        
+        
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------

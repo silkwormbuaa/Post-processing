@@ -53,9 +53,18 @@ with timer("read in data "):
         
         snapshot.read_snapshot()
         
+        snapshot.drop_ghost( buff=3 )
+        
+        
+        # Assemble blocks data to one whole snapshot
+        # (sorting is included in self.assemble_block() )
+        
+        snapshot.assemble_block()
+        
         p = list( snapshot.df['p'] )
         
         p_snap.append( p )
+        
         
     x_snap = np.array( snapshot.df['x'] )
     
