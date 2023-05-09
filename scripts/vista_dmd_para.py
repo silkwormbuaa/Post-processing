@@ -27,6 +27,7 @@ from   utils.tools       import get_filelist
 from   vista.paradmd     import ParaDmd
 
 
+
 #snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
 #
 #snap_file = snap_dir+'/snap_test/snapshot_00600031/snapshot_W_002.bin'
@@ -57,7 +58,7 @@ with timer('Read in '):
 
     if paradmd.rank == 0:
         
-        snap_files = get_filelist( snap_dir + '/snap_test' )
+        snap_files = get_filelist( snap_dir + '/snapshot_01' )
         
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
 
