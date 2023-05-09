@@ -145,6 +145,93 @@ def plot_eigens( eigens,
 
 
 # ----------------------------------------------------------------------
+# >>> Plot amplitude_St                                          (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_amp_st( st, amp, figsize=None, filename=None, pure=False ):
+    
+    if amp is None:
+        
+        raise ValueError('Please compute amplitude first.')
+    
+    
+    if figsize is None:
+        
+        # Set default figure size
+        
+        figsize = (10,10) 
+        
+        
+    
+    fig, ax = plt.subplots( figsize=figsize )      
+        
+    # Plot the first eigen values
+    
+    ax.scatter( st, 
+                amp, 
+                marker='o',
+                edgecolors='gray',
+                facecolors='none',
+                label='Eigenvalues')
+    
+     
+    # Ticks
+
+    ax.minorticks_on()
+    
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='in',
+                    length=10,
+                    width=2)
+    
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=5,
+                    width=1)
+    
+    ax.set_yscale( "symlog", linthresh = 1 )
+    
+#    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
+#    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    
+    ax.tick_params(axis='x',labelsize=15)
+    ax.tick_params(axis='y',labelsize=15)
+    
+    # Grids
+    
+    ax.grid(which='major', ls=':', linewidth=1)
+    ax.grid(which='minor', ls=':', linewidth=0.5)
+    
+    # Labels
+    
+    ax.set_xlabel( r"$St_{L_{sep}}$",fontdict={'size':20})
+    ax.set_ylabel( "amplitude",fontdict={'size':20})
+    
+    # With default labels or get pure figure
+    
+    if pure: fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    
+    # Save figure
+    
+    if filename: plt.savefig( filename )
+    
+    
+    plt.show()
+
+
+# ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
 #
