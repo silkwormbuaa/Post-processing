@@ -45,16 +45,16 @@ def init_1Dflt_empty( elem, precision ):
 # 2023/05/08  - adapted from L.Laguarda
 #
 # Desc
-#  - column-majored : order='F'
+#  - row-majored : order='C'
 # ----------------------------------------------------------------------
 
 def init_2Dflt_empty( rows, cols, precision ):
 
    if precision == 4:
-      return np.empty( (rows,cols), dtype='f4', order='F' )
+      return np.empty( (rows,cols), dtype='f4', order='C' )
 
    else:
-      return np.empty( (rows,cols), dtype='f8', order='F' )
+      return np.empty( (rows,cols), dtype='f8', order='C' )
   
 
 
@@ -69,13 +69,13 @@ def init_2Dflt_empty( rows, cols, precision ):
 # 2023/05/08  - adapted from L.Laguarda
 #
 # Desc
-#  - column-majored : order='F'
+#  - row-majored : order='C'
 # ----------------------------------------------------------------------
 
 def init_2Dcmx_empty( rows, cols, precision ):
 
    if precision == 8:
-      return np.empty( (rows,cols), dtype='c8', order='F' )
+      return np.empty( (rows,cols), dtype='c8', order='C' )
 
    else:
-      return np.empty( (rows,cols), dtype='c16', order='F' )
+      return np.empty( (rows,cols), dtype='c16', order='C' )

@@ -545,7 +545,7 @@ class ParaDmd:
         # 2. Sum Ui* x Ai(2 => Ns+1) over all processors
         
         C = init_2Dflt_empty( Ns, Ns, self.kind )
-        
+                
         self.comm.Allreduce( B, C, op=MPI.SUM )
         
         
@@ -553,7 +553,7 @@ class ParaDmd:
         
         '''why C.transpose()'''
         
-        B = np.array( np.matmul( C.transpose(), Vt.conj().T ), order='F' )
+        B = np.array( np.matmul( C, Vt.conj().T ), order='F' )
         
         del C
         gc.collect()
@@ -608,6 +608,12 @@ class ParaDmd:
         # Find amplitudes directly
         alphas = np.linalg.solve( P, q )
         
+        
+        self.mu = mu
+        
+        self.alphas = np.abs( alphas ) 
+        
+        self.freq = np.angle( mu )/0.01/(2*np.pi)
         
         
 # ----------------------------------------------------------------------
