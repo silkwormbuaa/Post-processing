@@ -376,13 +376,13 @@ class Snapshot:
 #            self.itstep = self.itstep_check
   
   
-        if not self.snap_lean   : self.snap_lean     = True
-  
-        if not self.compressible: self.compressible  = True
-  
-        if not self.snap_with_gx: self.snap_with_gx  = True
-  
-        if not self.snap_with_tp: self.snap_with_tp  = True
+#        if not self.snap_lean   : self.snap_lean     = True
+#  
+#        if not self.compressible: self.compressible  = True
+#  
+#        if not self.snap_with_gx: self.snap_with_gx  = True
+#  
+#        if not self.snap_with_tp: self.snap_with_tp  = True
 
   
         # Block-snapshots
@@ -405,15 +405,6 @@ class Snapshot:
   
             self.header_size += 10*slg
   
-
-            if self.slic_type == 'W' and not self.snap_with_cf:
-  
-                self.snap_with_cf = True
-                
-  
-            if self.slic_type == 'Z' and not self.snap_with_wd:
-  
-                self.snap_with_wd = True
   
         
         # Count variables
@@ -1327,15 +1318,17 @@ def Testing():
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_file = test_dir1 + '/snapshot_W_002.bin'
+    test_file = test_dir1 + '/snapshot_Z_001.bin'
     
     os.chdir( test_dir1 )
     
     snapshot1 = Snapshot( test_file )
     
-    with timer('get snapshot struct'):
-        
-        snapshot1.get_snapshot_struct()
+    snapshot1.read_snapshot()
+    
+#    with timer('get snapshot struct'):
+#        
+#        snapshot1.get_snapshot_struct()
         
     
 #    snapshot1.verbose = False
