@@ -105,6 +105,18 @@ class ParaDmd:
         
         self.Ns = None
         
+        # - time interval
+        
+        self.dt = None
+        
+        # - spdmd objective function components
+        
+        self.P = None
+        
+        self.q = None
+        
+        self.s = None
+        
 
 
 # ----------------------------------------------------------------------
@@ -447,7 +459,7 @@ class ParaDmd:
 # 2023/05/07  - created
 #
 # Desc
-#
+#   - (Sayadi & Schmid, 2016)
 # ----------------------------------------------------------------------
 
     def do_paradmd( self ):
@@ -598,24 +610,95 @@ class ParaDmd:
             
         
         # Build objective function matrices
-        P = np.multiply( np.dot( Y.conj().T, Y )
+        self.P = np.multiply( np.dot( Y.conj().T, Y )
                     , np.conj( np.dot( Vand, Vand.conj().T ) ) )
-        q = np.conj( np.diag( np.dot( np.dot( np.dot( Vand, Vt.conj().T ), 
+        self.q = np.conj( np.diag( np.dot( np.dot( np.dot( Vand, Vt.conj().T ), 
                                              sigma.conj().T ), Y ) ) )
-        s = np.trace( np.dot( sigma.conj().T, sigma ) )
+        self.s = np.trace( np.dot( sigma.conj().T, sigma ) )
 
         
         # Find amplitudes directly
-        alphas = np.linalg.solve( P, q )
+        alphas = np.linalg.solve( self.P, self.q )
         
         
         self.mu = mu
         
         self.alphas = np.abs( alphas ) 
         
-        self.freq = np.angle( mu )/0.01/(2*np.pi)
+        self.freq = np.angle( mu )/self.dt/(2*np.pi)
+        
+
+
+# ----------------------------------------------------------------------
+# >>> Sparsity-promoting dmd                                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/11  - created
+#
+# Desc
+#   - (Jovanović et al., 2014)
+#
+# ----------------------------------------------------------------------
+
+    def compute_spdmd( self, gammas ):
+        
+        # default parameters
+        
+        rho = 1
+        
+        maxiter = 10000
+        
+        eps_abs = 0.000001
+        
+        eps_rel = 0.0001
+        
+        # Check if P, q, s are available
+        
+        if self.P is None: raise ValueError('Please compute dmd first.')
+
+        
+        # Cholesky factorization of matrix P + (rho/2)*I
+        
+        Prho = (self.P + (rho/2)*np.eys(self.Ns))
+        
+        Plow = np.linalg.cholesky( Prho )
         
         
+        for i in range( len(gammas) ):
+            
+            gamma = gammas[i]
+            
+            # Initial condition
+            
+            y = np.zeros( self.Ns )
+            z = np.zeros( self.Ns )
+            
+            # Use ADMM to solve the gamma-parameterized problem
+            
+            for iter in range( maxiter ):
+            
+                # x-minimization step 
+                # x =  (P + (rho/2)*I)\(q + (rho)*u)
+                ''' check if conjugate transpose is needed?'''
+                
+                u = z - ( 1.0/rho ) * y 
+                xnew = np.linalg.solve( Plow.T,
+                           np.linalg.solve( Plow, (self.q + (rho/2)*u )))
+            
+            
+                # z-minimization step
+                
+                a = ( gamma/rho ) * np.ones( self.Ns )
+                v = xnew + ( 1.0/rho ) * y
+                
+                # Soft-thresholding of v
+                
+                znew = ( ( 1.0 - a/np.abs(v) ) * v ) * (np.abs(v) > a)
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
