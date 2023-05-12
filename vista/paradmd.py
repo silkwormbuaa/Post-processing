@@ -16,7 +16,11 @@ import gc
 
 import numpy             as np
 
+import numpy.linalg      as linalg
+
 import pandas            as pd
+
+from   scipy.sparse      import csc_matrix
 
 from   mpi4py            import MPI
 
@@ -99,11 +103,11 @@ class ParaDmd:
         
         self.select = None
         
-        # - snapshots matrix for dmd
+        # - snapshots matrix for dmd and total number of snapshots
         
         self.snapshots = []
         
-        self.Ns = None
+        self.N_t = None
         
         # - time interval
         
@@ -468,7 +472,7 @@ class ParaDmd:
         
         self.N_t = len( self.snapshots )
         
-        if self.Ns == 0:
+        if self.N_t == 0 or self.N_t < 2 :
             
             raise ValueError('Please read snapshots first!')     
         
@@ -489,7 +493,7 @@ class ParaDmd:
         
         del self.snapshots
         
-        Q1i, Ri = np.linalg.qr( Ai[:,:-1], mode='reduced' )
+        Q1i, Ri = linalg.qr( Ai[:,:-1], mode='reduced' )
         
         
         # 2. Build the buffer also form the Rprime matrix
@@ -508,7 +512,7 @@ class ParaDmd:
         
         # 3. QR factorization of Rprime and get R, Q2i
         
-        Q2i, R = np.linalg.qr( Rprime.reshape(Ns*n_procs, Ns), mode='reduced')
+        Q2i, R = linalg.qr( Rprime.reshape(Ns*n_procs, Ns), mode='reduced')
 
         del Rprime
         gc.collect()
@@ -528,7 +532,7 @@ class ParaDmd:
         
         # 1. Compute SVD of R
         
-        Ur, S, Vt = np.linalg.svd( R, full_matrices=False )
+        Ur, S, Vt = linalg.svd( R, full_matrices=False )
         
         
         # 2. Build up sigma
@@ -573,7 +577,7 @@ class ParaDmd:
         
         # 4. Compute S tilde
         
-        Si_td = np.matmul( B, np.linalg.inv( sigma) )
+        Si_td = np.matmul( B, linalg.inv( sigma) )
         
         del B 
         gc.collect()
@@ -581,7 +585,7 @@ class ParaDmd:
         
         # 5. Compute the eig(Si_st), with Si_d = Ui* x Ai(2=>Ns) x V x sigma^-1
         
-        mu, Y = np.linalg.eig( Si_td )
+        mu, Y = linalg.eig( Si_td )
         
         del Ai
         gc.collect()
@@ -610,6 +614,7 @@ class ParaDmd:
             
         
         # Build objective function matrices
+        
         self.P = np.multiply( np.dot( Y.conj().T, Y )
                     , np.conj( np.dot( Vand, Vand.conj().T ) ) )
         self.q = np.conj( np.diag( np.dot( np.dot( np.dot( Vand, Vt.conj().T ), 
@@ -618,7 +623,8 @@ class ParaDmd:
 
         
         # Find amplitudes directly
-        alphas = np.linalg.solve( self.P, self.q )
+        
+        alphas = linalg.solve( self.P, self.q )
         
         
         self.mu = mu
@@ -648,13 +654,41 @@ class ParaDmd:
         
         # default parameters
         
-        rho = 1
+        rho = 1.0
         
         maxiter = 10000
         
         eps_abs = 0.000001
         
         eps_rel = 0.0001
+        
+        n = self.N_t - 1
+        
+        # Identity matrix
+        
+        I = np.eye( n )
+        
+        # Initialize data containers
+        
+        # N_none0    : number of non-zero amplitudes
+        # Jsp        : square of F norm(before polish)
+        # Jpol       : square of F norm(after polish)
+        # Ploss      : optimal performance loss(after)
+        # alphas_sp  : vector of amplitudes(before.)
+        # alphas_pol : vector of amplitudes(after..)
+        
+        N_none0 = np.zeros( len(gammas), dtype=int )     
+        
+        Jsp = np.zeros( len(gammas) )          
+        
+        Jpol = np.zeros( len(gammas) )         
+        
+        Ploss = np.zeros( len(gammas) )        
+        
+        alphas_sp = np.zeros( (len(gammas),n), dtype=complex )  
+        
+        alphas_pol = np.zeros( (len(gammas),n), dtype=complex ) 
+    
         
         # Check if P, q, s are available
         
@@ -663,10 +697,12 @@ class ParaDmd:
         
         # Cholesky factorization of matrix P + (rho/2)*I
         
-        Prho = (self.P + (rho/2)*np.eys(self.Ns))
+        Prho = ( self.P + (rho/2.0) * np.eye( n ) )
         
-        Plow = np.linalg.cholesky( Prho )
+        Plow = linalg.cholesky( Prho )
         
+        
+        # Sweep over gamma to determine an acceptable value
         
         for i in range( len(gammas) ):
             
@@ -674,8 +710,8 @@ class ParaDmd:
             
             # Initial condition
             
-            y = np.zeros( self.Ns )
-            z = np.zeros( self.Ns )
+            y = np.zeros( n )
+            z = np.zeros( n )
             
             # Use ADMM to solve the gamma-parameterized problem
             
@@ -686,19 +722,102 @@ class ParaDmd:
                 ''' check if conjugate transpose is needed?'''
                 
                 u = z - ( 1.0/rho ) * y 
-                xnew = np.linalg.solve( Plow.T,
-                           np.linalg.solve( Plow, (self.q + (rho/2)*u )))
+                xnew = linalg.solve( Plow.conj().T,
+                           linalg.solve( Plow, (self.q + (rho/2.0)*u )))
             
             
                 # z-minimization step
                 
-                a = ( gamma/rho ) * np.ones( self.Ns )
+                a = ( gamma/rho ) * np.ones( n )
                 v = xnew + ( 1.0/rho ) * y
                 
                 # Soft-thresholding of v
                 
                 znew = ( ( 1.0 - a/np.abs(v) ) * v ) * (np.abs(v) > a)
+                
+                
+                # Primal and dual residuals
+                
+                res_prim = linalg.norm( xnew - znew )
+                res_dual = rho * linalg.norm( znew - z )
+                
+                
+                # Lagrange multiplier update step
+                
+                y = y + rho * ( xnew - znew )
+                
+                
+                # Stopping criteria
+                
+                eps_prim = np.sqrt( n ) * eps_abs + \
+                           eps_rel * max( linalg.norm(xnew), linalg.norm(znew) )
 
+                eps_dual = np.sqrt( n ) * eps_abs + eps_rel * linalg.norm( y )
+                
+                
+                if (res_prim < eps_prim) and (res_dual < eps_dual): break
+                
+                else: z = znew
+            
+            
+            # Record output data 
+            
+            alphas_sp[i,:] = z
+            
+            N_none0[i] = np.count_nonzero( alphas_sp[i,:] )
+            
+            Jsp[i] = np.real( z.conj().T @ self.P @ z ) \
+                     - 2.0 * np.real( self.q.conj().T @ z) + self.s
+                     
+            
+            # Polishing of the nonzero amplitudes
+            # Form the constraint matrix E for E^T x = 0
+            
+            ind_zero = np.where(np.abs(z) < 1.e-12)[0]
+            
+            m = len( ind_zero )
+            
+            E = I[:,ind_zero]
+            
+#            E = csc_matrix(E)
+            
+            
+            # Form KKT system for the optimality conditions
+            
+            KKT = np.block( [[self.P, E], [E.T, np.zeros((m,m))]] )
+            
+            rhs = np.block( [self.q, np.zeros(m)] )
+            
+            
+            # Solve KKT system 
+            
+            sol = linalg.solve( KKT, rhs )
+            
+            
+            # Vector of polished (optimal) amplitudes
+            
+            alphas_pol[i,:] = sol[0:n]
+            
+            # Polished (optimal) least-squares residual
+            
+            Jpol[i] = np.real( sol[0:n].conj().T @ self.P @ sol[0:n] )\
+                      - 2.0 * np.real(self.q.conj().T @ sol[0:n]) + self.s
+
+            # Polished (optimal) performance loss
+            
+            Ploss[i] = 100.0 * np.sqrt( Jpol[i]/self.s )
+            
+        
+        # Record output data
+        
+        self.Jsp = Jsp
+        self.Jpol = Jpol
+        self.Ploss = Ploss
+        self.alphas_sp = alphas_sp
+        self.alphas_pol = alphas_pol
+            
+            
+            
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
