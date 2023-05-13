@@ -14,11 +14,13 @@ import sys
 
 import gc 
 
-import numpy             as np
+import pickle
 
-import numpy.linalg      as linalg
+import numpy             as     np
 
-import pandas            as pd
+import numpy.linalg      as     linalg
+
+import pandas            as     pd
 
 from   scipy.sparse      import csc_matrix
 
@@ -68,16 +70,6 @@ class ParaDmd:
         
         self.snap_info_file = snap_dir + '/snap_info.dat'
         
-        
-        if self.rank == 0:
-            
-            if not (os.path.exists( self.snap_info_file ) and 
-                    os.path.exists( self.snap_struct_file )):
-                
-                raise FileNotFoundError("no paradmd pre-processing files")
-        
-            else: print("Checked pre-processing files.")
-            
         
         # some parameters need to be defined first
         
@@ -138,6 +130,18 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def read_info_file( self ):
+        
+        # Check if files are available.
+        
+        if self.rank == 0:
+            
+            if not (os.path.exists( self.snap_info_file ) and 
+                    os.path.exists( self.snap_struct_file )):
+                
+                raise FileNotFoundError("no paradmd pre-processing files")
+        
+            else: print("Checked pre-processing files.")
+        
         
         # Root read the info_file
         
@@ -617,8 +621,10 @@ class ParaDmd:
         
         self.P = np.multiply( np.dot( Y.conj().T, Y )
                     , np.conj( np.dot( Vand, Vand.conj().T ) ) )
+        
         self.q = np.conj( np.diag( np.dot( np.dot( np.dot( Vand, Vt.conj().T ), 
                                              sigma.conj().T ), Y ) ) )
+        
         self.s = np.trace( np.dot( sigma.conj().T, sigma ) )
 
         
@@ -626,13 +632,104 @@ class ParaDmd:
         
         alphas = linalg.solve( self.P, self.q )
         
-        
         self.mu = mu
         
         self.alphas = np.abs( alphas ) 
         
         self.freq = np.angle( mu )/self.dt/(2*np.pi)
         
+        
+
+# ----------------------------------------------------------------------
+# >>> Save P,q,s,Nt for further computing spdmd                  (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/13  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def save_Pqs( self ):
+        
+        # Check if P,q,s,N_t are available
+        
+        if self.P is None:
+            
+            raise ValueError("I don't have P,q,s now. Please do_paradmd() first"
+                             " to compute objective functions.")
+        
+        
+        # Save P,q,s,N_t with pickle
+        
+        with open( self.snap_dir + "/Pqs.dat", "wb" ) as f:
+            
+            pickle.dump( self.P, f)
+            
+            pickle.dump( self.q, f)
+            
+            pickle.dump( self.s, f)
+            
+            pickle.dump( self.mu, f)
+            
+            pickle.dump( self.N_t, f)
+            
+            pickle.dump( self.freq, f)
+            
+            pickle.dump( self.alphas, f)
+                
+
+        print("Pqs.dat file is written.")
+
+# ----------------------------------------------------------------------
+# >>> Read Pqs for spdmd                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/13  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def read_Pqs( self ):
+        
+        # Check if Pqs.dat file is available
+        
+        if not ( os.path.exists( self.snap_dir+'/Pqs.dat' ) ):
+            
+            raise FileNotFoundError("Pqs.dat is unavailable. Please run "
+                                    "do_paradmd and save_Pqs first.")
+        
+        
+        # Read P,q,s,N_t with pickle
+        
+        with open( self.snap_dir + "/Pqs.dat","rb") as f:
+            
+            self.P = pickle.load( f )
+            
+            self.q = pickle.load( f )
+            
+            self.s = pickle.load( f )
+            
+            self.mu = pickle.load( f )
+            
+            self.N_t = pickle.load( f )
+            
+            self.freq = pickle.load( f )
+            
+            self.alphas = pickle.load( f )
+            
+        
+        print("Pqs.dat file is read.")
+
 
 
 # ----------------------------------------------------------------------
@@ -660,9 +757,13 @@ class ParaDmd:
         
         eps_abs = 0.000001
         
-        eps_rel = 0.0001
+        eps_rel = 0.001
         
         n = self.N_t - 1
+        
+        # Selected mode index
+        
+        ind_sel = []
         
         # Identity matrix
         
@@ -775,6 +876,8 @@ class ParaDmd:
             
             ind_zero = np.where(np.abs(z) < 1.e-12)[0]
             
+            ind_sel.append( np.where(np.abs(z) > 1.e-12)[0] )
+            
             m = len( ind_zero )
             
             E = I[:,ind_zero]
@@ -814,7 +917,14 @@ class ParaDmd:
         self.Jpol = Jpol
         self.Ploss = Ploss
         self.alphas_sp = alphas_sp
+        
+        alphas_pol[np.abs(alphas_pol) < 10] = 0.0
+        
         self.alphas_pol = alphas_pol
+
+        self.ind_sel = ind_sel
+        
+        # 
             
             
             
