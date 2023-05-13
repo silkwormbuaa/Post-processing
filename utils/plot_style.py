@@ -16,9 +16,11 @@ import matplotlib.pyplot as     plt
 
 import matplotlib.ticker as     ticker
 
-from   matplotlib.patches import Circle
+import pyvista           as     pv
 
-import pyvista           as    pv
+import pandas            as     pd
+
+from   matplotlib.patches import Circle
 
 
 # ----------------------------------------------------------------------
@@ -88,7 +90,7 @@ def plot_eigens( eigens,
         
         ax.scatter( eigens2.real, 
                     eigens2.imag, 
-                    marker='o',
+                    marker='x',
                     c='blue',
                     label='Eigenvalues2')
     
@@ -158,9 +160,13 @@ def plot_eigens( eigens,
 #
 # ----------------------------------------------------------------------
 
-def plot_amp_st( st, amp, figsize=None, filename=None, pure=False ):
+def plot_amp_st( st, amp1, amp2=None, 
+                 figsize=None, 
+                 filename=None, 
+                 pure=False, 
+                 hidesmall=True ):
     
-    if amp is None:
+    if amp1 is None:
         
         raise ValueError('Please compute amplitude first.')
     
@@ -171,18 +177,36 @@ def plot_amp_st( st, amp, figsize=None, filename=None, pure=False ):
         
         figsize = (10,10) 
         
-        
     
     fig, ax = plt.subplots( figsize=figsize )      
         
-    # Plot the first eigen values
+    # Plot the first amplitudes
     
     ax.scatter( st, 
-                amp, 
+                amp1, 
                 marker='o',
                 edgecolors='gray',
                 facecolors='none',
-                label='Eigenvalues')
+                label='Standard' )
+    
+    if amp2 is not None:
+        
+        # if hide small, drop small amplitude less than 1
+        
+        df = pd.DataFrame( st, columns=['st'])
+        
+        df['amp2'] = amp2
+            
+        if hidesmall:
+            
+            df = df.drop( df[ df['amp2']<1.0 ].index )
+        
+        
+        ax.scatter( np.array( df['st'] ), 
+                    np.array( df['amp2'] ), 
+                    marker='x',
+                    c='red',
+                    label='Sparsity-promoting' )
     
      
     # Ticks
@@ -203,7 +227,7 @@ def plot_amp_st( st, amp, figsize=None, filename=None, pure=False ):
     
     ax.set_yscale( "symlog", linthresh = 1 )
     
-#    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(5.0))
 #    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     
     ax.tick_params(axis='x',labelsize=15)
