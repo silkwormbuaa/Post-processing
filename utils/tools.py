@@ -26,10 +26,10 @@ import math
 # Desc
 # 
 # - All files, including files in any subfolder will be retrieved
-#
+# - Only add files when key is matched
 # ----------------------------------------------------------------------
 
-def get_filelist( FoldPath ):
+def get_filelist( FoldPath, key=None ):
     
     FileList = []
     
@@ -38,8 +38,14 @@ def get_filelist( FoldPath ):
         for filename in files:
             
             # Filelist need to contain the whole path
-            
-            FileList.append( os.path.join(home,filename) )
+            if key is not None:
+                
+                if key in filename:
+                    
+                    FileList.append( os.path.join(home,filename) )
+            else:
+                
+                FileList.append( os.path.join(home,filename) )
     
     FileList.sort()
             
@@ -186,6 +192,32 @@ def is_above_wavywall( y, z, Case = 1):
 # - simple function applied in pandas 
 #
 # ----------------------------------------------------------------------
+
 def mean_of_list(lst):
     return sum(lst) / len(lst)
 
+
+
+# ----------------------------------------------------------------------
+# >>> Main: for testing and debugging                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/15  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if __name__ == "__main__":
+    
+    folder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots"
+    
+    files = get_filelist( folder,'.dat' )
+    
+    for file in files:
+        
+        print(file)
