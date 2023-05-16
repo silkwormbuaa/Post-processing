@@ -1314,21 +1314,20 @@ class Snapshot:
 def Testing():
     
     test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00514923'
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00842376'
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_file = test_dir1 + '/snapshot_Z_001.bin'
+    test_file = test_dir2 + '/snapshot_Z_001.bin'
     
-    os.chdir( test_dir1 )
+    os.chdir( test_dir2 )
     
     snapshot1 = Snapshot( test_file )
     
-    snapshot1.read_snapshot()
+#    snapshot1.read_snapshot()
     
-#    with timer('get snapshot struct'):
-#        
-#        snapshot1.get_snapshot_struct()
+    with timer('get snapshot struct'):
+        
+        snapshot1.get_snapshot_struct()
         
     
 #    snapshot1.verbose = False

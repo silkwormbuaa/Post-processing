@@ -18,7 +18,7 @@ import pandas            as     pd
 
 from   mpi4py            import MPI
 
-sys.path.append('..')
+#sys.path.append('..')
 
 from   utils.timer       import timer
 
@@ -37,6 +37,8 @@ from   vista.paradmd     import ParaDmd
 #snap_file = snap_dir+'/snap_test/snapshot_00600031/snapshot_W_002.bin'
 
 snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
+
+os.chdir( snap_dir )
 
 paradmd = ParaDmd( snap_dir )
 
@@ -62,7 +64,7 @@ with timer('Read in '):
 
     if paradmd.rank == 0:
         
-        snap_files = get_filelist( snap_dir + '/snapshot_test' )
+        snap_files = get_filelist( snap_dir + '/snapshot_02' )
         
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
 

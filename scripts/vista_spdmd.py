@@ -31,9 +31,10 @@ from   utils.plot_style  import plot_amp_st
 # Directory that stores Psq file
 snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
 
+#snap_dir = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/Z_slice_results'
 # gammas that are going to be sweep over
 
-gammas = np.arange(10000000,15000000,1000000)
+gammas = np.arange(10000000,11000000,1000000)
 
 
 # Set the instance and read in Pqs

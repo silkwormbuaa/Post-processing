@@ -820,7 +820,6 @@ class ParaDmd:
             
                 # x-minimization step 
                 # x =  (P + (rho/2)*I)\(q + (rho)*u)
-                ''' check if conjugate transpose is needed?'''
                 
                 u = z - ( 1.0/rho ) * y 
                 xnew = linalg.solve( Plow.conj().T,
