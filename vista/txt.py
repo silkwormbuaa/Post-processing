@@ -44,9 +44,3 @@ def txt_replace( file, in_str, out_str ):
     with open( file, 'w' ) as f:
         
         f.write( content )
-        
-#%% executable test scripts
-
-if __name__=='__main__':
-    
-    pass

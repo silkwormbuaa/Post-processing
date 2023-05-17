@@ -8,15 +8,18 @@
 @Desc    :   Script for getting a streamwise line data
 '''
 
+import os
+
 import sys
 
-sys.path.append('..')
+source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+sys.path.append( source_dir )
 
-from utils.tools         import *
+from   vista.timer         import timer
 
-from utils.timer         import timer
+from   vista.pytecio       import get_xline
 
-from vista.pytecio       import *
+from   vista.pytecio       import read_zonelist
 
 
 

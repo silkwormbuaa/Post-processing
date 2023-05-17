@@ -8,21 +8,15 @@
 @Desc    :   None
 '''
 
-import sys
-
 import os
 
-import numpy             as     np
+from   .block            import BlockData
 
-sys.path.append('..')
+from   .read_binary      import read_int_bin
 
-from   vista.block       import BlockData
+from   .read_binary      import read_flt_bin
 
-from   utils.read_binary import read_int_bin
-
-from   utils.read_binary import read_flt_bin
-
-from   utils.read_binary import read_log_bin
+from   .read_binary      import read_log_bin
 
 #%% 
 class StatisticData:

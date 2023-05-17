@@ -8,17 +8,13 @@
 @Desc    :   None
 '''
 
-import os
-
 import numpy             as     np
+
+import pandas            as     pd
 
 import matplotlib.pyplot as     plt
 
 import matplotlib.ticker as     ticker
-
-import pyvista           as     pv
-
-import pandas            as     pd
 
 from   matplotlib.patches import Circle
 

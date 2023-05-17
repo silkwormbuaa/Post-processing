@@ -10,11 +10,11 @@
 
 import os
 
-import sys
-
 import gc 
 
 import pickle
+
+import time
 
 import numpy             as     np
 
@@ -22,21 +22,17 @@ import numpy.linalg      as     linalg
 
 import pandas            as     pd
 
-from   scipy.sparse      import csc_matrix
-
 from   mpi4py            import MPI
 
-sys.path.append('..')
+from   .timer            import timer
 
-from   utils.timer       import timer
+from   .tools            import get_filelist
 
-from   utils.tools       import get_filelist
+from   .init_empty       import init_1Dflt_empty
 
-from   utils.init_empty  import init_1Dflt_empty
+from   .init_empty       import init_2Dflt_empty
 
-from   utils.init_empty  import init_2Dflt_empty
-
-from   utils.init_empty  import init_2Dcmx_empty
+from   .init_empty       import init_2Dcmx_empty
 
 class ParaDmd:
 # ----------------------------------------------------------------------
@@ -751,7 +747,7 @@ class ParaDmd:
         
         # default parameters
         
-        rho = 1.0
+        rho = 100000.
         
         maxiter = 10000
         
@@ -817,6 +813,8 @@ class ParaDmd:
             # Use ADMM to solve the gamma-parameterized problem
             
             for iter in range( maxiter ):
+                
+                t_ref = time.time()
             
                 # x-minimization step 
                 # x =  (P + (rho/2)*I)\(q + (rho)*u)
@@ -859,6 +857,7 @@ class ParaDmd:
                 
                 else: z = znew
             
+                print( 'Iter. num. %4d took %5.1fs - res: %8.4E < %8.4E and %8.4E < %8.4E and Nz = %4d' %( iter+1, time.time() - t_ref, res_prim, eps_prim, res_dual, eps_dual, np.count_nonzero( z ) ) )
             
             # Record output data 
             

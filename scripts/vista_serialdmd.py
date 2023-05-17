@@ -12,6 +12,9 @@ import os
 
 import sys
 
+source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+sys.path.append( source_dir )
+
 import numpy             as np
 
 import pandas            as pd
@@ -22,15 +25,13 @@ from   pydmd             import DMD
 
 from   pydmd.plotter     import plot_eigs
 
-sys.path.append('..')
+from   vista.timer       import timer
 
-from   utils.timer       import timer
+from   vista.tools       import get_filelist
 
-from   utils.tools       import get_filelist
+from   vista.plot_style  import plot_eigens
 
-from   utils.plot_style  import plot_eigens
-
-from   utils.plot_style  import plot_amp_st
+from   vista.plot_style  import plot_amp_st
 
 from   vista.snapshot    import Snapshot
 

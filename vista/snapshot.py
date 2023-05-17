@@ -19,17 +19,15 @@ import pandas            as     pd
 
 import matplotlib.pyplot as     plt
 
-sys.path.append('..')
+from   .read_binary      import read_int_bin
 
-from   utils.read_binary import read_int_bin
+from   .read_binary      import read_flt_bin
 
-from   utils.read_binary import read_flt_bin
+from   .read_binary      import read_log_bin
 
-from   utils.read_binary import read_log_bin
+from   .read_binary      import read_bin_3Dflt
 
-from   utils.read_binary import read_bin_3Dflt
-
-from   utils.timer       import timer
+from   .timer            import timer
 
 class Snapshot:
 

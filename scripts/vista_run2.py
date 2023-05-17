@@ -8,19 +8,26 @@
 @Desc    :   script doing spanwise periodic averaging
 '''
 
+import os
+
 import sys
 
-sys.path.append('..')
+source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+sys.path.append( source_dir )
 
 import gc
 
-from   utils.tools         import *
+import tecplot             as     tp
 
-from   utils.timer         import timer
+from   vista.tools         import get_filelist
 
-from   vista.pytecio       import *
+from   vista.timer         import timer
 
-from   plt2pandas          import *
+from   vista.pytecio       import read_zonelist
+
+from   vista.pytecio       import spanwise_periodic_ave
+
+from   plt2pandas          import frame2tec3d
 
 
 

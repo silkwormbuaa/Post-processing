@@ -8,11 +8,12 @@
 @Desc    :   Scripts for getting PSD
 '''
 
+import os
+
 import sys
 
-sys.path.append('..')
-
-import os
+source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+sys.path.append( source_dir )
 
 import matplotlib.pyplot as     plt
 
@@ -20,9 +21,9 @@ import matplotlib.ticker as     ticker
 
 from   vista.psd         import ProbeData
 
-from   utils.timer       import timer
+from   vista.timer       import timer
 
-from   utils.tools       import get_filelist
+from   vista.tools       import get_filelist
 
 
 folderpath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes'

@@ -13,7 +13,7 @@ import tecplot           as     tp
 import pandas            as     pd
 import logging           as     log
 from   scipy.interpolate import griddata
-from   utils.timer       import timer
+from   vista.timer       import timer
 from   time              import time
 from   glob              import glob
 

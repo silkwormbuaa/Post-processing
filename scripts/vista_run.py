@@ -8,14 +8,20 @@
 @Desc    :   get sorted zonelist and mean_result_ib_superficial average
 '''
 
+import os
+
 import sys
 
-sys.path.append('..')
+source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+sys.path.append( source_dir )
 
-from utils.timer         import timer
+from vista.timer         import timer
 
-from vista.pytecio       import *
+from vista.pytecio       import get_zonegrp
 
+from vista.pytecio       import read_zonelist
+
+from vista.pytecio       import ave_block_ib
 
 
 folderpath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/TP_stat"

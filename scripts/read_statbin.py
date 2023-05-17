@@ -9,17 +9,16 @@
            ! Set the headers for cutcell_setup first
 '''
 
-import sys
-
 import os
 
-import re
+import sys
+
+source_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append( source_dir )
 
 import pandas            as     pd
 
 import numpy             as     np
-
-sys.path.append('..')
 
 from   vista.statistic   import StatisticData
 

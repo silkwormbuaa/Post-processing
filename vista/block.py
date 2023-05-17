@@ -8,17 +8,13 @@
 @Desc    :   Class block
 '''
 
-import sys
-
 import numpy             as     np
 
-sys.path.append('..')
+from   .read_binary      import read_int_bin
 
-from utils.read_binary   import read_int_bin
+from   .read_binary      import read_flt_bin
 
-from utils.read_binary   import read_flt_bin
-
-from utils.read_binary   import read_log_bin
+from   .read_binary      import read_log_bin
 
 
 # ----------------------------------------------------------------------

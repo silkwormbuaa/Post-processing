@@ -16,21 +16,19 @@ import numpy             as np
 
 import pandas            as pd
 
-sys.path.append('..')
+from   .read_binary      import read_int_bin
 
-from utils.read_binary   import read_int_bin
+from   .read_binary      import read_flt_bin
 
-from utils.read_binary   import read_flt_bin
+from   .read_binary      import read_log_bin
 
-from utils.read_binary   import read_log_bin
+from   .read_binary      import read_chr_bin
 
-from utils.read_binary   import read_chr_bin
+from   .tools            import is_above_wavywall
 
-from utils.tools         import is_above_wavywall
+from   .tools            import if_overlap
 
-from utils.tools         import if_overlap
-
-from utils.tools         import mean_of_list
+from   .tools            import mean_of_list
 
 # ----------------------------------------------------------------------
 # >>> Initialize a grid from binary file                        ( 1-0 )
