@@ -69,12 +69,13 @@ with timer('Read in '):
 
     if paradmd.rank == 0:
         
-        snap_files = get_filelist( snap_dir + '/snapshot_02' )
+        snap_files = get_filelist( snap_dir + '/snapshot_test' )
         
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
     
 
     paradmd.select = 'p'
+    paradmd.var_norms['p'] = 45447.289
 
     for snap_file in snap_files:
         

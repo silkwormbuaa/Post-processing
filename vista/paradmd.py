@@ -28,6 +28,8 @@ from   .timer            import timer
 
 from   .tools            import get_filelist
 
+from   .tools            import to_dictionary
+
 from   .init_empty       import init_1Dflt_empty
 
 from   .init_empty       import init_2Dflt_empty
@@ -91,6 +93,8 @@ class ParaDmd:
         
         self.select = None
         
+        self.var_norms = None
+        
         # - snapshots matrix for dmd and total number of snapshots
         
         self.snapshots = []
@@ -122,6 +126,8 @@ class ParaDmd:
 # 2023/05/06  - created
 #
 # Desc
+#   - read info file and broadcast
+#   - set default variable values for normalization
 #
 # ----------------------------------------------------------------------
 
@@ -173,6 +179,10 @@ class ParaDmd:
                 
         self.n_var     = self.comm.bcast( self.n_var, root=0 )
         
+        
+        # Set default values of normalization
+        
+        self.var_norms = to_dictionary( self.vars_name, np.ones(self.n_var) )
         
             
 # ----------------------------------------------------------------------
@@ -347,11 +357,12 @@ class ParaDmd:
             
             # Drop ghost cells, other variables, and stack along blocks
             
-            if data is None: 
+            if data is None:
+                
+                # initialize data
                 
                 data = self.drop_ghost( buff_data, bl )
-#                print(f'data shape is {np.shape(data)}')
-                
+                                
             else: 
                 
                 data = np.hstack((data, self.drop_ghost(buff_data, bl)))
@@ -365,7 +376,7 @@ class ParaDmd:
         
 
 # ----------------------------------------------------------------------
-# >>> Drop ghost                                                (Nr.)
+# >>> Drop ghost cells and normalize data                        (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -375,8 +386,8 @@ class ParaDmd:
 # 2023/05/07  - created
 #
 # Desc
-#
-# 
+#   - drop ghost cells of one block
+#   - normalize the selected variables
 # ----------------------------------------------------------------------
 
     def drop_ghost( self, buff_data, bl, ghost=3 ):
@@ -436,16 +447,29 @@ class ParaDmd:
                 buff_data = buff_data[ : , ghost:-ghost, ghost:-ghost]
         
         
-        # reshape to long data vectors of different variable
+        # Reshape to long data vectors of different variable and 
+        # normalize the variables
         
         buff_data = buff_data.reshape(( self.n_var, Nx*Ny*Nz ))
 
-        if self.select == 'u':    buff_data = buff_data[0,:]
-        elif self.select == 'v':  buff_data = buff_data[1,:]
-        elif self.select == 'w':  buff_data = buff_data[2,:]
-        elif self.select == 'T':  buff_data = buff_data[3,:]
-        elif self.select == 'p':  buff_data = buff_data[4,:]
-        elif self.select == 'cf': buff_data = buff_data[5,:]
+        if self.select == 'u':    
+            buff_data = buff_data[0,:]/self.var_norms.get('u')
+            
+        elif self.select == 'v':  
+            buff_data = buff_data[1,:]/self.var_norms.get('v')
+            
+        elif self.select == 'w':  
+            buff_data = buff_data[2,:]/self.var_norms.get('w')
+            
+        elif self.select == 'T':  
+            buff_data = buff_data[3,:]/self.var_norms.get('T')
+            
+        elif self.select == 'p':  
+            buff_data = buff_data[4,:]/self.var_norms.get('p')
+            
+        elif self.select == 'cf': 
+            buff_data = buff_data[5,:]/self.var_norms.get('cf')
+            
         else: raise ValueError('The selected variable does not exist.')
         
         return buff_data

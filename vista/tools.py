@@ -12,6 +12,7 @@ import os
 
 import math
 
+import numpy             as     np
 
 # ----------------------------------------------------------------------
 # >>> GET FILE LIST                                               ( 0 )
@@ -197,7 +198,24 @@ def mean_of_list(lst):
     return sum(lst) / len(lst)
 
 
+# ----------------------------------------------------------------------
+# >>> To dictionary                                             ( 5 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/18  - created
+#
+# Desc
+#   - match two list(vectors) to a dictionary
+#
+# ----------------------------------------------------------------------
 
+def to_dictionary( keys, values ):
+    return { key:value for key, value in zip(keys, values) }
+        
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
@@ -214,10 +232,11 @@ def mean_of_list(lst):
 
 if __name__ == "__main__":
     
-    folder = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots"
+    keys = ['a','b']
+    values = np.ones(2)
     
-    files = get_filelist( folder,'.dat' )
+    dict =  to_dictionary( keys, values )
     
-    for file in files:
-        
-        print(file)
+    print(dict)
+
+    print('a is %f'%(dict.get('a')))

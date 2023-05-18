@@ -14,7 +14,7 @@ import tecplot           as     tp
 
 import numpy             as     np
 
-from   utils.timer       import timer
+from   vista.timer       import timer
 
 # from tecplot line to get Cf and Cp
 

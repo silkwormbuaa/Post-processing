@@ -1316,9 +1316,9 @@ def Testing():
     
     test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
         
-    test_file = test_dir2 + '/snapshot_Z_001.bin'
+    test_file = test_dir1 + '/snapshot_W_002.bin'
     
-    os.chdir( test_dir2 )
+    os.chdir( test_dir1 )
     
     snapshot1 = Snapshot( test_file )
     
