@@ -24,7 +24,7 @@ from   vista.statistic   import StatisticData
 
 from   vista.grid        import GridData
 
-from   utils.timer       import timer
+from   vista.timer       import timer
 
 #datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
 

@@ -17,18 +17,18 @@ sys.path.append( source_dir )
 
 import numpy             as     np
 
-from   utils.timer       import timer
+from   vista.timer       import timer
 
 from   vista.paradmd     import ParaDmd
 
-from   utils.plot_style  import plot_eigens
+from   vista.plot_style  import plot_eigens
 
-from   utils.plot_style  import plot_amp_st
+from   vista.plot_style  import plot_amp_st
 
 # Directory that stores Psq file
 #snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
 
-snap_dir = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/Z_slice_results'
+snap_dir = os.getcwd()
 # gammas that are going to be sweep over
 
 # gammas = np.arange(81500,801600,100)
