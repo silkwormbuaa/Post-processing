@@ -6,7 +6,8 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Class and methods of reading snapshots.
-         :   Adapted from Luis Laguarda's RAPTOR
+             Adapted from Luis Laguarda's RAPTOR
+             Further work: select only fluid cells to do dmd
 '''
 
 import os

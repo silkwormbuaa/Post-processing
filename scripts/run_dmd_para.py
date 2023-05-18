@@ -36,16 +36,19 @@ from   vista.paradmd     import ParaDmd
 #snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
 #
 #snap_file = snap_dir+'/snap_test/snapshot_00600031/snapshot_W_002.bin'
+#os.chdir( snap_dir )
 
-snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
 
-os.chdir( snap_dir )
+snap_dir = os.getcwd()
 
 paradmd = ParaDmd( snap_dir )
 
+
 paradmd.comm.barrier()
 
+
 with timer('Read in '):
+    
     
     paradmd.read_info_file()
 
@@ -55,11 +58,12 @@ with timer('Read in '):
 
     print('I am process %d out of %d, got the total block number %d.\
             I take care of blocks from %d(%d) .. %d(%d)'
-            %(paradmd.rank, paradmd.n_procs, paradmd.n_bl,
-            paradmd.i_start+1, paradmd.bl_num[paradmd.i_start], 
-            paradmd.i_end, paradmd.bl_num[paradmd.i_end-1])) 
+            %(paradmd.rank,      paradmd.n_procs,   paradmd.n_bl,
+              paradmd.i_start+1, paradmd.bl_num[paradmd.i_start], 
+              paradmd.i_end,     paradmd.bl_num[paradmd.i_end-1])) 
 
 #    paradmd.comm.barrier()
+
 
     snap_files = None
 
@@ -68,6 +72,7 @@ with timer('Read in '):
         snap_files = get_filelist( snap_dir + '/snapshot_02' )
         
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
+    
 
     paradmd.select = 'p'
 
@@ -76,6 +81,7 @@ with timer('Read in '):
         paradmd.para_read_data( snap_file )
         
     print(np.shape(paradmd.snapshots))
+
 
 # Specify the time interval of snapshots
 
