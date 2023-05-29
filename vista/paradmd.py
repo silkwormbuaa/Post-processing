@@ -763,13 +763,16 @@ class ParaDmd:
 # 2023/05/11  - created
 #
 # Desc
-#   - (Jovanović et al., 2014)
+#   - (Jovanović et al., 2014) 
+#   - http://www.ece.umn.edu/users/mihailo//software/dmdsp/
 #
 # ----------------------------------------------------------------------
 
     def compute_spdmd( self, gammas, rho=10000. ):
         
         # default parameters
+        
+        rho = 100000.
         
         maxiter = 10000
         
@@ -879,7 +882,10 @@ class ParaDmd:
                 
                 else: z = znew
             
-                print( 'Iter. num. %4d took %5.1fs - res: %8.4E < %8.4E and %8.4E < %8.4E and Nz = %4d' %( iter+1, time.time() - t_ref, res_prim, eps_prim, res_dual, eps_dual, np.count_nonzero( z ) ) )
+                print( 'Iter. num. %4d took %5.1fs \
+                      - res: %8.4E < %8.4E and %8.4E < %8.4E and Nz = %4d' \
+                      %( iter+1, time.time() - t_ref, res_prim, eps_prim, \
+                      res_dual, eps_dual, np.count_nonzero( z ) ) )
             
             # Record output data 
             

@@ -26,9 +26,9 @@ from   vista.plot_style  import plot_eigens
 from   vista.plot_style  import plot_amp_st
 
 # Directory that stores Psq file
-#snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
+snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/Z_slice'
 
-snap_dir = os.getcwd()
+#snap_dir = os.getcwd()
 # gammas that are going to be sweep over
 
 # gammas = np.arange(81500,801600,100)
@@ -47,11 +47,10 @@ with timer('Read in Pqs file '):
 
 with timer('Compute sparsity promoting dmd '):
     
-    paradmd.compute_spdmd( gammas, rho=10000. )
+    paradmd.compute_spdmd( gammas, rho=100000. )
     
 
-
-Lsep = 50.069
+Lsep = 50.31695
 
 velocity = 507.0
 
@@ -59,7 +58,10 @@ St = paradmd.freq * Lsep / velocity
 
 for i in range(len(gammas)):
 
-    plot_eigens( paradmd.mu, paradmd.mu[paradmd.ind_sel[i]] )
+    plot_eigens( paradmd.mu, 
+                 paradmd.mu[paradmd.ind_sel[i]],
+                 filename='eigens.png')
     
     plot_amp_st( St, paradmd.alphas ,
-                amp2 = np.abs(paradmd.alphas_pol[i,:]) )
+                amp2 = np.abs(paradmd.alphas_pol[i,:]),
+                filename='amplitude.png')
