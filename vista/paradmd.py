@@ -767,17 +767,15 @@ class ParaDmd:
 #
 # ----------------------------------------------------------------------
 
-    def compute_spdmd( self, gammas ):
+    def compute_spdmd( self, gammas, rho=10000. ):
         
         # default parameters
-        
-        rho = 100000.
         
         maxiter = 10000
         
         eps_abs = 0.000001
         
-        eps_rel = 0.001
+        eps_rel = 0.0001
         
         n = self.N_t - 1
         

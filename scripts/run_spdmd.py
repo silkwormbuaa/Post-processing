@@ -32,7 +32,7 @@ snap_dir = os.getcwd()
 # gammas that are going to be sweep over
 
 # gammas = np.arange(81500,801600,100)
-gammas = np.array([ 800000000. ])
+gammas = np.array([ 450000000. ])
 
 # Set the instance and read in Pqs
 
@@ -47,9 +47,8 @@ with timer('Read in Pqs file '):
 
 with timer('Compute sparsity promoting dmd '):
     
-    paradmd.compute_spdmd( gammas )
+    paradmd.compute_spdmd( gammas, rho=10000. )
     
-
 
 
 Lsep = 50.069

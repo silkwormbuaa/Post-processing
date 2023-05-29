@@ -1312,11 +1312,14 @@ class Snapshot:
 # ----------------------------------------------------------------------
 def Testing():
     
-    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_00514923'
+    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/Z_slice'
+#    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
+#    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
+#    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936/Z_slice'
     
-    test_dir2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
+#    test_dir1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/snapshots/snapshot_01376059/Z_slice'
         
-    test_file = test_dir1 + '/snapshot_W_002.bin'
+    test_file = test_dir1 + '/snapshot_Z_001.bin'
     
     os.chdir( test_dir1 )
     

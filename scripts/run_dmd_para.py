@@ -69,7 +69,7 @@ with timer('Read in '):
 
     if paradmd.rank == 0:
         
-        snap_files = get_filelist( snap_dir + '/snapshot_test' )
+        snap_files = get_filelist( snap_dir + '/snapshots' )
         
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
     
