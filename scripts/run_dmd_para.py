@@ -78,11 +78,12 @@ with timer('Read in '):
 
     paradmd.assign_block()
 
-    print('I am process %d out of %d, got the total block number %d.\
-            I take care of blocks from %d(%d) .. %d(%d)'
-            %(paradmd.rank,      paradmd.n_procs,   paradmd.n_bl,
-              paradmd.i_start+1, paradmd.bl_num[paradmd.i_start], 
-              paradmd.i_end,     paradmd.bl_num[paradmd.i_end-1])) 
+    print(f"I am process {paradmd.rank:5d} out of {paradmd.n_procs:5d},",end='')
+    print(f"got {paradmd.n_bl_local:5d} blocks out of {paradmd.n_bl:5d}",end='')
+    print(f". I take care of blocks from {paradmd.i_start+1:5d}",end='')
+    print(f"({paradmd.bl_num[paradmd.i_start]:5d}) to ",end='')
+    print(f"{paradmd.i_end:5d}({paradmd.bl_num[paradmd.i_end-1]:5d}).")
+    
 
 #    paradmd.comm.barrier() 
 
