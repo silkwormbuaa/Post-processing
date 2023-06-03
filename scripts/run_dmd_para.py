@@ -31,6 +31,8 @@ from   vista.plot_style  import plot_amp_st
 
 from   vista.paradmd     import ParaDmd
 
+from   vista.snapshot    import Snapshot
+
 
 
 #snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
@@ -42,6 +44,26 @@ from   vista.paradmd     import ParaDmd
 snap_dir = os.getcwd()
 
 paradmd = ParaDmd( snap_dir )
+
+
+# Get the snapshots info and struct files, then broadcast.
+
+snap_files = None
+
+with timer('Get snapshots file list and snapshots info'):
+    
+    if paradmd.rank == 0:
+        
+        snap_files = get_filelist( snap_dir + '/snapshots' )
+        
+        testfile = snap_files[0]
+        
+        snapshot_temp = Snapshot( testfile )
+        
+        snapshot_temp.get_snapshot_struct()
+        
+            
+    snap_files = paradmd.comm.bcast( snap_files, root=0 )
 
 
 paradmd.comm.barrier()
@@ -62,17 +84,7 @@ with timer('Read in '):
               paradmd.i_start+1, paradmd.bl_num[paradmd.i_start], 
               paradmd.i_end,     paradmd.bl_num[paradmd.i_end-1])) 
 
-#    paradmd.comm.barrier()
-
-
-    snap_files = None
-
-    if paradmd.rank == 0:
-        
-        snap_files = get_filelist( snap_dir + '/snapshots' )
-        
-    snap_files = paradmd.comm.bcast( snap_files, root=0 )
-    
+#    paradmd.comm.barrier() 
 
     paradmd.select = 'p'
     paradmd.var_norms['p'] = 45447.289
