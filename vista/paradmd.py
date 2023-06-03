@@ -772,8 +772,6 @@ class ParaDmd:
         
         # default parameters
         
-        rho = 100000.
-        
         maxiter = 10000
         
         eps_abs = 0.000001
@@ -882,10 +880,7 @@ class ParaDmd:
                 
                 else: z = znew
             
-                print( 'Iter. num. %4d took %5.1fs \
-                      - res: %8.4E < %8.4E and %8.4E < %8.4E and Nz = %4d' \
-                      %( iter+1, time.time() - t_ref, res_prim, eps_prim, \
-                      res_dual, eps_dual, np.count_nonzero( z ) ) )
+                print( 'Iter. num. %4d took %5.1fs - res: %8.4E < %8.4E and %8.4E < %8.4E and Nz = %4d'  %( iter+1, time.time() - t_ref, res_prim, eps_prim,res_dual, eps_dual, np.count_nonzero( z ) ) )
             
             # Record output data 
             
@@ -944,7 +939,7 @@ class ParaDmd:
         self.Ploss = Ploss
         self.alphas_sp = alphas_sp
         
-        alphas_pol[np.abs(alphas_pol) < 10] = 0.0
+#        alphas_pol[np.abs(alphas_pol) < 10] = 0.0
         
         self.alphas_pol = alphas_pol
 

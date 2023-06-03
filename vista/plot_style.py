@@ -195,7 +195,7 @@ def plot_amp_st( st, amp1, amp2=None,
             
         if hidesmall:
             
-            df = df.drop( df[ df['amp2']<1.0 ].index )
+            df = df.drop( df[ df['amp2']<0.01 ].index )
         
         
         ax.scatter( np.array( df['st'] ), 
