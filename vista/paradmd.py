@@ -686,7 +686,7 @@ class ParaDmd:
         
         # Save P,q,s,N_t with pickle
         
-        with open( self.snap_dir + "/Pqs.dat", "wb" ) as f:
+        with open( self.snap_dir + "/Pqs.pkl", "wb" ) as f:
             
             pickle.dump( self.P, f)
             
@@ -703,7 +703,7 @@ class ParaDmd:
             pickle.dump( self.alphas, f)
                 
 
-        print("Pqs.dat file is written.")
+        print("Pqs.pkl file is written.")
 
 # ----------------------------------------------------------------------
 # >>> Read Pqs for spdmd                                        (Nr.)
@@ -723,15 +723,15 @@ class ParaDmd:
         
         # Check if Pqs.dat file is available
         
-        if not ( os.path.exists( self.snap_dir+'/Pqs.dat' ) ):
+        if not ( os.path.exists( self.snap_dir+'/Pqs.pkl' ) ):
             
-            raise FileNotFoundError("Pqs.dat is unavailable. Please run "
+            raise FileNotFoundError("Pqs.pkl is unavailable. Please run "
                                     "do_paradmd and save_Pqs first.")
         
         
         # Read P,q,s,N_t with pickle
         
-        with open( self.snap_dir + "/Pqs.dat","rb") as f:
+        with open( self.snap_dir + "/Pqs.pkl","rb") as f:
             
             self.P = pickle.load( f )
             
@@ -768,9 +768,13 @@ class ParaDmd:
 #
 # ----------------------------------------------------------------------
 
-    def compute_spdmd( self, gammas, rho=10000. ):
+    def compute_spdmd( self, gamma=None, rho=None ):
         
         # default parameters
+        
+        if gamma is None: gamma = 10000.
+        
+        if rho is None: rho = 10000.
         
         maxiter = 10000
         
@@ -789,25 +793,26 @@ class ParaDmd:
         I = np.eye( n )
         
         # Initialize data containers
-        
+        """
         # N_none0    : number of non-zero amplitudes
         # Jsp        : square of F norm(before polish)
         # Jpol       : square of F norm(after polish)
         # Ploss      : optimal performance loss(after)
-        # alphas_sp  : vector of amplitudes(before.)
-        # alphas_pol : vector of amplitudes(after..)
+        # alphas_sp  : vector of amplitudes(before polish)
+        # alphas_pol : vector of amplitudes(after polish)
+        """
         
-        N_none0 = np.zeros( len(gammas), dtype=int )     
+        N_none0 = 0     
         
-        Jsp = np.zeros( len(gammas) )          
+        Jsp = 0.0          
         
-        Jpol = np.zeros( len(gammas) )         
+        Jpol = 0.0         
         
-        Ploss = np.zeros( len(gammas) )        
+        Ploss = 0.0        
         
-        alphas_sp = np.zeros( (len(gammas),n), dtype=complex )  
+        alphas_sp = np.zeros( n, dtype=complex )  
         
-        alphas_pol = np.zeros( (len(gammas),n), dtype=complex ) 
+        alphas_pol = np.zeros( n, dtype=complex ) 
     
         
         # Check if P, q, s are available
@@ -822,114 +827,109 @@ class ParaDmd:
         Plow = linalg.cholesky( Prho )
         
         
-        # Sweep over gamma to determine an acceptable value
+        # Initial condition
         
-        for i in range( len(gammas) ):
+        y = np.zeros( n )
+        z = np.zeros( n )
+        
+        # Use ADMM to solve the gamma-parameterized problem
+        
+        for iter in range( maxiter ):
             
-            gamma = gammas[i]
+            t_ref = time.time()
+        
+            # x-minimization step 
+            # x =  (P + (rho/2)*I)\(q + (rho)*u)
             
-            # Initial condition
+            u = z - ( 1.0/rho ) * y 
+            xnew = linalg.solve( Plow.conj().T,
+                        linalg.solve( Plow, (self.q + (rho/2.0)*u )))
+        
+        
+            # z-minimization step
             
-            y = np.zeros( n )
-            z = np.zeros( n )
+            a = ( gamma/rho ) * np.ones( n )
+            v = xnew + ( 1.0/rho ) * y
             
-            # Use ADMM to solve the gamma-parameterized problem
+            # Soft-thresholding of v
             
-            for iter in range( maxiter ):
-                
-                t_ref = time.time()
-            
-                # x-minimization step 
-                # x =  (P + (rho/2)*I)\(q + (rho)*u)
-                
-                u = z - ( 1.0/rho ) * y 
-                xnew = linalg.solve( Plow.conj().T,
-                           linalg.solve( Plow, (self.q + (rho/2.0)*u )))
+            znew = ( ( 1.0 - a/np.abs(v) ) * v ) * (np.abs(v) > a)
             
             
-                # z-minimization step
-                
-                a = ( gamma/rho ) * np.ones( n )
-                v = xnew + ( 1.0/rho ) * y
-                
-                # Soft-thresholding of v
-                
-                znew = ( ( 1.0 - a/np.abs(v) ) * v ) * (np.abs(v) > a)
-                
-                
-                # Primal and dual residuals
-                
-                res_prim = linalg.norm( xnew - znew )
-                res_dual = rho * linalg.norm( znew - z )
-                
-                
-                # Lagrange multiplier update step
-                
-                y = y + rho * ( xnew - znew )
-                
-                
-                # Stopping criteria
-                
-                eps_prim = np.sqrt( n ) * eps_abs + \
-                           eps_rel * max( linalg.norm(xnew), linalg.norm(znew) )
+            # Primal and dual residuals
+            
+            res_prim = linalg.norm( xnew - znew )
+            res_dual = rho * linalg.norm( znew - z )
+            
+            
+            # Lagrange multiplier update step
+            
+            y = y + rho * ( xnew - znew )
+            
+            
+            # Stopping criteria
+            
+            eps_prim = np.sqrt( n ) * eps_abs + \
+                        eps_rel * max( linalg.norm(xnew), linalg.norm(znew) )
 
-                eps_dual = np.sqrt( n ) * eps_abs + eps_rel * linalg.norm( y )
-                
-                
-                if (res_prim < eps_prim) and (res_dual < eps_dual): break
-                
-                else: z = znew
-            
-                print( 'Iter. num. %4d took %5.1fs - res: %8.4E < %8.4E and %8.4E < %8.4E and Nz = %4d'  %( iter+1, time.time() - t_ref, res_prim, eps_prim,res_dual, eps_dual, np.count_nonzero( z ) ) )
-            
-            # Record output data 
-            
-            alphas_sp[i,:] = z
-            
-            N_none0[i] = np.count_nonzero( alphas_sp[i,:] )
-            
-            Jsp[i] = np.real( z.conj().T @ self.P @ z ) \
-                     - 2.0 * np.real( self.q.conj().T @ z) + self.s
-                     
-            
-            # Polishing of the nonzero amplitudes
-            # Form the constraint matrix E for E^T x = 0
-            
-            ind_zero = np.where(np.abs(z) < 1.e-12)[0]
-            
-            ind_sel.append( np.where(np.abs(z) > 1.e-12)[0] )
-            
-            m = len( ind_zero )
-            
-            E = I[:,ind_zero]
-            
-#            E = csc_matrix(E)
+            eps_dual = np.sqrt( n ) * eps_abs + eps_rel * linalg.norm( y )
             
             
-            # Form KKT system for the optimality conditions
+            if (res_prim < eps_prim) and (res_dual < eps_dual): break
             
-            KKT = np.block( [[self.P, E], [E.T, np.zeros((m,m))]] )
-            
-            rhs = np.block( [self.q, np.zeros(m)] )
-            
-            
-            # Solve KKT system 
-            
-            sol = linalg.solve( KKT, rhs )
-            
-            
-            # Vector of polished (optimal) amplitudes
-            
-            alphas_pol[i,:] = sol[0:n]
-            
-            # Polished (optimal) least-squares residual
-            
-            Jpol[i] = np.real( sol[0:n].conj().T @ self.P @ sol[0:n] )\
-                      - 2.0 * np.real(self.q.conj().T @ sol[0:n]) + self.s
+            else: z = znew
+        
+            print( f"Iter. {iter+1:5d} took {time.time()-t_ref:5.2f}s.",end='')
+            print( f" - res_prim : {res_prim:10.2e} < {eps_prim:10.2e}",end='') 
+            print( f" - res_dual : {res_dual:10.2e} < {eps_dual:10.2e}",end='') 
+            print( f" Current nr. of selected modes:{np.count_nonzero(z):5d}")
+        
+        # Record output data 
+        
+        alphas_sp[:] = z
+        
+        N_none0 = np.count_nonzero( alphas_sp[:] )
+        
+        Jsp = np.real( z.conj().T @ self.P @ z ) \
+                    - 2.0 * np.real( self.q.conj().T @ z) + self.s
+                    
+        
+        # Polishing of the nonzero amplitudes
+        # Form the constraint matrix E for E^T x = 0
+        
+        ind_zero = np.where( np.abs(z) < 1.e-12 )[0]
+        
+        ind_sel.append( np.where( np.abs(z) > 1.e-12 )[0] )
+        
+        m = len( ind_zero )
+        
+        E = I[:,ind_zero]
+        
+        
+        # Form KKT system for the optimality conditions
+        
+        KKT = np.block( [[self.P, E], [E.T, np.zeros((m,m))]] )
+        
+        rhs = np.block( [self.q, np.zeros(m)] )
+        
+        
+        # Solve KKT system 
+        
+        sol = linalg.solve( KKT, rhs )
+        
+        
+        # Vector of polished (optimal) amplitudes
+        
+        alphas_pol[:] = sol[0:n]
+        
+        # Polished (optimal) least-squares residual
+        
+        Jpol = np.real( sol[0:n].conj().T @ self.P @ sol[0:n] )\
+                    - 2.0 * np.real(self.q.conj().T @ sol[0:n]) + self.s
 
-            # Polished (optimal) performance loss
-            
-            Ploss[i] = 100.0 * np.sqrt( Jpol[i]/self.s )
+        # Polished (optimal) performance loss
+        
+        Ploss = 100.0 * np.sqrt( Jpol/self.s )
             
         
         # Record output data
@@ -944,9 +944,7 @@ class ParaDmd:
         self.alphas_pol = alphas_pol
 
         self.ind_sel = ind_sel
-        
-        # 
-            
+
             
             
 # ----------------------------------------------------------------------

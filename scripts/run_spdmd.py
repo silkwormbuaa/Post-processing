@@ -6,6 +6,8 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   sparsity promoting dmd script
+             two parameters of gamma, rho should be provided.
+             'python3 run_spdmd.py 10000. 10000.'
 '''
 
 import os
@@ -25,14 +27,37 @@ from   vista.plot_style  import plot_eigens
 
 from   vista.plot_style  import plot_amp_st
 
+
+# =============================================================================
+# Take gamma, rho from command line
+# =============================================================================
+
+arguments = sys.argv
+
+if len( arguments ) == 1:
+    print("Default gamma=10000. and rho=10000 will be used.\n")
+
+elif len( arguments ) == 3:
+    gamma = float( arguments[1] )
+    rho   = float( arguments[2] )
+    print(f"Got {len(arguments)-1} parameters: gamma={gamma}",end='')
+    print(f" rho={rho}\n")
+
+else: raise ValueError("gamma and rho should be provided!")
+
+
+# =============================================================================
+# Computation
+# =============================================================================
+
 # Directory that stores Psq file
-snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/Z_slice'
 
-#snap_dir = os.getcwd()
-# gammas that are going to be sweep over
+Lsep = 58.9713176
 
-# gammas = np.arange(81500,801600,100)
-gammas = np.array([ 450000000. ])
+velocity = 507.0
+
+snap_dir = os.getcwd()
+
 
 # Set the instance and read in Pqs
 
@@ -47,21 +72,26 @@ with timer('Read in Pqs file '):
 
 with timer('Compute sparsity promoting dmd '):
     
-    paradmd.compute_spdmd( gammas, rho=100000. )
+    paradmd.compute_spdmd( gamma, rho )
     
-
-Lsep = 50.31695
-
-velocity = 507.0
-
 St = paradmd.freq * Lsep / velocity
 
-for i in range(len(gammas)):
 
-    plot_eigens( paradmd.mu, 
-                 paradmd.mu[paradmd.ind_sel[i]],
-                 filename='eigens.png')
-    
-    plot_amp_st( St, paradmd.alphas ,
-                amp2 = np.abs(paradmd.alphas_pol[i,:]),
-                filename='amplitude.png')
+# =============================================================================
+# plot eigen values and amplitudes
+# =============================================================================
+
+plot_eigens( paradmd.mu, 
+             paradmd.mu[ tuple(paradmd.ind_sel) ],
+             filename='eigens-.png')
+
+plot_amp_st( St, 
+             paradmd.alphas,
+             amp2 = np.abs(paradmd.alphas_pol),
+             filename='amplitude.png',
+             hidesmall=False)
+
+plot_amp_st( St, 
+             paradmd.alphas,
+             amp2 = np.abs(paradmd.alphas_pol),
+             filename='amplitude-hidesmall-.png')
