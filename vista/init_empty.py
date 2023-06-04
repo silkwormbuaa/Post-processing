@@ -35,7 +35,7 @@ def init_1Dflt_empty( elem, precision ):
 
 
 # ----------------------------------------------------------------------
-# >>> Initialize empty float 2D-array of given                   ( 2 )
+# >>> Initialize empty float 2D-array of given dimensions         ( 2 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -59,7 +59,31 @@ def init_2Dflt_empty( rows, cols, precision ):
 
 
 # ----------------------------------------------------------------------
-# >>> Initialize empty complex 2D-array of given                  ( 3 )
+# >>> Initialize empty complex 1D-array of given dimensions       ( 3 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/08  - adapted from L.Laguarda
+#
+# Desc
+#  - row-majored : order='C'
+# ----------------------------------------------------------------------
+
+def init_1Dcmx_empty( elem, precision ):
+
+   if precision == 8:
+      return np.empty( elem, dtype='c8', order='C' )
+
+   else:
+      return np.empty( elem, dtype='c16', order='C' )
+
+
+
+# ----------------------------------------------------------------------
+# >>> Initialize empty complex 2D-array of given                  ( 4 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
