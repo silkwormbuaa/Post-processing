@@ -670,7 +670,7 @@ class ParaDmd:
         
         self.mu = mu
         
-        self.alphas = np.abs( alphas ) 
+        self.alphas = alphas
         
         self.freq = np.angle( mu )/self.dt/(2*np.pi)
         
@@ -955,11 +955,7 @@ class ParaDmd:
         self.Jpol = Jpol
         self.Ploss = Ploss
         self.alphas_sp = alphas_sp
-        
-#        alphas_pol[np.abs(alphas_pol) < 10] = 0.0
-        
         self.alphas_pol = alphas_pol
-
         self.ind_spmode = ind_spmode
 
 
@@ -993,7 +989,12 @@ class ParaDmd:
                 
                 pickle.dump( self.alphas_pol, f )
                 
-        
+                pickle.dump( self.Ploss, f )
+                
+                pickle.dump( self.Jsp, f )
+                
+                pickle.dump( self.Jpol, f )
+                
         else: raise ValueError("Please compute spdmd first!")
 
         print("spdmd result are saved.")
@@ -1062,6 +1063,12 @@ class ParaDmd:
                 self.alphas_sp  = pickle.load( f )
                 
                 self.alphas_pol = pickle.load( f )
+                
+                self.Ploss      = pickle.load( f )
+                
+                self.Jsp        = pickle.load( f )
+                
+                self.Jpol       = pickle.load( f )
         
         self.ind_spmode = self.comm.bcast( self.ind_spmode, root=0 )
         
@@ -1151,28 +1158,24 @@ class ParaDmd:
                 with open( mode_filename, 'wb' ) as f:
                     
                     print(f'mode {i}')
+                    print(f"indx is {indx}")
+                    print(f"alpha is {self.alphas[indx]}")
+                    print(f"alpha_pol is {self.alphas_pol[indx]}")
+                    print(f"mu is {self.mu[indx]}")
+                    print("=============\n")
                     
                     pickle.dump( indx, f )
-                    print(f"indx is {indx}")
                     
                     pickle.dump( self.alphas[indx], f )
-                    print(f"alpha is {self.alphas[indx]}")
                     
                     pickle.dump( self.alphas_pol[indx], f )
-                    print(f"alpha_pol is {self.alphas_pol[indx]}")
                     
                     pickle.dump( self.mu[indx], f )
-                    print(f"mu is {self.mu[indx]}")
                     
                     pickle.dump( buf_mode, f )
-                    
-                    print("=============\n")
 
-            
-                
-                
-            
-        
+
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -1225,22 +1228,7 @@ def Testing():
         
         paradmd.para_read_data( snap_file )
     
-    print(np.shape( paradmd.snapshots ))
-'''
-    print(f'This is proc {paradmd.rank}, I got bl_num {paradmd.bl_num[-1]}')
-    print(f'This is proc {paradmd.rank}, I got bl_num {paradmd.pos[-1]}')
-    print(f'This is proc {paradmd.rank}, I got bl_num {paradmd.size[-1]}')
-    print(f'This is proc {paradmd.rank}, I got bl_num {paradmd.N1[-1]}')
-    print(f'This is proc {paradmd.rank}, I got bl_num {paradmd.N2[-1]}')
-    print(f'This is proc {paradmd.rank}, I got bl_num {paradmd.N3[-1]}')
-    
-    print(f'This is proc {paradmd.rank}, I got the kind is {paradmd.kind}.')
-    print(f'This is proc {paradmd.rank}, I got the kind is {paradmd.n_bl}.')
-    print(f'This is proc {paradmd.rank}, I got the kind is {paradmd.snap_type}.')
-    print(f'This is proc {paradmd.rank}, I got the kind is {paradmd.slic_type}.')
-    print(f'This is proc {paradmd.rank}, I got the kind is {paradmd.vars_name}.')
-'''    
-                                                     
+    print(np.shape( paradmd.snapshots ))                                                  
 
 
 

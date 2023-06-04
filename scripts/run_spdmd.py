@@ -106,12 +106,12 @@ plot_eigens( paradmd.mu,
              filename='eigens-.png')
 
 plot_amp_st( St, 
-             paradmd.alphas,
+             np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
              filename='amplitude.png',
              hidesmall=False)
 
 plot_amp_st( St, 
-             paradmd.alphas,
+             np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
              filename='amplitude-hidesmall-.png')

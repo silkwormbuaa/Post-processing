@@ -104,12 +104,11 @@ paradmd.dt = 0.005
 with timer('paradmd '):
 
     paradmd.do_paradmd()
+    
 
     if os.path.exists( paradmd.spdmd_result_file ):
         
         paradmd.read_spdmd_result()
-        
-#        print(f"indexes of selected modes {paradmd.ind_spmode}")
         
         paradmd.para_write_modes()
         
