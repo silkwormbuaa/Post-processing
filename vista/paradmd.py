@@ -32,6 +32,8 @@ from   .tools            import to_dictionary
 
 from   .init_empty       import init_1Dflt_empty
 
+from   .init_empty       import init_1Dcmx_empty
+
 from   .init_empty       import init_2Dflt_empty
 
 from   .init_empty       import init_2Dcmx_empty
@@ -64,9 +66,17 @@ class ParaDmd:
         
         self.snap_dir = snap_dir
         
-        self.snap_struct_file = snap_dir + '/snap_struct.csv'
+        self.snap_struct_file  = snap_dir + '/snap_struct.csv'
         
-        self.snap_info_file = snap_dir + '/snap_info.dat'
+        self.snap_info_file    = snap_dir + '/snap_info.dat'
+        
+        self.Pqs_file          = snap_dir + '/Pqs.pkl'
+        
+        self.ind_spmode_file   = snap_dir + '/ind_spmode.csv'
+        
+        self.spdmd_result_file = snap_dir + '/spdmd_result.pkl'
+        
+        self.dmdmodes_dir      = snap_dir + '/dmdmodes'
         
         
         # some parameters need to be defined first
@@ -95,11 +105,13 @@ class ParaDmd:
         
         self.var_norms = None
         
-        # - snapshots matrix for dmd and total number of snapshots
+        # - snapshots matrix for dmd, total number and length of snapshots
         
         self.snapshots = []
         
         self.N_t = None
+        
+        self.len_snap = None
         
         # - time interval
         
@@ -180,7 +192,7 @@ class ParaDmd:
         self.n_var     = self.comm.bcast( self.n_var, root=0 )
         
         
-        # Set default values of normalization
+        # Set default values 1.0 of normalization
         
         self.var_norms = to_dictionary( self.vars_name, np.ones(self.n_var) )
         
@@ -494,7 +506,7 @@ class ParaDmd:
         
         # Check if the snapshots data are available
         
-        self.N_t = len( self.snapshots )
+        self.N_t, self.len_snap = np.shape( self.snapshots )
         
         if self.N_t == 0 or self.N_t < 2 :
             
@@ -591,7 +603,8 @@ class ParaDmd:
         
         # 3. Compute C x V = Ui* x Ai(2 => Ns+1) x V
         
-        '''why C.transpose()'''
+        '''why C.transpose()?'''
+        '''now transpose is not needed because of C order matrix'''
         
         B = np.array( np.matmul( C, Vt.conj().T ), order='F' )
         
@@ -622,7 +635,7 @@ class ParaDmd:
         
         # DMD modes
         
-        Phi_i = np.matmul( Ui, Y )
+        self.Phi_i = np.matmul( Ui, Y )
         
         
         # Build Vandermonde matrix
@@ -652,12 +665,14 @@ class ParaDmd:
         
         alphas = linalg.solve( self.P, self.q )
         
+        
+        # Pass out variables
+        
         self.mu = mu
         
         self.alphas = np.abs( alphas ) 
         
         self.freq = np.angle( mu )/self.dt/(2*np.pi)
-        
         
 
 # ----------------------------------------------------------------------
@@ -688,22 +703,24 @@ class ParaDmd:
         
         with open( self.snap_dir + "/Pqs.pkl", "wb" ) as f:
             
-            pickle.dump( self.P, f)
+            pickle.dump( self.P, f )
             
-            pickle.dump( self.q, f)
+            pickle.dump( self.q, f )
             
-            pickle.dump( self.s, f)
+            pickle.dump( self.s, f )
             
-            pickle.dump( self.mu, f)
+            pickle.dump( self.mu, f )
             
-            pickle.dump( self.N_t, f)
+            pickle.dump( self.N_t, f )
             
-            pickle.dump( self.freq, f)
+            pickle.dump( self.freq, f )
             
-            pickle.dump( self.alphas, f)
+            pickle.dump( self.alphas, f )
                 
 
         print("Pqs.pkl file is written.")
+
+
 
 # ----------------------------------------------------------------------
 # >>> Read Pqs for spdmd                                        (Nr.)
@@ -786,7 +803,7 @@ class ParaDmd:
         
         # Selected mode index
         
-        ind_sel = []
+        ind_spmode = None
         
         # Identity matrix
         
@@ -899,7 +916,7 @@ class ParaDmd:
         
         ind_zero = np.where( np.abs(z) < 1.e-12 )[0]
         
-        ind_sel.append( np.where( np.abs(z) > 1.e-12 )[0] )
+        ind_spmode = np.where( np.abs(z) > 1.e-12 )[0] 
         
         m = len( ind_zero )
         
@@ -943,10 +960,219 @@ class ParaDmd:
         
         self.alphas_pol = alphas_pol
 
-        self.ind_sel = ind_sel
+        self.ind_spmode = ind_spmode
+
+
+
+# ----------------------------------------------------------------------
+# >>> Save result of spdmd for 2nd round DMD                     (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/04  - created
+#
+# Desc
+#   - save ind_spmode, alphas_sp, alphas_pol
+#
+# ----------------------------------------------------------------------
+
+    def save_spdmd_result( self ):
+        
+        filename = self.spdmd_result_file
+        
+        if hasattr(self, 'ind_spmode'):
+        
+            with open( filename, "wb") as f:
+                
+                pickle.dump( self.ind_spmode, f )
+                
+                pickle.dump( self.alphas_sp, f )
+                
+                pickle.dump( self.alphas_pol, f )
+                
+        
+        else: raise ValueError("Please compute spdmd first!")
+
+        print("spdmd result are saved.")
+
+# ----------------------------------------------------------------------
+# >>> Save index of sparsity-promoting modes                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/03  - created
+#
+# Desc
+#   - save the index of sparsity-promoting modes to csv.
+#   - Just for manually check, will not be used.
+# ----------------------------------------------------------------------
+
+    def save_ind_spmode( self ):
+        
+        if hasattr(self, 'ind_spmode'):
+        
+            df = pd.DataFrame( self.ind_spmode, columns=['ind_spmode'])
+            
+            df['alphas_pol'] = self.alphas_pol[ tuple([self.ind_spmode]) ]
+            
+            df['alphas_sp'] = self.alphas_sp[ tuple([self.ind_spmode]) ]
+            
+            df.to_csv( 'ind_spmode.csv', sep=' ', index=False)
+        
+        else: raise ValueError("Please compute spdmd first!")
+        
+        print("Indexes of selected sparsity promoting modes are saved.")
+
+
+
+# ----------------------------------------------------------------------
+# >>> Read ind_spmode file and broadcast                          (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/03  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+    
+    def read_spdmd_result( self ):
+        
+        self.ind_spmode = None
+        self.alphas_sp  = None
+        self.alphas_pol = None
+        
+        if self.rank == 0:
+            
+            filename = self.spdmd_result_file
+            
+            with open( filename, "rb" ) as f:
+            
+                self.ind_spmode = pickle.load( f )
+                
+                self.alphas_sp  = pickle.load( f )
+                
+                self.alphas_pol = pickle.load( f )
+        
+        self.ind_spmode = self.comm.bcast( self.ind_spmode, root=0 )
+        
+        self.alphas_sp = self.comm.bcast( self.alphas_sp, root=0 )
+        
+        self.alphas_pol = self.comm.bcast( self.alphas_pol, root=0 )
+        
+        
+        print("Finish reading in spdmd results.")
+
+
+
+# ----------------------------------------------------------------------
+# >>> parallel write selected dmd modes                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/03  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+    
+    def para_write_modes( self ):
+        
+        # Enter the existing directory or make a new one
+        
+        if os.path.exists( self.dmdmodes_dir ):
+            
+            os.chdir( self.dmdmodes_dir )
+        
+        else:
+            
+            if self.rank == 0:
+                
+                os.mkdir( self.dmdmodes_dir )
+                
+                print("dmdmodes dir does NOT exist, new dir is made.")
+        
+            self.comm.barrier()
+            
+            os.chdir( self.dmdmodes_dir )
+        
+        
+        # Collect modes and write by root
+        
+        # len_mode is the length of a whole flow field,
+        # on contrary, len_snap is the length of snapshot on each proc
+        
+        self.len_mode = self.comm.allreduce( self.len_snap, op=MPI.SUM )
+        
+#        print(f"I am proc {self.rank}, snapshot length is {self.len_snap}")
+#        print(f"I am proc {self.rank}, mode length is {self.len_mode}")
+
+        for i in range( len( self.ind_spmode ) ):
+            
+            # the number of data elements sent by each proc, is a list
+            
+            send_counts = self.comm.gather( self.len_snap, root=0 )
+            
+            displace = [0] + list( np.cumsum( send_counts)[:-1] )
+            
+#            print(f"send_counts is {send_counts}, rank is {self.rank}")           
+#            print(f"displace is {displace},rank is {self.rank}")
+            
+            if self.rank == 0:
+                
+                buf_mode = init_1Dcmx_empty( self.len_mode, self.kind*2 )
+            
+            else: buf_mode = None
+                
+            indx = self.ind_spmode[i]
+            
+            self.comm.Gatherv( self.Phi_i[indx], 
+                               [buf_mode, send_counts, displace, MPI.COMPLEX8 ],
+                               root=0 )
+            
+            # Save modes
+            
+            if self.rank == 0:
+                
+                mode_filename = "mode_" + f"{indx:03d}" + ".pkl"
+                
+                with open( mode_filename, 'wb' ) as f:
+                    
+                    print(f'mode {i}')
+                    
+                    pickle.dump( indx, f )
+                    print(f"indx is {indx}")
+                    
+                    pickle.dump( self.alphas[indx], f )
+                    print(f"alpha is {self.alphas[indx]}")
+                    
+                    pickle.dump( self.alphas_pol[indx], f )
+                    print(f"alpha_pol is {self.alphas_pol[indx]}")
+                    
+                    pickle.dump( self.mu[indx], f )
+                    print(f"mu is {self.mu[indx]}")
+                    
+                    pickle.dump( buf_mode, f )
+                    
+                    print("=============\n")
 
             
+                
+                
             
+        
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------

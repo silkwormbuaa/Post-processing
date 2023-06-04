@@ -94,7 +94,7 @@ with timer('Read in '):
         
         paradmd.para_read_data( snap_file )
         
-    print(np.shape(paradmd.snapshots))
+    print(f"Snapshots shape of {paradmd.rank} is {np.shape(paradmd.snapshots)}")
 
 
 # Specify the time interval of snapshots
@@ -105,8 +105,18 @@ with timer('paradmd '):
 
     paradmd.do_paradmd()
 
-    if paradmd.rank == 0:
+    if os.path.exists( paradmd.spdmd_result_file ):
         
-        paradmd.save_Pqs()
+        paradmd.read_spdmd_result()
+        
+#        print(f"indexes of selected modes {paradmd.ind_spmode}")
+        
+        paradmd.para_write_modes()
+        
+        
+    else:
+            
+        if paradmd.rank == 0: paradmd.save_Pqs()
+            
 
 

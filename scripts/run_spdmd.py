@@ -35,9 +35,13 @@ from   vista.plot_style  import plot_amp_st
 arguments = sys.argv
 
 if len( arguments ) == 1:
+    
     print("Default gamma=10000. and rho=10000 will be used.\n")
+    gamma = None
+    rho = None
 
 elif len( arguments ) == 3:
+    
     gamma = float( arguments[1] )
     rho   = float( arguments[2] )
     print(f"Got {len(arguments)-1} parameters: gamma={gamma}",end='')
@@ -72,17 +76,33 @@ with timer('Read in Pqs file '):
 
 with timer('Compute sparsity promoting dmd '):
     
+    
     paradmd.compute_spdmd( gamma, rho )
     
+    print(f"The performance loss of SPDMD is : {paradmd.Ploss:8.3f} %.")
+    
+
 St = paradmd.freq * Lsep / velocity
+
+paradmd.save_spdmd_result()
+
+paradmd.save_ind_spmode()
 
 
 # =============================================================================
 # plot eigen values and amplitudes
 # =============================================================================
 
+''' 
+numpy support using tuple as index to look for the elements.
+e.g.: 
+a. (2,1) will look for a 2-D array's element array[2,1].
+b. ([2,3],[1]) will look for the elements array[2,1] and array[3,1].
+c. ([1,2,3]) will look for the elements in a 1-D array arr[1:3].
+'''
+
 plot_eigens( paradmd.mu, 
-             paradmd.mu[ tuple(paradmd.ind_sel) ],
+             paradmd.mu[ tuple([paradmd.ind_spmode]) ],
              filename='eigens-.png')
 
 plot_amp_st( St, 
