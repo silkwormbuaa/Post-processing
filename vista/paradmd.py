@@ -111,7 +111,7 @@ class ParaDmd:
         
         self.N_t = None
         
-        self.len_snap = None
+        self.len_snap_local = None
         
         # - time interval
         
@@ -419,7 +419,7 @@ class ParaDmd:
             Ny = N2 - ghost*3
             Nz = N3 - ghost*3
         
-            buff_data = buff_data.reshape(( self.n_var, N1, N2, N3 ))
+            buff_data = buff_data.reshape(( self.n_var, N3, N2, N1 ))
             
             buff_data = buff_data[ : , ghost:-ghost, ghost:-ghost, ghost:-ghost]
         
@@ -432,7 +432,7 @@ class ParaDmd:
                 Ny = N2 - ghost*2
                 Nz = N3 - ghost*2
                 
-                buff_data = buff_data.reshape(( self.n_var, N2, N3 ))
+                buff_data = buff_data.reshape(( self.n_var, N3, N2 ))
                 
                 buff_data = buff_data[ : , ghost:-ghost, ghost:-ghost]
                 
@@ -443,7 +443,7 @@ class ParaDmd:
                 Ny = 1
                 Nz = N3 - ghost*2
                 
-                buff_data = buff_data.reshape(( self.n_var, N1, N3 ))
+                buff_data = buff_data.reshape(( self.n_var, N3, N1 ))
                 
                 buff_data = buff_data[ : , ghost:-ghost, ghost:-ghost]
                 
@@ -454,7 +454,7 @@ class ParaDmd:
                 Ny = N2 - ghost*2
                 Nz = 1
                 
-                buff_data = buff_data.reshape(( self.n_var, N1, N2 ))
+                buff_data = buff_data.reshape(( self.n_var, N2, N1 ))
                 
                 buff_data = buff_data[ : , ghost:-ghost, ghost:-ghost]
         
@@ -506,7 +506,7 @@ class ParaDmd:
         
         # Check if the snapshots data are available
         
-        self.N_t, self.len_snap = np.shape( self.snapshots )
+        self.N_t, self.len_snap_local = np.shape( self.snapshots )
         
         if self.N_t == 0 or self.N_t < 2 :
             
@@ -636,6 +636,8 @@ class ParaDmd:
         # DMD modes
         
         self.Phi_i = np.matmul( Ui, Y )
+        
+        print(f"\nPhi_i shape is {np.shape(self.Phi_i)}\n")
         
         
         # Build Vandermonde matrix
@@ -1069,15 +1071,21 @@ class ParaDmd:
                 self.Jsp        = pickle.load( f )
                 
                 self.Jpol       = pickle.load( f )
+                
+            print("\nFinish reading in spdmd results.")
+            
+            print(f"\nIndexes of selected modes are:\n{self.ind_spmode}")
+            
+            print(f"Ploss = {self.Ploss:8.3f} % .  ",end='')
+            
+            print(f"Jsp = {self.Jsp:10.3e}, Jpol = {self.Jpol:10.3e}.\n")
+        
         
         self.ind_spmode = self.comm.bcast( self.ind_spmode, root=0 )
         
         self.alphas_sp = self.comm.bcast( self.alphas_sp, root=0 )
         
         self.alphas_pol = self.comm.bcast( self.alphas_pol, root=0 )
-        
-        
-        print("Finish reading in spdmd results.")
 
 
 
@@ -1119,21 +1127,20 @@ class ParaDmd:
         # Collect modes and write by root
         
         # len_mode is the length of a whole flow field,
-        # on contrary, len_snap is the length of snapshot on each proc
+        # on contrary, len_snap_local is the length of snapshot on each proc
         
-        self.len_mode = self.comm.allreduce( self.len_snap, op=MPI.SUM )
+        self.len_mode = self.comm.allreduce( self.len_snap_local, op=MPI.SUM )
         
-#        print(f"I am proc {self.rank}, snapshot length is {self.len_snap}")
-#        print(f"I am proc {self.rank}, mode length is {self.len_mode}")
+        
+        # Parameters for MPI.Gatherv: 
+        # send_counts: a list of number of data elements on each proc
+        # displace: a list of locations where gathered data shoud put
+        
+        send_counts = self.comm.gather( self.len_snap_local, root=0 )
+        displace = [0] + list( np.cumsum( send_counts)[:-1] )
 
         for i in range( len( self.ind_spmode ) ):
-            
-            # the number of data elements sent by each proc, is a list
-            
-            send_counts = self.comm.gather( self.len_snap, root=0 )
-            
-            displace = [0] + list( np.cumsum( send_counts)[:-1] )
-            
+         
 #            print(f"send_counts is {send_counts}, rank is {self.rank}")           
 #            print(f"displace is {displace},rank is {self.rank}")
             
@@ -1145,7 +1152,12 @@ class ParaDmd:
                 
             indx = self.ind_spmode[i]
             
-            self.comm.Gatherv( self.Phi_i[indx], 
+            # Phi_i is a tall matrix,
+            # deep copy to make data contagious for mpi
+            
+            send_buf = self.Phi_i[:,indx].copy()
+            
+            self.comm.Gatherv( send_buf, 
                                [buf_mode, send_counts, displace, MPI.COMPLEX8 ],
                                root=0 )
             
@@ -1160,19 +1172,21 @@ class ParaDmd:
                     print(f'mode {i}')
                     print(f"indx is {indx}")
                     print(f"alpha is {self.alphas[indx]}")
+                    print(f"alpha_sp is {self.alphas_sp[indx]}")
                     print(f"alpha_pol is {self.alphas_pol[indx]}")
                     print(f"mu is {self.mu[indx]}")
                     print("=============\n")
                     
                     pickle.dump( indx, f )
-                    
                     pickle.dump( self.alphas[indx], f )
-                    
+                    pickle.dump( self.alphas_sp[indx], f )
                     pickle.dump( self.alphas_pol[indx], f )
-                    
                     pickle.dump( self.mu[indx], f )
-                    
                     pickle.dump( buf_mode, f )
+
+                    del buf_mode
+                    del send_buf
+                    gc.collect()
 
 
 
