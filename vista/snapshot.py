@@ -780,7 +780,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
    
-    def drop_ghost( self , buff ):
+    def drop_ghost( self , buff=3 ):
 
         # Check if data is available
         
@@ -1296,7 +1296,126 @@ class Snapshot:
         self.df = df
 
    
-                  
+
+# ----------------------------------------------------------------------
+# >>> Get grid vectors                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def get_grid_vectors( self, buff=3 ):
+        
+        self.verbose = False
+        
+        self.read_snapshot()
+        
+        
+        if self.type == 'block':
+            
+            x = []
+            y = []
+            z = []
+        
+            for snap_bl in self.snap_data:
+                
+                x_bl = snap_bl[4][0][buff:-buff]
+                y_bl = snap_bl[4][1][buff:-buff]
+                z_bl = snap_bl[4][2][buff:-buff]
+                
+                # Notice the order of output X,Y,Z !
+                # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
+
+                X,Y,Z = np.meshgrid( x_bl, y_bl, z_bl, indexing='ij') 
+                
+                # x,y,z are lists of nparrays
+                
+                x.append( np.ravel( X.T ) )
+                y.append( np.ravel( Y.T ) )
+                z.append( np.ravel( Z.T ) )
+            
+            # turn x into np.array, otherwise list cannot ravel
+            
+            x = np.array( x ).ravel()
+            y = np.array( y ).ravel()
+            z = np.array( z ).ravel()
+        
+            return x,y,z
+        
+        
+        elif self.type == 'slice':
+            
+            if self.slic_type == 'X':
+                
+                y=[]
+                z=[]
+                
+                for snap_bl in self.snap_data:
+                    
+                    y_bl = snap_bl[4][0][buff:-buff]
+                    z_bl = snap_bl[4][1][buff:-buff]
+                    
+                    Y,Z = np.meshgrid( y_bl, z_bl )
+                    
+                    y.append( np.ravel( Y ) )
+                    z.append( np.ravel( Z ) )
+                    
+                y = np.array( y ).ravel()
+                z = np.array( z ).ravel()
+                
+                return y,z
+            
+            
+            elif self.slic_type == 'W' or self.slic_type == 'Y':
+                
+                x=[]
+                z=[]
+                
+                for snap_bl in self.snap_data:
+                    
+                    x_bl = snap_bl[4][0][buff:-buff]
+                    z_bl = snap_bl[4][1][buff:-buff]
+                    
+                    X,Z = np.meshgrid( x_bl, z_bl )
+                    
+                    x.append( np.ravel( X ) )
+                    z.append( np.ravel( Z ) )
+                    
+                x = np.array( x ).ravel()
+                z = np.array( z ).ravel()
+                
+                return x,z
+            
+            
+            elif self.slic_type == 'Z':
+                
+                x=[]
+                y=[]
+                
+                for snap_bl in self.snap_data:
+                    
+                    x_bl = snap_bl[4][0][buff:-buff]
+                    y_bl = snap_bl[4][1][buff:-buff]
+                    
+                    X,Y = np.meshgrid( x_bl, y_bl )
+                    
+                    x.append( np.ravel( X ) )
+                    y.append( np.ravel( Y ) )
+                    
+                x = np.array( x ).ravel()
+                y = np.array( y ).ravel()
+                
+                return x,y
+            
+            
+            
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
