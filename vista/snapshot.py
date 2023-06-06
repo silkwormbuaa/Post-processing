@@ -1337,15 +1337,11 @@ class Snapshot:
                 
                 # x,y,z are lists of nparrays
                 
-                x.append( np.ravel( X.T ) )
-                y.append( np.ravel( Y.T ) )
-                z.append( np.ravel( Z.T ) )
+                x.extend( np.ravel( X.T ).tolist() )
+                y.extend( np.ravel( Y.T ).tolist() )
+                z.extend( np.ravel( Z.T ).tolist() )
             
             # turn x into np.array, otherwise list cannot ravel
-            
-            x = np.array( x ).ravel()
-            y = np.array( y ).ravel()
-            z = np.array( z ).ravel()
         
             GX = np.array([x,y,z]).T
         
@@ -1366,11 +1362,8 @@ class Snapshot:
                     
                     Y,Z = np.meshgrid( y_bl, z_bl )
                     
-                    y.append( np.ravel( Y ) )
-                    z.append( np.ravel( Z ) )
-                    
-                y = np.array( y ).ravel()
-                z = np.array( z ).ravel()
+                    y.extend( np.ravel( Y ).tolist() )
+                    z.extend( np.ravel( Z ).tolist() )
                 
                 GX = np.array([y,z]).T
                 
@@ -1389,11 +1382,8 @@ class Snapshot:
                     
                     X,Z = np.meshgrid( x_bl, z_bl )
                     
-                    x.append( np.ravel( X ) )
-                    z.append( np.ravel( Z ) )
-                    
-                x = np.array( x ).ravel()
-                z = np.array( z ).ravel()
+                    x.extend( np.ravel( X ).tolist() )
+                    z.extend( np.ravel( Z ).tolist() )
                 
                 GX = np.array([x,z]).T
                 
@@ -1412,12 +1402,9 @@ class Snapshot:
                     
                     X,Y = np.meshgrid( x_bl, y_bl )
                     
-                    x.append( np.ravel( X ) )
-                    y.append( np.ravel( Y ) )
-                    
-                x = np.array( x ).ravel()
-                y = np.array( y ).ravel()
-                
+                    x.extend( np.ravel( X ).tolist() )
+                    y.extend( np.ravel( Y ).tolist() )
+
                 GX = np.array([x,y]).T
                 
                 return GX
