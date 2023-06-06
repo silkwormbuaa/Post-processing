@@ -21,7 +21,7 @@ import pandas            as pd
 
 import matplotlib.pyplot as plt
 
-from   pydmd             import DMD
+from   pydmd             import DMD, SpDMD
 
 from   pydmd.plotter     import plot_eigs
 
@@ -36,7 +36,7 @@ from   vista.plot_style  import plot_amp_st
 from   vista.snapshot    import Snapshot
 
 
-snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_01'
+snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_test/snapshots'
 
 files = get_filelist( snap_dir )
 
@@ -85,28 +85,33 @@ with timer("read in data "):
         
 print( "%d snapshots are loaded."%len(p_snap) )
 
-p_snap = np.array(p_snap).T
+p_snap = np.array(p_snap).T/45447.289
 
 pdmd = DMD(svd_rank=-1)
 
-
+spdmd = SpDMD(svd_rank=-1,gamma=150000.0,rho=1.0)
 
 with timer("DMD"):
     
     pdmd.fit(p_snap)
     
-pdmd.original_time['dt']=0.01
+    spdmd.fit(p_snap)
+    
+pdmd.original_time['dt']=0.005
 # plot eigenvalues
 
 plot_eigens(pdmd.eigs)
 
-Lsep = 50.069
+Lsep = 58.9713176
 
 velocity = 507.0
 
 St = pdmd.frequency * Lsep / velocity
 
-plot_amp_st( St, np.abs(pdmd.amplitudes) )
+plot_amp_st( St, 
+             np.abs(pdmd.amplitudes), 
+             amp2 = np.abs(spdmd.amplitudes), 
+             filename='serial.png' )
 
 """
 # plot modes

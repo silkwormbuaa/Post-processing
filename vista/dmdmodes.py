@@ -12,6 +12,9 @@ import pickle
 
 import numpy             as     np
 
+import pandas            as     pd
+
+
 
 class DMDMode:
 # ----------------------------------------------------------------------
@@ -28,7 +31,7 @@ class DMDMode:
 #
 # ----------------------------------------------------------------------
 
-    def __init__( self ):
+    def __init__( self, modefile = None ):
         
         '''
         indx:        index of the mode among all standard DMD modes
@@ -42,7 +45,11 @@ class DMDMode:
         self.alpha_sp  = None
         self.alpha_pol = None
         self.mu        = None
-        self.Phi      = None
+        self.Phi       = None
+        
+        if modefile is not None:
+            
+            self.read_mode_file( modefile )
         
 
 
@@ -114,7 +121,7 @@ class DMDModes:
 #
 # ----------------------------------------------------------------------
 
-    def add_modes( self, mode ):
+    def add_mode( self, mode ):
         
         self.modes.append( mode )
         
@@ -135,14 +142,19 @@ class DMDModes:
 # ----------------------------------------------------------------------
 
     def reconstruct( self, step ):
+        
+        self.step = step
 
-        Phis = [mode.Phi for mode in self.modes]
+        Phis = np.array( [mode.Phi for mode in self.modes] )
+        
+        alphas = [mode.alpha for mode in self.modes]
 
         alpha_pols = [mode.alpha_pol for mode in self.modes]
         
         mus = [mode.mu for mode in self.modes] 
         
-        vand = np.vander( mus, step, increasing=True )
+        vand = np.vander( mus, self.step, increasing=True )
+
         
         if not self.modes:
         
@@ -150,8 +162,49 @@ class DMDModes:
         
         else:
             
-            self.recons_data = Phis.T @ np.diag(alpha_pols) @ vand
+            self.recons_data = Phis.T @ np.diag(alphas) @ vand
 
+
+
+# ----------------------------------------------------------------------
+# >>> Match mesh                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def match_mesh( self, df, snap_type ):
+        
+        header = [ f"recons_{i:05d}" for i in range( self.step )]
+        
+        self.df_recons = pd.DataFrame( self.recons_data, columns=header )
+        
+        # stack two dataframe based on columns
+        
+        self.df_recons = pd.concat([df, self.df_recons], axis=1)
+        
+        if snap_type == 'block':
+            
+            self.df_recons.sort_values(by=['z','y','x'],inplace=True)
+        
+        elif snap_type == 'X':
+            
+            self.df_recons.sort_values(by=['z','y'],inplace=True)
+
+        elif snap_type == 'Y' or snap_type == 'W':
+            
+            self.df_recons.sort_values(by=['z','x'],inplace=True)
+        
+        elif snap_type == 'Z':
+            
+            self.df_recons.sort_values(by=['y','x'],inplace=True)
 
 
 # ----------------------------------------------------------------------

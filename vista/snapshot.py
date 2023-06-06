@@ -1347,7 +1347,9 @@ class Snapshot:
             y = np.array( y ).ravel()
             z = np.array( z ).ravel()
         
-            return x,y,z
+            GX = np.array([x,y,z]).T
+        
+            return GX
         
         
         elif self.type == 'slice':
@@ -1370,7 +1372,9 @@ class Snapshot:
                 y = np.array( y ).ravel()
                 z = np.array( z ).ravel()
                 
-                return y,z
+                GX = np.array([y,z]).T
+                
+                return GX
             
             
             elif self.slic_type == 'W' or self.slic_type == 'Y':
@@ -1391,7 +1395,9 @@ class Snapshot:
                 x = np.array( x ).ravel()
                 z = np.array( z ).ravel()
                 
-                return x,z
+                GX = np.array([x,z]).T
+                
+                return GX
             
             
             elif self.slic_type == 'Z':
@@ -1412,7 +1418,9 @@ class Snapshot:
                 x = np.array( x ).ravel()
                 y = np.array( y ).ravel()
                 
-                return x,y
+                GX = np.array([x,y]).T
+                
+                return GX
             
             
             
