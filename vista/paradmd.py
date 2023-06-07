@@ -120,11 +120,15 @@ class ParaDmd:
         # - spdmd objective function components
         
         self.P = None
-        
         self.q = None
-        
         self.s = None
         
+        # list of output ind_spmode table
+        
+        self.St = None
+        self.beta = None
+        self.psi = None
+        self.psi_pol = None
 
 
 # ----------------------------------------------------------------------
@@ -154,7 +158,7 @@ class ParaDmd:
                 
                 raise FileNotFoundError("no paradmd pre-processing files")
         
-            else: print("Checked pre-processing files.")
+            else: print("Checked pre-processing files.\n")
         
         
         # Root read the info_file
@@ -637,8 +641,6 @@ class ParaDmd:
         
         self.Phi_i = np.matmul( Ui, Y )
         
-        print(f"\nPhi_i shape is {np.shape(self.Phi_i)}\n")
-        
         
         # Build Vandermonde matrix
         
@@ -675,6 +677,9 @@ class ParaDmd:
         self.alphas = alphas
         
         self.freq = np.angle( mu )/self.dt/(2*np.pi)
+        
+        print(f"DMD finished, got Phis shape {np.shape(self.Phi_i)}\n")
+        
         
 
 # ----------------------------------------------------------------------
@@ -720,7 +725,7 @@ class ParaDmd:
             pickle.dump( self.alphas, f )
                 
 
-        print("Pqs.pkl file is written.")
+        print("Pqs.pkl file is written.\n")
 
 
 
@@ -767,7 +772,7 @@ class ParaDmd:
             self.alphas = pickle.load( f )
             
         
-        print("Pqs.dat file is read.")
+        print("Pqs.dat file is read.\n")
 
 
 
@@ -960,6 +965,17 @@ class ParaDmd:
         self.alphas_pol = alphas_pol
         self.ind_spmode = ind_spmode
 
+        # Compute other parameters
+        """ - beta: growth rate
+            - 
+        """
+        
+        self.beta = np.log( np.abs( self.mu ) )
+        
+        self.psi_pol = np.abs( self.alphas_pol )/max( np.abs(self.alphas_pol) )
+        
+        self.psi = np.abs( self.alphas )/max( np.abs(self.alphas) )
+       
 
 
 # ----------------------------------------------------------------------
@@ -999,7 +1015,7 @@ class ParaDmd:
                 
         else: raise ValueError("Please compute spdmd first!")
 
-        print("spdmd result are saved.")
+        print("spdmd results are saved.\n")
 
 # ----------------------------------------------------------------------
 # >>> Save index of sparsity-promoting modes                               (Nr.)
@@ -1026,11 +1042,41 @@ class ParaDmd:
             
             df['alphas_sp'] = self.alphas_sp[ tuple([self.ind_spmode]) ]
             
-            df.to_csv( 'ind_spmode.csv', sep=' ', index=False)
+            df['beta'] = self.beta[ tuple([self.ind_spmode]) ]
+            
+            df['freq'] = self.freq[ tuple([self.ind_spmode]) ]
+            
+            df['psi'] = self.psi[ tuple([self.ind_spmode]) ]
+            
+            df['psi_pol'] = self.psi[ tuple([self.ind_spmode]) ]
+            
+            if self.St is not None:
+                
+                df['St'] = self.St[ tuple([self.ind_spmode]) ]
+            
+            else: 
+                
+                print("\nWarning: St is not computed when saving ind_spmode\n")
+            
+            # align each column
+            
+            df = df.astype(str)
+            
+            max_lengths = df.applymap(len).max()
+            
+            for column in df.columns:
+                df[column] = df[column].apply(lambda x:
+                                              x.ljust(max_lengths[column]))
+            
+            # output to csv
+            
+            df.to_csv( 'ind_spmode.csv', 
+                        sep='\t', 
+                        index=False )
         
         else: raise ValueError("Please compute spdmd first!")
         
-        print("Indexes of selected sparsity promoting modes are saved.")
+        print("Indexes of selected sparsity promoting modes are saved.\n")
 
 
 
