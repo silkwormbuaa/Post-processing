@@ -21,5 +21,6 @@ class timer():
         # self.end = time.time()
         self.interval = time.time() - self.start
         print("%s took: %0.2fs" % (self.message, self.interval))
+        print("=====================\n")
 
 

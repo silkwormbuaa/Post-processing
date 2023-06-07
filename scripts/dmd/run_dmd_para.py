@@ -33,12 +33,6 @@ from   vista.snapshot    import Snapshot
 
 
 
-#snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots'
-#
-#snap_file = snap_dir+'/snap_test/snapshot_00600031/snapshot_W_002.bin'
-#os.chdir( snap_dir )
-
-
 snap_dir = os.getcwd()
 
 paradmd = ParaDmd( snap_dir )
@@ -77,7 +71,7 @@ paradmd.comm.barrier()
 # Read in all the snapshots
 # =============================================================================
 
-with timer('Read in all the snapshots'):
+with timer('\nRead in all the snapshots'):
     
     paradmd.read_info_file()
 
@@ -92,7 +86,7 @@ with timer('Read in all the snapshots'):
     print(f"got {paradmd.n_bl_local:5d} blocks out of {paradmd.n_bl:5d}",end='')
     print(f". I take care of blocks from {paradmd.i_start+1:5d}",end='')
     print(f"({paradmd.bl_num[paradmd.i_start]:5d}) to ",end='')
-    print(f"{paradmd.i_end:5d}({paradmd.bl_num[paradmd.i_end-1]:5d}).")
+    print(f"{paradmd.i_end:5d}({paradmd.bl_num[paradmd.i_end-1]:5d}).\n")
     
     # select which parameter will be chosen to do DMD
     
@@ -103,8 +97,8 @@ with timer('Read in all the snapshots'):
         
         paradmd.para_read_data( snap_file )
     
-    print(f"Finish read in snapshots.",end='')
-    print(f"Snapshots shape of {paradmd.rank} is {np.shape(paradmd.snapshots)}")
+    print(f"Rank {paradmd.rank} finish read in snapshots ",end='')
+    print(f"with shape of {np.shape(paradmd.snapshots)}")
 
 
 # Specify the time interval of snapshots

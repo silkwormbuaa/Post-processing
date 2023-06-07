@@ -130,7 +130,7 @@ class Snapshot:
         
         # Verbose
   
-        self.verbose = True
+        self.verbose = False
 
 
 
@@ -196,12 +196,12 @@ class Snapshot:
         if self.verbose: print( 'Completed.' ); sys.stdout.flush()
         
         
-        print("snapshot %d is read."%self.itstep)
+        print(f"\nsnapshot {self.itstep} is read.\n")
         
 
 
 # ----------------------------------------------------------------------
-# >>> Read snapshot structure                                  ( 0 )
+# >>> Read snapshot and output snapshot structure/info            ( 0 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -262,9 +262,6 @@ class Snapshot:
         
         df.to_csv( 'snap_struct.csv', sep=' ',index=False )     
         
-        print( f'snap_struct of snapshot {self.itstep} is output.' )
-        
-        
         # Write snapshots info into a file
         
         with open('snap_info.dat','w') as fi:
@@ -280,6 +277,9 @@ class Snapshot:
                 fi.write(f'slic_type {self.slic_type}\n')
             
             fi.write(f'vars_name {self.vars_name}\n')
+        
+        
+        print(f'snap struct/info files of snapshot {self.itstep} are output.\n')
             
 
 # ----------------------------------------------------------------------

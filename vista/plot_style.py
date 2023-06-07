@@ -135,11 +135,11 @@ def plot_eigens( eigens,
     
     # Save figure
     
-    if filename: plt.savefig( filename )
+    if filename: 
+        
+        plt.savefig( filename )
+        print(f"{filename} is saved.\n")
     
-    
-    plt.show()
-
 
 
 # ----------------------------------------------------------------------
@@ -245,10 +245,11 @@ def plot_amp_st( st, amp1, amp2=None,
     
     # Save figure
     
-    if filename: plt.savefig( filename )
-    
-    
-    plt.show()
+    if filename: 
+        
+        plt.savefig( filename )
+        print(f"{filename} is saved.\n")
+
 
 
 # ----------------------------------------------------------------------

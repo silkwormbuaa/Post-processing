@@ -82,10 +82,10 @@ with timer('Compute sparsity promoting dmd '):
     
     paradmd.compute_spdmd( gamma, rho )
     
-    print(f"The performance loss of SPDMD is : {paradmd.Ploss:8.3f} %.")
+    print(f"The performance loss of SPDMD is : {paradmd.Ploss:8.3f} %.\n")
     
 
-St = paradmd.freq * Lsep / velocity
+paradmd.St = paradmd.freq * Lsep / velocity
 
 paradmd.save_spdmd_result()
 
@@ -106,15 +106,15 @@ c. ([1,2,3]) will look for the elements in a 1-D array arr[1:3].
 
 plot_eigens( paradmd.mu, 
              paradmd.mu[ tuple([paradmd.ind_spmode]) ],
-             filename='eigens-.png')
+             filename='a-eigens-.png')
 
-plot_amp_st( St, 
+plot_amp_st( paradmd.St, 
              np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
-             filename='amplitude.png',
+             filename='a-amplitude.png',
              hidesmall=False)
 
-plot_amp_st( St, 
+plot_amp_st( paradmd.St, 
              np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
-             filename='amplitude-hidesmall-.png')
+             filename='a-amplitude-hidesmall.png')
