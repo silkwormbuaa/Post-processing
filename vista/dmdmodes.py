@@ -144,8 +144,10 @@ class DMDModes:
     def reconstruct( self, step ):
         
         self.step = step
+        
+        self.indxes = [mode.indx for mode in self.modes]
 
-        Phis = np.array( [mode.Phi for mode in self.modes] )
+        self.Phis = np.array( [mode.Phi for mode in self.modes] ).T
         
         alphas = [mode.alpha for mode in self.modes]
 
@@ -162,7 +164,7 @@ class DMDModes:
         
         else:
             
-            self.recons_data = Phis.T @ np.diag(alphas) @ vand
+            self.recons_data = self.Phis @ np.diag(alphas) @ vand
 
 
 
@@ -182,29 +184,31 @@ class DMDModes:
 
     def match_mesh( self, df, snap_type ):
         
-        header = [ f"recons_{i:05d}" for i in range( self.step )]
+        header_re = [ f"recons_{i:05d}" for i in range( self.step )]
+        header_phi = [ f"phi_{indx:05d}" for indx in self.indxes]
         
-        self.df_recons = pd.DataFrame( self.recons_data, columns=header )
+        df_recons = pd.DataFrame( self.recons_data, columns=header_re )
+        df_phis = pd.DataFrame( self.Phis, columns=header_phi )
         
         # stack two dataframe based on columns
         
-        self.df_recons = pd.concat([df, self.df_recons], axis=1)
+        self.df_modes = pd.concat([df, df_recons, df_phis], axis=1)
         
         if snap_type == 'block':
             
-            self.df_recons.sort_values(by=['z','y','x'],inplace=True)
+            self.df_modes.sort_values(by=['z','y','x'],inplace=True)
         
         elif snap_type == 'X':
             
-            self.df_recons.sort_values(by=['z','y'],inplace=True)
+            self.df_modes.sort_values(by=['z','y'],inplace=True)
 
         elif snap_type == 'Y' or snap_type == 'W':
             
-            self.df_recons.sort_values(by=['z','x'],inplace=True)
+            self.df_modes.sort_values(by=['z','x'],inplace=True)
         
         elif snap_type == 'Z':
             
-            self.df_recons.sort_values(by=['y','x'],inplace=True)
+            self.df_modes.sort_values(by=['y','x'],inplace=True)
 
 
 # ----------------------------------------------------------------------
