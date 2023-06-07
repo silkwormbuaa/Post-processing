@@ -19,7 +19,7 @@ import pandas            as     pd
 
 import matplotlib.pyplot as     plt
 
-source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 from   vista.timer       import timer
@@ -86,21 +86,17 @@ with timer('\nReconstruct snapshots'):
     
     modes_temp.reconstruct( step )
     
-
     
-#    print(modes_temp.recons_data[0,0])
-    
-
 with timer("\nShow snapshots"):
     
     modes_temp.match_mesh( df, snap_type )
     
-    print(modes_temp.df_recons)
+    print(modes_temp.df_modes)
     
-    xmin = modes_temp.df_recons['x'].min()
-    xmax = modes_temp.df_recons['x'].max()
-    ymin = modes_temp.df_recons['z'].min()
-    ymax = modes_temp.df_recons['z'].max()
+    xmin = modes_temp.df_modes['x'].min()
+    xmax = modes_temp.df_modes['x'].max()
+    ymin = modes_temp.df_modes['y'].min()
+    ymax = modes_temp.df_modes['y'].max()
     
     x_i = np.linspace( xmin, xmax, 513)
     y_i = np.linspace( ymin, ymax, 129)
@@ -108,20 +104,44 @@ with timer("\nShow snapshots"):
     xx, yy = np.meshgrid( x_i, y_i )
     
     dataname = [f"recons_{i:05d}" for i in range(step)]
+
     
-    for i in range(step):
+    # plot reconstructed data
+    
+    for i in range( step ):
         
-        p = griddata((modes_temp.df_recons['x'],modes_temp.df_recons['z']),
-                    np.array(modes_temp.df_recons[dataname[i]]).real,
+        p = griddata((modes_temp.df_modes['x'],modes_temp.df_modes['y']),
+                    np.array(modes_temp.df_modes[dataname[i]]).real,
                     (xx,yy), method='linear')
         
         fig, ax = plt.subplots()
         
-    #    p = np.array(modes_temp.df_recons['recons_00000']).reshape((128,512))
+    #    p = np.array(modes_temp.df_modes['recons_00000']).reshape((128,512))
         
-        plt.imshow(p.real,extent=(0,120,0,10),origin='lower')
+        plt.imshow(p.real,extent=(xmin,xmax,ymin,ymax),origin='lower')
         
         ax.set_title('reconstructed mean')
+        
+        plt.show()
+    
+    
+    # plot dmd modes
+    
+    dataname = [f"phi_{i:05d}" for i in modes_temp.indxes]
+    
+    for i in range(5):
+        
+        phi = griddata((modes_temp.df_modes['x'],modes_temp.df_modes['y']),
+                    np.array(modes_temp.df_modes[dataname[i]]).real,
+                    (xx,yy), method='linear')
+        
+        fig, ax = plt.subplots()
+        
+    #    p = np.array(modes_temp.df_modes['recons_00000']).reshape((128,512))
+        
+        plt.imshow(phi.real,extent=(xmin,xmax,ymin,ymax),origin='lower')
+        
+        ax.set_title(f'phi{i:05d}')
         
         plt.show()
     

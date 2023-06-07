@@ -14,7 +14,7 @@ import os
 
 import sys
 
-source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 import numpy             as     np
@@ -27,9 +27,11 @@ from   vista.plot_style  import plot_eigens
 
 from   vista.plot_style  import plot_amp_st
 
+from   vista.tools       import read_case_parameter
+
 
 # =============================================================================
-# Take gamma, rho from command line
+# Take gamma, rho from command line | read case parameters
 # =============================================================================
 
 arguments = sys.argv
@@ -49,6 +51,7 @@ elif len( arguments ) == 3:
 
 else: raise ValueError("gamma and rho should be provided!")
 
+case_parameters = read_case_parameter( 'case_parameters' )
 
 # =============================================================================
 # Computation
@@ -56,9 +59,9 @@ else: raise ValueError("gamma and rho should be provided!")
 
 # Directory that stores Psq file
 
-Lsep = 58.9713176
+Lsep = float( case_parameters.get('Lsep') )
 
-velocity = 507.0
+velocity = float( case_parameters.get('u_ref') )
 
 snap_dir = os.getcwd()
 

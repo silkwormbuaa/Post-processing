@@ -12,7 +12,7 @@ import os
 
 import sys
 
-source_dir = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ))
+source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 import numpy             as np
@@ -27,18 +27,24 @@ from   pydmd.plotter     import plot_eigs
 
 from   vista.timer       import timer
 
+from   vista.snapshot    import Snapshot
+
 from   vista.tools       import get_filelist
+
+from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_eigens
 
 from   vista.plot_style  import plot_amp_st
 
-from   vista.snapshot    import Snapshot
 
+snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_test/snapshots_test_z'
 
-snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_test/snapshots'
+parameterfile = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_test_z/case_parameters'
 
 files = get_filelist( snap_dir )
+
+case_parameters = read_case_parameter( parameterfile )
 
 # for file in files: print(file)
 
@@ -85,7 +91,7 @@ with timer("read in data "):
         
 print( "%d snapshots are loaded."%len(p_snap) )
 
-p_snap = np.array(p_snap).T/45447.289
+p_snap = np.array(p_snap).T / float(case_parameters.get('u_ref'))
 
 pdmd = DMD(svd_rank=-1)
 
@@ -97,14 +103,14 @@ with timer("DMD"):
     
     spdmd.fit(p_snap)
     
-pdmd.original_time['dt']=0.005
+pdmd.original_time['dt'] = float(case_parameters.get('dt_snap'))
 # plot eigenvalues
 
 plot_eigens(pdmd.eigs)
 
-Lsep = 58.9713176
+Lsep = float( case_parameters.get('Lsep') )
 
-velocity = 507.0
+velocity = float( case_parameters.get('u_ref') )
 
 St = pdmd.frequency * Lsep / velocity
 
