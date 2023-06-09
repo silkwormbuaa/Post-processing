@@ -31,6 +31,7 @@ from   vista.paradmd     import ParaDmd
 
 from   vista.snapshot    import Snapshot
 
+from   vista.colors      import colors    as col
 
 
 snap_dir = os.getcwd()
@@ -44,6 +45,8 @@ paradmd = ParaDmd( snap_dir )
 snap_files = None
 
 case_parameters = None
+
+print(col.bg.green,col.fg.red,"This is rank ",f"{paradmd.rank}",col.reset)
 
 with timer('Get snapshots file list, snapshots info and case parameters'):
     

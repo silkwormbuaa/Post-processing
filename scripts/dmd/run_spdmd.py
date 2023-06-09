@@ -23,9 +23,13 @@ from   vista.timer       import timer
 
 from   vista.paradmd     import ParaDmd
 
+from   vista.colors      import colors  as col
+
 from   vista.plot_style  import plot_eigens
 
 from   vista.plot_style  import plot_amp_st
+
+from   vista.plot_style  import plot_psi_st
 
 from   vista.tools       import read_case_parameter
 
@@ -38,7 +42,9 @@ arguments = sys.argv
 
 if len( arguments ) == 1:
     
-    print("Default gamma=10000. and rho=10000 will be used.\n")
+    print( "\nDefault", col.bg.green, col.fg.red, end='')
+    print("gamma=10000, rho=10000 ", col.reset, "will be used.\n")
+    
     gamma = None
     rho = None
 
@@ -46,8 +52,8 @@ elif len( arguments ) == 3:
     
     gamma = float( arguments[1] )
     rho   = float( arguments[2] )
-    print(f"Got {len(arguments)-1} parameters: gamma={gamma}",end='')
-    print(f" rho={rho}\n")
+    print(f"\nGot {len(arguments)-1} parameters: ", col.bg.green, end='')
+    print(col.fg.red, f"gamma={gamma}, rho={rho}",  col.reset,"\n")
 
 else: raise ValueError("gamma and rho should be provided!")
 
@@ -82,7 +88,8 @@ with timer('Compute sparsity promoting dmd '):
     
     paradmd.compute_spdmd( gamma, rho )
     
-    print(f"The performance loss of SPDMD is : {paradmd.Ploss:8.3f} %.\n")
+    print(f"\nThe performance loss of SPDMD is :",col.fg.green, end='')
+    print(f" {paradmd.Ploss:8.3f} %.", col.reset, "\n")
     
 
 paradmd.St = paradmd.freq * Lsep / velocity
@@ -118,3 +125,10 @@ plot_amp_st( paradmd.St,
              np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
              filename='a-amplitude-hidesmall.png')
+
+plot_psi_st( paradmd.St,
+             np.abs(paradmd.psi),
+             psi2 = np.abs(paradmd.psi_pol),
+             figsize=(10,7),
+             filename='a-psi.png',
+             pure=True)

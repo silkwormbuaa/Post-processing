@@ -32,6 +32,10 @@ from   scipy.interpolate import griddata
 
 from   vista.tools       import get_filelist
 
+from   vista.tools       import read_case_parameter
+
+from   vista.plot_style  import plot_dmd_mode 
+
 
 # read in one snapshot file to get grid vectors
 
@@ -79,71 +83,68 @@ with timer('\nReconstruct snapshots'):
         
         modes_temp.add_mode( DMDMode(mode_file) )
         
+    # print selected modes properties:
     
     print(f"\nGot these modes:")
     print([mode.indx for mode in modes_temp.modes])
     
+    print(f"\nAlpha_pol of these modes:")
+    print([mode.alpha_pol for mode in modes_temp.modes])
+    
+    print(f"\n|Alpha_pol| of these modes:")
+    print([abs(mode.alpha_pol) for mode in modes_temp.modes])
+    
+    print(f"\nmu of these modes:")
+    print([mode.mu for mode in modes_temp.modes])
+    
+    print(f"\n|mu| of these modes:")
+    print([abs(mode.mu) for mode in modes_temp.modes])
+    
+    print(f"\nSt of these modes:")
+    print([mode.St for mode in modes_temp.modes])
     
     modes_temp.reconstruct( step )
     
-    
+
+
+# read case parameters
+
+modes_temp.case_parameters = read_case_parameter('case_parameters')
+
+
 with timer("\nShow snapshots"):
     
     modes_temp.match_mesh( df, snap_type )
     
     print(modes_temp.df_modes)
     
-    xmin = modes_temp.df_modes['x'].min()
-    xmax = modes_temp.df_modes['x'].max()
+    xmin = -50.0 #modes_temp.df_modes['x'].min()
+    xmax = 100.0 #modes_temp.df_modes['x'].max()
     ymin = modes_temp.df_modes['y'].min()
-    ymax = modes_temp.df_modes['y'].max()
+    ymax = 40.0  #modes_temp.df_modes['y'].max()
     
-    x_i = np.linspace( xmin, xmax, 513)
-    y_i = np.linspace( ymin, ymax, 129)
+    x_i = np.linspace( xmin, xmax, 451)
+    y_i = np.linspace( ymin, ymax, 121)
     
-    xx, yy = np.meshgrid( x_i, y_i )
+    modes_temp.grids_interp = np.meshgrid( x_i, y_i )
     
-    dataname = [f"recons_{i:05d}" for i in range(step)]
-
     
     # plot reconstructed data
     
-    for i in range( step ):
-        
-        p = griddata((modes_temp.df_modes['x'],modes_temp.df_modes['y']),
-                    np.array(modes_temp.df_modes[dataname[i]]).real,
-                    (xx,yy), method='linear')
-        
-        fig, ax = plt.subplots()
-        
-    #    p = np.array(modes_temp.df_modes['recons_00000']).reshape((128,512))
-        
-        plt.imshow(p.real,extent=(xmin,xmax,ymin,ymax),origin='lower')
-        
-        ax.set_title('reconstructed mean')
-        
-        plt.show()
+    xx,yy,v = modes_temp.interp_recons( 0 )
+
+    plot_dmd_mode( (xx,yy), v )
     
     
     # plot dmd modes
     
-    dataname = [f"phi_{i:05d}" for i in modes_temp.indxes]
+    n_mode = 0
     
-    for i in range(5):
-        
-        phi = griddata((modes_temp.df_modes['x'],modes_temp.df_modes['y']),
-                    np.array(modes_temp.df_modes[dataname[i]]).real,
-                    (xx,yy), method='linear')
-        
-        fig, ax = plt.subplots()
-        
-    #    p = np.array(modes_temp.df_modes['recons_00000']).reshape((128,512))
-        
-        plt.imshow(phi.real,extent=(xmin,xmax,ymin,ymax),origin='lower')
-        
-        ax.set_title(f'phi{i:05d}')
-        
-        plt.show()
+    xx,yy,v = modes_temp.interp_mode( n_mode )
+    
+    plot_dmd_mode( (xx,yy), v )
+    
+
     
     
     

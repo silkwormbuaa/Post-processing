@@ -5,7 +5,8 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   GridData is a class referring to a grid data binary file.
+             BlockGrid is the data structure class within the range of a block.
 '''
 
 import sys

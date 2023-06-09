@@ -38,6 +38,8 @@ from   .init_empty       import init_2Dflt_empty
 
 from   .init_empty       import init_2Dcmx_empty
 
+from   .colors           import colors   as col
+
 class ParaDmd:
 # ----------------------------------------------------------------------
 # >>> Function Name                                                (Nr.)
@@ -156,7 +158,9 @@ class ParaDmd:
             if not (os.path.exists( self.snap_info_file ) and 
                     os.path.exists( self.snap_struct_file )):
                 
-                raise FileNotFoundError("no paradmd pre-processing files")
+                raise FileNotFoundError(col.fg.red,
+                                        "no paradmd pre-processing files",
+                                        col.reset)
         
             else: print("Checked pre-processing files.\n")
         
@@ -486,7 +490,9 @@ class ParaDmd:
         elif self.select == 'cf': 
             buff_data = buff_data[5,:]/self.var_norms.get('cf')
             
-        else: raise ValueError('The selected variable does not exist.')
+        else: raise ValueError(col.fg.red,
+                               'The selected variable does not exist.',
+                               col.reset)
         
         return buff_data
         
@@ -751,7 +757,7 @@ class ParaDmd:
             
             raise FileNotFoundError("Pqs.pkl is unavailable. Please run "
                                     "do_paradmd and save_Pqs first.")
-        
+   
         
         # Read P,q,s,N_t with pickle
         
@@ -1013,6 +1019,14 @@ class ParaDmd:
                 
                 pickle.dump( self.Jpol, f )
                 
+                pickle.dump( self.beta, f )
+                
+                pickle.dump( self.psi_pol, f )
+                
+                pickle.dump( self.psi, f )
+                
+                pickle.dump( self.St, f )
+                
         else: raise ValueError("Please compute spdmd first!")
 
         print("spdmd results are saved.\n")
@@ -1081,7 +1095,7 @@ class ParaDmd:
 
 
 # ----------------------------------------------------------------------
-# >>> Read ind_spmode file and broadcast                          (Nr.)
+# >>> Read spdmd_result file and broadcast                          (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -1118,7 +1132,16 @@ class ParaDmd:
                 
                 self.Jpol       = pickle.load( f )
                 
-            print("\nFinish reading in spdmd results.")
+                self.beta       = pickle.load( f )
+                
+                self.psi_pol    = pickle.load( f )
+                
+                self.psi        = pickle.load( f )
+                
+                self.St         = pickle.load( f )
+                
+            print(col.fg.green,"Finish reading in spdmd results.",
+                  col.reset,end='\n')
             
             print(f"\nIndexes of selected modes are:\n{self.ind_spmode}")
             
@@ -1163,7 +1186,7 @@ class ParaDmd:
                 
                 os.mkdir( self.dmdmodes_dir )
                 
-                print("dmdmodes dir does NOT exist, new dir is made.")
+                print("dmdmodes dir does NOT exist, new dir is made.\n")
         
             self.comm.barrier()
             
@@ -1178,6 +1201,7 @@ class ParaDmd:
         self.len_mode = self.comm.allreduce( self.len_snap_local, op=MPI.SUM )
         
         
+        # Gather mode one by one from other procs to root
         # Parameters for MPI.Gatherv: 
         # send_counts: a list of number of data elements on each proc
         # displace: a list of locations where gathered data shoud put
@@ -1215,12 +1239,15 @@ class ParaDmd:
                 
                 with open( mode_filename, 'wb' ) as f:
                     
+                    # St is not necessary actually, can be derived from mu.
+                    
                     print(f'mode {i}')
                     print(f"indx is {indx}")
                     print(f"alpha is {self.alphas[indx]}")
                     print(f"alpha_sp is {self.alphas_sp[indx]}")
                     print(f"alpha_pol is {self.alphas_pol[indx]}")
                     print(f"mu is {self.mu[indx]}")
+                    print(f"St is {self.St[indx]}")
                     print("=============\n")
                     
                     pickle.dump( indx, f )
@@ -1228,6 +1255,7 @@ class ParaDmd:
                     pickle.dump( self.alphas_sp[indx], f )
                     pickle.dump( self.alphas_pol[indx], f )
                     pickle.dump( self.mu[indx], f )
+                    pickle.dump( self.St[indx], f )
                     pickle.dump( buf_mode, f )
 
                     del buf_mode

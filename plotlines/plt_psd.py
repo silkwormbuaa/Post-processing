@@ -24,7 +24,8 @@ from   matplotlib.colors import ListedColormap,LinearSegmentedColormap
 
 from   plt_tools         import *
 
-sys.path.append("..") 
+source_dir = os.path.realpath(__file__).split('scripts')[0] 
+sys.path.append( source_dir )
 
 from   utils.tools       import get_filelist
 
