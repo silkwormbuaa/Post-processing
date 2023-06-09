@@ -253,6 +253,195 @@ def plot_amp_st( st, amp1, amp2=None,
 
 
 # ----------------------------------------------------------------------
+# >>> Plot psi(relative amp)_St                                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/05/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_psi_st( st, psi1, psi2=None, 
+                 figsize=None, 
+                 filename=None, 
+                 pure=False, 
+                 hidesmall=True ):
+    
+    if psi1 is None:
+        
+        raise ValueError('Please compute amplitude first.')
+    
+    
+    if figsize is None:
+        
+        # Set default figure size
+        
+        figsize = (10,10) 
+        
+    
+    fig, ax = plt.subplots( figsize=figsize )      
+        
+    # Plot the first amplitudes
+    df = pd.DataFrame( st, columns=['st'])
+    
+    df['psi1'] = psi1
+    
+    if psi2 is not None:
+        
+        df['psi2'] = psi2
+    
+    df = df.drop( df[ df['st']<0.0 ].index )
+    
+
+    # Ticks
+
+#    ax.minorticks_on()
+    
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='out',
+                    length=10,
+                    width=2)
+    
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='out',
+                    length=5,
+                    width=1)
+    
+#    ax.set_xscale( "log" )
+    ax.set_yscale( "log" )
+    
+#    ax.xaxis.set_major_locator(ticker.MultipleLocator(1.0))
+#    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    ax.yaxis.set_tick_params( which='both', zorder=-1 )
+    ax.tick_params( axis='x', labelsize=15 )
+    ax.tick_params( axis='y', labelsize=15 )
+    
+    # axis limit
+    
+    ax.set_xlim( [0.0,12.0] )
+    ax.set_ylim( [0.001,1.0] )
+    
+    # Grids
+    
+    ax.grid(which='major', ls=':', linewidth=1)
+    ax.grid(which='minor', ls=':', linewidth=0.5)
+    
+    # Labels
+    
+    ax.set_xlabel( r"$St_{L_{sep}}$",fontdict={'size':20})
+    ax.set_ylabel( r"$|\psi_{k}|$",fontdict={'size':20})
+        
+    plt.vlines(df['st'],
+               0.0,
+               df['psi1'], 
+               linewidth=1,
+               alpha=1.0)
+    
+    if psi2 is not None:
+        
+        # if hide small, drop small amplitude less than 1
+            
+        if hidesmall:
+            
+            df2 = df.drop( df[ abs(df['psi2'])<1.0e-8 ].index )
+        
+        
+        plt.vlines( np.array( df2['st'] ),
+                    0.0, 
+                    np.array( df2['psi2'] ), 
+                    linewidth=1.5,
+                    colors='red',
+                    alpha=1.0,
+                    label='Sparsity-promoting' )
+        
+        plt.plot( np.array( df2['st']),
+                  np.array( df2['psi2']),
+                  'o',
+                  color='red',
+                  markersize=4)
+    # Save figure
+    
+    if filename: 
+        
+        plt.savefig( filename )
+        print(f"{filename} is saved.\n")
+        
+    # With default labels or get pure figure
+    
+    if pure: 
+        
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        plt.savefig( 'apure'+filename )
+        print(f"{'apure'+filename} is saved.\n")
+        
+
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_dmd_mode( grids, 
+                   v,
+                   figsize=None, 
+                   filename=None,
+                   pure=None):
+    
+    if (grids is None) or (v is None):
+        
+        raise ValueError('grids or mode value is None!')
+    
+    if figsize is None:
+        
+        # Set default figure size
+        
+        figsize = (15,4)
+        
+    
+    fig, ax = plt.subplots( figsize = figsize )
+    
+    clevel = np.linspace( np.min(v), np.max(v), 51 )
+    
+    print( np.min(v), np.max(v) )
+    
+    cs = ax.contourf(grids[0],
+                     grids[1],
+                     v,
+                     levels=clevel,
+                     cmap='bwr')
+    
+    # Set view
+    
+    ax.set_xlim([np.min(grids[0]),np.max(grids[0])])
+    ax.set_ylim([np.min(grids[1]),np.max(grids[1])])
+    
+    
+    # set axises stay with contour and x,y unit length equal
+    
+    plt.axis('tight')
+    plt.gca().set_aspect('equal', adjustable='box')
+    
+    plt.show()
+
+
+
+# ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
 #
