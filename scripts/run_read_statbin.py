@@ -13,7 +13,7 @@ import os
 
 import sys
 
-source_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 import pandas            as     pd
