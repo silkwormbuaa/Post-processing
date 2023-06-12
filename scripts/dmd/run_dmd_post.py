@@ -150,10 +150,14 @@ with timer("\nShow snapshots"):
     
     # plot mean mode
     
-    xx,yy,v = modes_temp.interp_mode( 0 )
+    indx_alpha_max = np.argmax( np.abs(modes_temp.alpha_pols) )
+    
+    print(f"The index of max alpha_pol is {indx_alpha_max}.\n")
+
+    xx,yy,v = modes_temp.interp_mode( indx_alpha_max )
     
     plot_dmd_mode( (xx,yy), v,
-                    filename="mode_00000_0.png",
+                    filename="mode_mean.png",
                     colorbar=True,
                     title="mean mode")
     
@@ -162,7 +166,7 @@ with timer("\nShow snapshots"):
         
     phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
     
-    for n_mode in range( 1,n_modes//2 + 1 ):
+    for n_mode in range( n_modes//2 + 1 ):
         
         for i, phase in enumerate(phases):
             
