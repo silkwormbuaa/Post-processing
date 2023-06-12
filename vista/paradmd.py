@@ -814,6 +814,8 @@ class ParaDmd:
         
         n = self.N_t - 1
         
+        print(f"Matrix size is {n} x {n}.\n")
+        
         # Selected mode index
         
         ind_spmode = None
@@ -904,15 +906,20 @@ class ParaDmd:
 
             eps_dual = np.sqrt( n ) * eps_abs + eps_rel * linalg.norm( y )
             
-            
-            if (res_prim < eps_prim) and (res_dual < eps_dual): break
-            
-            else: z = znew
-        
             print( f"Iter. {iter+1:5d} took {time.time()-t_ref:5.2f}s.",end='')
             print( f" - res_prim : {res_prim:10.2e} < {eps_prim:10.2e}",end='') 
             print( f" - res_dual : {res_dual:10.2e} < {eps_dual:10.2e}",end='') 
             print( f" Current nr. of selected modes:{np.count_nonzero(z):5d}")
+            
+            
+            if (res_prim < eps_prim) and (res_dual < eps_dual): break
+        
+            else: z = znew
+        
+        # verbose after ADMM iteration
+        
+        print( "\nIteration has finished, solving KKT system ... \n" )
+        
         
         # Record output data 
         
