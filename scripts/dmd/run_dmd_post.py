@@ -13,6 +13,8 @@ import os
 
 import sys
 
+import cmath
+
 import numpy             as     np
 
 import pandas            as     pd
@@ -82,10 +84,14 @@ with timer('\nReconstruct snapshots'):
     for mode_file in mode_files:
         
         modes_temp.add_mode( DMDMode(mode_file) )
-        
+    
+    # number of modes
+    
+    n_modes = len(modes_temp.modes)
+    
     # print selected modes properties:
     
-    print(f"\nGot these modes:")
+    print(f"\nGot { n_modes } modes:")
     print([mode.indx for mode in modes_temp.modes])
     
     print(f"\nAlpha_pol of these modes:")
@@ -114,6 +120,10 @@ modes_temp.case_parameters = read_case_parameter('case_parameters')
 
 with timer("\nShow snapshots"):
     
+    if os.path.exists("./modesfigures"): os.chdir("./modesfigures")
+        
+    else: os.mkdir("./modesfigures"); os.chdir("./modesfigures")
+    
     modes_temp.match_mesh( df, snap_type )
     
     print(modes_temp.df_modes)
@@ -133,16 +143,34 @@ with timer("\nShow snapshots"):
     
     xx,yy,v = modes_temp.interp_recons( 0 )
 
-    plot_dmd_mode( (xx,yy), v )
+    plot_dmd_mode( (xx,yy), v, filename="reconstructed.png", colorbar=True )
     
     
     # plot dmd modes
+        
+    phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
     
-    n_mode = 0
-    
-    xx,yy,v = modes_temp.interp_mode( n_mode )
-    
-    plot_dmd_mode( (xx,yy), v )
+    for n_mode in range( n_modes//2 + 1 ):
+        
+        for i, phase in enumerate(phases):
+            
+            xx,yy,v = modes_temp.interp_mode( n_mode, phase=phase )
+            
+            filename = f"mode_{n_mode:05d}_{i}"
+            
+            title = f"phase = {i}/4"
+            
+            if i == 0:
+                
+                cmax = np.max( np.abs(v) )*1.1
+                
+                clevel = np.linspace( -cmax, cmax, 51)
+            
+            plot_dmd_mode( (xx,yy), v,
+                           filename=filename+'.png',
+                           colorbar=True,
+                           clevel=clevel,
+                           title=title)
     
 
     

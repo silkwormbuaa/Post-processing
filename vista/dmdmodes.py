@@ -286,7 +286,9 @@ class DMDModes:
 # 2023/06/09  - created
 #
 # Desc
-#
+#   1. shift coordinate
+#   2. advance in phase
+#   3. interpolate onto grids_interp
 # ----------------------------------------------------------------------
 
     def interp_mode( self, n_mode, phase=1.0+0.0j, coord_shift=True ):
@@ -312,11 +314,11 @@ class DMDModes:
         
         indx = max( 2*n_mode-1, 0 )
         
-        header = f"phi_{indx:05d}"
+        header = f"phi_{self.indxes[indx]:05d}"
         
         phi = self.df_modes[ header ]
         
-        v = np.array( phi * self.alpha_pols[indx] )
+        v = np.array( phi * self.alpha_pols[indx] * phase )
         
         v =   griddata( (self.df_modes['x'], self.df_modes['y']),
                         v.real,

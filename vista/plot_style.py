@@ -250,6 +250,7 @@ def plot_amp_st( st, amp1, amp2=None,
         plt.savefig( filename )
         print(f"{filename} is saved.\n")
 
+    plt.close() # must be added, otherwise will give too many figures warning.
 
 
 # ----------------------------------------------------------------------
@@ -380,6 +381,8 @@ def plot_psi_st( st, psi1, psi2=None,
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
         plt.savefig( 'apure'+filename )
         print(f"{'apure'+filename} is saved.\n")
+    
+    plt.close()
         
 
 
@@ -401,7 +404,10 @@ def plot_dmd_mode( grids,
                    v,
                    figsize=None, 
                    filename=None,
-                   pure=None):
+                   pure=None,
+                   colorbar=False,
+                   clevel=None,
+                   title=None):
     
     if (grids is None) or (v is None):
         
@@ -416,9 +422,10 @@ def plot_dmd_mode( grids,
     
     fig, ax = plt.subplots( figsize = figsize )
     
-    clevel = np.linspace( np.min(v), np.max(v), 51 )
+    if clevel is None:
+        
+        clevel = np.linspace( np.min(v), np.max(v), 51 )
     
-    print( np.min(v), np.max(v) )
     
     cs = ax.contourf(grids[0],
                      grids[1],
@@ -426,18 +433,33 @@ def plot_dmd_mode( grids,
                      levels=clevel,
                      cmap='bwr')
     
+    # show colorbar?
+    
+    if colorbar is True: plt.colorbar( cs )
+    
+    # set title
+    
+    if title: ax.set_title(f"{title}"+r"$\pi$",size=20)
+    
     # Set view
     
     ax.set_xlim([np.min(grids[0]),np.max(grids[0])])
     ax.set_ylim([np.min(grids[1]),np.max(grids[1])])
-    
     
     # set axises stay with contour and x,y unit length equal
     
     plt.axis('tight')
     plt.gca().set_aspect('equal', adjustable='box')
     
-    plt.show()
+    # save figures
+    
+    if filename:
+        
+        plt.savefig( filename )
+        
+        print(f"{filename} is output.\n")
+    
+    plt.close()
 
 
 
