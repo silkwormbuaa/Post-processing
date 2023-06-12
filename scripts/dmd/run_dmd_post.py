@@ -143,14 +143,26 @@ with timer("\nShow snapshots"):
     
     xx,yy,v = modes_temp.interp_recons( 0 )
 
-    plot_dmd_mode( (xx,yy), v, filename="reconstructed.png", colorbar=True )
+    plot_dmd_mode( (xx,yy), v, 
+                   filename="reconstructed.png", 
+                   colorbar=True )
     
     
-    # plot dmd modes
+    # plot mean mode
+    
+    xx,yy,v = modes_temp.interp_mode( 0 )
+    
+    plot_dmd_mode( (xx,yy), v,
+                    filename="mode_00000_0.png",
+                    colorbar=True,
+                    title="mean mode")
+    
+    
+    # plot oscillating dmd modes
         
     phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
     
-    for n_mode in range( n_modes//2 + 1 ):
+    for n_mode in range( 1,n_modes//2 + 1 ):
         
         for i, phase in enumerate(phases):
             
@@ -158,7 +170,7 @@ with timer("\nShow snapshots"):
             
             filename = f"mode_{n_mode:05d}_{i}"
             
-            title = f"phase = {i}/4"
+            title = f"phase = {i}/4"+r"$\pi$"
             
             if i == 0:
                 

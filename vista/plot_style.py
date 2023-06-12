@@ -439,7 +439,7 @@ def plot_dmd_mode( grids,
     
     # set title
     
-    if title: ax.set_title(f"{title}"+r"$\pi$",size=20)
+    if title: ax.set_title(f"{title}",size=20)
     
     # Set view
     
