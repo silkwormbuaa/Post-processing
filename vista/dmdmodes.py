@@ -161,22 +161,37 @@ class DMDModes:
         
         self.alphas = [mode.alpha for mode in self.modes]
 
-        self.alpha_pols = [mode.alpha_pol for mode in self.modes]
+        self.alphas_pol = [mode.alpha_pol for mode in self.modes]
         
         self.mus = [mode.mu for mode in self.modes]
         
         self.Sts = [mode.St for mode in self.modes] 
+
+        # build a new dataframe of above variables
+        
+        df_ind = pd.DataFrame( self.indxes, columns=['indxes'])
+        
+        df_ind['Sts'] = np.array( self.Sts )
+        df_ind['alphas'] = np.array( self.alphas )
+        df_ind['alphas_pol'] = np.array( self.alphas_pol )
+        df_ind['mus'] = np.array(self.mus)
+        
+        df_ind = df_ind.drop(df_ind[df_ind['Sts'] < 0].index)
+        df_ind = df_ind.sort_values(by='Sts')
+
+        self.df_ind = df_ind
+        
+        # reconstruct and time advance
         
         self.vand = np.vander( self.mus, self.step, increasing=True )
 
-        
         if not self.modes:
         
             raise ValueError("No mode is available!")
         
         else:
             
-            self.recons_data = self.Phis @ np.diag(self.alpha_pols) @ self.vand
+            self.recons_data = self.Phis @ np.diag(self.alphas_pol) @ self.vand
 
 
 
@@ -291,7 +306,7 @@ class DMDModes:
 #   3. interpolate onto grids_interp
 # ----------------------------------------------------------------------
 
-    def interp_mode( self, n_mode, phase=1.0+0.0j, coord_shift=True ):
+    def interp_mode( self, indx, phase=1.0+0.0j, coord_shift=True ):
         
         # shift the coordinates
         
@@ -310,23 +325,22 @@ class DMDModes:
             xx = np.array( self.grids_interp[0] )
             yy = np.array( self.grids_interp[1] )
         
+        
         # reconstruct modal variable; interpolate
+
+        header = f"phi_{indx:05d}"
         
-        indx = max( 2*n_mode-1, 0 )
+        phi = np.array( self.df_modes[ header ] )
         
-        header = f"phi_{self.indxes[indx]:05d}"
+        alpha_pol = self.df_ind.loc[self.df_ind['indxes']==indx,
+                                    'alphas_pol'].iloc[0]
         
-        phi = self.df_modes[ header ]
-        
-        v = np.array( phi * self.alpha_pols[indx] * phase )
+        v = phi * alpha_pol * phase
         
         v =   griddata( (self.df_modes['x'], self.df_modes['y']),
                         v.real,
                         (self.grids_interp[0],self.grids_interp[1]),
                         method='linear' )
-        
-        if indx > 0:
-            v = 2.0 * v
         
         return xx, yy, v
 

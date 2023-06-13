@@ -30,8 +30,6 @@ from   vista.snapshot    import Snapshot
 
 from   vista.dmdmodes    import DMDMode, DMDModes
 
-from   scipy.interpolate import griddata
-
 from   vista.tools       import get_filelist
 
 from   vista.tools       import read_case_parameter
@@ -111,6 +109,8 @@ with timer('\nReconstruct snapshots'):
     
     modes_temp.reconstruct( step )
     
+    print(f"\nIndexes of positive modes:")
+    print( modes_temp.df_ind )
 
 
 # read case parameters
@@ -120,13 +120,21 @@ modes_temp.case_parameters = read_case_parameter('case_parameters')
 
 with timer("\nShow snapshots"):
     
+    # enter ./modesfigures directory
+    
     if os.path.exists("./modesfigures"): os.chdir("./modesfigures")
         
     else: os.mkdir("./modesfigures"); os.chdir("./modesfigures")
     
+    
+    # match mesh with data
+    
     modes_temp.match_mesh( df, snap_type )
     
     print(modes_temp.df_modes)
+    
+    
+    # generate the grid that will be interpolated on
     
     xmin = -50.0 #modes_temp.df_modes['x'].min()
     xmax = 100.0 #modes_temp.df_modes['x'].max()
@@ -148,13 +156,17 @@ with timer("\nShow snapshots"):
                    colorbar=True )
     
     
+    # indexes of positive modes
+    
+    indxes = np.array( modes_temp.df_ind['indxes'] )
+    
+    print(indxes)
+    
     # plot mean mode
     
-    indx_alpha_max = np.argmax( np.abs(modes_temp.alpha_pols) )
-    
-    print(f"The index of max alpha_pol is {indx_alpha_max}.\n")
+    print(f"The index of max alpha_pol is {indxes[0]}.\n")
 
-    xx,yy,v = modes_temp.interp_mode( indx_alpha_max )
+    xx,yy,v = modes_temp.interp_mode( indxes[0] )
     
     plot_dmd_mode( (xx,yy), v,
                     filename="mode_mean.png",
@@ -166,13 +178,13 @@ with timer("\nShow snapshots"):
         
     phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
     
-    for n_mode in range( n_modes//2 + 1 ):
+    for n in range( len(indxes) ):
         
         for i, phase in enumerate(phases):
             
-            xx,yy,v = modes_temp.interp_mode( n_mode, phase=phase )
+            xx,yy,v = modes_temp.interp_mode( indxes[n], phase=phase )
             
-            filename = f"mode_{n_mode:05d}_{i}"
+            filename = f"mode_{indxes[n]:05d}_{i}"
             
             title = f"phase = {i}/4"+r"$\pi$"
             

@@ -980,7 +980,7 @@ class ParaDmd:
 
         # Compute other parameters
         """ - beta: growth rate
-            - 
+            - psi: relative amplitudes
         """
         
         self.beta = np.log( np.abs( self.mu ) )
