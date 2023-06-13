@@ -224,18 +224,22 @@ class DMDModes:
         if snap_type == 'block':
             
             self.df_modes.sort_values(by=['z','y','x'],inplace=True)
+            self.GX_header = ['x','y','z']
         
         elif snap_type == 'X':
             
             self.df_modes.sort_values(by=['z','y'],inplace=True)
+            self.GX_header = ['y','z']
 
         elif snap_type == 'Y' or snap_type == 'W':
             
             self.df_modes.sort_values(by=['z','x'],inplace=True)
+            self.GX_header = ['x','z']
         
         elif snap_type == 'Z':
             
             self.df_modes.sort_values(by=['y','x'],inplace=True)
+            self.GX_header = ['x','y']
         
         # clear the list of modes
         
@@ -282,7 +286,13 @@ class DMDModes:
         
         v = np.array( self.df_modes[ header ] )
         
-        v =   griddata( (self.df_modes['x'], self.df_modes['y']),
+        # when doing interpolation, do not shift the coordinate avoiding 
+        # necessary steps.
+        
+        x_origin = self.df_modes[self.GX_header[0]]
+        y_origin = self.df_modes[self.GX_header[1]]
+        
+        v =   griddata( (x_origin, y_origin),
                         v.real,
                         (self.grids_interp[0],self.grids_interp[1]),
                         method='linear' )
@@ -337,10 +347,13 @@ class DMDModes:
         
         v = phi * alpha_pol * phase
         
-        v =   griddata( (self.df_modes['x'], self.df_modes['y']),
-                        v.real,
-                        (self.grids_interp[0],self.grids_interp[1]),
-                        method='linear' )
+        x_origin = self.df_modes[self.GX_header[0]]
+        y_origin = self.df_modes[self.GX_header[1]]
+        
+        v = griddata( (x_origin, y_origin),
+                      v.real,
+                      (self.grids_interp[0],self.grids_interp[1]),
+                      method='linear' )
         
         return xx, yy, v
 

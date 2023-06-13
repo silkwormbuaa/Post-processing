@@ -19,8 +19,6 @@ import numpy             as     np
 
 import pandas            as     pd
 
-import matplotlib.pyplot as     plt
-
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
@@ -108,7 +106,7 @@ with timer('\nReconstruct snapshots'):
     print([mode.St for mode in modes_temp.modes])
     
     modes_temp.reconstruct( step )
-    
+
     print(f"\nIndexes of positive modes:")
     print( modes_temp.df_ind )
 
@@ -136,15 +134,28 @@ with timer("\nShow snapshots"):
     
     # generate the grid that will be interpolated on
     
-    xmin = -50.0 #modes_temp.df_modes['x'].min()
-    xmax = 100.0 #modes_temp.df_modes['x'].max()
-    ymin = modes_temp.df_modes['y'].min()
-    ymax = 40.0  #modes_temp.df_modes['y'].max()
+    if snap_type == 'Z':
     
-    x_i = np.linspace( xmin, xmax, 451)
-    y_i = np.linspace( ymin, ymax, 121)
+        x1min = -50.0 #modes_temp.df_modes['x'].min()
+        x1max = 100.0 #modes_temp.df_modes['x'].max()
+        x2min = modes_temp.df_modes['y'].min()
+        x2max = 40.0  #modes_temp.df_modes['y'].max()
+        
+    elif snap_type == 'W' or snap_type == 'Y':
+        
+        x1min = modes_temp.df_modes[GX_header[0]].min()
+        x1max = modes_temp.df_modes[GX_header[0]].max()
+        x2min = modes_temp.df_modes[GX_header[1]].min()
+        x2max = modes_temp.df_modes[GX_header[1]].max()
     
-    modes_temp.grids_interp = np.meshgrid( x_i, y_i )
+    else:
+        
+        raise ValueError("snap_type not supported yet.")
+    
+    x_1 = np.linspace( x1min, x1max, 451)
+    x_2 = np.linspace( x2min, x2max, 121)
+    
+    modes_temp.grids_interp = np.meshgrid( x_1, x_2 )
     
     
     # plot reconstructed data
@@ -199,11 +210,3 @@ with timer("\nShow snapshots"):
                            colorbar=True,
                            clevel=clevel,
                            title=title)
-    
-
-    
-    
-    
-    
-        
-
