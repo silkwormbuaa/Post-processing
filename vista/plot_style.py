@@ -271,7 +271,9 @@ def plot_psi_st( st, psi1, psi2=None,
                  figsize=None, 
                  filename=None, 
                  pure=False, 
-                 hidesmall=True ):
+                 hidesmall=True,
+                 xlim=None,
+                 gray=None):
     
     if psi1 is None:
         
@@ -292,9 +294,9 @@ def plot_psi_st( st, psi1, psi2=None,
     
     df['psi1'] = psi1
     
-    if psi2 is not None:
-        
-        df['psi2'] = psi2
+    if gray is not None: df['gray'] = gray
+    
+    if psi2 is not None: df['psi2'] = psi2
     
     df = df.drop( df[ df['st']<0.0 ].index )
     
@@ -315,8 +317,6 @@ def plot_psi_st( st, psi1, psi2=None,
                     length=5,
                     width=1)
     
-#    ax.set_xscale( "log" )
-    ax.set_yscale( "log" )
     
 #    ax.xaxis.set_major_locator(ticker.MultipleLocator(1.0))
 #    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
@@ -326,8 +326,14 @@ def plot_psi_st( st, psi1, psi2=None,
     
     # axis limit
     
-    ax.set_xlim( [0.0,12.0] )
-    ax.set_ylim( [0.001,1.0] )
+    if xlim:
+        ax.set_xscale( "log" )
+        ax.set_xlim( xlim )
+    
+    else: ax.set_xlim( [0.0,3.0] )
+    
+    ax.set_yscale( "log" )
+    ax.set_ylim( [0.0001,1.0] )
     
     # Grids
     
@@ -338,12 +344,30 @@ def plot_psi_st( st, psi1, psi2=None,
     
     ax.set_xlabel( r"$St_{L_{sep}}$",fontdict={'size':20})
     ax.set_ylabel( r"$|\psi_{k}|$",fontdict={'size':20})
+    
+    # Plot line
+    
+    if gray is not None:
         
-    plt.vlines(df['st'],
-               0.0,
-               df['psi1'], 
-               linewidth=1,
-               alpha=1.0)
+        st1 = np.array(df['st'])
+        v_psi1 = np.array(df['psi1'])
+        
+        for i, value in enumerate( df['gray'] ):
+            plt.vlines( st1[i],
+                        0.0,
+                        v_psi1[i],
+                        linewidth=1,
+                        alpha= value,
+                        colors='black')
+    
+    else:
+    
+        plt.vlines( df['st'],
+                    0.0,
+                    df['psi1'], 
+                    linewidth=1,
+                    alpha=1.0,
+                    colors='black')
     
     if psi2 is not None:
         
@@ -397,7 +421,7 @@ def plot_psi_st( st, psi1, psi2=None,
 # 2023/06/09  - created
 #
 # Desc
-#
+#   - 2D contours of dmd modes
 # ----------------------------------------------------------------------
 
 def plot_dmd_mode( grids, 
