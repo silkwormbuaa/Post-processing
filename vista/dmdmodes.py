@@ -193,6 +193,15 @@ class DMDModes:
             
             self.recons_data = self.Phis @ np.diag(self.alphas_pol) @ self.vand
 
+        # clear the list of modes
+        
+        self.modes.clear()
+
+        # also add std dmd reconstructed data
+        
+        with open('reconstructed_std_dmd.pkl','rb') as f:
+            
+            self.recons_std_dmd = pickle.load( f )
 
 
 # ----------------------------------------------------------------------
@@ -221,6 +230,12 @@ class DMDModes:
         
         self.df_modes = pd.concat([df_mesh, df_recons, df_phis], axis=1)
         
+        self.df_modes['recons_std_dmd'] = self.recons_std_dmd
+        
+        del self.recons_std_dmd
+        del self.recons_data
+        del self.Phis
+        
         if snap_type == 'block':
             
             self.df_modes.sort_values(by=['z','y','x'],inplace=True)
@@ -241,10 +256,6 @@ class DMDModes:
             self.df_modes.sort_values(by=['y','x'],inplace=True)
             self.GX_header = ['x','y']
         
-        # clear the list of modes
-        
-        self.modes.clear()
-        
         
         
 # ----------------------------------------------------------------------
@@ -261,7 +272,7 @@ class DMDModes:
 #
 # ----------------------------------------------------------------------
 
-    def interp_recons( self, step, coord_shift=True ):
+    def interp_recons( self, header, coord_shift=True ):
         
         # shift the coordinates
         
@@ -281,8 +292,6 @@ class DMDModes:
             yy = np.array( self.grids_interp[1] )
         
         # reconstruct modal variable; interpolate
-        
-        header = f"recons_{step:05d}"
         
         v = np.array( self.df_modes[ header ] )
         

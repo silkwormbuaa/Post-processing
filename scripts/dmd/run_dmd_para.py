@@ -109,6 +109,9 @@ with timer('\nRead in all the snapshots'):
 
 paradmd.dt = float( case_parameters.get('dt_snap') )
 
+# =============================================================================
+# do parallel dmd
+# =============================================================================
 
 with timer('paradmd '):
 
@@ -122,6 +125,8 @@ with timer('paradmd '):
         
         paradmd.para_write_modes()
         
+        paradmd.save_reconstruct()
+                
     # if spdmd is yet to do
     
     else:

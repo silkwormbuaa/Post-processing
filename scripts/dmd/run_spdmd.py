@@ -132,4 +132,27 @@ plot_psi_st( paradmd.St,
              psi2 = np.abs(paradmd.psi_pol),
              figsize=(10,7),
              filename='a-psi.png',
-             pure=True)
+             pure=False)
+
+plot_psi_st( paradmd.St,
+             np.abs(paradmd.psi),
+             psi2 = np.abs(paradmd.psi_pol),
+             figsize=(10,7),
+             filename='a-psi-log.png',
+             xlim=[0.001,6.0],
+             pure=False)
+
+growth = paradmd.beta
+gmax = np.max(growth)
+gmin = np.min(growth)
+
+gray_scale = (growth - gmin)/( gmax - gmin )
+
+plot_psi_st( paradmd.St,
+             np.abs(paradmd.psi),
+             psi2 = np.abs(paradmd.psi_pol),
+             figsize=(10,7),
+             filename='a-psi-log-gray.png',
+             xlim=[0.001,6.0],
+             pure=False,
+             gray=gray_scale)

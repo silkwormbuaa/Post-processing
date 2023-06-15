@@ -16,6 +16,10 @@ import sys
 
 import cmath
 
+import pickle
+
+import time
+
 import numpy             as     np
 
 import pandas            as     pd
@@ -35,14 +39,16 @@ from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_dmd_mode 
 
-
+t_0 = time.time()
+# =============================================================================
 # read in one snapshot file to get grid vectors
+# =============================================================================
 
 snap_dir = os.getcwd()
 
 step = 1
 
-with timer('\nGet snapshots file and grid vector'):
+with timer('\n - Get snapshots file and grid vector'):
     
     snap_files = get_filelist( snap_dir + '/snapshots' )
     
@@ -69,14 +75,21 @@ with timer('\nGet snapshots file and grid vector'):
     df = pd.DataFrame( GX, columns = GX_header )
     
     
+# =============================================================================
+# Reconstruct snapshots with selected spdmd modes:
+# =============================================================================
 
-# match data and grids:
-
-with timer('\nReconstruct snapshots'):
-    
-    mode_files = get_filelist( snap_dir + '/dmdmodes' )
+with timer('\n - Reconstruct snapshots'):
     
     modes_temp = DMDModes()
+    
+    # read case parameters
+
+    modes_temp.case_parameters = read_case_parameter('case_parameters')
+    
+    # read modes in /dmdmodes
+    
+    mode_files = get_filelist( snap_dir + '/dmdmodes' )
     
     for mode_file in mode_files:
         
@@ -111,32 +124,27 @@ with timer('\nReconstruct snapshots'):
     print(f"\nIndexes of positive modes:")
     print( modes_temp.df_ind )
 
+# =============================================================================
+# match mesh and reconstructed data( both std_dmd and spdmd ), each modes
+# =============================================================================
+    
+# match mesh with data
+with timer("\n - Match mesh "):
 
-# read case parameters
-
-modes_temp.case_parameters = read_case_parameter('case_parameters')
-
-
-with timer("\nShow snapshots"):
-    
-    # enter ./modesfigures directory
-    
-    if os.path.exists("./modesfigures"): os.chdir("./modesfigures")
-        
-    else: os.mkdir("./modesfigures"); os.chdir("./modesfigures")
-    
-    
-    # match mesh with data
-    
     modes_temp.match_mesh( df, snap_type )
-    
+
     print(modes_temp.df_modes)
-    
-    
-    # generate the grid that will be interpolated on
-    
+
+
+
+# =============================================================================
+# generate the grid that will be interpolated on
+# =============================================================================
+
+with timer("\n - Generate the interpolation grid "):
+
     if snap_type == 'Z':
-    
+
         x1min = -50.0 #modes_temp.df_modes['x'].min()
         x1max = 100.0 #modes_temp.df_modes['x'].max()
         x2min = modes_temp.df_modes['y'].min()
@@ -148,55 +156,82 @@ with timer("\nShow snapshots"):
         x1max = modes_temp.df_modes[GX_header[0]].max()
         x2min = modes_temp.df_modes[GX_header[1]].min()
         x2max = modes_temp.df_modes[GX_header[1]].max()
-    
+
     else:
         
         raise ValueError("snap_type not supported yet.")
-    
+        
     x_1 = np.linspace( x1min, x1max, 451)
     x_2 = np.linspace( x2min, x2max, 121)
-    
+
     modes_temp.grids_interp = np.meshgrid( x_1, x_2 )
-    
-    
-    # plot reconstructed data
-    
-    xx,yy,v = modes_temp.interp_recons( 0 )
+
+
+# =============================================================================
+# interpolate and output figures
+# =============================================================================
+
+with timer("\n - Interpolate and output figures "):
+
+    # enter ./modesfigures directory
+
+    if os.path.exists("./modesfigures"): os.chdir("./modesfigures")
+        
+    else: os.mkdir("./modesfigures"); os.chdir("./modesfigures")
+
+
+    # plot reconstructed flow field with selected spdmd modes
+
+    header = f"recons_00000"
+
+    xx,yy,v = modes_temp.interp_recons( header )
 
     plot_dmd_mode( (xx,yy), v, 
-                   filename="reconstructed.png", 
-                   colorbar=True )
-    
-    
+                    filename="reconstructed_spdmd.png", 
+                    colorbar=True )
+
+
+    # plot reconstructed flow field with std dmd modes
+
+    header = "recons_std_dmd"
+
+    xx,yy,v = modes_temp.interp_recons( header )
+
+    plot_dmd_mode( (xx,yy), v, 
+                    filename="reconstructed_std_dmd.png", 
+                    colorbar=True )
+
+
     # indexes of positive modes
-    
+
     indxes = np.array( modes_temp.df_ind['indxes'] )
-    
+
     print(indxes)
-    
+
+
     # plot mean mode
-    
+
     print(f"The index of max alpha_pol is {indxes[0]}.\n")
 
     xx,yy,v = modes_temp.interp_mode( indxes[0] )
-    
+
     plot_dmd_mode( (xx,yy), v,
                     filename="mode_mean.png",
                     colorbar=True,
                     title="mean mode")
-    
-    
+
+
     # plot oscillating dmd modes
         
     phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
-    
+
     for n in range( len(indxes) ):
         
         for i, phase in enumerate(phases):
             
             xx,yy,v = modes_temp.interp_mode( indxes[n], phase=phase )
             
-            filename = f"mode_{indxes[n]:05d}_{i}"
+            filename = f"mode_{n:02d}_{indxes[n]:05d}_{i}"
             
             title = f"phase = {i}/4"+r"$\pi$"
             
@@ -207,7 +242,11 @@ with timer("\nShow snapshots"):
                 clevel = np.linspace( -cmax, cmax, 51)
             
             plot_dmd_mode( (xx,yy), v,
-                           filename=filename+'.png',
-                           colorbar=True,
-                           clevel=clevel,
-                           title=title)
+                            filename=filename+'.png',
+                            colorbar=True,
+                            clevel=clevel,
+                            title=title)
+
+t_end = time.time()
+
+print(f"\n - dmdpost totally took {t_end-t_0:8.2f}s.")

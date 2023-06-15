@@ -685,9 +685,75 @@ class ParaDmd:
         self.freq = np.angle( mu )/self.dt/(2*np.pi)
         
         print(f"DMD finished, got Phis shape {np.shape(self.Phi_i)}\n")
-        
-        
 
+
+
+# ----------------------------------------------------------------------
+# >>> Reconstruct from standard DMD                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/06/15  - created
+#
+# Desc
+#   - reconstruct using all dmd modes
+#   - root process collect and save the reconstructed data
+#
+# ----------------------------------------------------------------------
+
+    def save_reconstruct( self ):
+        
+        # reconstruct on each process
+        
+        vand = np.vander( self.mu, 1, increasing=True ).astype(np.complex64)
+
+        self.recons_data = self.Phi_i @ np.diag(self.alphas) @ vand
+                
+                
+        # root process collect the reconstructed data of std dmd
+        
+        # - communicate between procs, same way as self.para_write_modes
+        # - using len_mode_local ( from self.paradmd )
+        
+        self.len_mode = self.comm.allreduce( self.len_snap_local, op=MPI.SUM )
+        
+        send_counts = self.comm.gather( self.len_snap_local, root=0 )
+        displace = [0] + list( np.cumsum( send_counts )[:-1] )
+        
+        
+        if self.rank == 0:
+            
+            buf_recons = init_1Dcmx_empty( self.len_mode, self.kind*2 )
+        
+        else: buf_recons = None
+        
+        send_buf = self.recons_data.ravel().copy()
+        
+        self.comm.Gatherv( send_buf,
+                           [buf_recons, send_counts, displace, MPI.COMPLEX8 ],
+                           root=0 )
+        
+        # - save reconstructed data
+        os.chdir( self.snap_dir )
+        
+        if self.rank == 0:
+            
+            recons_data_file = 'reconstructed_std_dmd.pkl'
+            
+            with open( recons_data_file, 'wb' ) as f:
+                
+                pickle.dump( buf_recons, f )
+                
+            del buf_recons
+            gc.collect()
+            
+            print("reconstructed_std_dmd.pkl is saved.\n")
+        
+        
+        
 # ----------------------------------------------------------------------
 # >>> Save P,q,s,Nt for further computing spdmd                  (Nr.)
 # ----------------------------------------------------------------------
@@ -1059,6 +1125,8 @@ class ParaDmd:
         
             df = pd.DataFrame( self.ind_spmode, columns=['ind_spmode'])
             
+            df['alphas'] = self.alphas[ tuple([self.ind_spmode]) ]
+            
             df['alphas_pol'] = self.alphas_pol[ tuple([self.ind_spmode]) ]
             
             df['alphas_sp'] = self.alphas_sp[ tuple([self.ind_spmode]) ]
@@ -1079,7 +1147,14 @@ class ParaDmd:
                 
                 print("\nWarning: St is not computed when saving ind_spmode\n")
             
+            # make a copy of sorted( based on St ) dataframe
+            
+            df_unsorted = df.copy()
+            
             # align each column
+            
+            df = df.drop( df[ df['St']<0.0 ].index )
+            df = df.sort_values(by='St')
             
             df = df.astype(str)
             
@@ -1089,11 +1164,26 @@ class ParaDmd:
                 df[column] = df[column].apply(lambda x:
                                               x.ljust(max_lengths[column]))
             
-            # output to csv
-            
             df.to_csv( 'ind_spmode.csv', 
                         sep='\t', 
                         index=False )
+            
+            # output the unsorted, full index
+            df_unsorted = df_unsorted.astype(str)
+            
+            max_lengths = df_unsorted.applymap(len).max()
+            
+            for column in df_unsorted.columns:
+                df_unsorted[column] = df_unsorted[column].apply(lambda x:
+                                              x.ljust(max_lengths[column]))
+            
+            # output to csv
+            
+            df_unsorted.to_csv( 'ind_spmode.csv', 
+                                sep='\t', 
+                                index=False,
+                                mode='a')
+            
         
         else: raise ValueError("Please compute spdmd first!")
         
@@ -1233,7 +1323,7 @@ class ParaDmd:
             # deep copy to make data contagious for mpi
             
             send_buf = self.Phi_i[:,indx].copy()
-            
+                       
             self.comm.Gatherv( send_buf, 
                                [buf_mode, send_counts, displace, MPI.COMPLEX8 ],
                                root=0 )
