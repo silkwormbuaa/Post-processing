@@ -1242,7 +1242,7 @@ class ParaDmd:
             
             if self.rank == 0:
                 
-                mode_filename = "mode_" + f"{indx:03d}" + ".pkl"
+                mode_filename = "mode_" + f"{indx:05d}" + ".pkl"
                 
                 with open( mode_filename, 'wb' ) as f:
                     
