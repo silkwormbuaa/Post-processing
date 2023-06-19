@@ -1,46 +1,91 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   vista_dmd_para.py
-@Time    :   2023/05/03 
+@File    :   run_show_snap.py
+@Time    :   2023/06/18 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   parallel dmd script
+@Desc    :   None
 '''
+
 
 import os
 
-import sys 
+import sys
 
-source_dir = os.path.realpath(__file__).split('scripts')[0] 
-sys.path.append( source_dir )
+import time
 
 import numpy             as     np
 
 import pandas            as     pd
 
-from   mpi4py            import MPI
+source_dir = os.path.realpath(__file__).split('scripts')[0]
+sys.path.append( source_dir )
 
 from   vista.timer       import timer
+
+from   vista.snapshot    import Snapshot
+
+from   vista.paradmd     import ParaDmd
 
 from   vista.tools       import get_filelist
 
 from   vista.tools       import read_case_parameter
 
-from   vista.paradmd     import ParaDmd
-
-from   vista.snapshot    import Snapshot
+from   vista.plot_style  import plot_dmd_mode 
 
 from   vista.colors      import colors    as col
 
+from   scipy.interpolate import griddata
 
-snap_dir = os.getcwd()
+t_0 = time.time()
+# =============================================================================
+# read in one snapshot file to get grid vectors
+# =============================================================================
 
+#snap_dir = os.getcwd()
+
+snap_dir = '/home/wencanwu/my_simulation/temp/220825_low/snapshots_W_test'
+snap_dir = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_test'
+snap_dir = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_test_W'
 os.chdir(snap_dir)
 
-paradmd = ParaDmd( snap_dir )
+step = 1
 
+with timer('\n - Get snapshots file and grid vector'):
+    
+    snap_files = get_filelist( snap_dir + '/snapshots' )
+    
+    testfile = snap_files[0]
+    
+    snapshot_temp = Snapshot( testfile )
+    
+    
+    if snapshot_temp.type == 'slice': 
+        
+        snap_type = snapshot_temp.slic_type
+        if   snap_type == 'X': GX_header=['y','z']
+        elif snap_type == 'Z': GX_header=['x','y']
+        elif snap_type == 'W' or snap_type == 'Y': GX_header=['x','z']      
+        
+    elif snapshot_temp.type == 'block': 
+        
+        snap_type = 'block'
+        GX_header = ['x','y','z']
+        
+    
+    GX = snapshot_temp.get_grid_vectors( buff=3 )
+    
+    print(np.shape(GX))
+
+    df = pd.DataFrame( GX, columns = GX_header )
+    
+    print(np.max( GX[:,0]),np.min(GX[:,0]))
+    print(np.max( GX[:,1]),np.min(GX[:,1]))
+
+paradmd = ParaDmd( snap_dir )
+    
 # =============================================================================
 # Get the snapshots info, struct files and case parameters, then broadcast.
 # =============================================================================
@@ -111,29 +156,36 @@ with timer('\nRead in all the snapshots'):
 
 paradmd.dt = float( case_parameters.get('dt_snap') )
 
-# =============================================================================
-# do parallel dmd
-# =============================================================================
+snap1 = np.array(paradmd.snapshots[0])
 
-with timer('paradmd '):
+snap2 = np.array(paradmd.snapshots[-1])
 
-    paradmd.do_paradmd()
-    
-    # if spdmd is already done, just output selected modes
+df['snap1'] = snap1
 
-    if os.path.exists( paradmd.spdmd_result_file ):
-        
-        paradmd.read_spdmd_result()
-        
-        paradmd.para_write_modes()
-        
-        paradmd.save_reconstruct()
-                
-    # if spdmd is yet to do
-    
-    else:
-            
-        if paradmd.rank == 0: paradmd.save_Pqs()
-            
+print(np.max(snap1),np.min(snap1))
+
+print( len(snap1) )
+
+df['snap2'] = snap2
+
+x_1 = np.linspace(-50.0,100.0,101)
+x_2 = np.linspace(-10.0,10.0,51)
+
+meshgrid = np.meshgrid(x_1,x_2)
+
+v =   griddata( (df['x'], df['z']),
+                df['snap2'],
+                (meshgrid[0],meshgrid[1]),
+                method='linear' )
+
+print(np.min(v),np.max(v))
+
+plot_dmd_mode(meshgrid,v,
+              filename='debug2.png',
+              colorbar=True)
+
+
+
+
 
 

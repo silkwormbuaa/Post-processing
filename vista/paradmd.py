@@ -536,7 +536,7 @@ class ParaDmd:
         # 1. Direct QR factorization of Ai(1 => Ns)
                 
         Ai = np.array(self.snapshots).T
-        
+
         del self.snapshots
         
         Q1i, Ri = linalg.qr( Ai[:,:-1], mode='reduced' )
