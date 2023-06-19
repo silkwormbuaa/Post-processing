@@ -49,7 +49,7 @@ if len( arguments ) == 1:
     gamma = None
     rho = None
 
-elif len( arguments ) == 3:
+elif len( arguments ) == 3 or len( arguments ) > 3 : # in case >run.out
     
     gamma = float( arguments[1] )
     rho   = float( arguments[2] )
