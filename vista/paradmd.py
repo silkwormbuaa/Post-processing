@@ -1137,7 +1137,7 @@ class ParaDmd:
             
             df['psi'] = self.psi[ tuple([self.ind_spmode]) ]
             
-            df['psi_pol'] = self.psi[ tuple([self.ind_spmode]) ]
+            df['psi_pol'] = self.psi_pol[ tuple([self.ind_spmode]) ]
             
             if self.St is not None:
                 
