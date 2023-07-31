@@ -47,13 +47,13 @@ from   .tools            import mean_of_list
 
 class GridData:
     
-    def __init__(self, grid_dir ):
+    def __init__(self, grid_file ):
         
         # directory to the grid binary file
-        self.dir = grid_dir
+        self.grid_file = grid_file
         
         # grid file size
-        self.fsize = os.stat( grid_dir ).st_size
+        self.fsize = os.stat( self.grid_file ).st_size
         
         # file pointer position
         self.pos = 0
@@ -69,6 +69,34 @@ class GridData:
         
         # verbose ?
         self.verbose = False
+
+
+
+# ----------------------------------------------------------------------
+# >>> Read Grid                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/07/31  - created
+#
+# Desc
+#
+#   - read the grid file 
+#
+# ----------------------------------------------------------------------
+
+    def read_grid( self ):
+        
+        with open( self.grid_file, 'rb' ) as f:
+            
+            self.read_grid_header( f )
+            
+            self.read_grid_body( f )
+
+
 
 # ----------------------------------------------------------------------
 # >>> Read Grid File Header                                     ( 1-1 )
@@ -145,6 +173,7 @@ class GridData:
 # Desc
 #
 # ----------------------------------------------------------------------
+    
     def read_grid_body( self, file ):
         
         end_of_file = False
@@ -157,6 +186,7 @@ class GridData:
         
         # give every blockgrid an index
         # number start from 1
+        
         i = 1
         
 #        self.g.append( BlockGrid( file, 0,self.grid_with_solver))

@@ -54,52 +54,48 @@ G = GridData( gridfile )
 
 #os.chdir( outpath )
 
-with open( gridfile, 'rb' ) as f:
-    
-    G.verbose = True
-    
-    
-    ## read in whole grid info
-    
-    # 1. grid headers: containing what will be read
-    # 2. grid body: inputting every block's grids
-    # 3. sorted_group: sort and group block index basd on x,y,z
-    
-    G.read_grid_header( f )
-    
-    G.read_grid_body( f )
-    
-    G.get_sorted_groups()
-    
-    
-    # given a rectangular region, get a list of blocks within the region
-    
-    rect1 = [-57, -1.2576, -49.625, 1.73695342]
-    
-    G.select_blockgrids( rect1 )
-    
-    block_list = np.array( G.blockgrids_sel ).ravel()
+G.verbose = True
 
-    with timer("read in cut cell info "):
+## read in whole grid info
 
-        cc_df = pd.read_csv( ccfile, delimiter = r'\s+' )
+# 1. read_grid() : read_grid_header() + read_grid_body()
+#   * grid headers: containing what will be read
+#   * grid body: every block's grids information
+# 2. sorted_group: sort and group block index basd on x,y,z
 
-        cc_df.drop( columns=['nx',  'ny',  'nz'
-                            ,'fax0','fay0','faz0'
-                            ,'fax1','fay1','faz1']
-                            , inplace=True )
+G.read_grid()
+
+G.get_sorted_groups()
+
+
+# given a rectangular region, get a list of blocks within the region
+
+rect1 = [-57, -1.2576, -49.625, 1.73695342]
+
+G.select_blockgrids( rect1 )
+
+block_list = np.array( G.blockgrids_sel ).ravel()
+
+with timer("read in cut cell info "):
+
+    cc_df = pd.read_csv( ccfile, delimiter = r'\s+' )
+
+    cc_df.drop( columns=['nx',  'ny',  'nz'
+                        ,'fax0','fay0','faz0'
+                        ,'fax1','fay1','faz1']
+                        , inplace=True )
+    
+with timer("assign volume fractions "):
+    
+    for num in block_list:
+
+        # dataframe slice for a certain block
+        temp_df = cc_df[cc_df['block_number'] == num ]
         
-    with timer("assign volume fractions "):
+        # block number starts from 1, but python list index
+        # starts from 0
         
-        for num in block_list:
-
-            # dataframe slice for a certain block
-            temp_df = cc_df[cc_df['block_number'] == num ]
-            
-            # block number starts from 1, but python list index
-            # starts from 0
-            
-            G.g[num-1].assign_vol_fra( temp_df, geo_case )
+        G.g[num-1].assign_vol_fra( temp_df, geo_case )
 
 S = StatisticData( datafile )
 
