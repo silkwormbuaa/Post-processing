@@ -95,6 +95,10 @@ class GridData:
             self.read_grid_header( f )
             
             self.read_grid_body( f )
+        
+        if self.verbose is True:
+            
+            print( f"finish read grid file ...{self.grid_file[-50:]}" )
 
 
 
@@ -344,7 +348,7 @@ class BlockGrid:
         self.size += 3*sin
         if self.verbose: print( 'npx = ', self.npx )
         
-        # read grid bounding box corner location
+        # read grid bounding box corner location ( no ghost cells )
         self.lx0 = read_flt_bin( file.read(sfl), sfl )
         self.lx1 = read_flt_bin( file.read(sfl), sfl )
         self.ly0 = read_flt_bin( file.read(sfl), sfl )

@@ -18,6 +18,8 @@ import numpy             as     np
 
 import pandas            as     pd
 
+from   copy              import deepcopy
+
 from   .read_binary      import read_int_bin
 
 from   .read_binary      import read_flt_bin
@@ -25,6 +27,8 @@ from   .read_binary      import read_flt_bin
 from   .read_binary      import read_log_bin
 
 from   .read_binary      import read_bin_3Dflt
+
+from   .grid             import GridData
 
 from   .timer            import timer
 
@@ -44,26 +48,35 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def __init__( self, snap_dir ):
+    def __init__( self, snap_dir=None ):
         
         # Directory
-  
-        self.dir = snap_dir
-
-        # Chekc file sizes
-
-        self.fsize = os.stat( self.dir ).st_size
         
-        # Snapshot type
+        if snap_dir is not None:
   
-        if snap_dir[-9:-8] in [ 'W', 'X', 'Y', 'Z' ]:
-  
-            self.type = 'slice'; self.slic_type = snap_dir[-9:-8]
-  
+            self.dir = snap_dir
+
+            # Chekc file sizes
+
+            self.fsize = os.stat( self.dir ).st_size
+            
+            # Snapshot type
+    
+            if snap_dir[-9:-8] in [ 'W', 'X', 'Y', 'Z' ]:
+    
+                self.type = 'slice'; self.slic_type = snap_dir[-9:-8]
+    
+            else:
+    
+                self.type = 'block'
+        
         else:
-  
-            self.type = 'block'
-  
+            
+            self.dir = None 
+            
+            self.fsize = 0
+            
+            self.type = None
   
         # Snapshot data (per block)
   
@@ -145,8 +158,6 @@ class Snapshot:
 # Desc
 #
 #   - reading one snapshot's header, block data
-#   - dropping ghost cells and assembling clean block data into 
-#     a snapshot
 #
 # ----------------------------------------------------------------------
 
@@ -1296,7 +1307,7 @@ class Snapshot:
    
 
 # ----------------------------------------------------------------------
-# >>> Get grid vectors                                           (Nr.)
+# >>> Get grid vectors                                           ( 7 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -1306,6 +1317,8 @@ class Snapshot:
 # 2023/06/05  - created
 #
 # Desc
+#
+#   - read a snapshot and return GX (DMD needs this)
 #
 # ----------------------------------------------------------------------
 
@@ -1406,9 +1419,204 @@ class Snapshot:
                 GX = np.array([x,y]).T
                 
                 return GX
+
+
+
+# ----------------------------------------------------------------------
+# >>> Get slice                                                   ( 8 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/07/31  - created
+#
+# Desc
+#   
+#   - get a 2D slice from a 3D snapshot
+#   - inputs: slice normal to which axis; location of the slice
+#
+# ----------------------------------------------------------------------
+
+    def get_slice( self, slic_type, loc, buff=3 ):
+        
+        
+        # check if current snapshots 3D?
+        
+        if not self.type == 'block':
+            raise TypeError("The snapshot to be sliced is not 3D")
+        
+        # check if the grid file is available and read in grid
+        
+        if not os.path.exists('inca_grid.bin'):
+            raise FileNotFoundError("Please check inca_grid.bin!")
+        
+        else:
+            
+            grid3d = GridData( 'inca_grid.bin' )
+            grid3d.verbose = True
+            grid3d.read_grid()
+
+            
+        # select the blocks that intersect the plane
+        # keep 1. intersected blocks' number  2. indexes of sliced location
+        
+        bl_intersect = []
+        indx_slic    = []
+        
+        # loop over all blocks within this 3d snapshot
+               
+        for bl_data in self.snap_data:
+            
+            bl_num = bl_data[0]      # block number starts from 1
+            grd = grid3d.g[bl_num-1] # index of grid starts from 0
+            
+            if slic_type == 'X':
+                
+                # find the bounding box of the block
+                xmin = grd.lx0
+                xmax = grd.lx1
+                
+                # if intersect, keep this block number and 
+                # find the index of slice location
+                if loc >= xmin and loc < xmax:
+                    
+                    bl_intersect.append( bl_num )
+                    
+                    istart = buff
+                    iend   = grd.npx-buff
+                    
+                    for i in range(istart,iend):
+                        
+                        bnd1 = grd.gx[i] - 0.5*grd.hx[i]
+                        bnd2 = grd.gx[i] + 0.5*grd.hx[i]
+                        if loc >= bnd1 and loc < bnd2:
+                            indx_slic.append(i)
+                            break
+
+            
+            elif slic_type == 'Y':
+                
+                ymin = grd.ly0
+                ymax = grd.ly1
+               
+                if loc >= ymin and loc < ymax:
+                    bl_intersect.append( bl_num )
+
+                    istart = buff
+                    iend   = grd.npy-buff
+                    
+                    for i in range(istart,iend):
+                        
+                        bnd1 = grd.gy[i] - 0.5*grd.hy[i]
+                        bnd2 = grd.gy[i] + 0.5*grd.hy[i]
+                        if loc >= bnd1 and loc < bnd2:
+                            indx_slic.append(i)
+                            break
             
             
+            elif slic_type == 'Z':
+                
+                zmin = grd.lz0
+                zmax = grd.lz1
+                
+                if loc >= zmin and loc < zmax:
+                    bl_intersect.append( bl_num )
+
+                    istart = buff
+                    iend   = grd.npz-buff
+                    
+                    for i in range(istart,iend):
+                        
+                        bnd1 = grd.gz[i] - 0.5*grd.hz[i]
+                        bnd2 = grd.gz[i] + 0.5*grd.hz[i]
+                        if loc >= bnd1 and loc < bnd2:
+                            indx_slic.append(i)
+                            break
+        
+        if len(bl_intersect) == 0:
+            raise ValueError("No block is sliced! Check slice location.")
+                    
+        if self.verbose:
+            print(f"sliced {len(bl_intersect)} blocks.\n")
             
+            for i in range(len(bl_intersect)):
+                print(f"{bl_intersect[i]} -- {indx_slic[i]}")
+
+# ----- init a slice snapshot 
+        
+        snap_2d = Snapshot()
+
+        # Get sliced data from 3d snapshot and fill in 2d snapshot
+        
+        for bl_data in self.snap_data:
+            
+            bl_num = bl_data[0]
+            
+            if bl_num in bl_intersect:
+                
+                grd = grid3d.g[bl_num-1]
+                idx = indx_slic[bl_intersect.index(bl_num)]
+                
+                N1 = grd.npx + buff*2
+                N2 = grd.npy + buff*2
+                N3 = grd.npz + buff*2
+                G1 = grd.gx
+                G2 = grd.gy
+                G3 = grd.gz
+                
+                sol = deepcopy( bl_data[5] )
+                sol = np.array(sol).reshape(self.n_vars,N3,N2,N1)
+                
+                if slic_type == 'X':                
+                    
+                    GX = [G2,G3]
+                    sol = sol[:,:,:,idx]
+                    snap_2d.snap_data.append( [bl_num, 1, N2, N3, GX, sol] )
+                
+                if slic_type == 'Y':
+                    
+                    GX = [G1,G3]
+                    sol = sol[:,:,idx,:]
+                    snap_2d.snap_data.append( [bl_num, N1, 1, N3, GX, sol])
+                    
+                if slic_type == 'Z':
+                    
+                    GX = [G1,G2]
+                    sol = sol[:,idx,:,:]
+                    snap_2d.snap_data.append( [bl_num, N1, N2, 1, GX, sol])
+            
+        
+        # fill in headers
+        
+        snap_2d.hformat      = self.hformat
+        snap_2d.kind         = self.kind
+        snap_2d.itstep       = self.itstep
+        snap_2d.itime        = self.itime
+        snap_2d.n_species    = self.n_species
+        snap_2d.snap_lean    = self.snap_lean
+        snap_2d.compressible = self.compressible
+        snap_2d.snap_with_gx = self.snap_with_gx
+        snap_2d.snap_with_tp = self.snap_with_tp
+        snap_2d.snap_with_vp = self.snap_with_vp
+        snap_2d.snap_with_cp = self.snap_with_cp
+        snap_2d.snap_with_mu = self.snap_with_mu
+        
+        snap_2d.snap_with_cf = False
+        snap_2d.snap_with_wd = self.snap_with_wd
+        snap_2d.snap_with_bg = False  
+        
+        snap_2d.slic_type    = slic_type
+        snap_2d.type         = 'slice'
+        snap_2d.n_vars       = self.n_vars
+        snap_2d.vars_name    = self.vars_name
+        
+        
+        return snap_2d
+
+
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -1424,25 +1632,40 @@ class Snapshot:
 # ----------------------------------------------------------------------
 def Testing():
     
-    test_dir1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/Z_slice'
+    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936/Z_slice'
     
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/snapshots/snapshot_01376059/Z_slice'
         
-    test_file = test_dir1 + '/snapshot_Z_001.bin'
+    snap3d_file = test_dir1 + '/snapshot.bin'
+    
+  
     
     os.chdir( test_dir1 )
     
-    snapshot1 = Snapshot( test_file )
+    snapshot1 = Snapshot( snap3d_file )    
+    
+    snapshot1.verbose = True
     
 #    snapshot1.read_snapshot()
     
-    with timer('get snapshot struct'):
-        
+    with timer("\nread 3d snapshot and get snapshot struct"):
+       
         snapshot1.get_snapshot_struct()
+    
+    with timer("\ndo slice"):
+         
+        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
         
+        # get slice of snapshot3d
+        
+    with timer("\nwrite slice snapshot"):
+        
+        # write slice snapshot
+        
+        pass
     
 #    snapshot1.verbose = False
 
