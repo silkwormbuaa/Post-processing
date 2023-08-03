@@ -23,7 +23,7 @@ from   .io_binary        import read_flt_bin
 
 from   .io_binary        import read_log_bin
 
-from   .io_binary        import read_chr_bin
+from   .io_binary        import read_char_bin
 
 from   .tools            import is_above_wavywall
 
@@ -160,9 +160,9 @@ class GridData:
 
         if self.verbose:
             
-            print(self.grid_file_format)
-            print(self.grid_with_solver)
-            print(self.bl_num)
+            print(f"grid_file_format: {self.grid_file_format}")
+            print(f"grid with solver: {self.grid_with_solver}")
+            print(f"number of blocks: {self.bl_num}")
 
 # ----------------------------------------------------------------------
 # >>> Read Grid File Body                                       ( 1-2 )
@@ -367,20 +367,20 @@ class BlockGrid:
         if self.verbose: print( 'paramx = ', self.paramx )
         
         # read shapes of grids: char(len=10) for each direction
-        self.shapex = read_chr_bin( file.read(10) )
-        self.shapey = read_chr_bin( file.read(10) )
-        self.shapez = read_chr_bin( file.read(10) )
+        self.shapex = read_char_bin( file.read(10) )
+        self.shapey = read_char_bin( file.read(10) )
+        self.shapez = read_char_bin( file.read(10) )
         
         self.size += 30
         if self.verbose: print( 'shapex = ', self.shapex )
         
         # read boundary values: char(len=10)*2 for each direction
-        self.bx1 = read_chr_bin( file.read(10) )
-        self.bx2 = read_chr_bin( file.read(10) )
-        self.by1 = read_chr_bin( file.read(10) )
-        self.by2 = read_chr_bin( file.read(10) )
-        self.bz1 = read_chr_bin( file.read(10) )
-        self.bz2 = read_chr_bin( file.read(10) )
+        self.bx1 = read_char_bin( file.read(10) )
+        self.bx2 = read_char_bin( file.read(10) )
+        self.by1 = read_char_bin( file.read(10) )
+        self.by2 = read_char_bin( file.read(10) )
+        self.bz1 = read_char_bin( file.read(10) )
+        self.bz2 = read_char_bin( file.read(10) )
         
         self.size += 60
         if self.verbose: print( 'bx1 = ', self.bx1 )
@@ -425,12 +425,12 @@ class BlockGrid:
         if self.verbose: print( 'transx1 = ', self.transx1 )
         
         # read fluid names: char(len=15) for each one
-        self.fluidx1 = read_chr_bin( file.read(15) )
-        self.fluidx2 = read_chr_bin( file.read(15) )
-        self.fluidy1 = read_chr_bin( file.read(15) )
-        self.fluidy2 = read_chr_bin( file.read(15) )
-        self.fluidz1 = read_chr_bin( file.read(15) )
-        self.fluidz2 = read_chr_bin( file.read(15) )
+        self.fluidx1 = read_char_bin( file.read(15) )
+        self.fluidx2 = read_char_bin( file.read(15) )
+        self.fluidy1 = read_char_bin( file.read(15) )
+        self.fluidy2 = read_char_bin( file.read(15) )
+        self.fluidz1 = read_char_bin( file.read(15) )
+        self.fluidz2 = read_char_bin( file.read(15) )
         
         self.size += 90
         if self.verbose: print( 'fluidx1 = ', self.fluidx1 )

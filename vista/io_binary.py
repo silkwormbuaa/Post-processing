@@ -252,7 +252,7 @@ def read_char_bin( byte_stream ):
 #
 # ----------------------------------------------------------------------
 
-def read_bin_3Dflt( pos, file, N1, N2, N3, kind ):
+def read_3Dflt_bin( pos, file, N1, N2, N3, kind ):
     
     # Get number of floats that should be read
     
@@ -289,8 +289,8 @@ def write_flt_bin( data, file, precision ):
     if precision == 4:
         data_array = np.array( data, dtype = 'f4' )
     
-    if precision == 8:
-        data_array = np.array( data, dtype = 'f4' )
+    elif precision == 8:
+        data_array = np.array( data, dtype = 'f8' )
     
     else:
         print( "Logical precision not supported." ); exit()   
@@ -319,10 +319,10 @@ def write_int_bin( data, file, precision ):
     if precision == 2:
         data_array = np.array( data, dtype='i2' )
     
-    if precision == 4:
+    elif precision == 4:
         data_array = np.array( data, dtype='i4' )
             
-    if precision == 8:
+    elif precision == 8:
         data_array = np.array( data, dtype='i8' )
 
     else:
@@ -356,7 +356,7 @@ def write_int_bin( data, file, precision ):
 #
 # ----------------------------------------------------------------------
 
-def write_log_bin( file, data, precision ):
+def write_log_bin( data, file, precision ):
     
     data_array = np.array( data, dtype='?' ).flatten()
     
@@ -390,7 +390,7 @@ def write_log_bin( file, data, precision ):
 #
 # ----------------------------------------------------------------------
 
-def write_bin_char( data, file ):
+def write_char_bin( data, file ):
     
     file.write( data.encode('ascii') )
     

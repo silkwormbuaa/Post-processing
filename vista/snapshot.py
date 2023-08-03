@@ -11,22 +11,20 @@
 '''
 
 import os
-
 import sys
 
 import numpy             as     np
-
 import pandas            as     pd
-
 from   copy              import deepcopy
 
-from   .read_binary      import read_int_bin
+from   .io_binary        import read_int_bin
+from   .io_binary        import read_flt_bin
+from   .io_binary        import read_log_bin
+from   .io_binary        import read_3Dflt_bin
 
-from   .read_binary      import read_flt_bin
-
-from   .read_binary      import read_log_bin
-
-from   .read_binary      import read_bin_3Dflt
+from   .io_binary        import write_flt_bin
+from   .io_binary        import write_int_bin
+from   .io_binary        import write_log_bin
 
 from   .grid             import GridData
 
@@ -625,7 +623,7 @@ class Snapshot:
                               
                 # First direction
     
-                G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
+                G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
 
                 self.pos += N1*self.kind
 
@@ -634,7 +632,7 @@ class Snapshot:
     
                 # Second direction
     
-                G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
+                G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
     
                 self.pos += N2*self.kind
     
@@ -643,7 +641,7 @@ class Snapshot:
     
                 # Third direction
     
-                G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
+                G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
 
                 self.pos     += N3*self.kind
 
@@ -669,14 +667,14 @@ class Snapshot:
                 if self.slic_type == 'X':
                     
                     
-                    G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
+                    G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
                     
                     self.pos += N2*self.kind
                     
                     GX.append( G2 )
                     
                     
-                    G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
+                    G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
                     
                     self.pos += N3*self.kind
                     
@@ -687,14 +685,14 @@ class Snapshot:
                 
                 elif self.slic_type == 'Y' or self.slic_type == 'W':
                     
-                    G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
+                    G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
                     
                     self.pos += N1*self.kind
                     
                     GX.append( G1 )
                     
 
-                    G3  = read_bin_3Dflt( self.pos, file, 1, 1, N3, self.kind )
+                    G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
                     
                     self.pos += N3*self.kind
                     
@@ -705,14 +703,14 @@ class Snapshot:
                 
                 elif self.slic_type == 'Z': 
 
-                    G1  = read_bin_3Dflt( self.pos, file, N1, 1, 1, self.kind )
+                    G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
                     
                     self.pos += N1*self.kind
                     
                     GX.append( G1 )
                     
                     
-                    G2  = read_bin_3Dflt( self.pos, file, 1, N2, 1, self.kind )
+                    G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
                     
                     self.pos += N2*self.kind
                     
@@ -734,7 +732,7 @@ class Snapshot:
  
             for v in range( self.n_vars ):
  
-                sol[v,:] = read_bin_3Dflt( self.pos, file, N1,N2,N3, self.kind )
+                sol[v,:] = read_3Dflt_bin( self.pos, file, N1,N2,N3, self.kind )
  
                 self.pos += ( N1*N2*N3 ) * self.kind
  
@@ -1541,8 +1539,9 @@ class Snapshot:
         if self.verbose:
             print(f"sliced {len(bl_intersect)} blocks.\n")
             
+            print("index of block  --  index of cut cell")
             for i in range(len(bl_intersect)):
-                print(f"{bl_intersect[i]} -- {indx_slic[i]}")
+                print(f"{bl_intersect[i]:15d} -- {indx_slic[i]:12d}")
 
 # ----- init a slice snapshot 
         
@@ -1593,8 +1592,8 @@ class Snapshot:
         snap_2d.hformat      = self.hformat
         snap_2d.kind         = self.kind
         snap_2d.itstep       = self.itstep
-        snap_2d.itime        = self.itime
         snap_2d.n_species    = self.n_species
+        snap_2d.itime        = self.itime
         snap_2d.snap_lean    = self.snap_lean
         snap_2d.compressible = self.compressible
         snap_2d.snap_with_gx = self.snap_with_gx
@@ -1616,6 +1615,133 @@ class Snapshot:
         return snap_2d
 
 
+
+# ----------------------------------------------------------------------
+# >>> Write snapshot                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/02  - created
+#
+# Desc
+#
+#   - write a snapshot into binary file
+#
+# ----------------------------------------------------------------------
+
+    def write_snapshot( self, filename ):
+        
+        verbose = self.verbose
+        
+# ----- write snapshot header 
+    
+        # Default size
+        sin = 4
+        slg = 4
+        sfl = 8
+        
+        with open( filename, 'wb' ) as f:
+            
+            pos = 0
+            
+            # header format
+            
+            write_int_bin( self.hformat, f, sin )
+            
+            # floating point precision format
+            
+            write_int_bin( self.kind, f, sin )
+            
+            # time step 
+            
+            write_int_bin( self.itstep, f, sin )
+            
+            # number of species
+            
+            write_int_bin( self.n_species, f, sin )
+            
+            pos += 4*sin
+
+            # simulation time
+            
+            write_flt_bin( self.itime, f, sfl )
+            
+            pos += sfl
+            
+            # compose logicals
+            
+            if self.type == 'block':
+                
+                buf_log = [ self.snap_lean,
+                            self.compressible,
+                            self.snap_with_gx,
+                            self.snap_with_tp,
+                            self.snap_with_vp,
+                            self.snap_with_cp,
+                            self.snap_with_mu,
+                            self.snap_with_wd ]
+                
+                write_log_bin( buf_log, f, slg )
+                
+                pos += slg*8
+            
+            elif self.type == 'slice':
+                
+                buf_log = [ self.snap_lean,
+                            self.compressible,
+                            self.snap_with_gx,
+                            self.snap_with_tp,
+                            self.snap_with_vp,
+                            self.snap_with_cp,
+                            self.snap_with_mu,
+                            self.snap_with_cf,
+                            self.snap_with_wd,
+                            self.snap_with_bg ]
+
+                write_log_bin( buf_log, f, slg )
+                
+                pos += slg*10
+                                
+            else: raise ValueError("snapshot type not supported.")
+            
+            if verbose: 
+                print(f"Finish write snapshot header, pos = {pos}.")
+            
+# ----- write snapshot body
+
+            for bl_data in self.snap_data:
+                
+                # block number
+                
+                write_int_bin( bl_data[0], f, sin )
+                
+                # dimensions of grids, N1, N2, N3
+                
+                write_int_bin( bl_data[1], f, sin )
+                write_int_bin( bl_data[2], f, sin )
+                write_int_bin( bl_data[3], f, sin )
+                
+                # GX (G1,G2,G3 different dimension for different cases
+                #  ,thus cannot be transformed into numpy array directly.)
+
+                if self.type == 'block':
+                    
+                    write_flt_bin( bl_data[4][0], f, self.kind )
+                    write_flt_bin( bl_data[4][1], f, self.kind )
+                    write_flt_bin( bl_data[4][2], f, self.kind )
+                
+                elif self.type == 'slice':
+                                        
+                    write_flt_bin( bl_data[4][0], f, self.kind )
+                    write_flt_bin( bl_data[4][1], f, self.kind )
+
+                # sol(n_vars, N3, N2, N1)
+                
+                write_flt_bin( bl_data[5], f, self.kind )
+                
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
