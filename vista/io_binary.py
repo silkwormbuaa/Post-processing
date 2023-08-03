@@ -227,15 +227,15 @@ def read_log_bin( byte_stream, precision ):
 #
 # ----------------------------------------------------------------------
 
-def read_chr_bin( byte_stream ):
+def read_char_bin( byte_stream ):
 
-    # Get number of floats in byte_stream
+   n    = int(len( byte_stream ))
+   obj  = struct.unpack_from( n*'c', byte_stream, offset=0)
+   char = ''
 
-    n = len( byte_stream ) 
+   for i in range(0,n): char += obj[i].decode('ascii')
 
-    # Read data (if output is an array, it is in column-major order)
-    return struct.unpack_from( '%ds'%n, byte_stream
-                             , offset = 0 )[0].decode('utf-8')
+   return char.replace(' ', '')
 
 
 # ----------------------------------------------------------------------
