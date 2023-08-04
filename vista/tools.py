@@ -265,8 +265,61 @@ def read_case_parameter( filename ):
     
     return parameters
                 
-                
-                
+
+# ----------------------------------------------------------------------
+# >>> Distribute MPI work                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/04  - created
+#
+# Desc
+#
+#   - Distribute the tasks each processor should take 
+#   - return values are 'i_start' and 'i_end' representing the start and 
+#     end index of a list of N tasks starting from 0. (0,1,...,N-1)
+#   - if there is no task, i_start = None
+# ----------------------------------------------------------------------
+
+def distribute_mpi_work(n_tasks, n_processors, rank):
+    
+    # algorithm divides number of blocks in a dealing way
+    
+    n_tasks_local = n_tasks // n_processors       # floor dividing
+    
+    left_tasks = n_tasks - n_tasks_local*n_processors
+    
+    
+    if rank < left_tasks:
+        
+        n_tasks_local = n_tasks_local + 1
+        
+        i_start = 0 + rank*n_tasks_local
+        
+        i_end = i_start + n_tasks_local
+    
+    
+    elif n_tasks_local > 0:
+        
+        i_start = 0 + rank*n_tasks_local + left_tasks
+        
+        i_end = i_start + n_tasks_local    
+    
+        
+    else:
+        
+        n_tasks_local = 0
+        
+        i_start = None
+        
+        i_end = None
+        
+    
+    return i_start, i_end
+        
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
