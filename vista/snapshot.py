@@ -140,7 +140,10 @@ class Snapshot:
         # Verbose
   
         self.verbose = False
+        
+        # Grid3d (including all blocks grids from inca_grid.bin file)
 
+        self.grid3d = None
 
 
 # ----------------------------------------------------------------------
@@ -739,8 +742,6 @@ class Snapshot:
                 # Sanity check on the pressure
  
                 if v == 4 and np.all( ( sol[v,:] == 0.0 ) ): io_alert = True
-
-
 
             # Evaluate
  
@@ -1440,24 +1441,30 @@ class Snapshot:
     def get_slice( self, slic_type, loc, buff=3 ):
         
         
-        # check if current snapshots 3D?
+# ----- check if current snapshots 3D?
         
         if not self.type == 'block':
             raise TypeError("The snapshot to be sliced is not 3D")
         
-        # check if the grid file is available and read in grid
         
-        if not os.path.exists('inca_grid.bin'):
-            raise FileNotFoundError("Please check inca_grid.bin!")
+# # ----- check if the grid file is available and read in grid
         
-        else:
+#         if not os.path.exists('inca_grid.bin'):
+#             raise FileNotFoundError("Please check inca_grid.bin!")
+        
+#         else:
             
-            grid3d = GridData( 'inca_grid.bin' )
-            grid3d.verbose = True
-            grid3d.read_grid()
+#             grid3d = GridData( 'inca_grid.bin' )
+#             grid3d.verbose = True
+#             grid3d.read_grid()
 
-            
-        # select the blocks that intersect the plane
+        if self.grid3d is None:
+            raise ValueError("Please read in grid file first!")
+        
+        else: grid3d = self.grid3d   
+        
+
+# ----- select the blocks that intersect the plane
         # keep 1. intersected blocks' number  2. indexes of sliced location
         
         bl_intersect = []
