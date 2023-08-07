@@ -69,13 +69,14 @@ print("=========="); sys.stdout.flush()
 
 comm.barrier()
 
-
 # Root read in grid file and broadcast to other processors
 
 grid3d = None
 
-if rank == 0:
+
 # ----- check if the grid file is available and read in grid then broadcast
+
+if rank == 0:
         
     if not os.path.exists('inca_grid.bin'):
         raise FileNotFoundError("Please check inca_grid.bin!")
@@ -90,47 +91,70 @@ if rank == 0:
     
 grid3d = comm.bcast( grid3d, root=0 )
 
+
 # ----- Slice snapshot one by one
+
 i = 0
+
+slice_size = None
 
 for snapshot_file in filelist:
     
-    with timer("reading one snapshot and writing out slice"):
+    # check if the snapshot slice already exists
+    # if exists and slice file is complete(size equals), do not do slice
+    
+    do_slice = True
+    
+    slicefile = os.path.dirname(snapshot_file)+'/snapshot_Y_003.bin'
+    
+    if i > 0:
+    
+        file_is_there = os.path.exists(slicefile)
+        
+        if file_is_there: 
+            
+            slice_size = os.stat( slicefile ).st_size
+            
+            if slice_size == size_std: do_slice = False
 
-        # read in snapshot
-        
-        snapshot3d = Snapshot( snapshot_file )
-        
-        snapshot3d.verbose = False
-        
-        snapshot3d.read_snapshot()
-        
-        print(f"finish reading snapshot {snapshot3d.itstep}.")
+    if do_slice:
     
-        # write the slice
+        with timer("reading one snapshot and writing out slice"):
+
+            # read in snapshot
+            
+            snapshot3d = Snapshot( snapshot_file )
+            
+            snapshot3d.verbose = False
+            
+            snapshot3d.read_snapshot()
+            
+            print(f"finish reading snapshot {snapshot3d.itstep}.")
+        
+            # write the slice
+        
+            snapshot3d.grid3d = grid3d
+            
+            snapshot2d = snapshot3d.get_slice( 'Y', 0.0 )
+                    
+#            print(f"writing {slicefile}")
+            
+            snapshot2d.write_snapshot( slicefile )
+            
+            print(f"finish writing slice {snapshot2d.itstep}.")
+            
+            del snapshot3d,snapshot2d
+            gc.collect()
     
-        snapshot3d.grid3d = grid3d
-        
-        snapshot2d = snapshot3d.get_slice( 'Y', 0.0 )
-        
-        slicefile = os.path.dirname(snapshot_file)+'/snapshot_Y_003.bin'
-        
-        print(f"writing {slicefile}")
-        
-        snapshot2d.write_snapshot( slicefile )
-        
-        print(f"finish writing slice {snapshot2d.itstep}.")
-        
-        del snapshot3d,snapshot2d
-        gc.collect()
+    if i == 0: size_std = os.stat( slicefile ).st_size
     
     i += 1
     
-    print(f"progress: {i/len(filelist)}.")
+    print(f"Rank {rank } progress: {i/len(filelist)*100:10.2f}%.\n")
         
     sys.stdout.flush()
-    
-# Read in snapshots and slice one by one
+
+
 
 # get a slice from a known folder
 
