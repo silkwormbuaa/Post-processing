@@ -91,12 +91,13 @@ if rank == 0:
 grid3d = comm.bcast( grid3d, root=0 )
 
 # ----- Slice snapshot one by one
+i = 0
 
 for snapshot_file in filelist:
     
-    # read in snapshot
-    
-    with timer("reading one snapshot"):
+    with timer("reading one snapshot and writing out slice"):
+
+        # read in snapshot
         
         snapshot3d = Snapshot( snapshot_file )
         
@@ -105,12 +106,8 @@ for snapshot_file in filelist:
         snapshot3d.read_snapshot()
         
         print(f"finish reading snapshot {snapshot3d.itstep}.")
-        
-    sys.stdout.flush()
     
-    # get slice and write out
-    
-    with timer("writing out slice"):
+        # write the slice
     
         snapshot3d.grid3d = grid3d
         
@@ -126,6 +123,10 @@ for snapshot_file in filelist:
         
         del snapshot3d,snapshot2d
         gc.collect()
+    
+    i += 1
+    
+    print(f"progress: {i/len(filelist)}.")
         
     sys.stdout.flush()
     

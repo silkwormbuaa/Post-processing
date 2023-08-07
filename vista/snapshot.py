@@ -1439,8 +1439,7 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def get_slice( self, slic_type, loc, buff=3 ):
-        
-        
+             
 # ----- check if current snapshots 3D?
         
         if not self.type == 'block':
