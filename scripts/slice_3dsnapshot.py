@@ -197,12 +197,14 @@ with timer("\nwrite 2d snapshot"):
  """
 
 
-
-# just show a slice that already there.
 """ 
+# just show a slice that already there.
+
+os.chdir("/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936")
+
 with timer("\nread in new snapshot and show"):
     
-    snapshot2d_new = Snapshot("snapshot_W_003.bin")
+    snapshot2d_new = Snapshot("snapshot_Y_003.bin")
     
     snapshot2d_new.verbose = True
     

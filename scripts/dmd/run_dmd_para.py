@@ -50,6 +50,7 @@ snap_files = None
 case_parameters = None
 
 print(col.bg.green,col.fg.red,"This is rank ",f"{paradmd.rank}",col.reset)
+sys.stdout.flush()
 
 with timer('Get snapshots file list, snapshots info and case parameters'):
     
@@ -70,6 +71,7 @@ with timer('Get snapshots file list, snapshots info and case parameters'):
     
     case_parameters = paradmd.comm.bcast( case_parameters, root=0 )
 
+sys.stdout.flush()
 
 paradmd.comm.barrier()
 
@@ -93,6 +95,7 @@ with timer('\nRead in all the snapshots'):
     print(f". I take care of blocks from {paradmd.i_start+1:5d}",end='')
     print(f"({paradmd.bl_num[paradmd.i_start]:5d}) to ",end='')
     print(f"{paradmd.i_end:5d}({paradmd.bl_num[paradmd.i_end-1]:5d}).\n")
+    sys.stdout.flush()
     
     # select which parameter will be chosen to do DMD
     
@@ -105,7 +108,7 @@ with timer('\nRead in all the snapshots'):
     
     print(f"Rank {paradmd.rank} finish read in snapshots ",end='')
     print(f"with shape of {np.shape(paradmd.snapshots)}")
-
+    sys.stdout.flush()
 
 # Specify the time interval of snapshots
 
@@ -134,6 +137,7 @@ with timer('paradmd '):
     else:
             
         if paradmd.rank == 0: paradmd.save_Pqs()
-            
+
+sys.stdout.flush()       
 
 

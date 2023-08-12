@@ -60,6 +60,8 @@ else: raise ValueError("gamma and rho should be provided!")
 
 case_parameters = read_case_parameter( 'case_parameters' )
 
+sys.stdout.flush()
+
 # =============================================================================
 # Computation
 # =============================================================================
@@ -91,7 +93,7 @@ with timer('Compute sparsity promoting dmd '):
     
     print(f"\nThe performance loss of SPDMD is :",col.fg.green, end='')
     print(f" {paradmd.Ploss:8.3f} %.", col.reset, "\n")
-    
+    sys.stdout.flush()
 
 paradmd.St = paradmd.freq * Lsep / velocity
 
@@ -99,6 +101,7 @@ paradmd.save_spdmd_result()
 
 paradmd.save_ind_spmode()
 
+sys.stdout.flush()
 
 # =============================================================================
 # plot eigen values and amplitudes

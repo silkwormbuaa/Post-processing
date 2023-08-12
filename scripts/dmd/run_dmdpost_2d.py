@@ -73,7 +73,8 @@ with timer('\n - Get snapshots file and grid vector'):
     GX = snapshot_temp.get_grid_vectors( buff=3 )
 
     df = pd.DataFrame( GX, columns = GX_header )
-    
+
+sys.stdout.flush()    
     
 # =============================================================================
 # Reconstruct snapshots with selected spdmd modes:
@@ -124,6 +125,8 @@ with timer('\n - Reconstruct snapshots'):
     print(f"\nIndexes of positive modes:")
     print( modes_temp.df_ind )
 
+sys.stdout.flush()
+
 # =============================================================================
 # match mesh and reconstructed data( both std_dmd and spdmd ), each modes
 # =============================================================================
@@ -135,7 +138,7 @@ with timer("\n - Match mesh "):
 
     print(modes_temp.df_modes)
 
-
+sys.stdout.flush()
 
 # =============================================================================
 # generate the grid that will be interpolated on
@@ -166,6 +169,7 @@ with timer("\n - Generate the interpolation grid "):
 
     modes_temp.grids_interp = np.meshgrid( x_1, x_2 )
 
+sys.stdout.flush()
 
 # =============================================================================
 # interpolate and output figures
@@ -250,3 +254,4 @@ with timer("\n - Interpolate and output figures "):
 t_end = time.time()
 
 print(f"\n - dmdpost totally took {t_end-t_0:8.2f}s.")
+sys.stdout.flush()

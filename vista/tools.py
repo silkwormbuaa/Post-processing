@@ -238,6 +238,8 @@ def read_case_parameter( filename ):
     
     parameters = {}
 
+    if not os.path.exists( filename ):
+        raise FileExistsError("Please set case_parameters file!")
 
     # read file content line by line
     
