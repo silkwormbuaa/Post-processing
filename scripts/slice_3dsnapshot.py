@@ -150,7 +150,8 @@ for snapshot_file in filelist:
     
     i += 1
     
-    print(f"Rank {rank } progress: {i/len(filelist)*100:10.2f}%.\n")
+    print(f"Rank {rank } progress: {i/len(filelist)*100:10.2f}%.",end='')
+    print(f"  Finish file {snapshot_file[-30:]}")
         
     sys.stdout.flush()
 
