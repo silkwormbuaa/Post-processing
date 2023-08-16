@@ -1489,7 +1489,7 @@ class Snapshot:
                     bl_intersect.append( bl_num )
                     
                     istart = buff
-                    iend   = grd.npx-buff
+                    iend   = grd.nx + buff
                     
                     for i in range(istart,iend):
                         
@@ -1509,7 +1509,7 @@ class Snapshot:
                     bl_intersect.append( bl_num )
 
                     istart = buff
-                    iend   = grd.npy-buff
+                    iend   = grd.ny + buff
                     
                     for i in range(istart,iend):
                         
@@ -1529,7 +1529,7 @@ class Snapshot:
                     bl_intersect.append( bl_num )
 
                     istart = buff
-                    iend   = grd.npz-buff
+                    iend   = grd.nz + buff
                     
                     for i in range(istart,iend):
                         
@@ -1564,9 +1564,9 @@ class Snapshot:
                 grd = grid3d.g[bl_num-1]
                 idx = indx_slic[bl_intersect.index(bl_num)]
                 
-                N1 = grd.npx + buff*2
-                N2 = grd.npy + buff*2
-                N3 = grd.npz + buff*2
+                N1 = grd.nx + buff*2
+                N2 = grd.ny + buff*2
+                N3 = grd.nz + buff*2
                 G1 = grd.gx
                 G2 = grd.gy
                 G3 = grd.gz

@@ -200,7 +200,7 @@ class GridData:
             # read in block grid one by one
             # input: file, index, if grid_with_solver
                         
-            self.g.append( BlockGrid(file,i,self.grid_with_solver) )
+            self.g.append( BlockGrid( file, i, self.grid_with_solver ) )
             
             self.pos = self.pos + self.g[-1].size
             
@@ -319,9 +319,9 @@ class GridData:
 
 class BlockGrid:
     
-    def __init__( self, file , num , grid_with_solver ):
+    def __init__( self, file , num , grid_with_solver, verbose=False ):
         
-        self.verbose = False
+        self.verbose = verbose
         self.grid_with_solver = grid_with_solver
         
         sin = 4
@@ -340,13 +340,17 @@ class BlockGrid:
         self.size += 4
         
         # read grid dimension 
-        # npx, npy, npz do not include ghost cells
-        self.npx = read_int_bin( file.read(sin), sin )
-        self.npy = read_int_bin( file.read(sin), sin )
-        self.npz = read_int_bin( file.read(sin), sin )
+        # nx, ny, nz do not include buffer cells, 
+        # instead, npx,npy,npz should include buffer cells 
+        self.nx = read_int_bin( file.read(sin), sin )
+        self.ny = read_int_bin( file.read(sin), sin )
+        self.nz = read_int_bin( file.read(sin), sin )
         
         self.size += 3*sin
-        if self.verbose: print( 'npx = ', self.npx )
+        if self.verbose: 
+            print( 'nx = ', self.nx )
+            print( 'ny = ', self.ny )
+            print( 'nz = ', self.nz )
         
         # read grid bounding box corner location ( no ghost cells )
         self.lx0 = read_flt_bin( file.read(sfl), sfl )
@@ -457,22 +461,22 @@ class BlockGrid:
         # - hx(y,z) cell widths
         # - wx(y,z) linear interpolation coefficients
         
-        self.gx = read_flt_bin( file.read( (self.npx+6)*sfl ), sfl )
-        self.dx = read_flt_bin( file.read( (self.npx+6)*sfl ), sfl )
-        self.hx = read_flt_bin( file.read( (self.npx+6)*sfl ), sfl )
-        self.wx = read_flt_bin( file.read( (self.npx+6)*sfl ), sfl )
+        self.gx = read_flt_bin( file.read( (self.nx+6)*sfl ), sfl )
+        self.dx = read_flt_bin( file.read( (self.nx+6)*sfl ), sfl )
+        self.hx = read_flt_bin( file.read( (self.nx+6)*sfl ), sfl )
+        self.wx = read_flt_bin( file.read( (self.nx+6)*sfl ), sfl )
         
-        self.gy = read_flt_bin( file.read( (self.npy+6)*sfl ), sfl )
-        self.dy = read_flt_bin( file.read( (self.npy+6)*sfl ), sfl )
-        self.hy = read_flt_bin( file.read( (self.npy+6)*sfl ), sfl )
-        self.wy = read_flt_bin( file.read( (self.npy+6)*sfl ), sfl )
+        self.gy = read_flt_bin( file.read( (self.ny+6)*sfl ), sfl )
+        self.dy = read_flt_bin( file.read( (self.ny+6)*sfl ), sfl )
+        self.hy = read_flt_bin( file.read( (self.ny+6)*sfl ), sfl )
+        self.wy = read_flt_bin( file.read( (self.ny+6)*sfl ), sfl )
 
-        self.gz = read_flt_bin( file.read( (self.npz+6)*sfl ), sfl )
-        self.dz = read_flt_bin( file.read( (self.npz+6)*sfl ), sfl )
-        self.hz = read_flt_bin( file.read( (self.npz+6)*sfl ), sfl )
-        self.wz = read_flt_bin( file.read( (self.npz+6)*sfl ), sfl )
+        self.gz = read_flt_bin( file.read( (self.nz+6)*sfl ), sfl )
+        self.dz = read_flt_bin( file.read( (self.nz+6)*sfl ), sfl )
+        self.hz = read_flt_bin( file.read( (self.nz+6)*sfl ), sfl )
+        self.wz = read_flt_bin( file.read( (self.nz+6)*sfl ), sfl )
         
-        self.size += ( self.npx+self.npy+self.npz + 18 ) * sfl * 4
+        self.size += ( self.nx+self.ny+self.nz + 18 ) * sfl * 4
         if self.verbose: print( 'self.gy = ', self.gy )
         
         # read extra spaces after 'write'
@@ -510,7 +514,7 @@ class BlockGrid:
             k = np.array( df['k'] )
             vol = np.array( df['vol'] )
             
-            self.vol_fra = np.zeros( shape=(self.npx+6,self.npy+6,self.npz+6) )
+            self.vol_fra = np.zeros( shape=(self.nx+6,self.ny+6,self.nz+6) )
             
             # df['i'], df['j'], df['k'] all count from 1 like Fortran
             # well in python, array count from 0.
@@ -519,8 +523,8 @@ class BlockGrid:
                 self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
             
             # for cells that above wall and not cut cell, set vol_fra = 1
-            for kk in range( 3,self.npz+3 ):
-                for jj in range( 3,self.npy+3 ):
+            for kk in range( 3,self.nz+3 ):
+                for jj in range( 3,self.ny+3 ):
                     
                     y = self.gy[jj]
                     z = self.gz[kk]
@@ -530,11 +534,56 @@ class BlockGrid:
                         
                         # now because in x direction, the geometry is uniform, 
                         # so set vol_fra in x direction constant
-                        self.vol_fra[3:self.npx+3,jj,kk] = 1.0
+                        self.vol_fra[3:self.nx+3,jj,kk] = 1.0
             
             print("Block %d cut cell volume fractions are assigned."%self.num)
 
         elif len(df) == 0:
             
-            self.vol_fra = np.ones( shape=(self.npx+6,self.npy+6,self.npz+6) )
-            
+            self.vol_fra = np.ones( shape=(self.nx+6,self.ny+6,self.nz+6) )
+
+
+# ----------------------------------------------------------------------
+# >>> Testing section                                           ( -1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/16  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def Testing():
+
+    filename = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
+    
+    grd = GridData( filename )
+    
+    grd.verbose = True
+    
+    grd.read_grid()
+    
+    
+
+
+# ----------------------------------------------------------------------
+# >>> Main: for test and debugging                              ( -1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/16  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if __name__ == "__main__":
+
+    Testing()
