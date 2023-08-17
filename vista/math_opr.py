@@ -8,6 +8,8 @@
 @Desc    :   Basic math functions 
 '''
 
+import numpy             as     np
+
 # ----------------------------------------------------------------------
 # >>> LINEAR INTERPOLATION                                        ( 1 )
 # ----------------------------------------------------------------------
@@ -65,3 +67,27 @@ def du_dy( u1, y1, u2, y2, opt=1 ):
         dudy = abs( temp1 / temp2 )
         
     return dudy 
+
+
+# ----------------------------------------------------------------------
+# >>> Unitize                                                  (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/16  - created
+#
+# Desc
+#   - unitize a vector to have L2 = 1
+# ----------------------------------------------------------------------
+
+def unitize_L2( vector ):
+    
+    l2_norm = np.linalg.norm( vector )
+    
+    vector_unitized = vector / l2_norm
+    
+    return vector_unitized
+
