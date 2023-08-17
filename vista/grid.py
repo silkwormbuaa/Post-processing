@@ -200,7 +200,7 @@ class GridData:
             # read in block grid one by one
             # input: file, index, if grid_with_solver
                         
-            self.g.append( BlockGrid( file, i, self.grid_with_solver ) )
+            self.g.append(BlockGrid(file,i,self.grid_with_solver,self.verbose))
             
             self.pos = self.pos + self.g[-1].size
             
