@@ -14,6 +14,8 @@ import numpy             as     np
 
 from   stl               import mesh
 
+import time
+
 from   .math_opr         import unitize_L2
 
 # ----------------------------------------------------------------------
@@ -104,11 +106,11 @@ def point_in_triangle_b( p, p1, p2, p3 ):
     
 #-- compute dot products
     
-    dot00 = v0(1)*v0(1) + v0(2)*v0(2) + v0(3)*v0(3) # v0 o v0
-    dot01 = v0(1)*v1(1) + v0(2)*v1(2) + v0(3)*v1(3) # v0 o v1
-    dot02 = v0(1)*v2(1) + v0(2)*v2(2) + v0(3)*v2(3) # v0 o v2
-    dot11 = v1(1)*v1(1) + v1(2)*v1(2) + v1(3)*v1(3) # v1 o v1
-    dot12 = v1(1)*v2(1) + v1(2)*v2(2) + v1(3)*v2(3) # v1 o v2
+    dot00 = v0[0]*v0[0] + v0[1]*v0[1] + v0[2]*v0[2] # v0 o v0
+    dot01 = v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2] # v0 o v1
+    dot02 = v0[0]*v2[0] + v0[1]*v2[1] + v0[2]*v2[2] # v0 o v2
+    dot11 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2] # v1 o v1
+    dot12 = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2] # v1 o v2
     
 #-- compute barycentric coordinates
 
@@ -146,7 +148,7 @@ def point_in_triangle_b( p, p1, p2, p3 ):
 #   - return value is vol_fra[i,j,k] with inside 0.0 and outside 1.0.
 # ----------------------------------------------------------------------
 
-def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
+def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
     
 #-- parameters
 
@@ -186,8 +188,8 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
         
         # define ray from x_ref to block center
         
-        x  = [ g.gx[npx//2], g.gy[npy//2], g.gz[npz//2] ]
-        dx = x - x_ref
+        x  = np.array( [ g.gx[npx//2], g.gy[npy//2], g.gz[npz//2] ] )
+        dx = x - np.array(x_ref)
         
         # calculate intersections
         
@@ -238,11 +240,14 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
 
     for k in range( npz ):
         for j in range( npy ):
+            
+            t0 = time.time()
+            
             for i in range( npx ):
                 
                 # define the ray from reference point to grid point
             
-                x  = [ g.gx[i], g.gy[j], g.gz[k] ]
+                x  = np.array( [ g.gx[i], g.gy[j], g.gz[k] ] )
                 dx = x - x_ref
             
                 # overlap of ray ('s bounding box) with ib bounding box
@@ -255,7 +260,7 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
                 
                 # all elements in cover >= 0, ray is possible intersecting ib
                 
-                if ( all( cover >= 0.0 ) ):
+                if ( all( item >= 0.0 for item in cover ) ):
                     
                     # loop over all ibmsh triangles
                     
@@ -276,7 +281,7 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
                         cover = np.minimum( np.array(corner_up), x_max ) \
                               - np.maximum( np.array(corner_dn), x_min )
                         
-                        if ( all( cover >= 0.0 ) ):
+                        if ( all( item >= 0.0 for item in cover) ):
                             
                             # ray's projection length on normal direction
                             
@@ -299,7 +304,7 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
                                     new = True
                                     
                                     for ii in range( cnt ):
-                                        if ( abs(lam - lam_list(ii)) < tol ):
+                                        if ( abs(lam - lam_list[ii]) < tol ):
                                             new = False ; break
                                         
                                     # if triangle intersects ray in a new point
@@ -337,8 +342,12 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
                 # reference point for next cell
                 
                 vol_fra[i,j,k] = signum
-                x_ref = x              
+                x_ref = x
                 
+            if verbose: 
+                
+                print(f'finish assign point a row,takes {time.time()-t0} s.')              
+            
             # end i
         # end j
     # end k              
