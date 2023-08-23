@@ -1,6 +1,7 @@
 # ignore compiled bytecode
 *__pycache__*
 *.pyc
+*.so
 
 # ignore CodeCounter
 .VSCodeCounter

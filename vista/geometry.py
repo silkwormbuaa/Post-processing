@@ -271,79 +271,10 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
                 if ( all( item >= 0.0 for item in cover ) ):             
 
                     # loop over all ibmsh triangles
-
-                    cnt = 0
-                    
-                    for i_tri in range( ibmsh.n_tri ):
-                        
-                        p0 = ibmsh.v0[i_tri]
-                        p1 = ibmsh.v1[i_tri]
-                        p2 = ibmsh.v2[i_tri]
-                        normal = ibmsh.normals[i_tri]
-
-                        # compute overlap of triangle and block 
-                        
-                        corner_up = [max(u,v,w) for u,v,w in zip(p0,p1,p2)]
-                        corner_dn = [min(u,v,w) for u,v,w in zip(p0,p1,p2)]
-
-                        cover = np.minimum( np.array(corner_up), x_max ) \
-                              - np.maximum( np.array(corner_dn), x_min )
-                        
-                        if ( all( item >= 0.0 for item in cover) ):
-                            
-                            # ray's projection length on normal direction
-                            
-                            v_n = np.dot( normal, dx )
-                            
-                            if ( v_n != 0 ): # ray not parallel to triangle
-                                
-                                tri_cen = C13 * ( p0 + p1 + p2 )
-                                
-                                lam = np.dot( normal, (tri_cen-x_ref) ) / v_n
-                                
-                                if ( 0.0 <= lam <= 1.0 ):
-                                    
-                                    # check if this intersection point 
-                                    # was found before
-                                    
-                                    tol = sum(np.maximum(abs(tri_cen),
-                                                         abs(x_ref))) * EPS
-                                    
-                                    new = True
-                                    
-                                    for ii in range( cnt ):
-                                        if ( abs(lam - lam_list[ii]) < tol ):
-                                            new = False ; break
-                                        
-                                    # if triangle intersects ray in a new point
-                                    if new:
-                                        
-                                        ip = x_ref + dx * lam                                        
-                                        
-                                        if point_in_triangle_b(ip,p0,p1,p2):
-                                            
-                                            # found valid intersection
-                                            
-                                            lam_list[cnt] = lam
-                                            cnt = cnt + 1
-                                            if cnt == 1000: 
-                                                cnt = 998     # buffer overflow    
-                                    # new
-                                # intersection within ray range
-                            # triangle not parallel to ray
-                        # triangle (or partly) within block
-                    # loop over all triangles
-                    
-                    if cnt%2 == 1 : 
-                        
-                        # odd intersection points, x and x_ref have opposite sig
-                        # here just distinguish inside/outside ib, later, 
-                        # interface cells vol_fra will be overwritten.
-                        signum = -signum
             
-#                    geo.ray_tracer_core(x,x_ref,ibmsh.normals,
-#                                        ibmsh.v0,ibmsh.v1,ibmsh.v2,
-#                                        signum)
+                    geo.ray_tracer_core(x,        x_ref,    ibmsh.normals,
+                                        ibmsh.v0, ibmsh.v1, ibmsh.v2,
+                                        signum)
                 else:
                     
                     # ray and ib won't intersect, keep signum
