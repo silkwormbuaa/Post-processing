@@ -23,24 +23,29 @@ from   vista.geometry           import read_stl
 
 from   vista.geometry           import ray_tracer
 
-datapath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/'
+datapath = '/home/wencanwu/my_simulation/tutorials/tutorial_cylinder/results/'
 
 gridfile = datapath + 'inca_grid.bin'
 
-ibfile = datapath + 'ib.stl'
+ibfile = datapath + 'cube_NEW.stl'
 
 G = GridData( gridfile )
 
-G.verbose = True
+G.verbose = False
 
 G.read_grid()
 
 ibmsh = read_stl( ibfile )
 
-x_init = [0.0, 10.0, 0.0]
+x_init = [50.0, 50.0, 1.0]
 
-bl_g = G.g[0]
+bl_g = G.g[2]
 
-bl_g.vol_fra = ray_tracer( ibmsh, bl_g, x_init, 1.0,verbose=True )
+print(bl_g.gx)
+print(bl_g.gy)
+
+bl_g.vol_fra = ray_tracer( ibmsh, bl_g, x_init, 1.0, verbose=True )
+
+print( bl_g.vol_fra )
 
 print(f"assign bl_g {bl_g.num}")

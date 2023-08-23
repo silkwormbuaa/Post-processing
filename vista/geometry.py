@@ -10,6 +10,13 @@
 
 import sys
 
+import os
+
+source_dir = os.path.realpath(__file__).split('vista')[0] 
+sys.path.append( source_dir + 'vista/lib/form' )
+
+print(source_dir + 'lib/exec/')
+
 import numpy             as     np
 
 from   stl               import mesh
@@ -17,6 +24,10 @@ from   stl               import mesh
 import time
 
 from   .math_opr         import unitize_L2
+
+from   .lib.form         import geo
+
+
 
 # ----------------------------------------------------------------------
 # >>> Read STL file                                              (Nr.)
@@ -149,7 +160,7 @@ def point_in_triangle_b( p, p1, p2, p3 ):
 # ----------------------------------------------------------------------
 
 def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
-    
+
 #-- parameters
 
     C13 = np.float64(1/3)
@@ -162,8 +173,9 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
     vol_fra = np.zeros( shape=(g.nx+buff*2,g.ny+buff*2,g.nz+buff*2), dtype='f' )
     
     # signum_init represent the signum at x_init
+    # signum must be a numpy array to pass through Fortran-python interface
     
-    signum = signum_init
+    signum = np.array(signum_init,dtype=np.float64)
     
     # reference point
     
@@ -240,13 +252,9 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
 
     for k in range( npz ):
         for j in range( npy ):
-            
-            t0 = time.time()
-            
             for i in range( npx ):
-                
+
                 # define the ray from reference point to grid point
-            
                 x  = np.array( [ g.gx[i], g.gy[j], g.gz[k] ] )
                 dx = x - x_ref
             
@@ -260,10 +268,10 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
                 
                 # all elements in cover >= 0, ray is possible intersecting ib
                 
-                if ( all( item >= 0.0 for item in cover ) ):
-                    
+                if ( all( item >= 0.0 for item in cover ) ):             
+
                     # loop over all ibmsh triangles
-                    
+
                     cnt = 0
                     
                     for i_tri in range( ibmsh.n_tri ):
@@ -332,7 +340,10 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
                         # here just distinguish inside/outside ib, later, 
                         # interface cells vol_fra will be overwritten.
                         signum = -signum
-                        
+            
+#                    geo.ray_tracer_core(x,x_ref,ibmsh.normals,
+#                                        ibmsh.v0,ibmsh.v1,ibmsh.v2,
+#                                        signum)
                 else:
                     
                     # ray and ib won't intersect, keep signum
@@ -342,12 +353,8 @@ def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
                 # reference point for next cell
                 
                 vol_fra[i,j,k] = signum
-                x_ref = x
-                
-            if verbose: 
-                
-                print(f'finish assign point a row,takes {time.time()-t0} s.')              
-            
+                x_ref = x      
+                      
             # end i
         # end j
     # end k              
@@ -393,6 +400,16 @@ def Testing():
     
     print(f"number of triangles: {mesh.n_tri}")
 
+    p = np.array([0.0,0.5,0.0])
+    p1 = np.array([1.0,0.0,0.0])
+    p2 = np.array([-1.0,0.0,0.0])
+    p3 = np.array([0.0,2.0,0.0])
+    
+    print( geo.point_in_triangle.__doc__)
+    
+    flag = bool( geo.point_in_triangle(p,p1,p2,p3) )
+    
+    print( flag )
 
 
 # ----------------------------------------------------------------------
