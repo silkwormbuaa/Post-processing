@@ -115,6 +115,8 @@ class DMDModes:
         self.case_parameters = None
 
         self.recons_data = None
+        
+        self.recons_std_dmd = None
 
 
 # ----------------------------------------------------------------------
@@ -196,12 +198,7 @@ class DMDModes:
         # clear the list of modes
         
         self.modes.clear()
-
-        # also add std dmd reconstructed data
         
-        with open('reconstructed_std_dmd.pkl','rb') as f:
-            
-            self.recons_std_dmd = pickle.load( f )
 
 
 # ----------------------------------------------------------------------

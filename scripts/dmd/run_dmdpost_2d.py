@@ -16,9 +16,9 @@ import sys
 
 import cmath
 
-import pickle
-
 import time
+
+import pickle
 
 import numpy             as     np
 
@@ -95,6 +95,12 @@ with timer('\n - Reconstruct snapshots'):
     for mode_file in mode_files:
         
         modes_temp.add_mode( DMDMode(mode_file) )
+    
+    # also add std dmd reconstructed data
+    
+    with open('reconstructed_std_dmd.pkl','rb') as f:
+        
+        modes_temp.recons_std_dmd = pickle.load( f )
     
     # number of modes
     

@@ -247,7 +247,7 @@ class ParaDmd:
         
         if self.rank == 0:
             
-            df = pd.read_csv( self.snap_struct_file, sep=' ' )
+            df = pd.read_csv( struct_file, sep=' ' )
             
             self.bl_num = np.array( df['bl_num'] )
             
