@@ -205,8 +205,10 @@ class Snapshot:
         
         if self.verbose: print( 'Completed.' ); sys.stdout.flush()
         
+        if self.type == 'block': snap_type = self.type
+        if self.type == 'slice': snap_type = self.slic_type
         
-        print(f"\nsnapshot {self.itstep} is read.\n")
+        print(f"\nsnapshot {self.itstep} {snap_type} is read.\n")
         
 
 
@@ -228,9 +230,16 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def get_snapshot_struct( self ):
+    def get_snapshot_struct( self, struct_file=None, info_file=None ):
 
+        # initialize output struct/info file name
        
+        if struct_file is None: 
+            struct_file = 'snap_struct.csv'
+       
+        if info_file is None: 
+            info_file = 'snap_info.dat'
+
         # Read snapshot file
 
         self.read_snapshot()  
@@ -270,11 +279,11 @@ class Snapshot:
         
         df = pd.DataFrame( struct_data.T, columns=df_header )
         
-        df.to_csv( 'snap_struct.csv', sep=' ',index=False )     
+        df.to_csv( struct_file, sep=' ',index=False )     
         
         # Write snapshots info into a file
         
-        with open('snap_info.dat','w') as fi:
+        with open( info_file,'w') as fi:
             
             fi.write(f'kind      {self.kind}\n')
             

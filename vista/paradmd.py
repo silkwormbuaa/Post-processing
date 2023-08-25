@@ -149,27 +149,31 @@ class ParaDmd:
 #
 # ----------------------------------------------------------------------
 
-    def read_info_file( self ):
+    def read_info_file( self, info_file=None ):
+        
+        # initialize info_file. If not given, use default self.snap_info_file
+        
+        if info_file is None:
+            info_file = self.snap_info_file
         
         # Check if files are available.
         
         if self.rank == 0:
             
-            if not (os.path.exists( self.snap_info_file ) and 
-                    os.path.exists( self.snap_struct_file )):
+            if not ( os.path.exists( info_file ) ):
                 
                 raise FileNotFoundError(col.fg.red,
-                                        "no paradmd pre-processing files",
+                                        "no paradmd pre-processing info file",
                                         col.reset)
         
-            else: print("Checked pre-processing files.\n")
+            else: print("Checked pre-processing info file.\n")
         
         
         # Root read the info_file
         
         if self.rank == 0:
         
-            with open( self.snap_info_file ) as fi:
+            with open( info_file ) as fi:
                 
                 self.kind = int(fi.readline().strip().split()[1])
                 
@@ -219,8 +223,26 @@ class ParaDmd:
 #
 # ----------------------------------------------------------------------
 
-    def read_struct_file( self ):
+    def read_struct_file( self, struct_file=None ):
         
+        # initialize info_file. If not given, use default self.snap_info_file
+        
+        if struct_file is None:
+            struct_file = self.snap_struct_file
+        
+        # Check if files are available.
+        
+        if self.rank == 0:
+            
+            if not ( os.path.exists( struct_file ) ):
+                
+                raise FileNotFoundError(col.fg.red,
+                                        "no paradmd pre-processing struct file",
+                                        col.reset)
+        
+            else: print("Checked pre-processing struct file.\n")        
+
+
         # Read snap_struct.dat file into a pandas dataframe
         
         if self.rank == 0:
