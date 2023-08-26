@@ -12,6 +12,8 @@ import os
 
 import math
 
+import shutil
+
 import numpy             as     np
 
 # ----------------------------------------------------------------------
@@ -51,6 +53,50 @@ def get_filelist( FoldPath, key=None ):
     FileList.sort()
             
     return FileList
+
+
+# ----------------------------------------------------------------------
+# >>> copy_file_with_same_subfolder                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/26  - created
+#
+# Desc
+#   - a function to copy file with same subfolder
+#     like copying a kind of snapshot under snapshots/snapshot_xxx/xxx 
+# ----------------------------------------------------------------------
+
+def copy_file_with_same_subfolder( src_folder, dest_folder, key ):
+    
+    src_file_list = get_filelist( src_folder, key)
+
+    dest_file_list = []
+
+    for file in src_file_list:
+        
+        rear = file.split(src_folder,maxsplit=1)[1]
+        
+        dest_file = dest_folder.rstrip('/')+'/'+rear.lstrip('/')
+        
+        dest_file_list.append(dest_file)
+
+    n_files = len(dest_file_list)
+
+    for i in range(n_files):
+        
+        if os.path.exists(dest_file_list[i].split(key)[0]):
+        
+            shutil.copy2(src_file_list[i],dest_file_list[i])
+            
+            if i%(n_files//100) == 0:
+                
+                print(f"copy progress : {int(i/n_files*100)}%")
+        
+        else: raise FileNotFoundError(dest_file_list[i].split(key)[0])
 
 
 # ----------------------------------------------------------------------
