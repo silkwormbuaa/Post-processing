@@ -192,7 +192,7 @@ with timer("\n - Interpolate and output figures "):
 
     # plot reconstructed flow field with selected spdmd modes
 
-    header = f"recons_00000"
+    header = "recons_00000"
 
     xx,yy,v = modes_temp.interp_recons( header )
 

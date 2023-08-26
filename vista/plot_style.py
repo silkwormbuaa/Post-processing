@@ -411,7 +411,7 @@ def plot_psi_st( st, psi1, psi2=None,
 
 
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> Plot 2d dmd mode                                            (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -485,6 +485,110 @@ def plot_dmd_mode( grids,
     
     plt.close()
 
+
+
+# ----------------------------------------------------------------------
+# >>> plot combined 2d dmd mode                                   (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/08/26  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_combined_dmd_mode( grids1, v1, dir1,
+                            grids2, v2, dir2,
+                            figsize=None,
+                            filename=None,
+                            pure=None,
+                            colorbar=False,
+                            clevel=None,
+                            title=None):
+    
+    if figsize is None:
+        
+        # set default figure size
+        figsize = (15,10)
+  
+    fig = plt.figure(figsize=figsize)
+    ax  = fig.add_subplot( 111, projection='3d' )
+    
+    ax.view_init(elev=115.0, azim=-90.0)
+    
+    # level of color bar
+    
+    if clevel is None:
+        
+        clevel = np.linspace( min( np.min(v1), np.min(v2) ),
+                              max( np.max(v2), np.max(v2) ),
+                              51 )
+        
+    # plane direction to determine passing value
+      
+    if dir1 == 'x':
+        X = v1;        Y = grids1[0]; Z = grids1[1]
+    elif dir1 == 'y':
+        X = grids1[0]; Y = v1;        Z = grids1[1]
+    elif dir1 == 'z':
+        X = grids1[0]; Y = grids1[1]; Z = v1
+        
+    line = np.array([[np.min(X),0,0],[np.max(X),0,0]])
+    
+    ax.plot(line[:,0],line[:,1],line[:,2],
+            color='black',linewidth=0.5,zorder=100)
+        
+    contourf1 = ax.contourf( X,Y,Z, 
+                             zdir=dir1, 
+                             alpha=0.9,
+                             levels=clevel, 
+                             offset=0,
+                             cmap='bwr' )
+
+    if dir2 == 'x':
+        X = v2;        Y = grids2[0]; Z = grids2[1]
+    elif dir2 == 'y':
+        X = grids2[0]; Y = v2;        Z = grids2[1]
+    elif dir2 == 'z':
+        X = grids2[0]; Y = grids2[1]; Z = v2
+        
+    ax.contourf( X,Y,Z, 
+                 zdir = dir2, 
+                 alpha = 0.5,
+                 offset = 0,
+                 levels=clevel, 
+                 cmap='bwr' )
+    
+    
+    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$')
+    ax.set_ylabel(r'$y_s/{\delta}_0$')
+    ax.set_zlabel(r'$z/{\delta}_0$')
+    
+    ax.set_ylim(-0.01,8)
+    
+    
+    if colorbar is True: plt.colorbar(contourf1)
+    
+    if title is not None: ax.set_title(f"{title}",size=20)
+    
+    # set aspect of bounding box
+    
+    ax.set_box_aspect([150,44,40])
+    
+    if filename:
+        
+        plt.savefig( filename )
+        print(f"{filename} is output.\n")
+        
+    plt.show()
+    
+    plt.close()
+    
+    
 
 
 # ----------------------------------------------------------------------

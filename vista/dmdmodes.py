@@ -198,7 +198,7 @@ class DMDModes:
         # clear the list of modes
         
         self.modes.clear()
-        
+
 
 
 # ----------------------------------------------------------------------
@@ -297,7 +297,7 @@ class DMDModes:
         
         x_origin = self.df_modes[self.GX_header[0]]
         y_origin = self.df_modes[self.GX_header[1]]
-        
+         
         v =   griddata( (x_origin, y_origin),
                         v.real,
                         (self.grids_interp[0],self.grids_interp[1]),
