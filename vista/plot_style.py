@@ -18,6 +18,8 @@ import matplotlib.ticker as     ticker
 
 from   matplotlib.patches import Circle
 
+from   mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 # ----------------------------------------------------------------------
 # >>> Plot eigen values around a unit circle                     (Nr.)
@@ -426,6 +428,7 @@ def plot_psi_st( st, psi1, psi2=None,
 
 def plot_dmd_mode( grids, 
                    v,
+                   St=None,
                    figsize=None, 
                    filename=None,
                    pure=None,
@@ -457,10 +460,16 @@ def plot_dmd_mode( grids,
                      levels=clevel,
                      cmap='bwr')
     
+    # print St one figures
+    
+    if St is not None:
+        plt.text(2,3, f'St={St:.3f}', fontsize=18)
+    
     # show colorbar?
     
-    if colorbar is True: plt.colorbar( cs )
-    
+    if colorbar is True:
+        cbar = plt.colorbar(cs, cax=ax.inset_axes([1.1,0.3,0.03,0.5]))
+        cbar.ax.set_ylabel(r'$\Re({\phi}_p)$',fontsize=15)
     # set title
     
     if title: ax.set_title(f"{title}",size=20)
@@ -513,12 +522,12 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
     if figsize is None:
         
         # set default figure size
-        figsize = (15,10)
+        figsize = (30,20)
   
     fig = plt.figure(figsize=figsize)
     ax  = fig.add_subplot( 111, projection='3d' )
     
-    ax.view_init(elev=115.0, azim=-90.0)
+    ax.view_init(elev=125.0, azim=-90.0)
     
     # level of color bar
     
@@ -544,7 +553,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
         
     contourf1 = ax.contourf( X,Y,Z, 
                              zdir=dir1, 
-                             alpha=0.9,
+                             alpha=1.0,
                              levels=clevel, 
                              offset=0,
                              cmap='bwr' )
@@ -558,23 +567,41 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
         
     ax.contourf( X,Y,Z, 
                  zdir = dir2, 
-                 alpha = 0.5,
+                 alpha = 0.9,
                  offset = 0,
                  levels=clevel, 
                  cmap='bwr' )
     
     
-    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$')
-    ax.set_ylabel(r'$y_s/{\delta}_0$')
-    ax.set_zlabel(r'$z/{\delta}_0$')
+    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$',fontsize=30)
+    ax.set_ylabel(r'$y_s/{\delta}_0$',fontsize=30)
+    ax.set_zlabel(r'$z/{\delta}_0$',fontsize=30)
     
-    ax.set_ylim(-0.01,8)
+    ax.set_ylim(0,7)
+    ax.set_zlim(-2,2)
     
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(5.0))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+    ax.zaxis.set_major_locator(ticker.MultipleLocator(1.0))
     
-    if colorbar is True: plt.colorbar(contourf1)
+    ax.tick_params(axis='x',labelsize=20,pad=20)
+    ax.tick_params(axis='y',labelsize=20,pad=10)
+    ax.tick_params(axis='z',labelsize=20,pad=10)
+
+    ax.xaxis.labelpad=40
+    ax.yaxis.labelpad=20
+    ax.zaxis.labelpad=20
+
     
-    if title is not None: ax.set_title(f"{title}",size=20)
-    
+    if colorbar is True: 
+        cbar = plt.colorbar(contourf1, 
+                            cax=ax.inset_axes([1.1,0.3,0.03,0.5]))
+        cbar.ax.set_ylabel(r'$\Re({\phi}_p)$',fontsize=30)
+        cbar.ax.tick_params(labelsize=20)
+        
+    if title is not None: 
+        ax.text(0.0,8.0,-5.0, title, fontsize=50,ha='center')
+        
     # set aspect of bounding box
     
     ax.set_box_aspect([150,44,40])
@@ -583,8 +610,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
         
         plt.savefig( filename )
         print(f"{filename} is output.\n")
-        
-    plt.show()
+    
     
     plt.close()
     

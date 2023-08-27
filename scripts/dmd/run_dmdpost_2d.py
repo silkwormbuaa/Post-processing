@@ -234,6 +234,8 @@ with timer("\n - Interpolate and output figures "):
     # plot oscillating dmd modes
         
     phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
+    
+    Sts = np.array( modes_temp.df_ind['Sts'] )
 
     for n in range( len(indxes) ):
         
@@ -243,7 +245,7 @@ with timer("\n - Interpolate and output figures "):
             
             filename = f"mode_{n:02d}_{indxes[n]:05d}_{i}"
             
-            title = f"phase = {i}/4"+r"$\pi$"
+            title = f"St={Sts[n]:.3f} "+ f"phase = {i}/4"+r"$\pi$"
             
             if i == 0:
                 
@@ -257,6 +259,16 @@ with timer("\n - Interpolate and output figures "):
                             clevel=clevel,
                             title=title)
 
+        # convert png image to gif
+        
+        convert_gif = f"convert -delay 100 mode_{n:02d}*.png mode_{n:02d}.gif"
+        
+        exit_code = os.system( convert_gif )
+        
+        if exit_code == 0: print( f"Output mode_{n:02d} gif.")
+        else:              print( f"Failed to output mode_{n:02d} gif.")
+        
+                
 t_end = time.time()
 
 print(f"\n - dmdpost totally took {t_end-t_0:8.2f}s.")

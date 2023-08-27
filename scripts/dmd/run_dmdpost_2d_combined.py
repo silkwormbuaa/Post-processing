@@ -274,7 +274,8 @@ with timer("\n - Interpolate and output figures "):
     plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                             (xx2,yy2), v2, 'z',
                             filename='reconstructed_spdmd.png',
-                            colorbar=True)
+                            colorbar=True,
+                            title='reconstructed spdmd modes')
     
     # plot reconstructed flow field with std dmd modes
     
@@ -286,7 +287,8 @@ with timer("\n - Interpolate and output figures "):
     plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                             (xx2,yy2), v2, 'z',
                             filename='reconstructed_std_dmd.png',
-                            colorbar=True)
+                            colorbar=True,
+                            title='reconstructed full modes')
 
     # indexes of positive modes
 
@@ -307,9 +309,50 @@ with timer("\n - Interpolate and output figures "):
                             colorbar=True,
                             title='mean mode')    
     
+    # plot oscillating dmd modes
     
+    phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
     
+    Sts = np.array( modes_Y.df_ind['Sts'] )
     
+    for n in range( 1, len(indxes) ):
+        
+        for i, phase in enumerate(phases):
+            
+            xx1, yy1, v1 = modes_Y.interp_mode( indxes[n], phase=phase )
+            xx2, yy2, v2 = modes_Z.interp_mode( indxes[n], phase=phase )         
+    
+            filename = f"mode_{n:02d}_{indxes[n]:05d}_{i}"
+            
+            title = f"St={Sts[n]:.3f} "+ f"phase = {i}/4"+r"$\pi$"
+            
+            if i == 0:
+                
+                cmax = max(np.max(np.abs(v1)),np.max(np.abs(v2))) * 1.1
+                
+                clevel = np.linspace( -cmax, cmax, 51 )
+            
+            plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
+                                    (xx2,yy2), v2, 'z',
+                                    filename=filename+'.png',
+                                    colorbar=True,
+                                    clevel=clevel,
+                                    title=title)
+        
+        # convert png image to gif
+        
+        convert_gif = f"convert -delay 100 mode_{n:02d}*.png mode_{n:02d}.gif"
+        
+        exit_code = os.system( convert_gif )
+        
+        if exit_code == 0: print( f"Output mode_{n:02d} gif.")
+        else:              print( f"Failed to output mode_{n:02d} gif.")
+        
+
+t_end = time.time()
+
+print(f"\n - dmdpost totally took {t_end-t_0:8.2f}s.")
+sys.stdout.flush()
     
     
     
