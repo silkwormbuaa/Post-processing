@@ -194,7 +194,7 @@ with timer("\n - Interpolate and output figures "):
 
     header = "recons_00000"
 
-    xx,yy,v = modes_temp.interp_recons( header )
+    xx,yy,v = modes_temp.interp_recons( header, snap_type )
 
     plot_dmd_mode( (xx,yy), v, 
                     filename="reconstructed_spdmd.png", 
@@ -205,7 +205,7 @@ with timer("\n - Interpolate and output figures "):
 
     header = "recons_std_dmd"
 
-    xx,yy,v = modes_temp.interp_recons( header )
+    xx,yy,v = modes_temp.interp_recons( header, snap_type )
 
     plot_dmd_mode( (xx,yy), v, 
                     filename="reconstructed_std_dmd.png", 
@@ -241,7 +241,7 @@ with timer("\n - Interpolate and output figures "):
         
         for i, phase in enumerate(phases):
             
-            xx,yy,v = modes_temp.interp_mode( indxes[n], phase=phase )
+            xx,yy,v = modes_temp.interp_mode( indxes[n], snap_type, phase=phase)
             
             filename = f"mode_{n:02d}_{indxes[n]:05d}_{i}"
             
@@ -249,7 +249,7 @@ with timer("\n - Interpolate and output figures "):
             
             if i == 0:
                 
-                cmax = np.max( np.abs(v) )*1.1
+                cmax = np.max( np.abs(v) )*1.3
                 
                 clevel = np.linspace( -cmax, cmax, 51)
             

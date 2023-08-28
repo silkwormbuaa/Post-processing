@@ -269,24 +269,41 @@ class DMDModes:
 #
 # ----------------------------------------------------------------------
 
-    def interp_recons( self, header, coord_shift=True ):
+    def interp_recons( self, header, snap_type, coord_shift=True ):
         
         # shift the coordinates
         
+        x_imp   = float(self.case_parameters.get('x_imp'))
+        H       = float(self.case_parameters.get('H'))
+        H_md    = float(self.case_parameters.get('H_md'))
+        delta_0 = float(self.case_parameters.get('delta_0'))
+        
         if coord_shift:
             
-            x_imp   = float(self.case_parameters.get('x_imp'))
-            H       = float(self.case_parameters.get('H'))
-            H_md    = float(self.case_parameters.get('H_md'))
-            delta_0 = float(self.case_parameters.get('delta_0'))
+            if snap_type == 'X':
+                raise ValueError("X slice not supported.")
             
-            xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
-            yy = ( np.array(self.grids_interp[1]) + H - H_md ) / delta_0
+            elif snap_type == 'Y':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy =   np.array(self.grids_interp[1]) / delta_0
+            
+            elif snap_type == 'Z':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy = ( np.array(self.grids_interp[1]) + H - H_md ) / delta_0                    
+
             
         else:
             
-            xx = np.array( self.grids_interp[0] )
-            yy = np.array( self.grids_interp[1] )
+            if snap_type == 'X':
+                raise ValueError("X slice not supported.")
+            
+            elif snap_type == 'Y':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy =   np.array(self.grids_interp[1]) / delta_0
+            
+            elif snap_type == 'Z':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy =   np.array(self.grids_interp[1]) / delta_0   
         
         # reconstruct modal variable; interpolate
         
@@ -322,24 +339,41 @@ class DMDModes:
 #   3. interpolate onto grids_interp
 # ----------------------------------------------------------------------
 
-    def interp_mode( self, indx, phase=1.0+0.0j, coord_shift=True ):
+    def interp_mode( self, indx, snap_type, phase=1.0+0.0j, coord_shift=True ):
         
         # shift the coordinates
         
+        x_imp   = float(self.case_parameters.get('x_imp'))
+        H       = float(self.case_parameters.get('H'))
+        H_md    = float(self.case_parameters.get('H_md'))
+        delta_0 = float(self.case_parameters.get('delta_0'))
+        
         if coord_shift:
             
-            x_imp   = float(self.case_parameters.get('x_imp'))
-            H       = float(self.case_parameters.get('H'))
-            H_md    = float(self.case_parameters.get('H_md'))
-            delta_0 = float(self.case_parameters.get('delta_0'))
+            if snap_type == 'X':
+                raise ValueError("X slice not supported.")
             
-            xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
-            yy = ( np.array(self.grids_interp[1]) + H - H_md ) / delta_0
+            elif snap_type == 'Y':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy =  np.array(self.grids_interp[1]) / delta_0
             
+            elif snap_type == 'Z':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy = ( np.array(self.grids_interp[1]) + H - H_md ) / delta_0                    
+
+
         else:
             
-            xx = np.array( self.grids_interp[0] )
-            yy = np.array( self.grids_interp[1] )
+            if snap_type == 'X':
+                raise ValueError("X slice not supported.")
+            
+            elif snap_type == 'Y':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy =  np.array(self.grids_interp[1]) / delta_0
+            
+            elif snap_type == 'Z':
+                xx = ( np.array(self.grids_interp[0]) - x_imp ) / delta_0
+                yy =   np.array(self.grids_interp[1]) / delta_0  
         
         
         # reconstruct modal variable; interpolate

@@ -79,7 +79,7 @@ with timer('\n - Get snapshots file and grid vector'):
 
 # -- grid of Z 
 
-    snap_files = get_filelist( snap_dir + '/snapshots','snapshot_Z_004.bin' )
+    snap_files = get_filelist( snap_dir + '/snapshots','snapshot_Z_001.bin' )
     
     testfile = snap_files[0]
     
@@ -234,11 +234,14 @@ sys.stdout.flush()
 
 with timer("\n - Generate the interpolation grid "):
     
-    xmin = modes_Z.df_modes['x'].min()
-    xmax = modes_Z.df_modes['x'].max()
+    xmin = modes_Y.df_modes['x'].min()  # Y plane's range in x is smaller
+    xmax = 119.0
+#    xmax = modes_Y.df_modes['x'].max()
     
-    ymin = modes_Z.df_modes['y'].min()
-    ymax = modes_Z.df_modes['y'].max()
+    ymin = 0.0
+    ymax = 45.0
+#    ymin = modes_Z.df_modes['y'].min()
+#    ymax = modes_Z.df_modes['y'].max()
     
     zmin = modes_Y.df_modes['z'].min()
     zmax = modes_Y.df_modes['z'].max()
@@ -268,9 +271,9 @@ with timer("\n - Interpolate and output figures "):
     
     header = "recons_00000"
     
-    xx1, yy1, v1 = modes_Y.interp_recons( header )
-    xx2, yy2, v2 = modes_Z.interp_recons( header )
-    
+    xx1, yy1, v1 = modes_Y.interp_recons( header,'Y' )
+    xx2, yy2, v2 = modes_Z.interp_recons( header,'Z' )
+        
     plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                             (xx2,yy2), v2, 'z',
                             filename='reconstructed_spdmd.png',
@@ -281,8 +284,8 @@ with timer("\n - Interpolate and output figures "):
     
     header = "recons_std_dmd"
 
-    xx1, yy1, v1 = modes_Y.interp_recons( header )
-    xx2, yy2, v2 = modes_Z.interp_recons( header )
+    xx1, yy1, v1 = modes_Y.interp_recons( header,'Y' )
+    xx2, yy2, v2 = modes_Z.interp_recons( header,'Z' )
     
     plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                             (xx2,yy2), v2, 'z',
@@ -294,14 +297,14 @@ with timer("\n - Interpolate and output figures "):
 
     indxes = np.array( modes_Y.df_ind['indxes'] )
 
-    print(indxes)
+    print(f"positive modes indexes: {indxes}")
       
     # plot mean mode
     
     print(f"The index of max alpha_pol is {indxes[0]}.\n")
     
-    xx1, yy1, v1 = modes_Y.interp_mode( indxes[0] )
-    xx2, yy2, v2 = modes_Z.interp_mode( indxes[0] )
+    xx1, yy1, v1 = modes_Y.interp_mode( indxes[0], 'Y' )
+    xx2, yy2, v2 = modes_Z.interp_mode( indxes[0], 'Z' )
     
     plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                             (xx2,yy2), v2, 'z',
@@ -319,8 +322,8 @@ with timer("\n - Interpolate and output figures "):
         
         for i, phase in enumerate(phases):
             
-            xx1, yy1, v1 = modes_Y.interp_mode( indxes[n], phase=phase )
-            xx2, yy2, v2 = modes_Z.interp_mode( indxes[n], phase=phase )         
+            xx1, yy1, v1 = modes_Y.interp_mode( indxes[n], 'Y', phase=phase )
+            xx2, yy2, v2 = modes_Z.interp_mode( indxes[n], 'Z', phase=phase )         
     
             filename = f"mode_{n:02d}_{indxes[n]:05d}_{i}"
             
@@ -328,7 +331,7 @@ with timer("\n - Interpolate and output figures "):
             
             if i == 0:
                 
-                cmax = max(np.max(np.abs(v1)),np.max(np.abs(v2))) * 1.1
+                cmax = max(np.max(np.abs(v1)),np.max(np.abs(v2))) * 1.3
                 
                 clevel = np.linspace( -cmax, cmax, 51 )
             
@@ -345,7 +348,7 @@ with timer("\n - Interpolate and output figures "):
         
         exit_code = os.system( convert_gif )
         
-        if exit_code == 0: print( f"Output mode_{n:02d} gif.")
+        if exit_code == 0: print( f"Output mode_{n:02d} gif.\n")
         else:              print( f"Failed to output mode_{n:02d} gif.")
         
 
