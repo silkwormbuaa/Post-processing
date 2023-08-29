@@ -238,9 +238,9 @@ with timer("\n - Generate the interpolation grid "):
     xmax = 119.0
 #    xmax = modes_Y.df_modes['x'].max()
     
-    ymin = 0.0
+    ymin = modes_Z.df_modes['y'].min()
+#    ymin = 0.0
     ymax = 45.0
-#    ymin = modes_Z.df_modes['y'].min()
 #    ymax = modes_Z.df_modes['y'].max()
     
     zmin = modes_Y.df_modes['z'].min()
@@ -320,6 +320,19 @@ with timer("\n - Interpolate and output figures "):
     
     for n in range( 1, len(indxes) ):
         
+        cmax = 0.0
+        
+        for i, phase in enumerate(phases):
+            
+            xx1, yy1, v1 = modes_Y.interp_mode( indxes[n], 'Y', phase=phase )
+            xx2, yy2, v2 = modes_Z.interp_mode( indxes[n], 'Z', phase=phase ) 
+        
+            cmax_new = max(np.max(np.abs(v1)),np.max(np.abs(v2)))
+        
+            cmax = max(cmax, cmax_new)
+        
+        clevel = np.linspace( -cmax, cmax, 51 )
+        
         for i, phase in enumerate(phases):
             
             xx1, yy1, v1 = modes_Y.interp_mode( indxes[n], 'Y', phase=phase )
@@ -328,12 +341,6 @@ with timer("\n - Interpolate and output figures "):
             filename = f"mode_{n:02d}_{indxes[n]:05d}_{i}"
             
             title = f"St={Sts[n]:.3f} "+ f"phase = {i}/4"+r"$\pi$"
-            
-            if i == 0:
-                
-                cmax = max(np.max(np.abs(v1)),np.max(np.abs(v2))) * 1.3
-                
-                clevel = np.linspace( -cmax, cmax, 51 )
             
             plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                                     (xx2,yy2), v2, 'z',

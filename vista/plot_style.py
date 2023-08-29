@@ -536,7 +536,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
         clevel = np.linspace( min( np.min(v1), np.min(v2) ),
                               max( np.max(v1), np.max(v2) ),
                               51 )
-        
+           
     # plane direction to determine passing value
       
     if dir1 == 'x':

@@ -79,7 +79,7 @@ with timer('Get Z snapshots file list, snapshots info and case parameters'):
     
     if paradmd2.rank == 0:
         
-        snap_filesZ = get_filelist( snap_dir + '/snapshots','snapshot_Z_004.bin')
+        snap_filesZ = get_filelist( snap_dir + '/snapshots','snapshot_Z_001.bin')
         
         testfile = snap_filesZ[0]
         
