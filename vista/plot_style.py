@@ -527,8 +527,6 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
     fig = plt.figure(figsize=figsize)
     ax  = fig.add_subplot( 111, projection='3d' )
     
-    ax.view_init(elev=125.0, azim=-90.0)
-    
     # level of color bar
     
     if clevel is None:
@@ -538,18 +536,22 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
                               51 )
            
     # plane direction to determine passing value
+    # since ax.view_init() only support two axes to adjust view,
+    # in order to show a better view angle, switch y,z values.    
       
     if dir1 == 'x':
         X = v1;        Y = grids1[0]; Z = grids1[1]
     elif dir1 == 'y':
-        X = grids1[0]; Y = v1;        Z = grids1[1]
+        X = grids1[0]; Y = grids1[1]; Z = v1 ; dir1 = 'z'
     elif dir1 == 'z':
-        X = grids1[0]; Y = grids1[1]; Z = v1
+        X = grids1[0]; Y = v1; Z = grids1[1] ; dir1 = 'y'
+    
+    # intersection line between Y,Z planes
         
     line = np.array([[np.min(X),0,0],[np.max(X),0,0]])
     
     ax.plot(line[:,0],line[:,1],line[:,2],
-            color='black',linewidth=0.5,zorder=100)
+            color='black',linewidth=1.0,zorder=100)
         
     contourf1 = ax.contourf( X,Y,Z, 
                              zdir=dir1, 
@@ -561,9 +563,9 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
     if dir2 == 'x':
         X = v2;        Y = grids2[0]; Z = grids2[1]
     elif dir2 == 'y':
-        X = grids2[0]; Y = v2;        Z = grids2[1]
+        X = grids2[0]; Y = grids2[1]; Z = v2; dir2='z'
     elif dir2 == 'z':
-        X = grids2[0]; Y = grids2[1]; Z = v2
+        X = grids2[0]; Y = v2; Z = grids2[1]; dir2='y'
         
     ax.contourf( X,Y,Z, 
                  zdir = dir2, 
@@ -572,48 +574,53 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
                  levels=clevel, 
                  cmap='bwr' )
     
+    # view angle    
+    ax.view_init( elev=30.0, azim=-120.0 )
     
-    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$',fontsize=30)
-    ax.set_ylabel(r'$y_s/{\delta}_0$',fontsize=30)
-    ax.set_zlabel(r'$z/{\delta}_0$',fontsize=30)
+    # parameters for axes
     
-    ax.set_ylim(0,7)
-    ax.set_zlim(-2,2)
+    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$',fontsize=40)
+    ax.set_zlabel(r'$y_s/{\delta}_0$',fontsize=40)
+    ax.set_ylabel(r'$z/{\delta}_0$',fontsize=40)
     
     ax.xaxis.set_major_locator(ticker.MultipleLocator(5.0))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
-    ax.zaxis.set_major_locator(ticker.MultipleLocator(1.0))
+    ax.zaxis.set_major_locator(ticker.MultipleLocator(2.0))
     
-    ax.tick_params(axis='x',labelsize=20,pad=20)
-    ax.tick_params(axis='y',labelsize=20,pad=10)
-    ax.tick_params(axis='z',labelsize=20,pad=10)
+    ax.tick_params(axis='x',labelsize=30,pad=20)
+    ax.tick_params(axis='y',labelsize=30,pad=10)
+    ax.tick_params(axis='z',labelsize=30,pad=10)
 
-    ax.xaxis.labelpad=40
+    ax.xaxis.labelpad=70
     ax.yaxis.labelpad=20
     ax.zaxis.labelpad=20
 
+    ax.set_zlim(0,7)
+    ax.set_ylim(-2,2)
+    
+    # colorbar
     
     if colorbar is True: 
         cbar = plt.colorbar(contourf1, 
-                            cax=ax.inset_axes([1.1,0.3,0.03,0.5]))
-        cbar.ax.set_ylabel(r'$\Re({\phi}_p)$',fontsize=30)
-        cbar.ax.tick_params(labelsize=20)
-        
+                            cax=ax.inset_axes([1.05,0.3,0.03,0.5]))
+        cbar.ax.set_ylabel(r'$\Re({\phi}_p)$',fontsize=40)
+        cbar.ax.tick_params(labelsize=30)
+
+    # title        
     if title is not None: 
-        ax.text(0.0,8.0,-5.0, title, fontsize=50,ha='center')
+        ax.text(0.0,8.0,5.0, title, fontsize=40, ha='center')
         
     # set aspect of bounding box
-    
-    ax.set_box_aspect([150,44,40])
-    
+    ax.set_box_aspect([150,40,50])
+
+    plt.tight_layout()  # tried to remove rounding blank
+
     if filename:
         
-        plt.savefig( filename )
+        plt.savefig( filename, bbox_inches='tight' ) # tight bouding box
         print(f"{filename} is output.\n")
     
-    
     plt.close()
-    
     
 
 

@@ -238,16 +238,16 @@ with timer("\n - Generate the interpolation grid "):
     xmax = 119.0
 #    xmax = modes_Y.df_modes['x'].max()
     
-    ymin = modes_Z.df_modes['y'].min()
+    ymin = 0.040
 #    ymin = 0.0
-    ymax = 45.0
+    ymax = 44.04
 #    ymax = modes_Z.df_modes['y'].max()
     
     zmin = modes_Y.df_modes['z'].min()
     zmax = modes_Y.df_modes['z'].max()
     
     x = np.linspace( xmin, xmax, 451)
-    y = np.linspace( ymin, ymax, 121)
+    y = np.linspace( ymin, ymax, 111)
     z = np.linspace( zmin, zmax, 121)
     
     modes_Y.grids_interp = np.meshgrid( x, z )
@@ -351,7 +351,7 @@ with timer("\n - Interpolate and output figures "):
         
         # convert png image to gif
         
-        convert_gif = f"convert -delay 100 mode_{n:02d}*.png mode_{n:02d}.gif"
+        convert_gif = f"convert -delay 100 -layers Optimize mode_{n:02d}*.png mode_{n:02d}.gif"
         
         exit_code = os.system( convert_gif )
         
