@@ -3,7 +3,7 @@
 Original code credit to Weibo
 """
 
-from   vista.tools.timer import timer
+from   vista.timer       import timer
 
 from   ReadIn            import GetZonegrp
 

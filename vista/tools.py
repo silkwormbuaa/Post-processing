@@ -119,7 +119,7 @@ def copy_file_with_same_subfolder( src_folder, dest_folder, key ):
 #
 # ----------------------------------------------------------------------
 
-def if_overlap( rect1, rect2 ):    
+def if_overlap_2d( rect1, rect2 ):    
     
     notOverlap = ( rect1[2] <= rect2[0] ) or \
                  ( rect1[0] >= rect2[2] ) or \
@@ -130,6 +130,36 @@ def if_overlap( rect1, rect2 ):
     
     return Overlap
 
+
+# ----------------------------------------------------------------------
+# >>> IF OVERLAP 3D                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/01  - created
+#
+# Desc
+#
+#   - check if two box overlap
+#   - bbox1 = [x1min,x1max,y1min,y1max,z1min,z1max]
+#   - bbox2 = [x2min,x2max,y2min,y2max,z2min,z2max]
+# ----------------------------------------------------------------------
+
+def if_overlap_3d( bbox1, bbox2 ):    
+    
+    notOverlap = ( bbox1[1] <= bbox2[0] ) or \
+                 ( bbox1[0] >= bbox2[1] ) or \
+                 ( bbox1[3] <= bbox2[2] ) or \
+                 ( bbox1[2] >= bbox2[3] ) or \
+                 ( bbox1[5] <= bbox2[4] ) or \
+                 ( bbox1[4] >= bbox2[5] )
+    
+    Overlap = not notOverlap
+    
+    return Overlap
 
 # ----------------------------------------------------------------------
 # >>> If Segment Penetrate Zone                                  ( 2 )

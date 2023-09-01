@@ -10,7 +10,7 @@
 
 import os
 
-from   utils.timer       import timer 
+from   vista.timer       import timer 
 
 from   IB_force          import GetIBForce
 

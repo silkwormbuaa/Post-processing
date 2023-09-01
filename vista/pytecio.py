@@ -22,7 +22,7 @@ from   .math_opr         import lin_interpo
 
 from   .tools            import get_filelist
 
-from   .tools            import if_overlap
+from   .tools            import if_overlap_2d
 
 from   .tools            import if_penetrate
 
@@ -307,7 +307,7 @@ def ave_block( zonegrp, FoldPath, outfile, block_dim=2 ):
         zonegrp_range = [zonegrp[i].xmin, zonegrp[i].ymin,
                          zonegrp[i].xmax, zonegrp[i].ymax]
         
-        Overlap = if_overlap(zonegrp_range, RegionRange)
+        Overlap = if_overlap_2d(zonegrp_range, RegionRange)
 
         if Overlap: 
             zone_overlap_indx.append(i)
@@ -692,7 +692,7 @@ def ave_block_ib( folderpath, zonegrps,
         zonegrp_range = [zonegrps[i].xmin, zonegrps[i].ymin,
                          zonegrps[i].xmax, zonegrps[i].ymax]
         
-        Overlap = if_overlap( zonegrp_range, regionrange )
+        Overlap = if_overlap_2d( zonegrp_range, regionrange )
 
         if Overlap: 
             zone_overlap_indx.append(i)
