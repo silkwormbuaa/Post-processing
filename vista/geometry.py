@@ -15,13 +15,9 @@ import os
 source_dir = os.path.realpath(__file__).split('vista')[0] 
 sys.path.append( source_dir + 'vista/lib/form' )
 
-print(source_dir + 'lib/exec/')
-
 import numpy             as     np
 
 from   stl               import mesh
-
-import time
 
 from   .math_opr         import unitize_L2
 
@@ -159,7 +155,7 @@ def point_in_triangle_b( p, p1, p2, p3 ):
 #   - return value is vol_fra[i,j,k] with inside 0.0 and outside 1.0.
 # ----------------------------------------------------------------------
 
-def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3, verbose=False ):
+def ray_tracer( ibmsh, g, x_init, signum_init, buff = 3 ):
 
 #-- parameters
 

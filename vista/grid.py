@@ -27,7 +27,7 @@ from   .io_binary        import read_char_bin
 
 from   .tools            import is_above_wavywall
 
-from   .tools            import if_overlap
+from   .tools            import if_overlap_3d
 
 from   .tools            import mean_of_list
 
@@ -96,9 +96,7 @@ class GridData:
             
             self.read_grid_body( f )
         
-        if self.verbose is True:
-            
-            print( f"finish read grid file ...{self.grid_file[-50:]}" )
+        print( f"finish read grid file ...{self.grid_file[-50:]}" )
 
 
 
@@ -275,29 +273,35 @@ class GridData:
 #
 # Desc
 #
-# - input a rect1(xmin,ymin,xmax,ymax)
+# - input a bbox[xmin,xmax,ymin,ymax,zmin,zmax]
 # - record which block grids groups are partly or fully overlapped
 #   with rect1. 
 #
 # ----------------------------------------------------------------------
 
-    def select_blockgrids( self, rect1 ):
+    def select_blockgrids( self, bbox ):
         
-        lx0 = np.array( self.grouped['lx0'] )
-        ly0 = np.array( self.grouped['ly0'] )
-        lx1 = np.array( self.grouped['lx1'] )
-        ly1 = np.array( self.grouped['ly1'] )
-        bl_index = np.array( self.grouped['bl_index'] )
         
-        self.blockgrids_sel = list()
+        selected_bls = []
         
-        for i in range(len(bl_index)):
+        for i in range( len(self.g) ):
             
-            rect2 = [ lx0[i],ly0[i],lx1[i],ly1[i] ]
+            bl_num = self.g[i].num
             
-            if if_overlap( rect1, rect2 ):
+            lx0 = self.g[i].lx0
+            lx1 = self.g[i].lx1
+            ly0 = self.g[i].ly0
+            ly1 = self.g[i].ly1
+            lz0 = self.g[i].lz0
+            lz1 = self.g[i].lz1
+            
+            bbox2 = [ lx0, lx1, ly0, ly1, lz0, lz1 ]
+            
+            if if_overlap_3d( bbox, bbox2 ):
                 
-                self.blockgrids_sel.append(bl_index[i])
+                selected_bls.append( bl_num )
+            
+        return selected_bls
 
 
 

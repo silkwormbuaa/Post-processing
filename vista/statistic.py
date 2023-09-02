@@ -10,6 +10,10 @@
 
 import os
 
+import numpy             as     np
+
+import pandas            as     pd
+
 from   .block            import BlockData
 
 from   .io_binary        import read_int_bin
@@ -200,7 +204,7 @@ class StatisticData:
 #   (no index issue)
 # ----------------------------------------------------------------------
 
-    def read_stat_body( self, file , fill ):
+    def read_stat_body( self, file , fill, vars ):
         
         end_of_file = False
                
@@ -210,17 +214,245 @@ class StatisticData:
         
         self.pos = self.header_size
         
+        # vars determine the index of data sequences to read
+        
+        vars_indx = self.vars_to_indx( vars )
+        
         while not end_of_file:
         
             # read in block one by one
             # only blocks in fill list will be filled with data chunk
         
-            self.bl.append( BlockData( file, self.n_var, fill ) )
+            self.bl.append( BlockData(file, self.n_var, fill, vars, vars_indx) )
             
             self.pos = self.pos + self.bl[-1].size
                                     
             if self.pos >= self.fsize: end_of_file = True
 
+
+# ----------------------------------------------------------------------
+# >>> vars to indx                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/01  - created
+#
+# Desc
+#   - from variables list to sequence index list within in BlockData
+# ----------------------------------------------------------------------
+    def vars_to_indx( self, vars ):
+        
+        # list of variables for inquiry
+        
+        mean_ls = ['u','v','w','rho','rhoE','p','T','mu']
+        
+        cor2_ls = ['uu','uv','uw','urho'  ,'urhoE'   ,'up'   ,'uT'   ,'umu'   ,
+                        'vv','vw','vrho'  ,'vrhoE'   ,'vp'   ,'vT'   ,'vmu'   ,
+                             'ww','wrho'  ,'wrhoE'   ,'wp'   ,'wT'   ,'wmu'   ,
+                                  'rhorho','rhorhoE' ,'rhop' ,'rhoT' ,'rhomu' ,
+                                           'rhoErhoE','rhoEp','rhoET','rhoEmu',
+                                                      'pp'   ,'pT'   ,'pmu'   ,
+                                                              'TT'   ,'mumu'  ]   
+        
+        # index list of vars
+        
+        indx = []
+        
+        # from variables list to corresponding indexes list
+        
+        for var in vars:
+            
+            displace = 0
+            
+            if var in mean_ls:
+                
+                indx.append( displace + mean_ls.index(var) )
+
+            if self.meanvalues: displace += 8
+            
+            if var in cor2_ls:
+                
+                indx.append( displace + cor2_ls.index(var) )
+                
+            if self.doublecorr: displace += 36
+        
+
+        return indx        
+
+
+# ----------------------------------------------------------------------
+# >>> Match grid                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/01  - created
+#
+# Desc
+#   - match data with 
+# ----------------------------------------------------------------------
+    
+    def match_grid( self, G, block_list ):
+        
+        for num in block_list:
+            
+            g = G.g[num-1]
+            
+            X,Y,Z = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
+            
+            self.bl[num-1].df['x'] = X.T.flatten()
+            self.bl[num-1].df['y'] = Y.T.flatten()
+            self.bl[num-1].df['z'] = Z.T.flatten()
+            
+            # adding vol_fra !! original vol_fra has i,j,k order, 
+            # should be transpose as k,j,i
+            
+            self.bl[num-1].df['vol_frac'] = np.ravel( G.g[num-1].vol_fra.T )
+            
+
+# ----------------------------------------------------------------------
+# >>> drop ghost cells                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def drop_ghost( self, G, block_list, buff=3 ):
+        
+        for num in block_list:
+            
+            npx = G.g[num-1].nx + buff*2
+            npy = G.g[num-1].ny + buff*2
+            npz = G.g[num-1].nz + buff*2
+            
+            vars = self.bl[num-1].df.columns
+            
+            data_chunk = None
+            
+            for var in vars:
+                
+                data = np.array( self.bl[num-1].df[var] )
+                data = data.reshape( npz, npy, npx )
+                data = data[buff:npz-buff,buff:npy-buff,buff:npx-buff].flatten()
+                
+                if data_chunk is None: data_chunk = data
+                else: data_chunk = np.column_stack((data_chunk,data))
+            
+            self.bl[num-1].df = pd.DataFrame(data_chunk,columns=vars)
+            
+        #    print( self.bl[num-1].df)    
+                
+
+# ----------------------------------------------------------------------
+# >>> compute profile                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_profile( self, block_list, bbox, vars, RS=True ):
+        
+# ----- collect data frame from all filled blocks
+        
+        df = pd.concat( [self.bl[num-1].df for num in block_list] )
+        
+
+        # reset indexes in case repeated indexes from different blocks
+        
+        df.reset_index( drop=True, inplace=True )
+        
+        print(df)
+        
+        
+# ----- slim down data with bbox
+        
+        df.drop( df[ (df['x'] < bbox[0]) | (df['x'] > bbox[1]) |
+                     (df['y'] < bbox[2]) | (df['y'] > bbox[3]) |
+                     (df['z'] < bbox[4]) | (df['z'] > bbox[5]) ].index,
+                 inplace=True )
+        
+        print(df)
+        
+        # compute turbulence (Reynolds Stress)
+        
+        if RS:
+            df['uu'] = np.array(df['uu']) - np.array(df['u'])*np.array(df['u'])
+            df['vv'] = np.array(df['vv']) - np.array(df['v'])*np.array(df['v'])
+            df['ww'] = np.array(df['ww']) - np.array(df['w'])*np.array(df['w'])
+            df['uv'] = np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+            
+            print(df)
+            
+# ----- do averaging in x-z plane
+        
+        ys = np.sort( np.unique( np.array( df['y'] )))
+        
+        data_chunk = None
+        
+        for y in ys:
+            
+            df_temp = df[ df['y']==y ]
+            
+            vol_frac = np.array( df_temp['vol_frac'] )
+            vol_total = np.sum( vol_frac )
+            if vol_total < 0.0000001: vol_total = float('inf')
+            
+            buff = [y]
+            
+            for var in vars:
+                
+                v = np.sum( np.array(df_temp[var])*vol_frac ) / vol_total
+                buff.append(v)
+            
+                
+            if data_chunk is None: data_chunk = [buff]
+            else: data_chunk.append( buff )
+            
+        
+        data_chunk = np.array(data_chunk).reshape( len(ys), len(vars)+1 )
+        
+        df_profile = pd.DataFrame(data_chunk,columns=['y']+vars)
+        
+        pd.set_option('display.max_rows', None)  # 显示所有行
+        
+        print( df_profile )
+        
+# ----- drop points below wall and set values at wall manually
+        
+        df_profile.drop( df_profile[ df_profile['p']==0.0 ].index, inplace=True)
+        
+        df_profile.reset_index( drop=True, inplace=True )
+        
+        for var in vars:
+            if var not in ['p','rho','T']:
+                df_profile.loc[0,var] = 0.0
+        
+        df_profile.to_string('output.txt', index=False,
+                            float_format='%15.7f',
+                            justify='left')
+         
+            
+        
+        
 """
 # ----------------------------------------------------------------------
 # >>> Class Statistic Block Data                                ( 1 )

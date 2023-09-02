@@ -54,7 +54,7 @@ G = GridData( gridfile )
 
 #os.chdir( outpath )
 
-G.verbose = True
+G.verbose = False
 
 ## read in whole grid info
 
@@ -70,11 +70,9 @@ G.get_sorted_groups()
 
 # given a rectangular region, get a list of blocks within the region
 
-rect1 = [-57, -1.2576, -49.625, 1.73695342]
+bbox = [-57, -49.625, -1.2576, 45.0, -11.0, 11.0]
 
-G.select_blockgrids( rect1 )
-
-block_list = np.array( G.blockgrids_sel ).ravel()
+block_list = G.select_blockgrids( bbox )
 
 with timer("read in cut cell info "):
 
@@ -100,14 +98,29 @@ with timer("assign volume fractions "):
 S = StatisticData( datafile )
 
 with timer("read block statistics data "):
+    
     with open( datafile, 'br' ) as f:   
             
         S.read_stat_header( f )
-
-        # only blocks in the list will be filled data chunk
-        S.read_stat_body( f, block_list )
         
+        vars = ['u','v','w','p','rho','T','uu','vv','ww','uv']
+        
+        # only blocks in the list will be filled data chunk
+        S.read_stat_body( f, block_list, vars )
+    
+    
+with timer("match grid and drop ghost cells"):   
+     
+    S.match_grid( G, block_list )
+    
+    S.drop_ghost( G, block_list )
 
+
+with timer("compute profile"):
+    
+    os.chdir(datapath)
+
+    S.compute_profile( block_list, bbox, vars )
 """
 with timer("calculating profile "):
     

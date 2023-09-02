@@ -23,11 +23,13 @@ from   vista.geometry           import read_stl
 
 from   vista.geometry           import ray_tracer
 
-datapath = '/home/wencanwu/my_simulation/tutorials/tutorial_cylinder/results/'
+from   vista.timer              import timer
+
+datapath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/'
 
 gridfile = datapath + 'inca_grid.bin'
 
-ibfile = datapath + 'cube_NEW.stl'
+ibfile = datapath + 'ib.stl'
 
 G = GridData( gridfile )
 
@@ -39,13 +41,12 @@ ibmsh = read_stl( ibfile )
 
 x_init = [50.0, 50.0, 1.0]
 
-bl_g = G.g[2]
+bl_g = G.g[0]
 
-print(bl_g.gx)
-print(bl_g.gy)
+print(len(G.g))
 
-bl_g.vol_fra = ray_tracer( ibmsh, bl_g, x_init, 1.0, verbose=True )
+with timer("ray_tracer of one block"):
+    bl_g.vol_fra = ray_tracer( ibmsh, bl_g, x_init, 1.0  )
 
-print( bl_g.vol_fra )
 
 print(f"assign bl_g {bl_g.num}")
