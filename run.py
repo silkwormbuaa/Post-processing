@@ -9,7 +9,7 @@
 '''
 import os
 import tecplot           as     tp
-from   utils.timer       import timer
+from   vista.timer       import timer
 from   plt2pandas        import ReadPltBlocks_xy
 from   plt2pandas        import frame2tec3d
 from   ReadIn            import ReadZonegrp

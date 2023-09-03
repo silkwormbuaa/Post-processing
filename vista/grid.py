@@ -306,6 +306,101 @@ class GridData:
 
 
 # ----------------------------------------------------------------------
+# >>> select sliced block grids                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/03  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def select_sliced_blockgrids( self, slic_type, loc, buff=3 ):
+        
+        """
+        input:
+        slic_type : 'X', 'Y', or 'Z' ( normal direction of slice)
+        loc       : coordinate
+        
+        return : list of selected bl_nums, list of slice indexes on each bl
+        """
+        
+        selected_bls = []
+        indx_slic    = []
+        
+        for grd in self.g:
+            
+            bl_num = grd.num
+            
+            lx0 = grd.lx0
+            lx1 = grd.lx1
+            ly0 = grd.ly0
+            ly1 = grd.ly1
+            lz0 = grd.lz0
+            lz1 = grd.lz1
+            
+            if slic_type == 'X':
+                
+                if lx0 <= loc < lx1:
+                    
+                    selected_bls.append( bl_num )
+                    istart = buff
+                    iend   = grd.nx + buff
+                    
+                    for i in range( istart, iend ):
+                        
+                        bnd1 = grd.gx[i] - 0.5*grd.hx[i]
+                        bnd2 = grd.gx[i] + 0.5*grd.hx[i]
+                        if (bnd1 <= loc < bnd2):
+                            indx_slic.append(i)
+                            break
+            
+            elif slic_type == 'Y':
+                
+                if ly0 <= loc < ly1:
+                    
+                    selected_bls.append( bl_num )
+                    istart = buff
+                    iend   = grd.ny + buff
+                    
+                    for i in range( istart, iend ):
+                        
+                        bnd1 = grd.gy[i] - 0.5*grd.hy[i]
+                        bnd2 = grd.gy[i] + 0.5*grd.hy[i]
+                        if (bnd1 <= loc < bnd2):
+                            indx_slic.append(i)
+                            break                    
+                    
+            elif slic_type == 'Z':
+                
+                if lz0 <= loc < lz1:
+                    
+                    selected_bls.append( bl_num )
+
+                    istart = buff
+                    iend   = grd.nz + buff
+                    
+                    for i in range( istart, iend ):
+                        
+                        bnd1 = grd.gz[i] - 0.5*grd.hz[i]
+                        bnd2 = grd.gz[i] + 0.5*grd.hz[i]
+                        if (bnd1 <= loc < bnd2):
+                            indx_slic.append(i)
+                            break
+         
+        if len(indx_slic) != len(selected_bls):
+            raise ValueError("Number of slices index != number of blocks")
+
+
+        return selected_bls, indx_slic
+
+
+
+# ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
 # ----------------------------------------------------------------------
 #

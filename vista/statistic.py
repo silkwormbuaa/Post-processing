@@ -40,15 +40,15 @@ class StatisticData:
 # - statistic binary file directory
 # ----------------------------------------------------------------------
 
-    def __init__( self, stat_dir ):
+    def __init__( self, stat_file ):
         
         # directory to the statistic file
         
-        self.dir = stat_dir
+        self.file = stat_file
 
         # file size
         
-        self.fsize = os.stat(self.dir).st_size
+        self.fsize = os.stat(self.file).st_size
         
         # file pointer position
         
@@ -294,7 +294,7 @@ class StatisticData:
 # 2023/09/01  - created
 #
 # Desc
-#   - match data with 
+#   - match data with grids
 # ----------------------------------------------------------------------
     
     def match_grid( self, G, block_list ):
@@ -347,8 +347,10 @@ class StatisticData:
                 data = data.reshape( npz, npy, npx )
                 data = data[buff:npz-buff,buff:npy-buff,buff:npx-buff].flatten()
                 
-                if data_chunk is None: data_chunk = data
-                else: data_chunk = np.column_stack((data_chunk,data))
+                if data_chunk is None: data_chunk = [data]
+                else: data_chunk.append(data)
+            
+            data_chunk = np.array(data_chunk).T
             
             self.bl[num-1].df = pd.DataFrame(data_chunk,columns=vars)
             
@@ -436,7 +438,7 @@ class StatisticData:
         
         print( df_profile )
         
-# ----- drop points below wall and set values at wall manually
+# ----- drop points below wall and set values(except p,rho,T) at wall manually
         
         df_profile.drop( df_profile[ df_profile['p']==0.0 ].index, inplace=True)
         
@@ -451,114 +453,119 @@ class StatisticData:
                             justify='left')
          
             
-        
-        
-"""
+
 # ----------------------------------------------------------------------
-# >>> Class Statistic Block Data                                ( 1 )
+# >>> get slice                                                (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2023/02/01  - created
+# 2023/09/03  - created
 #
 # Desc
-#
-# - initialize an object of block data.
-# - for selected block, block data is read and RS is calculated.
+#   - slice 3D statistic data
 #
 # ----------------------------------------------------------------------
 
-class BlockData:
-    
-    def __init__( self, file, n_var, fill ):
+    def get_slice( self, G, block_list, indx_slic, slic_type, buff=3 ):
         
-        self.verbose = False
+        """
+        G : corresponding GridData instance
+        block_list: list of sliced blocks
+        indx_slic: list of slice indexes on each block
+        slic_type : 'X','Y' or 'Z'
+        loc : location coordinate
         
-        # index of block, can be read from blockdata itself
-        self.num = 0
+        return : dataframe of sliceed results
+        """
         
-        # size of this BlockData (in bytes)
-        self.size = 0
-        self.n_var = n_var
-        self.dim = []
+# ----- should somehow check if Statistic is 3D or 2D data?
         
-        # empty list for future use
-        self.mean = []
-        self.cor2 = []
-        self.cc_vf = []
+        # pass
+        
+        for i, bl_num in enumerate( block_list ):
 
-        # size of type 
+# ----- do slicing on each bl.df
+            
+            bl   = self.bl[bl_num-1]
+            g    = G.g[bl_num-1]
+            indx = indx_slic[i]
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+            vars = bl.df.columns
+            
+            data_chunk = None
+            
+            for var in vars:
+                
+                data = np.array( bl.df[var] )
+                data = data.reshape( npz, npy, npx )
+                
+                if   slic_type == 'X': data = data[:,:,indx].flatten()
+                elif slic_type == 'Y': data = data[:,indx,:].flatten()
+                elif slic_type == 'Z': data = data[indx,:,:].flatten()
+                
+                if data_chunk is None: data_chunk = [data]
+                else: data_chunk.append( data )
+            
+            data_chunk = np.array(data_chunk).T
+            
+            bl.df = pd.DataFrame(data_chunk,columns=vars)
+    
+# ----- match grids with data
+
+            if slic_type == 'X':
+                
+                Y,Z = np.meshgrid( g.gy, g.gz )
+                bl.df['y'] = Y.flatten()
+                bl.df['z'] = Z.flatten()
+
+            if slic_type == 'Y':
+                
+                X,Z = np.meshgrid( g.gx, g.gz )
+                bl.df['x'] = X.flatten()
+                bl.df['z'] = Z.flatten()
+                
+            if slic_type == 'Z':
+                
+                X,Y = np.meshgrid( g.gx, g.gy )
+                bl.df['x'] = X.flatten()
+                bl.df['y'] = Y.flatten()                
+
+# ----- compute gradients if necessary
+
+# ----- drop ghost cells
+
+            vars = bl.df.columns
+            
+            data_chunk = None
+            
+            for var in vars:
+                
+                data = np.array( bl.df[var] )
+                
+                if   slic_type == 'X': data = data.reshape( npz, npy )
+                elif slic_type == 'Y': data = data.reshape( npz, npx )
+                elif slic_type == 'Z': data = data.reshape( npy, npx )
+                    
+                data = data[buff:-buff,buff:-buff].flatten()
+
+                if data_chunk is None: data_chunk = [data]
+                else: data_chunk.append(data)
         
-        sin = 4
-        sfl = 8
-        slg = 4        
+            data_chunk = np.array(data_chunk).T
+
+            bl.df = pd.DataFrame(data_chunk,columns=vars)
+
+# ----- concatenate all dataframes in all selected blocks
+
+        df_slice = pd.concat( [self.bl[num-1].df for num in block_list] )
         
-        # read global block number and block dimensions
+        df_slice.reset_index( drop=True, inplace=True)
         
-        self.num = read_int_bin( file.read(sin), sin )
-        self.dim = read_int_bin( file.read(3*sin), sin )
-        
-        npx = self.dim[0]
-        npy = self.dim[1]
-        npz = self.dim[2]
-        
-        self.np  = npx * npy * npz
-        
-        # if this block chunk will be read?
-        # by default, to_fill is False
-        self.to_fill = False
-        if self.num in fill: self.to_fill = True
-      
-        # read primitive variables + 'p T mu', when fill is true.
-        if self.to_fill:
-            
-            tmp = read_flt_bin( file.read(self.np*8*sfl), sfl)
-            
-            self.mean = np.reshape( tmp, (8,npz,npy,npx) ).T
-            
-            if self.verbose:
-                print(type(self.mean))
-                print('self.mean[:,0,0,0]')
-                print(self.mean[:,0,0,0])
-                print('self.mean[0,:,0,0]')
-                print(self.mean[0,:,0,0])
-                print('self.mean[0,0,:,0]')
-                print(self.mean[0,0,:,0])
-                print('self.mean[0,0,0,:]')
-                print(self.mean[0,0,0,:])
-            
-            # read double correlations: #36 is the correlations' number 
-            
-            tmp = read_flt_bin( file.read(self.np*36*sfl), sfl )
-            
-            self.cor2 = np.reshape( tmp, (36,npz,npy,npx) ).T
-            
-            # calculate Reynolds Stress 
-            # uu represent <u`u`> actually
-            
-            u = self.mean[:,:,:,0]
-            v = self.mean[:,:,:,1]
-            w = self.mean[:,:,:,2]            
-            
-            self.uu = self.cor2[:,:,:,0] - np.multiply(u,u)
-            self.uv = self.cor2[:,:,:,1] - np.multiply(u,v)
-            self.vv = self.cor2[:,:,:,8] - np.multiply(v,v)
-            self.ww = self.cor2[:,:,:,15]- np.multiply(w,w)         
-        
-            print("Block %d data is read."%self.num)
-        # skip data chunk if fill is False
-        else:
-            
-            # skip mean data
-            file.seek( self.np*8*sfl, 1 )
-            
-            # skip correlation data
-            file.seek( self.np*36*sfl, 1 )
-        
-        # calculate the block data size in byte
-        
-        self.size = self.np*self.n_var*sfl + 4*sin
-"""
+        return df_slice
