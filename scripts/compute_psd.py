@@ -24,8 +24,6 @@ from   vista.timer       import timer
 
 from   vista.tools       import get_filelist
 
-from   vista.tools       import read_case_parameter
-
 from   vista.colors      import colors as col
 
 
@@ -59,7 +57,7 @@ with timer('Finish computing PSD '):
             
             t_0 = time.time()
             
-            probe = ProbeData( probefile )
+            probe = ProbeData( probefile, withT=False )
             
             probe.cleandata( starttime=20 )
             

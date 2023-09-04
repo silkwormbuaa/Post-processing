@@ -37,7 +37,12 @@ import matplotlib.pyplot as     plt
 
 class ProbeData:
     
-    def __init__( self, datafile ):
+    def __init__( self, datafile, withT=True ):
+        
+        """
+        datafile: probe data file
+        withT: new INCA since Jan 2023, set True by default. Else set False.
+        """
         
         self.probe_index = int( datafile[-9:-4] )
         
@@ -49,9 +54,11 @@ class ProbeData:
                           'w',
                           'rho',
                           'rhoE',
-                          'p',
-                          'T'       # updated inca since Jan 2023, by default, T is added                          
+                          'p'
                         ]
+        if withT:                          # updated inca since Jan 2023,
+            self.var_list.append('T')      # by default, T is added.     
+                                             
 
         with open( datafile, 'r' ) as f:
 

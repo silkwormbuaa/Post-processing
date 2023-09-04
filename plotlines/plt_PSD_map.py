@@ -5,7 +5,7 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   Plotting psd contours without labels
+@Desc    :   Plotting psd contours with/without labels
 '''
 
 import os
@@ -27,21 +27,30 @@ from   plt_tools         import *
 source_dir = os.path.realpath(__file__).split('plotlines')[0] 
 sys.path.append( source_dir )
 
-from   utils.tools       import get_filelist
+from   vista.tools       import get_filelist
 
-from   utils.timer       import timer
+from   vista.timer       import timer
 
 plt.rcParams.update({'font.size': 25})
 
-datapath0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/probes/psd_x'
+# Option zone
+# =============================================================================
+
+output_nr = 5
+pure      = False
+
+# =============================================================================
+
+
+datapath0 = '/home/wencanwu/my_simulation/temp/smooth_wall/probes/psd_x'
 datapath1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/psd_x'
 datapath2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/probes/psd_x'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/probes/psd_x'
 datapath4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/psd_x'
+datapath5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/probes/psd_x'
 
 outpath    = '/home/wencanwu/my_simulation/temp/DataPost'
 
-output_nr = 3
 
 if output_nr == 0:
     filelist   = get_filelist( datapath0 )
@@ -57,6 +66,9 @@ elif output_nr == 3:
 
 elif output_nr == 4:
     filelist   = get_filelist( datapath4 )
+
+elif output_nr == 5:
+    filelist   = get_filelist( datapath5 )
     
 else: raise ValueError("case nr is wrong!")
     
@@ -86,6 +98,7 @@ with timer("import psd data"):
             x.append(x_temp)
             St.append(St_temp)
             nd_fwpsd.append(nd_fwpsd_temp)
+            
 if output_nr == 0:
     #flat_Luis
     St_Lsep = (np.array(St) * 9.628729).tolist()
@@ -139,15 +152,25 @@ elif output_nr == 4:
     fig_name = "psd_0927"
 
 elif output_nr == 5:
-    #1125
-    St_Lsep = (np.array(St) * 13.1286891).tolist()
+    ##1221
+    St_Lsep = (np.array(St) * 13.266).tolist()
     print(St_Lsep[0][:10])
     print(St_Lsep[0][-10:])
-    x_sep = [-10.55859, -10.55859]
+    x_sep = [-10.6786859, -10.6786859]
     y_sep = [0.001,100]
-    x_reatt = [2.570097, 2.570097]
+    x_reatt = [2.58732, 2.58732]
     y_reatt = [0.001,100]
-    fig_name = "psd_1125"
+    fig_name = 'psd_1221'
+    
+    #1125
+#    St_Lsep = (np.array(St) * 13.1286891).tolist()
+#    print(St_Lsep[0][:10])
+#    print(St_Lsep[0][-10:])
+#    x_sep = [-10.55859, -10.55859]
+#    y_sep = [0.001,100]
+#    x_reatt = [2.570097, 2.570097]
+#    y_reatt = [0.001,100]
+#    fig_name = "psd_1125"
 
 
 
@@ -159,10 +182,13 @@ fwpsd = ax.pcolormesh(x,St_Lsep,nd_fwpsd,
                       cmap='Greys',
                       vmin=0, vmax=0.3)
 
+# -- using contourf instead of pcolormesh
+
 #fwpsd = ax.contourf(x,St_Lsep,nd_fwpsd,np.linspace(0,0.3,num=31),
 #                      cmap='Greys',vmin=0, vmax=0.3)
 
-#fig.colorbar( fwpsd ,orientation='horizontal')
+if not pure:
+    fig.colorbar( fwpsd ,orientation='horizontal')
 
 ax.plot(x_sep,y_sep,'r',linewidth=1.0)
 ax.plot(x_reatt,y_reatt,'r',linewidth=1.0)
@@ -184,13 +210,16 @@ ax.set_ylim( [0.01,100] )
 
 ax.xaxis.set_ticklabels([])
 ax.yaxis.set_ticklabels([])
-#ax.set_xlabel( r'$(x-x_{imp})/\delta_0$', fontdict={'size':16})
-#ax.set_ylabel( r'$St=f\cdot L_{sep}/U_{\infty}$', fontdict={'size':16})
 
-#ax.set_title( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$',
-#             size=18)
+if not pure:
+    ax.set_xlabel( r'$(x-x_{imp})/\delta_0$', fontdict={'size':16})
+    ax.set_ylabel( r'$St=f\cdot L_{sep}/U_{\infty}$', fontdict={'size':16})
+
+    ax.set_title( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$', size=18)
 
 os.chdir( outpath )
-plt.savefig( fig_name + '_pure' )
+
+if pure: fig_name = fig_name + '_pure'
+plt.savefig( fig_name )
 #plt.show()
 
