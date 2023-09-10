@@ -331,6 +331,14 @@ class StatisticData:
 
     def drop_ghost( self, G, block_list, buff=3 ):
         
+        """
+        Applicable to 3D statistics data.
+        G : GridData instance
+        block_list : list of blocks that are going to drop ghost cells
+        
+        return : self.bl[num-1].df
+        """
+        
         for num in block_list:
             
             npx = G.g[num-1].nx + buff*2
@@ -357,6 +365,67 @@ class StatisticData:
         #    print( self.bl[num-1].df)    
                 
 
+
+# ----------------------------------------------------------------------
+# >>> compute Mach number                                         (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/10  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_vars( self, block_list:list, vars_new:list ):
+        
+        """
+        block_list: list of blocks that are going to compute new variables
+        vars_new: list of str representing new vars 
+                  ['mach','grad_rho','grad_RS']
+        """
+        
+        
+        for num in block_list:
+            
+            df = self.bl[num-1].df
+            
+# --------- compute Mach number 
+
+            if "mach" in vars_new:
+                
+                u = np.array( df['u'] )
+                v = np.array( df['v'] )
+                w = np.array( df['w'] )
+                T = np.array( df['T'] )
+                gamma = 1.40
+                R = 287.0508571
+                
+                mach = np.sqrt( u*u+v*v+w*w ) / np.sqrt( gamma*R*T )
+                
+                self.bl[num-1].df['mach'] = mach
+            
+# ---------- compute density gradient
+
+            if "grad_rho" in vars_new:
+                
+                pass
+            
+# ---------- compute Reynolds Stress gradients
+
+            if "grad_RS" in vars_new:
+                
+                pass
+                
+                
+                
+                
+        
+
+
 # ----------------------------------------------------------------------
 # >>> compute profile                                            (Nr.)
 # ----------------------------------------------------------------------
@@ -371,7 +440,16 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def compute_profile( self, block_list, bbox, vars, RS=True ):
+    def compute_profile( self, block_list, bbox, vars, RS=True, outfile=False ):
+        
+        """
+        block list: selected block list (within bounding box)
+        bbox: bounding box coordinates [xmin,xmax,ymin,ymax,zmin,zmax]
+        vars: variable names list
+        RS: set True to compute Reynolds Stresses, otherwise drop them
+        outfile: assign outfile name or use default one ''
+        """
+        
         
 # ----- collect data frame from all filled blocks
         
@@ -448,7 +526,11 @@ class StatisticData:
             if var not in ['p','rho','T']:
                 df_profile.loc[0,var] = 0.0
         
-        df_profile.to_string('output.txt', index=False,
+# ----- output profile into txt
+
+        if outfile is False: outfile = 'profile_spanwisemean.dat'
+
+        df_profile.to_string(outfile, index=False,
                             float_format='%15.7f',
                             justify='left')
          
@@ -478,7 +560,7 @@ class StatisticData:
         slic_type : 'X','Y' or 'Z'
         loc : location coordinate
         
-        return : dataframe of sliceed results
+        return : dataframe of sliced results
         """
         
 # ----- should somehow check if Statistic is 3D or 2D data?

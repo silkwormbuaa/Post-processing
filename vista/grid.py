@@ -281,6 +281,9 @@ class GridData:
 
     def select_blockgrids( self, bbox ):
         
+        """
+        bbox : [xmin,xmax,ymin,ymax,zmin,zmax]
+        """
         
         selected_bls = []
         

@@ -118,7 +118,7 @@ with timer("match grid and drop ghost cells"):
 
 with timer("compute profile"):
     
-    os.chdir(datapath)
+    os.chdir( datapath )
 
     S.compute_profile( block_list, bbox, vars )
         
