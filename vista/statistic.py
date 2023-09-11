@@ -16,6 +16,8 @@ import pandas            as     pd
 
 from   .block            import BlockData
 
+from   .grid             import GridData
+
 from   .io_binary        import read_int_bin
 
 from   .io_binary        import read_flt_bin
@@ -385,7 +387,7 @@ class StatisticData:
         """
         block_list: list of blocks that are going to compute new variables
         vars_new: list of str representing new vars 
-                  ['mach','grad_rho','grad_RS']
+                  ['mach','tke']
         """
         
         
@@ -407,25 +409,107 @@ class StatisticData:
                 mach = np.sqrt( u*u+v*v+w*w ) / np.sqrt( gamma*R*T )
                 
                 self.bl[num-1].df['mach'] = mach
+
+# ---------- compute turbulent kinetic energy
+
+            if "RS" in vars_new:
+                
+                uu = np.array(df['uu']) - np.array(df['u'])*np.array(df['u'])
+                vv = np.array(df['vv']) - np.array(df['v'])*np.array(df['v'])
+                ww = np.array(df['ww']) - np.array(df['w'])*np.array(df['w'])
+                uv = np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+                tke= uu + vv + ww
+                
+                self.bl[num-1].df['uu'] = uu 
+                self.bl[num-1].df['vv'] = vv
+                self.bl[num-1].df['ww'] = ww
+                self.bl[num-1].df['uv'] = uv
+                self.bl[num-1].df['tke']= tke
+                
+                
+
+# ----------------------------------------------------------------------
+# >>> compute gradients of variables                              (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/11  - created
+#
+# Desc
+#   - need to be improved when dealing with near-wall cells
+# ----------------------------------------------------------------------
+       
+    def compute_gradients( self, block_list:list, grads:list, G:GridData,
+                           buff=3):
+
+        """
+        block_list: list of blocks that are going to compute gradients
+        grads: list of str representing gradients ['schlieren','shadowgraph']
+        """
+
+        for num in block_list:
             
-# ---------- compute density gradient
-
-            if "grad_rho" in vars_new:
-                
-                pass
+            df = self.bl[num-1].df
+            g  = G.g[num-1]
             
-# ---------- compute Reynolds Stress gradients
+# --------- compute magnitude of density gradient
 
-            if "grad_RS" in vars_new:
+            if 'schlieren' in grads:
                 
-                pass
+                rho = np.array( df['rho'] )
                 
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
                 
+                rho = rho.reshape( npz, npy, npx )
                 
+                drho_dx = np.gradient(rho, g.gx, axis=2)
+                drho_dy = np.gradient(rho, g.gy, axis=1)
+                drho_dz = np.gradient(rho, g.gz, axis=0)
                 
-        
+                grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
+                
+                self.bl[num-1].df['grad_rho'] = grad_rho.flatten()
 
+# --------- compute Laplacian of the density
 
+            if 'shadowgraph' in grads:
+                
+                if 'schlieren' in grads:
+                    
+                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
+                              + np.gradient(drho_dy, g.gy, axis=1) \
+                              + np.gradient(drho_dz, g.gz, axis=0) 
+                              
+                    self.bl[num-1].df['laplacian'] = laplacian.flatten()
+            
+                else:
+                    
+                    rho = np.array( df['rho'] )
+                    
+                    npx = g.nx + buff*2
+                    npy = g.ny + buff*2
+                    npz = g.nz + buff*2
+                    
+                    rho = rho.reshape( npz, npy, npx )
+                    
+                    drho_dx = np.gradient(rho, g.gx, axis=2)
+                    drho_dy = np.gradient(rho, g.gy, axis=1)
+                    drho_dz = np.gradient(rho, g.gz, axis=0)
+
+                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
+                              + np.gradient(drho_dy, g.gy, axis=1) \
+                              + np.gradient(drho_dz, g.gz, axis=0) 
+                              
+                    self.bl[num-1].df['laplacian'] = laplacian.flatten()
+                    
+# --------- compute other gradients maybe...
+            
+            
 # ----------------------------------------------------------------------
 # >>> compute profile                                            (Nr.)
 # ----------------------------------------------------------------------
