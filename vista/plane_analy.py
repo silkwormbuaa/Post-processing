@@ -46,7 +46,7 @@ def save_sonic_line( xx, yy, mach ):
     plt.close()
         
     np.savetxt(
-        "SeprationLine.dat",
+        "SonicLine.dat",
         xycor,
         fmt="%15.7f",
         delimiter=" ",
@@ -80,7 +80,7 @@ def save_separation_line( xx, yy, u ):
     header = 'x      y'
     xycor = np.empty(shape=[0, 2])
     fig, ax = plt.subplots(figsize=(10, 4))
-    cs = ax.contour(xx, yy, u, levels=[1.0], linewidths=1.5, colors="k")
+    cs = ax.contour(xx, yy, u, levels=[0.0], linewidths=1.5, colors="k")
     for isoline in cs.collections[0].get_paths():
         xy = isoline.vertices
         xycor = np.vstack((xycor, xy))
@@ -88,7 +88,7 @@ def save_separation_line( xx, yy, u ):
     plt.close()
     
     np.savetxt(
-        "SonicLine.dat",
+        "SeparationLine.dat",
         xycor,
         fmt="%15.7f",
         delimiter=" ",
