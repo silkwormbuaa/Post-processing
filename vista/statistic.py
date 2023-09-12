@@ -420,10 +420,10 @@ class StatisticData:
                 uv = np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
                 tke= uu + vv + ww
                 
-                self.bl[num-1].df['uu'] = uu 
-                self.bl[num-1].df['vv'] = vv
-                self.bl[num-1].df['ww'] = ww
-                self.bl[num-1].df['uv'] = uv
+                self.bl[num-1].df['u`u`'] = uu 
+                self.bl[num-1].df['v`v`'] = vv
+                self.bl[num-1].df['w`w`'] = ww
+                self.bl[num-1].df['u`v`'] = uv
                 self.bl[num-1].df['tke']= tke
                 
                 
@@ -448,6 +448,9 @@ class StatisticData:
         """
         block_list: list of blocks that are going to compute gradients
         grads: list of str representing gradients ['schlieren','shadowgraph']
+        G: GridData instance of corresponding case
+        
+        return: self.bl[num-1].df['grad_rho'] (...['laplacian'])
         """
 
         for num in block_list:
@@ -509,7 +512,72 @@ class StatisticData:
                     
 # --------- compute other gradients maybe...
             
+
+
+# ----------------------------------------------------------------------
+# >>> compute source term of secondary flow                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/11  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_source_terms( self, block_list:list, G:GridData, buff=3):
+        
+        """
+        block_list: list of blocks that are going to compute gradients
+        G: GridData instance of corresponding case
+        
+        return: self.bl[num-1].df['S1'] (...['S2'])
+        """
+        
+        for num in block_list:
             
+            df = self.bl[num-1].df
+            g  = G.g[num-1]
+
+            vars_exist = df.columns
+            
+            if 'v`v`' not in vars_exist:
+                vv = np.array(df['vv']) - np.array(df['v'])*np.array(df['v'])
+            else: vv = np.array( df['v`v`'] )
+            
+            if 'w`w`' not in vars_exist:
+                ww = np.array(df['ww']) - np.array(df['w'])*np.array(df['w'])
+            else: ww = np.array( df['w`w`'] )
+            
+            vw = np.array(df['vw']) - np.array(df['v'])*np.array(df['w'])
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+# --------- compute S1 = dd(v'v'-w'w')/dydz
+
+            temp = np.array( vv-ww ).reshape( npz, npy, npx )
+            
+            S1 = np.gradient( np.gradient(temp, g.gy, axis=1), g.gz, axis=0)
+
+            self.bl[num-1].df['S1'] = S1.flatten()
+            
+# --------- compute S2 = dd(v'w')/dzdz - dd(v'w')/dydy
+
+            vw = vw.reshape( npz, npy, npx)
+            
+            S2 = np.gradient( np.gradient(vw, g.gz, axis=0), g.gz, axis=0) \
+               - np.gradient( np.gradient(vw, g.gy, axis=1), g.gy, axis=1)
+            
+            self.bl[num-1].df['S2'] = S2.flatten()
+            
+            self.bl[num-1].df['S'] = S1.flatten() + S2.flatten()
+            
+
 # ----------------------------------------------------------------------
 # >>> compute profile                                            (Nr.)
 # ----------------------------------------------------------------------
@@ -635,14 +703,13 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def get_slice( self, G, block_list, indx_slic, slic_type, buff=3 ):
+    def get_slice( self, block_list, G, indx_slic, slic_type, buff=3 ):
         
         """
-        G : corresponding GridData instance
         block_list: list of sliced blocks
+        G : corresponding GridData instance
         indx_slic: list of slice indexes on each block
         slic_type : 'X','Y' or 'Z'
-        loc : location coordinate
         
         return : dataframe of sliced results
         """
