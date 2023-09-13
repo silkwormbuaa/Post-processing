@@ -41,6 +41,10 @@ rank = comm.Get_rank()
 n_procs = comm.Get_size()
 
 
+slic_type = 'Y'
+loc = 0.0
+output_file = '/snapshot_Y_003.bin'
+
 # --- Root gets all the files and broadcast to other processors
 
 filelist = None
@@ -72,7 +76,7 @@ comm.barrier()
 # Root read in grid file and broadcast to other processors
 
 grid3d = None
-
+block_list = None
 
 # ----- check if the grid file is available and read in grid then broadcast
 
@@ -84,12 +88,14 @@ if rank == 0:
     else:
         
         grid3d = GridData('inca_grid.bin')
-        grid3d.verbose = True
+        grid3d.verbose = False
         grid3d.read_grid()
+        block_list, indx_slic = grid3d.select_sliced_blockgrids(slic_type,loc)
         
     sys.stdout.flush()
     
 grid3d = comm.bcast( grid3d, root=0 )
+block_list = comm.bcast( block_list, root=0 )
 
 
 # ----- Slice snapshot one by one
@@ -105,7 +111,7 @@ for snapshot_file in filelist:
     
     do_slice = True
     
-    slicefile = os.path.dirname(snapshot_file)+'/snapshot_Y_003.bin'
+    slicefile = os.path.dirname(snapshot_file)+output_file
     
     if i > 0:
     
@@ -127,7 +133,7 @@ for snapshot_file in filelist:
             
             snapshot3d.verbose = False
             
-            snapshot3d.read_snapshot()
+            snapshot3d.read_snapshot( block_list )
             
             print(f"finish reading snapshot {snapshot3d.itstep}.")
         
@@ -135,7 +141,7 @@ for snapshot_file in filelist:
         
             snapshot3d.grid3d = grid3d
             
-            snapshot2d = snapshot3d.get_slice( 'Y', 0.0 )
+            snapshot2d = snapshot3d.get_slice( slic_type, loc )
                     
 #            print(f"writing {slicefile}")
             
@@ -197,17 +203,16 @@ with timer("\nwrite 2d snapshot"):
     snapshot2d.write_snapshot("snapshot2d.bin") 
  """
 
+"""
+# just show a slice that already there; !! only applicable to uniform mesh.
 
-""" 
-# just show a slice that already there.
-
-os.chdir("/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936")
+#os.chdir("/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block")
 
 with timer("\nread in new snapshot and show"):
     
     snapshot2d_new = Snapshot("snapshot_Y_003.bin")
     
-    snapshot2d_new.verbose = True
+    snapshot2d_new.verbose = False
     
     snapshot2d_new.read_snapshot()
     
@@ -234,6 +239,7 @@ with timer("\nread in new snapshot and show"):
     contour = ax.pcolor(x,z,p)
     ax.set_title('pressure')
     plt.show()
-     """
+"""
+
 
 
