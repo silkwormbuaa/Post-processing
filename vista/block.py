@@ -38,7 +38,7 @@ from   .io_binary        import read_log_bin
 
 class BlockData:
     
-    def __init__( self, file, n_var, fill, vars, var_indx ):
+    def __init__( self, file, n_var, block_list, vars, var_indx ):
         
         self.verbose = False
         
@@ -77,7 +77,7 @@ class BlockData:
         # if this block chunk will be read?
         # by default, to_fill is False
         self.to_fill = False
-        if self.num in fill: self.to_fill = True
+        if self.num in block_list: self.to_fill = True
 
         # primitive variables 'u,v,w,rho,rhoE'
         # read primitive variables + 'p T mu', when fill is true.

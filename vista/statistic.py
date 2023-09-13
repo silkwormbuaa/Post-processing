@@ -789,8 +789,6 @@ class StatisticData:
                 bl.df['x'] = X.flatten()
                 bl.df['y'] = Y.flatten()                
 
-# ----- compute gradients if necessary
-
 # ----- drop ghost cells
 
             vars = bl.df.columns

@@ -71,7 +71,7 @@ with timer("read selected blocks "):
         
         S.compute_source_terms( block_list, G )
         
-with timer("Get slice dataframe "):
+with timer("Get slice dataframe and match grids"):
     
     df_slice = S.get_slice( block_list, G, indx_slic, 'X' )
     

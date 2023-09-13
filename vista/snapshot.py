@@ -127,7 +127,7 @@ class Snapshot:
         
         # Name list string of variables
         
-        self.vars_name = ''
+        self.vars_name = []
 
         # Number of blocks
         
@@ -162,12 +162,11 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def read_snapshot( self ):
+    def read_snapshot( self, block_list=None ):
         
         # End of file marker
 
         end_of_file = False
-
 
 # --- Read snapshot file
 
@@ -189,8 +188,8 @@ class Snapshot:
 
                 # Read current block 
                 # self.pos is updated inside self.read_snap_block
-
-                self.read_snap_block( fs )
+                 
+                self.read_snap_block( fs, block_list )
                 
                 self.n_bl += 1
 
@@ -201,9 +200,11 @@ class Snapshot:
 
         # Inform user
 
-        if self.verbose: print( '%d blocks were read.'%self.n_bl )
-        
-        if self.verbose: print( 'Completed.' ); sys.stdout.flush()
+        print( f'{self.n_bl} blocks were read ',end='')
+        if block_list is not None:
+            print( f'with {len(block_list)} blocks filled.' )
+
+        sys.stdout.flush()
         
         if self.type == 'block': snap_type = self.type
         if self.type == 'slice': snap_type = self.slic_type
@@ -431,41 +432,41 @@ class Snapshot:
             
             self.n_vars += 3
             
-            self.vars_name += 'u v w '
+            self.vars_name += ['u', 'v', 'w']
   
         else: 
             
             self.n_vars += 5
         
-            self.vars_name += 'u v w xx xx '
+            self.vars_name += ['u', 'v', 'w', 'xx', 'xx']
             
   
         if self.snap_with_tp: 
             
             self.n_vars += 2
             
-            self.vars_name += 'T p '
+            self.vars_name += ['T', 'p']
             
   
         if self.snap_with_vp: 
             
             self.n_vars += 1
         
-            self.vars_name += 'vapor '
+            self.vars_name += ['vapor']
             
             
         if self.snap_with_cp: 
             
             self.n_vars += 2
             
-            self.vars_name += 'cappa cp '
+            self.vars_name += ['cappa', 'cp']
             
   
         if self.snap_with_mu: 
             
             self.n_vars += 1
         
-            self.vars_name += 'mu '
+            self.vars_name += ['mu']
         
         
         # Special case - skin-friction
@@ -476,14 +477,14 @@ class Snapshot:
                 
                 self.n_vars += 1
                 
-                self.vars_name += 'cf '
+                self.vars_name += ['cf']
             
             
         if self.snap_with_wd: 
             
             self.n_vars += 1
             
-            self.vars_name += 'wd '
+            self.vars_name += ['wd']
             
 
   
@@ -542,10 +543,18 @@ class Snapshot:
 # Desc
 #     - read one snapshot block data
 #     - data are stored in self.snap_data list
-#     - [ bl_num, N1, N2, N3, GX, sol[n_var,:] ]
+#     - [ bl_num, N1, N2, N3, GX, df_sol:pd.DataFrame ]
 # ----------------------------------------------------------------------
 
-    def read_snap_block( self, file ):
+    def read_snap_block( self, file, block_list=None ):
+
+        """
+        file: pointer to opened file
+        block_list: list of blocks to be filled
+        
+        return: [ bl_num, N1, N2, N3, GX, df_sol:pd.DataFrame ] 
+                append to self.snap_data 
+        """
 
         # Size of int
 
@@ -574,9 +583,7 @@ class Snapshot:
             # Block dimensions
  
             N1 = self.snap_data[-1][1]
- 
             N2 = self.snap_data[-1][2]
- 
             N3 = self.snap_data[-1][3]
  
             # Use previous results
@@ -598,15 +605,11 @@ class Snapshot:
             if verbose:
  
                 str_ = ' Faulty block %5d - %2d x %2d x %2d'%(bl_num,N1,N2,N3)
- 
                 print( str_ )
- 
                 sys.stdout.flush()
                 
- 
         else:
             
-                
             # Corrupted IO flag
  
             io_alert = False
@@ -621,18 +624,15 @@ class Snapshot:
  
             self.pos += 4*sin
             
-             
             # Grid buffer
  
             GX = []
             
- 
             # Read grid vectors
             # if read in 3D blocks
     
             if self.snap_with_gx and self.type=='block':
                 
-                              
                 # First direction
     
                 G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
@@ -641,7 +641,6 @@ class Snapshot:
 
                 GX.append( G1 )
                 
-    
                 # Second direction
     
                 G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
@@ -650,7 +649,6 @@ class Snapshot:
     
                 GX.append( G2 )
                 
-    
                 # Third direction
     
                 G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
@@ -660,16 +658,6 @@ class Snapshot:
                 GX.append( G3 )
                 
 
-                    # Sanity check
-    
-#                    if np.all( ( G3 == 0.0 ) ): io_alert = True 
- 
-
-                # Sanity check
- 
-#                if np.all( ( G1 == 0.0 ) ) \
-#                    or np.all( ( G2 == 0.0 ) ): io_alert = True
-
             # if read in slice snapshot
             
             elif self.snap_with_gx and self.type == 'slice':
@@ -678,13 +666,11 @@ class Snapshot:
                 
                 if self.slic_type == 'X':
                     
-                    
                     G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
                     
                     self.pos += N2*self.kind
                     
                     GX.append( G2 )
-                    
                     
                     G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
                     
@@ -702,7 +688,6 @@ class Snapshot:
                     self.pos += N1*self.kind
                     
                     GX.append( G1 )
-                    
 
                     G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
                     
@@ -721,7 +706,6 @@ class Snapshot:
                     
                     GX.append( G1 )
                     
-                    
                     G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
                     
                     self.pos += N2*self.kind
@@ -729,29 +713,43 @@ class Snapshot:
                     GX.append( G2 )
  
  
- 
-            # Initialize solution buffer
- 
-            sol = np.zeros( shape=(self.n_vars, N1*N2*N3), dtype=np.float32 )
- 
-            
             # Record the starting position of var chunk
             
             self.pos_var_start.append( self.pos )
+ 
+            # Initialize solution buffer
             
+            to_fill = False
             
-            # Read solution fields
- 
-            for v in range( self.n_vars ):
- 
-                sol[v,:] = read_3Dflt_bin( self.pos, file, N1,N2,N3, self.kind )
- 
-                self.pos += ( N1*N2*N3 ) * self.kind
- 
-                # Sanity check on the pressure
- 
-                if v == 4 and np.all( ( sol[v,:] == 0.0 ) ): io_alert = True
+            if block_list is None:
+                to_fill = True
+            else: 
+                if bl_num in block_list: to_fill = True
 
+            if to_fill:
+                
+                # Read solution fields
+                
+                sol = np.zeros( shape=(self.n_vars,N1*N2*N3), dtype=np.float32 )
+                
+                for v in range( self.n_vars ):
+    
+                    sol[v,:] = read_3Dflt_bin(self.pos,file,N1,N2,N3,self.kind)
+    
+                    self.pos += ( N1*N2*N3 ) * self.kind
+    
+                    # Sanity check on the pressure
+    
+                    if v == 4 and np.all( ( sol[v,:] == 0.0 ) ): io_alert = True
+        
+                df_sol = pd.DataFrame(sol.T, columns=self.vars_name)
+            
+            else:
+                
+                self.pos += (N1*N2*N3*self.n_vars) * self.kind
+                df_sol = pd.DataFrame( columns=self.vars_name )
+            
+            
             # Evaluate
  
             if io_alert:
@@ -771,14 +769,15 @@ class Snapshot:
  
                 if verbose:
  
-                    str_ = ' Block %5d has size %2d x %2d x %2d' \
-                        %( bl_num, N1, N2, N3 ); print( str_ )
+                    str_ = f' Block {bl_num} has size {N1} x {N2} x {N3}'+ \
+                           f' {to_fill}'
+                    print( str_ )
  
                     sys.stdout.flush()
  
                 # Append to snap_data
  
-                self.snap_data.append( [ bl_num, N1, N2, N3, GX, sol ] )
+                self.snap_data.append( [ bl_num, N1, N2, N3, GX, df_sol ] )
                 
 
 
@@ -815,7 +814,7 @@ class Snapshot:
             
             
             # Loop over all snap_data's elements
-            # Snap_data_bl = [ bl_num, N1, N2, N3, GX, sol ]
+            # Snap_data_bl = [ bl_num, N1, N2, N3, GX, df_sol ]
             
             for snap_data_bl in self.snap_data:
                 
@@ -851,7 +850,7 @@ class Snapshot:
                     # Notice the binary data storage order [n_var, Z, Y, X]
                     # Reshape to chunk -> slice -> reshape to vector
 
-                    sol_buff = np.array(snap_data_bl[5]).\
+                    sol_buff = np.array(snap_data_bl[5]).T.\
                                   reshape( self.n_vars, N3, N2, N1 )
                     
                     sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
@@ -873,7 +872,7 @@ class Snapshot:
                         
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
-                        sol_buff = np.array(snap_data_bl[5]).\
+                        sol_buff = np.array(snap_data_bl[5]).T.\
                                     reshape( self.n_vars, N3, N2 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
@@ -893,7 +892,7 @@ class Snapshot:
                         
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
-                        sol_buff = np.array(snap_data_bl[5]).\
+                        sol_buff = np.array(snap_data_bl[5]).T.\
                                     reshape( self.n_vars, N3, N1 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
@@ -913,7 +912,7 @@ class Snapshot:
                         
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
-                        sol_buff = np.array(snap_data_bl[5]).\
+                        sol_buff = np.array(snap_data_bl[5]).T.\
                                     reshape( self.n_vars, N3, N2 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
@@ -1281,7 +1280,7 @@ class Snapshot:
         
         df = pd.DataFrame( GX.T, columns=GX_header.strip().split() )
         
-        df_sol = pd.DataFrame( sol_bl.T, columns=self.vars_name.strip().split() )
+        df_sol = pd.DataFrame( sol_bl.T, columns=self.vars_name )
         
         df = pd.concat([df, df_sol], axis=1)
         
@@ -1327,6 +1326,7 @@ class Snapshot:
 # Desc
 #
 #   - read a snapshot and return GX (DMD needs this)
+#   - mainly because for 2D snapshots,we cannot have the grid info from grid.bin 
 #
 # ----------------------------------------------------------------------
 
@@ -1580,26 +1580,29 @@ class Snapshot:
                 G2 = grd.gy
                 G3 = grd.gz
                 
-                sol = deepcopy( bl_data[5] )
-                sol = np.array(sol).reshape(self.n_vars,N3,N2,N1)
+                df_sol = deepcopy( bl_data[5] )
+                sol = np.array(df_sol).T.reshape(self.n_vars,N3,N2,N1)
                 
                 if slic_type == 'X':                
                     
                     GX = [G2,G3]
-                    sol = sol[:,:,:,idx]
-                    snap_2d.snap_data.append( [bl_num, 1, N2, N3, GX, sol] )
+                    sol = sol[:,:,:,idx].reshape(self.n_vars,N3*N2)
+                    df_sol = pd.DataFrame(sol.T,columns=self.vars_name)
+                    snap_2d.snap_data.append( [bl_num, 1, N2, N3, GX, df_sol] )
                 
                 if slic_type == 'Y':
                     
                     GX = [G1,G3]
-                    sol = sol[:,:,idx,:]
-                    snap_2d.snap_data.append( [bl_num, N1, 1, N3, GX, sol])
+                    sol = sol[:,:,idx,:].reshape(self.n_vars,N3*N1)
+                    df_sol = pd.DataFrame(sol.T,columns=self.vars_name)
+                    snap_2d.snap_data.append( [bl_num, N1, 1, N3, GX, df_sol] )
                     
                 if slic_type == 'Z':
                     
                     GX = [G1,G2]
-                    sol = sol[:,idx,:,:]
-                    snap_2d.snap_data.append( [bl_num, N1, N2, 1, GX, sol])
+                    sol = sol[:,idx,:,:].reshape(self.n_vars,N2*N1)
+                    df_sol = pd.DataFrame(sol.T,columns=self.vars_name)
+                    snap_2d.snap_data.append( [bl_num, N1, N2, 1, GX, df_sol] )
             
         
         # fill in headers
@@ -1755,7 +1758,7 @@ class Snapshot:
 
                 # sol(n_vars, N3, N2, N1)
                 
-                write_flt_bin( bl_data[5], f, self.kind )
+                write_flt_bin( np.array(bl_data[5]).T, f, self.kind )
                 
 
 # ----------------------------------------------------------------------
@@ -1781,39 +1784,41 @@ def Testing():
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/snapshots/snapshot_01376059/Z_slice'
         
     snap3d_file = test_dir1 + '/snapshot.bin'
-    
-  
+    gridfile = test_dir1 + '/inca_grid.bin'
+
+    # - read in grid info
+
+    G = GridData( gridfile )
+
+    G.read_grid()
+
+    block_list, indx_slic = G.select_sliced_blockgrids( 'X', 0.0 )
     
     os.chdir( test_dir1 )
     
     snapshot1 = Snapshot( snap3d_file )    
     
-    snapshot1.verbose = True
+    snapshot1.verbose = False
     
-#    snapshot1.read_snapshot()
+    with timer('read one snapshot '):
+        snapshot1.read_snapshot( block_list )
+        
+        print( snapshot1.snap_data[snapshot1.bl_nums.index(1365)][5])
+        
+#        print(snapshot1.snap_data[50])
     
-    with timer("\nread 3d snapshot and get snapshot struct"):
+#    with timer("\nread 3d snapshot and get snapshot struct"):
        
-        snapshot1.get_snapshot_struct()
+#        snapshot1.get_snapshot_struct()
     
-    with timer("\ndo slice"):
+#    with timer("\ndo slice"):
          
-        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
+#        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
         
-        # get slice of snapshot3d
-        
-    with timer("\nwrite slice snapshot"):
-        
-        # write slice snapshot
-        
-        pass
     
 #    snapshot1.verbose = False
 
 '''
-    with timer('read one snapshot '):
-    
-        snapshot1.read_snapshot()
 
         # Drop ghost points 
         
