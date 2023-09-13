@@ -203,17 +203,22 @@ def if_penetrate( zone_range, segment ):
 #
 # - select which wavy wall case
 #
-#   1 : 1014 case, D/delta = 2
-#   2 : 0926 case, D/delta = 1
-#   3 : 0825 case, D/delta = 0.5
-#   4 : 0927 case, D/delta = 0.25
-#   5 : 1221 case, D/delta = 0.125
 #
 # - wave length lambda = 1.04
 #
 # ----------------------------------------------------------------------
 
 def is_above_wavywall( y, z, Case = 1):
+    
+    """
+    y: float
+    z: float
+    case=1 : 1014 case, D/delta = 2
+    case=2 : 0926 case, D/delta = 1
+    case=3 : 0825 case, D/delta = 0.5
+    case=4 : 0927 case, D/delta = 0.25
+    case=5 : 1221 case, D/delta = 0.125
+    """
     
     A = 0.26
     
@@ -253,6 +258,88 @@ def is_above_wavywall( y, z, Case = 1):
         above_wall = False
     
     return above_wall
+
+
+
+# ----------------------------------------------------------------------
+# >>> define wall shape                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/11  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def define_wall_shape( z_list:np.array, Case = 1, write=True, scale=True ):
+
+    """
+    z_list: np.array of z coordinates
+    case=1 : 1014 case, D/delta = 2
+    case=2 : 0926 case, D/delta = 1
+    case=3 : 0825 case, D/delta = 0.5
+    case=4 : 0927 case, D/delta = 0.25
+    case=5 : 1221 case, D/delta = 0.125
+    
+    write out wall_X.dat or return list of y
+    """
+       
+    A = 0.26
+    
+    len_w = 1.04
+    
+    if   Case == 1:   D = 10.4
+    elif Case == 2:   D = 5.2    
+    elif Case == 3:   D = 2.6       
+    elif Case == 4:   D = 1.3
+    # Case 5: the wavelength is smaller and do not have flat valley
+    elif Case == 5:
+        len_w = 0.65
+        D     = 0.65
+    
+    y_list = []
+    
+    for z in z_list:
+    
+        z0 = z % D 
+        
+        # when z0 is less than half wave length
+        if abs(z0) <= (len_w*0.5):
+        
+            y_w = -A + A*math.cos( z0/len_w*2*math.pi )
+        
+        elif abs(z0-D) <= (len_w*0.5):
+        
+            y_w = -A + A*math.cos( (z0-D)/len_w*2*math.pi )
+        
+        else:
+            # for case 5, this will not happen
+            y_w = -2.0*A
+
+        y_list.append( y_w )
+    
+    if write:
+        
+        zycor = np.column_stack((z_list,y_list))
+        
+        if scale: zycor = zycor/5.2
+        
+        np.savetxt( "wall_X.dat",
+                    zycor,
+                    fmt="%15.7f",
+                    delimiter=" ",
+                    comments="",
+                    header='x    y')
+    
+    else: 
+        
+        return np.array( y_list )
+    
+    
 
 # ----------------------------------------------------------------------
 # >>> Mean of a list                                            ( 4 )

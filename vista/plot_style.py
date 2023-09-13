@@ -470,6 +470,7 @@ def plot_dmd_mode( grids,
     if colorbar is True:
         cbar = plt.colorbar(cs, cax=ax.inset_axes([1.1,0.3,0.03,0.5]))
         cbar.ax.set_ylabel(r'$\Re({\phi}_p)$',fontsize=15)
+    
     # set title
     
     if title: ax.set_title(f"{title}",size=20)
@@ -622,6 +623,143 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
     
     plt.close()
     
+
+
+# ----------------------------------------------------------------------
+# >>> Plot Z slice                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/12  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_slicez_stat( xx, yy, v, 
+                      sonic=True, 
+                      separation=True,
+                      figsize=None, 
+                      filename=None,
+                      col_map=None,
+                      cbar_label=None):
+    
+    if figsize is None:
+        figsize = (15,8)
+    
+    fig, ax = plt.subplots( figsize=figsize )
+    
+    if col_map is None: col_map='viridis'
+    
+    cs = ax.contourf( xx, yy, v, cmap=col_map, levels=51 )
+    
+    if sonic: 
+        df_sonic = pd.read_csv( 'SonicLine.dat', delimiter=r'\s+' )
+        x_sonic = np.array(df_sonic['x'])
+        y_sonic = np.array(df_sonic['y'])
+        ax.plot(x_sonic,y_sonic,'blue')
+    
+    if separation:
+        df_sep = pd.read_csv( 'SeparationLine.dat', delimiter=r'\s+' )
+        x_sep = np.array(df_sep['x'])
+        y_sep = np.array(df_sep['y'])
+        ax.plot(x_sep,y_sep,'red')
+
+    cbar = plt.colorbar(cs)
+    cbar.ax.set_ylabel(cbar_label,fontsize=15)
+    cbar.ax.tick_params(labelsize=15)
+
+    ax.tick_params(axis='x',labelsize=15,pad=10)
+    ax.tick_params(axis='y',labelsize=15,pad=10)
+
+
+    # set axises stay with contour and x,y unit length equal
+    
+    plt.axis('tight')
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    if filename:
+        plt.savefig( filename )
+        print(f"{filename} is output.\n")
+
+    plt.close()        
+
+
+# ----------------------------------------------------------------------
+# >>> Plot X slice                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/12  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_slicex_stat( zz, yy, v,
+                      wall=True, 
+                      sonic=True, 
+                      separation=False,
+                      figsize=None, 
+                      filename=None,
+                      col_map=None,
+                      cbar_label=None):
+    
+    if figsize is None:
+        figsize = (15,15)
+    
+    fig, ax = plt.subplots( figsize=figsize )
+    
+    if col_map is None: col_map='viridis'
+    
+    cs = ax.contourf( zz, yy, v, cmap=col_map, levels=51 )
+    
+    if wall:
+        df_wall = pd.read_csv( 'wall_X.dat', delimiter=r'\s+' )
+        z_wall = np.array(df_wall['x'])
+        y_wall = np.array(df_wall['y'])
+#        ax.plot(z_wall,y_wall,'black')
+        ax.fill_between(z_wall,-0.1,y_wall,color='grey')
+    
+    
+    if sonic: 
+        df_sonic = pd.read_csv( 'SonicLine.dat', delimiter=r'\s+' )
+        z_sonic = np.array(df_sonic['x'])
+        y_sonic = np.array(df_sonic['y'])
+        ax.plot(z_sonic,y_sonic,'blue')
+    
+    if separation:
+        df_sep = pd.read_csv( 'SeparationLine.dat', delimiter=r'\s+' )
+        z_sep = np.array(df_sep['x'])
+        y_sep = np.array(df_sep['y'])
+        ax.plot(z_sep,y_sep,'red')
+
+    cbar = plt.colorbar(cs)
+    cbar.ax.set_ylabel(cbar_label,fontsize=15)
+    cbar.ax.tick_params(labelsize=15)
+
+    ax.tick_params(axis='x',labelsize=15,pad=10)
+    ax.tick_params(axis='y',labelsize=15,pad=10)
+
+
+    # set axises stay with contour and x,y unit length equal
+    
+    plt.axis('tight')
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    if filename:
+        plt.savefig( filename )
+        print(f"{filename} is output.\n")
+
+    plt.close() 
+
+
 
 
 # ----------------------------------------------------------------------

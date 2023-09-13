@@ -447,7 +447,8 @@ class StatisticData:
 
         """
         block_list: list of blocks that are going to compute gradients
-        grads: list of str representing gradients ['schlieren','shadowgraph']
+        grads: list of str representing gradients 
+               ['schlieren','shadowgraph','vorticity']
         G: GridData instance of corresponding case
         
         return: self.bl[num-1].df['grad_rho'] (...['laplacian'])
