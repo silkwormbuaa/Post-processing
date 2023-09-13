@@ -424,9 +424,9 @@ class StatisticData:
                 self.bl[num-1].df['v`v`'] = vv
                 self.bl[num-1].df['w`w`'] = ww
                 self.bl[num-1].df['u`v`'] = uv
-                self.bl[num-1].df['tke']= tke
+                self.bl[num-1].df['tke']= tke             
                 
-                
+
 
 # ----------------------------------------------------------------------
 # >>> compute gradients of variables                              (Nr.)
@@ -510,10 +510,28 @@ class StatisticData:
                               
                     self.bl[num-1].df['laplacian'] = laplacian.flatten()
                     
-# --------- compute other gradients maybe...
-            
+# ---------- compute vorticity
 
+            if "vorticity" in grads:
 
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
+                
+                u = np.array( df['u'] ).reshape( npz, npy, npx )
+                v = np.array( df['v'] ).reshape( npz, npy, npx )
+                w = np.array( df['w'] ).reshape( npz, npy, npx )
+                
+                w1 = np.gradient(w,g.gy,axis=1) - np.gradient(v,g.gz,axis=0)
+                w2 = np.gradient(u,g.gz,axis=0) - np.gradient(w,g.gx,axis=2)
+                w3 = np.gradient(v,g.gx,axis=2) - np.gradient(u,g.gy,axis=1)
+                
+                self.bl[num-1].df['w1'] = w1.flatten()
+                self.bl[num-1].df['w2'] = w2.flatten()
+                self.bl[num-1].df['w3'] = w3.flatten()
+                
+                               
+                               
 # ----------------------------------------------------------------------
 # >>> compute source term of secondary flow                      (Nr.)
 # ----------------------------------------------------------------------
