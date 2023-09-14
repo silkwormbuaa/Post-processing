@@ -708,7 +708,7 @@ class StatisticData:
             
 
 # ----------------------------------------------------------------------
-# >>> get slice                                                (Nr.)
+# >>> get slice dataframe (statistics.bin)                        (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -722,7 +722,7 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def get_slice( self, block_list, G, indx_slic, slic_type, buff=3 ):
+    def get_slice_df( self, block_list, G, indx_slic, slic_type, buff=3 ):
         
         """
         block_list: list of sliced blocks

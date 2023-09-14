@@ -41,8 +41,8 @@ rank = comm.Get_rank()
 n_procs = comm.Get_size()
 
 
-slic_type = 'Y'
-loc = 0.0
+slic_type   = 'Y'
+loc         = 0.0
 output_file = '/snapshot_Y_003.bin'
 
 # --- Root gets all the files and broadcast to other processors
@@ -135,8 +135,6 @@ for snapshot_file in filelist:
             
             snapshot3d.read_snapshot( block_list )
             
-            print(f"finish reading snapshot {snapshot3d.itstep}.")
-        
             # write the slice
         
             snapshot3d.grid3d = grid3d

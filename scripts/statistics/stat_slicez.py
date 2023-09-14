@@ -94,9 +94,7 @@ with timer("Interpolate and plot "):
 
     T    = griddata( (x_slice,y_slice), T_slice,
                      (xx,yy), method='linear')
-    
-    x = (np.linspace(-50.0,100,301) - 50.4)/5.2
-    y = np.linspace(0.0, 50.0,101)/5.2
+
     
     save_sonic_line( xx,yy, mach )
     

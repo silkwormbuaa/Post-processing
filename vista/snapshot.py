@@ -209,7 +209,7 @@ class Snapshot:
         if self.type == 'block': snap_type = self.type
         if self.type == 'slice': snap_type = self.slic_type
         
-        print(f"\nsnapshot {self.itstep} {snap_type} is read.\n")
+        print(f"\nSnapshot {self.itstep} {snap_type} is read.\n")
         
 
 
@@ -913,7 +913,7 @@ class Snapshot:
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
                         sol_buff = np.array(snap_data_bl[5]).T.\
-                                    reshape( self.n_vars, N3, N2 )
+                                    reshape( self.n_vars, N2, N1 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
                     
@@ -1103,15 +1103,15 @@ class Snapshot:
                 
                 # x,y,z are lists of nparrays
                 
-                x.append( np.ravel( X.T ) )
-                y.append( np.ravel( Y.T ) )
-                z.append( np.ravel( Z.T ) )
+                x = x + np.ravel( X.T ).tolist()
+                y = y + np.ravel( Y.T ).tolist()
+                z = z + np.ravel( Z.T ).tolist()
                 
             x = np.array( x ).ravel()
             y = np.array( y ).ravel()
             z = np.array( z ).ravel()
             
-            GX = np.stack( [ x.ravel(), y.ravel(), z.ravel() ] )
+            GX = np.stack( [ x, y, z ] )
             
             GX_header = 'x y z '
             
@@ -1157,13 +1157,13 @@ class Snapshot:
                     
                     Y, Z = np.meshgrid( y_bl, z_bl )
                     
-                    y.append( np.ravel( Y ) )
-                    z.append( np.ravel( Z ) )
+                    y = y + np.ravel( Y ).tolist()
+                    z = z + np.ravel( Z ).tolist()
 
                 y = np.array( y ).ravel()
                 z = np.array( z ).ravel()
                 
-                GX = np.stack( [ y.ravel(), z.ravel() ] )
+                GX = np.stack( [ y, z ] )
                 
                 GX_header = 'y z '
                 
@@ -1203,13 +1203,13 @@ class Snapshot:
                     
                     X, Z = np.meshgrid( x_bl, z_bl )
                     
-                    x.append( np.ravel( X ) )
-                    z.append( np.ravel( Z ) )
+                    x = x + np.ravel( X ).tolist()
+                    z = z + np.ravel( Z ).tolist()
 
                 x = np.array( x ).ravel()
                 z = np.array( z ).ravel()
                 
-                GX = np.stack( [ x.ravel(), z.ravel() ] )
+                GX = np.stack( [ x, z ] )
                 
                 GX_header = 'x z '
                 
@@ -1249,13 +1249,13 @@ class Snapshot:
                     
                     X, Y = np.meshgrid( x_bl, y_bl )
                     
-                    x.append( np.ravel( X ) )
-                    y.append( np.ravel( Y ) )
+                    x = x + np.ravel( X ).tolist()
+                    y = y + np.ravel( Y ).tolist()
 
-                x = np.array( x ).ravel()
-                y = np.array( y ).ravel()
+                x = np.array( x )
+                y = np.array( y )
                 
-                GX = np.stack( [ x.ravel(), y.ravel() ] )
+                GX = np.stack( [ x, y ] )
                 
                 GX_header = 'x y '
                 
@@ -1632,6 +1632,31 @@ class Snapshot:
         
         return snap_2d
 
+
+
+# ----------------------------------------------------------------------
+# >>> get slice dataframe (snapshot.bin                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/14  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def get_slice_df( self, slic_type, loc, buff=3 ):
+        
+        snapshot2d = self.get_slice( slic_type, loc, buff=buff )
+        
+        snapshot2d.drop_ghost( buff=3 )
+        
+        snapshot2d.assemble_block()
+        
+        return snapshot2d.df
 
 
 # ----------------------------------------------------------------------
