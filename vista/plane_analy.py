@@ -135,7 +135,54 @@ def save_isolines( xx, yy, v, value:float, file ):
         
         pickle.dump( lines, f)
         
+
+
+# ----------------------------------------------------------------------
+# >>> shift coordinates                                          (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/14  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def shift_coordinates( df:pd.DataFrame, delta, H, H_md, x_imp ):
+    
+    """
+    df    : dataframe of df_slice
+    delta : boundary thickness
+    H     : height of ridge
+    H_md  : melt-down height
+    x_imp : x coordinate of impingement point
+    
+    return : df with xs, ys, zs (if x,y,z exist)
+    """
+    
+    vars = df.columns
+    
+    if 'x' in vars: 
+        xs = ( np.array( df['x'] ) - x_imp ) / delta
+        df['xs'] = xs
+    
+    if 'y' in vars: 
+        ys = ( np.array( df['y'] ) + H - H_md ) / delta
+        y_scale = np.array( df['y'] ) / delta
+        df['ys'] = ys
+        df['y_scale'] = y_scale
         
+    if 'z' in vars:
+        zs = np.array( df['z'] ) / delta
+        df['zs'] = zs
+    
+    return df
+
+
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------

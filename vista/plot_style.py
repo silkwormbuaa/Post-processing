@@ -665,7 +665,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'white')
+            ax.plot(x_sonic,y_sonic,'white',linewidth=0.8)
 
 
     if separation:
@@ -744,7 +744,7 @@ def plot_slicex_stat( zz, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'white')
+            ax.plot(x_sonic,y_sonic,'white',linewidth=0.8)
     
     
     if separation:
@@ -754,7 +754,7 @@ def plot_slicex_stat( zz, yy, v,
         for line in lines:
             x_sep = line[:,0]
             y_sep = line[:,1]
-            ax.plot(x_sep,y_sep,'red')
+            ax.plot(x_sep,y_sep,'red',linewidth=0.8)
 
     cbar = plt.colorbar(cs)
     cbar.ax.set_ylabel(cbar_label,fontsize=15)

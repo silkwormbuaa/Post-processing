@@ -31,7 +31,11 @@ from   vista.timer       import timer
 
 from   vista.tools       import define_wall_shape
 
+from   vista.tools       import read_case_parameter
+
 from   vista.plane_analy import save_sonic_line
+
+from   vista.plane_analy import shift_coordinates
 
 from   vista.plot_style  import plot_slicex_stat
 
@@ -40,6 +44,7 @@ datapath = os.getcwd()
 
 datafile = datapath + '/statistics.bin'
 gridfile = datapath + '/inca_grid.bin'
+parametersfile = datapath.split('/results')[0] + '/case_parameters'
 
 # - read in grid info
 
@@ -77,16 +82,24 @@ with timer("Get slice dataframe and match grids"):
     
 with timer("Interpolate and plot "):
     
-    z_slice = np.array( df_slice['z'] ) / 5.2
-    y_slice = np.array( df_slice['y'] ) / 5.2
+    parameters = read_case_parameter( parametersfile )
+    delta   = float( parameters.get('delta_0') )
+    h_ridge = float( parameters.get('H') )
+    h_md    = float( parameters.get('H_md') )
+    x_imp   = float( parameters.get('x_imp') )
+    
+    df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
+    
+    y_slice = np.array( df_slice['ys'] )
+    z_slice = np.array( df_slice['zs'] )
     
     mach_slice = np.array( df_slice['mach'] )
     tke_slice = np.array( df_slice['tke'] )
     S_slice = np.array( df_slice['S'] )
     w1_slice = np.array( df_slice['w1'] )
     
-    z = np.linspace(-5.2,5.2, 201) / 5.2
-    y = np.linspace(-0.52, 10.4, 316) / 5.2
+    z = np.linspace(-1.0,1.0, 201)
+    y = np.linspace(-0.1, 1.1, 121)
     
     zz,yy = np.meshgrid(z,y)
     
@@ -109,7 +122,7 @@ with timer("Interpolate and plot "):
 
     save_sonic_line( zz, yy, mach )
     
-    define_wall_shape( z*5.2, Case=4 )
+    define_wall_shape( z*5.2, Case=4, yshift=(h_ridge-h_md) )
     
     cbar = r'$Mach$'
     plot_slicex_stat( zz, yy, mach,

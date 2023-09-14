@@ -275,7 +275,8 @@ def is_above_wavywall( y, z, Case = 1):
 #
 # ----------------------------------------------------------------------
 
-def define_wall_shape( z_list:np.array, Case = 1, write=True, scale=True ):
+def define_wall_shape( z_list:np.array, Case = 1, 
+                       yshift=None, write=True, scale=True ):
 
     """
     z_list: np.array of z coordinates
@@ -321,6 +322,10 @@ def define_wall_shape( z_list:np.array, Case = 1, write=True, scale=True ):
             y_w = -2.0*A
 
         y_list.append( y_w )
+    
+    if yshift is not None:
+        y_list = np.array(y_list) + yshift
+        
     
     if write:
         
