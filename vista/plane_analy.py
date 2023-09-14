@@ -14,6 +14,8 @@ import pandas            as     pd
 
 import matplotlib.pyplot as     plt
 
+import pickle
+
 # ----------------------------------------------------------------------
 # >>> Save sonic line                                            (Nr.)
 # ----------------------------------------------------------------------
@@ -35,25 +37,22 @@ def save_sonic_line( xx, yy, mach ):
     mach : 2d numpy array 
     """
     
-    header = 'x      y'
-    xycor = np.empty(shape=[0, 2])
+    lines = []
+    
     fig, ax = plt.subplots(figsize=(10, 4))
-    cs = ax.contour(xx, yy, mach, levels=[1.0], linewidths=1.5, colors="k")
+
+    cs = ax.contour( xx, yy, mach, levels=[1.0] )
+
     for isoline in cs.collections[0].get_paths():
-        xy = isoline.vertices
-        xycor = np.vstack((xycor, xy))
+        line = isoline.vertices
+        lines.append( line )
         
     plt.close()
-        
-    np.savetxt(
-        "SonicLine.dat",
-        xycor,
-        fmt="%15.7f",
-        delimiter=" ",
-        comments="",
-        header=header,
-    )
     
+    with open('soniclines.pkl','wb') as f:
+        
+        pickle.dump( lines, f )
+        
 
 
 # ----------------------------------------------------------------------
@@ -75,27 +74,68 @@ def save_separation_line( xx, yy, u ):
     """
     xx,yy: 2d numpy array storing coordinates
     u : 2d numpy array of streamwise velocity
+    
+    return: pickle isolines list into 'separationlines.pkl'
     """
     
-    header = 'x      y'
-    xycor = np.empty(shape=[0, 2])
-    fig, ax = plt.subplots(figsize=(10, 4))
-    cs = ax.contour(xx, yy, u, levels=[0.0], linewidths=1.5, colors="k")
-    for isoline in cs.collections[0].get_paths():
-        xy = isoline.vertices
-        xycor = np.vstack((xycor, xy))
+    lines = []
     
+    fig, ax = plt.subplots(figsize=(20, 8))
+    
+    cs = ax.contour(xx, yy, u, levels=[0.0] )
+    
+    for isoline in cs.collections[0].get_paths():
+        line = isoline.vertices
+        lines.append( line )
+        
     plt.close()
     
-    np.savetxt(
-        "SeparationLine.dat",
-        xycor,
-        fmt="%15.7f",
-        delimiter=" ",
-        comments="",
-        header=header,
-    )
+    with open('separationlines.pkl','wb') as f:
+        
+        pickle.dump( lines, f)
 
+
+
+# ----------------------------------------------------------------------
+# >>> Save isolines                                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/11  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def save_isolines( xx, yy, v, value:float, file ):
+
+    """
+    xx,yy: 2d numpy array storing coordinates
+    v : 2d numpy array of target variable
+    
+    return: pickle isolines list into file
+    """
+    
+    lines = []
+    
+    fig, ax = plt.subplots(figsize=(20, 8))
+    
+    cs = ax.contour(xx, yy, v, levels=[0.0] )
+    
+    for isoline in cs.collections[0].get_paths():
+        line = isoline.vertices
+        lines.append( line )
+        
+    plt.close()
+    
+    with open( file,'wb') as f:
+        
+        pickle.dump( lines, f)
+        
+        
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------

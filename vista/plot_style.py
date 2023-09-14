@@ -8,6 +8,8 @@
 @Desc    :   None
 '''
 
+import pickle
+
 import numpy             as     np
 
 import pandas            as     pd
@@ -657,16 +659,23 @@ def plot_slicez_stat( xx, yy, v,
     cs = ax.contourf( xx, yy, v, cmap=col_map, levels=51 )
     
     if sonic: 
-        df_sonic = pd.read_csv( 'SonicLine.dat', delimiter=r'\s+' )
-        x_sonic = np.array(df_sonic['x'])
-        y_sonic = np.array(df_sonic['y'])
-        ax.plot(x_sonic,y_sonic,'blue')
-    
+        with open('soniclines.pkl','rb') as f:
+            lines = pickle.load( f )
+        
+        for line in lines:
+            x_sonic = line[:,0]
+            y_sonic = line[:,1]
+            ax.plot(x_sonic,y_sonic,'white')
+
+
     if separation:
-        df_sep = pd.read_csv( 'SeparationLine.dat', delimiter=r'\s+' )
-        x_sep = np.array(df_sep['x'])
-        y_sep = np.array(df_sep['y'])
-        ax.plot(x_sep,y_sep,'red')
+        with open('separationlines.pkl','rb') as f:
+            lines = pickle.load( f )
+            
+        for line in lines:
+            x_sep = line[:,0]
+            y_sep = line[:,1]
+            ax.plot(x_sep,y_sep,'red',linewidth=0.8)
 
     cbar = plt.colorbar(cs)
     cbar.ax.set_ylabel(cbar_label,fontsize=15)
@@ -729,16 +738,23 @@ def plot_slicex_stat( zz, yy, v,
     
     
     if sonic: 
-        df_sonic = pd.read_csv( 'SonicLine.dat', delimiter=r'\s+' )
-        z_sonic = np.array(df_sonic['x'])
-        y_sonic = np.array(df_sonic['y'])
-        ax.plot(z_sonic,y_sonic,'blue')
+        with open('soniclines.pkl','rb') as f:
+            lines = pickle.load( f )
+        
+        for line in lines:
+            x_sonic = line[:,0]
+            y_sonic = line[:,1]
+            ax.plot(x_sonic,y_sonic,'white')
+    
     
     if separation:
-        df_sep = pd.read_csv( 'SeparationLine.dat', delimiter=r'\s+' )
-        z_sep = np.array(df_sep['x'])
-        y_sep = np.array(df_sep['y'])
-        ax.plot(z_sep,y_sep,'red')
+        with open('separationlines.pkl','rb') as f:
+            lines = pickle.load( f )
+            
+        for line in lines:
+            x_sep = line[:,0]
+            y_sep = line[:,1]
+            ax.plot(x_sep,y_sep,'red')
 
     cbar = plt.colorbar(cs)
     cbar.ax.set_ylabel(cbar_label,fontsize=15)
