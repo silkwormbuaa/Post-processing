@@ -73,7 +73,7 @@ with timer("read selected blocks "):
         
 with timer("Get slice dataframe and match grids"):
     
-    df_slice = S.get_slice( block_list, G, indx_slic, 'X' )
+    df_slice = S.get_slice_df( block_list, G, indx_slic, 'X' )
     
 with timer("Interpolate and plot "):
     

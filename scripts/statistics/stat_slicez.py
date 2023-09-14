@@ -67,7 +67,7 @@ with timer("read selected blocks "):
         
 with timer("Get slice dataframe "):
     
-    df_slice = S.get_slice( block_list, G, indx_slic, 'Z' )
+    df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
 
 with timer("Interpolate and plot "):
     
