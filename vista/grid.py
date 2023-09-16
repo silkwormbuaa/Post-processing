@@ -275,14 +275,15 @@ class GridData:
 #
 # - input a bbox[xmin,xmax,ymin,ymax,zmin,zmax]
 # - record which block grids groups are partly or fully overlapped
-#   with rect1. 
+#   with rect1 (mode=='overlap); or within bounding box(mode='within')
 #
 # ----------------------------------------------------------------------
 
-    def select_blockgrids( self, bbox ):
+    def select_blockgrids( self, bbox, mode='overlap' ):
         
         """
         bbox : [xmin,xmax,ymin,ymax,zmin,zmax]
+        mode : 'overlap' or 'within'
         """
         
         selected_bls = []
@@ -300,9 +301,19 @@ class GridData:
             
             bbox2 = [ lx0, lx1, ly0, ly1, lz0, lz1 ]
             
-            if if_overlap_3d( bbox, bbox2 ):
+            if mode == 'overlap':
                 
-                selected_bls.append( bl_num )
+                if if_overlap_3d( bbox, bbox2 ):
+                    
+                    selected_bls.append( bl_num )
+                    
+            elif mode == 'within':
+                
+                if (    lx0 >= bbox[0] and lx1 <= bbox[1]
+                    and ly0 >= bbox[2] and ly1 <= bbox[3]
+                    and lz0 >= bbox[4] and lz1 <= bbox[5] ):
+                    
+                    selected_bls.append( bl_num )
             
         return selected_bls
 
@@ -322,18 +333,27 @@ class GridData:
 #
 # ----------------------------------------------------------------------
 
-    def select_sliced_blockgrids( self, slic_type, loc, buff=3 ):
+    def select_sliced_blockgrids( self, slic_type, loc, bbox=None, buff=3 ):
         
         """
         input:
         slic_type : 'X', 'Y', or 'Z' ( normal direction of slice)
         loc       : coordinate
+        bbox      : [xmin,xmax,ymin,ymax,zmin,zmax]
         
         return : list of selected bl_nums, list of slice indexes on each bl
         """
         
         selected_bls = []
         indx_slic    = []
+        
+        if bbox is None: 
+            min = float('-inf')
+            max = float('inf')
+            bbox = [min,max,min,max,min,max]
+        
+        within_bbox_bls = self.select_blockgrids( bbox, mode='within' )
+        
         
         for grd in self.g:
             
@@ -348,7 +368,7 @@ class GridData:
             
             if slic_type == 'X':
                 
-                if lx0 <= loc < lx1:
+                if (lx0 <= loc < lx1) and (bl_num in within_bbox_bls):
                     
                     selected_bls.append( bl_num )
                     istart = buff
@@ -364,7 +384,7 @@ class GridData:
             
             elif slic_type == 'Y':
                 
-                if ly0 <= loc < ly1:
+                if (ly0 <= loc < ly1) and (bl_num in within_bbox_bls):
                     
                     selected_bls.append( bl_num )
                     istart = buff
@@ -380,7 +400,7 @@ class GridData:
                     
             elif slic_type == 'Z':
                 
-                if lz0 <= loc < lz1:
+                if (lz0 <= loc < lz1) and (bl_num in within_bbox_bls):
                     
                     selected_bls.append( bl_num )
 

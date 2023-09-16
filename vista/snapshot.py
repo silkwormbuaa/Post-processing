@@ -144,6 +144,10 @@ class Snapshot:
         # Grid3d (including all blocks grids from inca_grid.bin file)
 
         self.grid3d = None
+        
+        # number of actually filled blocks
+        
+        self.filled = 0
 
 
 # ----------------------------------------------------------------------
@@ -202,7 +206,7 @@ class Snapshot:
 
         print( f'{self.n_bl} blocks were read ',end='')
         if block_list is not None:
-            print( f'with {len(block_list)} blocks filled.' )
+            print( f'with { self.filled } blocks filled.' )
 
         sys.stdout.flush()
         
@@ -724,7 +728,7 @@ class Snapshot:
             if block_list is None:
                 to_fill = True
             else: 
-                if bl_num in block_list: to_fill = True
+                if bl_num in block_list: to_fill = True; self.filled += 1
 
             if to_fill:
                 
@@ -778,6 +782,111 @@ class Snapshot:
                 # Append to snap_data
  
                 self.snap_data.append( [ bl_num, N1, N2, N3, GX, df_sol ] )
+
+
+
+    def compute_gradients( self, block_list:list, grads:list, 
+                           grid3d:GridData, buff=3):
+        """
+        block_list: list of blocks that are going to compute gradients
+        grads: list of str representing gradients 
+               ['schlieren','shadowgraph','grad_V']
+        G: GridData instance of corresponding case
+        
+        return: self.snap_data[num-1][5]['grad_rho'] (...['laplacian'])        
+        """
+        
+        for num in block_list:
+            
+            df = self.snap_data[self.bl_nums.index(num)][5]
+            
+            g = grid3d.g[num-1]
+            
+            T = np.array( df['T'] )
+            p = np.array( df['p'] )
+            
+            df['rho'] = p / (T*287.0508571)
+            
+# --------- compute magnitude of density gradient
+
+            if 'schlieren' in grads:
+                
+                rho = np.array( df['rho'] )
+                
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
+                
+                rho = rho.reshape( npz, npy, npx )
+                
+                drho_dx = np.gradient(rho, g.gx, axis=2)
+                drho_dy = np.gradient(rho, g.gy, axis=1)
+                drho_dz = np.gradient(rho, g.gz, axis=0)
+                
+                grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
+                
+                df['grad_rho'] = grad_rho.flatten()
+
+                
+# --------- compute Laplacian of the density
+
+            if 'shadowgraph' in grads:
+                
+                if 'schlieren' in grads:
+                    
+                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
+                              + np.gradient(drho_dy, g.gy, axis=1) \
+                              + np.gradient(drho_dz, g.gz, axis=0) 
+                              
+                    df['laplacian'] = laplacian.flatten()
+            
+                else:
+                    
+                    rho = np.array( df['rho'] )
+                    
+                    npx = g.nx + buff*2
+                    npy = g.ny + buff*2
+                    npz = g.nz + buff*2
+                    
+                    rho = rho.reshape( npz, npy, npx )
+                    
+                    drho_dx = np.gradient(rho, g.gx, axis=2)
+                    drho_dy = np.gradient(rho, g.gy, axis=1)
+                    drho_dz = np.gradient(rho, g.gz, axis=0)
+
+                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
+                              + np.gradient(drho_dy, g.gy, axis=1) \
+                              + np.gradient(drho_dz, g.gz, axis=0) 
+                              
+                    df['laplacian'] = laplacian.flatten()
+
+# ------------- compute velocity gradient
+
+            if 'grad_V' in grads:
+                
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
+                
+                u = np.array( df['u'] ).reshape( npz, npy, npx )
+                v = np.array( df['v'] ).reshape( npz, npy, npx )
+                w = np.array( df['w'] ).reshape( npz, npy, npx )
+                
+                du_dx = np.gradient( u, g.gx, axis=2 )
+                du_dy = np.gradient( u, g.gy, axis=1 )
+                du_dz = np.gradient( u, g.gz, axis=0 )
+                dv_dx = np.gradient( v, g.gx, axis=2 )
+                dv_dy = np.gradient( v, g.gy, axis=1 )
+                dv_dz = np.gradient( v, g.gz, axis=0 )
+                dw_dx = np.gradient( w, g.gx, axis=2 )
+                dw_dy = np.gradient( w, g.gy, axis=1 )
+                dw_dz = np.gradient( w, g.gz, axis=0 )
+                
+                Q = -0.5*( du_dx**2 + dv_dy**2 + dw_dz**2 ) \
+                    -du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
+                
+                df['Q-criterion'] = Q.flatten()
+                
                 
 
 
@@ -826,6 +935,8 @@ class Snapshot:
                 N2     = snap_data_bl[2]
                 N3     = snap_data_bl[3]
                 
+                df     = snap_data_bl[5]
+                n_vars = len( df.columns )
                 
                 # Nx, Ny, Nz are dimensions without ghost cells
                 
@@ -835,7 +946,6 @@ class Snapshot:
                     Ny     = N2 - buff*2
                     Nz     = N3 - buff*2
                     
-                
                     # Grid buffer
                     
                     GX = []
@@ -851,7 +961,7 @@ class Snapshot:
                     # Reshape to chunk -> slice -> reshape to vector
 
                     sol_buff = np.array(snap_data_bl[5]).T.\
-                                  reshape( self.n_vars, N3, N2, N1 )
+                                  reshape( n_vars, N3, N2, N1 )
                     
                     sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
                 
@@ -873,7 +983,7 @@ class Snapshot:
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
                         sol_buff = np.array(snap_data_bl[5]).T.\
-                                    reshape( self.n_vars, N3, N2 )
+                                    reshape( n_vars, N3, N2 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
 
@@ -893,7 +1003,7 @@ class Snapshot:
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
                         sol_buff = np.array(snap_data_bl[5]).T.\
-                                    reshape( self.n_vars, N3, N1 )
+                                    reshape( n_vars, N3, N1 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
                     
@@ -913,18 +1023,20 @@ class Snapshot:
                         for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
 
                         sol_buff = np.array(snap_data_bl[5]).T.\
-                                    reshape( self.n_vars, N2, N1 )
+                                    reshape( n_vars, N2, N1 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
                     
                 
                 # Reshape the matrix ( no matter 2D or 3D) to long vectors
                        
-                sol_buff = sol_buff.reshape(( self.n_vars, Nx*Ny*Nz ))
+                sol_buff = sol_buff.reshape(( n_vars, Nx*Ny*Nz ))
+                
+                df = pd.DataFrame(sol_buff.T, columns=df.columns)
                 
                 # Append to snap_data_clean
                 
-                self.snap_cleandata.append([bl_num, Nx, Ny, Nz, GX, sol_buff])  
+                self.snap_cleandata.append([bl_num, Nx, Ny, Nz, GX, df])  
                         
             
             # Release memory occupied by snap_data
@@ -1076,7 +1188,9 @@ class Snapshot:
     def assemble_block( self ):
         
         # Different ways of assemble blocks with different shapes
-        
+
+        vars = self.snap_cleandata[0][5].columns
+
         if self.type == 'block':
             
             bl_number = []
@@ -1117,8 +1231,8 @@ class Snapshot:
             
             
             # Compose long vectors of solutions
-            
-            sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                       
+            sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
         
             pos_s = 0
             
@@ -1126,14 +1240,12 @@ class Snapshot:
                 
                 pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
                 
-                sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
                 
                 pos_s = pos_e
                 
                 
-                
         elif self.type == 'slice':
-            
             
             if self.slic_type == 'X':
                 
@@ -1141,11 +1253,9 @@ class Snapshot:
                 y = []
                 z = []
                 
-                
                 # Compose long vectors of coordinates y,z
                 
                 for snap_bl in self.snap_cleandata:
-                    
                     
                     bl_number.append(snap_bl[0])
                     
@@ -1167,10 +1277,9 @@ class Snapshot:
                 
                 GX_header = 'y z '
                 
-
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
                 
                 pos_s = 0 
                 
@@ -1178,7 +1287,7 @@ class Snapshot:
                                         
                     pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
                         
-                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
                         
                     pos_s = pos_e
                     
@@ -1216,7 +1325,7 @@ class Snapshot:
 
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
                 
                 pos_s = 0 
                 
@@ -1224,10 +1333,9 @@ class Snapshot:
                                         
                     pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
                         
-                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
                         
                     pos_s = pos_e
-
 
             
             elif self.slic_type == 'Z':
@@ -1262,7 +1370,7 @@ class Snapshot:
 
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (self.n_vars,self.n_cells), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
                 
                 pos_s = 0 
                 
@@ -1270,7 +1378,7 @@ class Snapshot:
                                         
                     pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
                         
-                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] )
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
                         
                     pos_s = pos_e
             
@@ -1280,7 +1388,7 @@ class Snapshot:
         
         df = pd.DataFrame( GX.T, columns=GX_header.strip().split() )
         
-        df_sol = pd.DataFrame( sol_bl.T, columns=self.vars_name )
+        df_sol = pd.DataFrame( sol_bl.T, columns=vars )
         
         df = pd.concat([df, df_sol], axis=1)
         
@@ -1581,27 +1689,28 @@ class Snapshot:
                 G3 = grd.gz
                 
                 df_sol = deepcopy( bl_data[5] )
-                sol = np.array(df_sol).T.reshape(self.n_vars,N3,N2,N1)
+                n_vars = len( df_sol.columns )
+                sol = np.array(df_sol).T.reshape(n_vars,N3,N2,N1)
                 
                 if slic_type == 'X':                
                     
                     GX = [G2,G3]
-                    sol = sol[:,:,:,idx].reshape(self.n_vars,N3*N2)
-                    df_sol = pd.DataFrame(sol.T,columns=self.vars_name)
+                    sol = sol[:,:,:,idx].reshape(n_vars,N3*N2)
+                    df_sol = pd.DataFrame(sol.T,columns=df_sol.columns)
                     snap_2d.snap_data.append( [bl_num, 1, N2, N3, GX, df_sol] )
                 
                 if slic_type == 'Y':
                     
                     GX = [G1,G3]
-                    sol = sol[:,:,idx,:].reshape(self.n_vars,N3*N1)
-                    df_sol = pd.DataFrame(sol.T,columns=self.vars_name)
+                    sol = sol[:,:,idx,:].reshape(n_vars,N3*N1)
+                    df_sol = pd.DataFrame(sol.T,columns=df_sol.columns)
                     snap_2d.snap_data.append( [bl_num, N1, 1, N3, GX, df_sol] )
                     
                 if slic_type == 'Z':
                     
                     GX = [G1,G2]
-                    sol = sol[:,idx,:,:].reshape(self.n_vars,N2*N1)
-                    df_sol = pd.DataFrame(sol.T,columns=self.vars_name)
+                    sol = sol[:,idx,:,:].reshape(n_vars,N2*N1)
+                    df_sol = pd.DataFrame(sol.T,columns=df_sol.columns)
                     snap_2d.snap_data.append( [bl_num, N1, N2, 1, GX, df_sol] )
             
         

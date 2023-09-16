@@ -45,7 +45,7 @@ import matplotlib.pyplot as plt
 
 slic_type = 'Z'
 loc       = 0.0
-
+grads     = ['schlieren']
 # =============================================================================
 # read in grid file and snapshot file, then get slice dataframe
 # =============================================================================
@@ -61,7 +61,8 @@ gridfile = datapath.split('/snapshots')[0] + '/results/inca_grid.bin'
 grid3d = GridData( gridfile )
 grid3d.read_grid()
 
-block_list, indx_slic = grid3d.select_sliced_blockgrids( slic_type, loc )
+bbox = [-50.00, 125.0, -1.30, 50.0, -11.0, 11.0]
+block_list, indx_slic = grid3d.select_sliced_blockgrids( slic_type, loc, bbox)
 
 # - read in 3D snapshot file
 
@@ -74,6 +75,9 @@ with timer("read in 3d snapshot "):
     snap3d.grid3d = grid3d
 
     snap3d.read_snapshot( block_list )
+    
+    snap3d.compute_gradients( block_list, grads, grid3d, buff=3 )
+    
 
 with timer("get slice dataframe "):
     
@@ -97,6 +101,7 @@ with timer("Interpolate and plot "):
     y_slice = np.array( df_slice['y_scale'] )
     
     u_slice = np.array( df_slice['u'] )
+    grad_rho_slice = np.array( df_slice['grad_rho'] )
     
     x = np.linspace( -18, 12, 301 )
     y = np.linspace( 0.0, 7.5, 161 )
@@ -106,12 +111,15 @@ with timer("Interpolate and plot "):
     u = griddata( (x_slice,y_slice), u_slice,
                   (xx,yy), method='linear')
 
+    grad_rho = griddata( (x_slice,y_slice), grad_rho_slice,
+                         (xx,yy), method='linear')
    
     save_separation_line( xx,yy,u )
     
-    cbar = 'u'
-    plot_slicez_stat( xx,yy,u,
-                      filename='utest',
+    cbar = r'$\nabla{\rho}$'
+    plot_slicez_stat( xx,yy,grad_rho,
+                      filename='schlieren',
+                      col_map='Greys',
                       cbar_label=cbar,
                       separation=True,
                       sonic=False)
