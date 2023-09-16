@@ -103,8 +103,8 @@ with timer("Interpolate and plot "):
     u_slice = np.array( df_slice['u'] )
     grad_rho_slice = np.array( df_slice['grad_rho'] )
     
-    x = np.linspace( -18, 12, 301 )
-    y = np.linspace( 0.0, 7.5, 161 )
+    x = np.linspace( -17.5, 12.5, 601 )
+    y = np.linspace( 0.0, 8, 321 )
     
     xx,yy = np.meshgrid( x, y )
     
@@ -117,12 +117,15 @@ with timer("Interpolate and plot "):
     save_separation_line( xx,yy,u )
     
     cbar = r'$\nabla{\rho}$'
+    cbar_levels = np.linspace( 0.0, 0.75*np.max(grad_rho),51)
+    
     plot_slicez_stat( xx,yy,grad_rho,
                       filename='schlieren',
                       col_map='Greys',
                       cbar_label=cbar,
                       separation=True,
-                      sonic=False)
+                      sonic=False,
+                      cbar_levels=cbar_levels)
    
     
     

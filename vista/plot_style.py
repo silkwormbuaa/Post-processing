@@ -647,7 +647,8 @@ def plot_slicez_stat( xx, yy, v,
                       figsize=None, 
                       filename=None,
                       col_map=None,
-                      cbar_label=None):
+                      cbar_label=None,
+                      cbar_levels=None):
     
     if figsize is None:
         figsize = (15,8)
@@ -656,7 +657,9 @@ def plot_slicez_stat( xx, yy, v,
     
     if col_map is None: col_map='viridis'
     
-    cs = ax.contourf( xx, yy, v, cmap=col_map, levels=51 )
+    if cbar_levels is None: cbar_levels=51
+    
+    cs = ax.contourf( xx, yy, v, cmap=col_map, levels=cbar_levels )
     
     if sonic: 
         with open('soniclines.pkl','rb') as f:
