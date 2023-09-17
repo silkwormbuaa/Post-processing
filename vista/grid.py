@@ -604,7 +604,39 @@ class BlockGrid:
         # read extra spaces after 'write'
         file.read(4)
         self.size += 4
+
+
+
+# ----------------------------------------------------------------------
+# >>> compute corner point                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/16  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_point( self, buff=3 ):
         
+        self.px = np.zeros( self.nx + buff*2 + 1 )
+        self.py = np.zeros( self.ny + buff*2 + 1 )
+        self.pz = np.zeros( self.nz + buff*2 + 1 )
+        
+        self.px[0] = self.gx[0] - 0.5*self.hx[0]
+        self.py[0] = self.gy[0] - 0.5*self.hy[0]
+        self.pz[0] = self.gz[0] - 0.5*self.hz[0]
+        
+        self.px[1:] = self.gx + 0.5*self.hx
+        self.py[1:] = self.gy + 0.5*self.hy
+        self.pz[1:] = self.gz + 0.5*self.hz
+        
+
+
 # ----------------------------------------------------------------------
 # >>> Define Cut Cell                                          ( 2-1 )
 # ----------------------------------------------------------------------

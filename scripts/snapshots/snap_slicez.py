@@ -37,7 +37,6 @@ from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_slicez_stat
 
-import matplotlib.pyplot as plt
 
 # =============================================================================
 # option 
