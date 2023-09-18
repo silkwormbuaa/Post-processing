@@ -123,7 +123,7 @@ def save_isolines( xx, yy, v, value:float, file ):
     
     fig, ax = plt.subplots(figsize=(20, 8))
     
-    cs = ax.contour(xx, yy, v, levels=[0.0] )
+    cs = ax.contour(xx, yy, v, levels=[value] )
     
     for isoline in cs.collections[0].get_paths():
         line = isoline.vertices
