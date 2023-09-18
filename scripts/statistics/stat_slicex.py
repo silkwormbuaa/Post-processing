@@ -39,6 +39,8 @@ from   vista.plane_analy import shift_coordinates
 
 from   vista.plot_style  import plot_slicex_stat
 
+loc = -57.0
+
 
 datapath = os.getcwd()
 
@@ -52,7 +54,7 @@ G = GridData( gridfile )
 
 G.read_grid()
 
-block_list, indx_slic = G.select_sliced_blockgrids( 'X', -57.0 )
+block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
 
 print(f"Selected {len(block_list)} blocks.\n")
 
@@ -87,6 +89,7 @@ with timer("Interpolate and plot "):
     h_ridge = float( parameters.get('H') )
     h_md    = float( parameters.get('H_md') )
     x_imp   = float( parameters.get('x_imp') )
+    casecode =  str( parameters.get('casecode') )
     
     df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
     
@@ -97,6 +100,9 @@ with timer("Interpolate and plot "):
     tke_slice = np.array( df_slice['tke'] )
     S_slice = np.array( df_slice['S'] )
     w1_slice = np.array( df_slice['w1'] )
+    u_slice = np.array( df_slice['u'] )
+    v_slice = np.array( df_slice['v'] )
+    w_slice = np.array( df_slice['w'] )
     
     z = np.linspace(-1.0,1.0, 201)
     y = np.linspace(-0.1, 1.1, 121)
@@ -114,6 +120,15 @@ with timer("Interpolate and plot "):
     
     w1 = griddata( (z_slice,y_slice), w1_slice,
                    (zz,yy), method='linear')    
+
+    u = griddata( (z_slice,y_slice), u_slice,
+                   (zz,yy), method='linear') 
+
+    v = griddata( (z_slice,y_slice), v_slice,
+                   (zz,yy), method='linear') 
+
+    w = griddata( (z_slice,y_slice), w_slice,
+                   (zz,yy), method='linear')   
     
     
     fig, ax = plt.subplots()
@@ -122,7 +137,7 @@ with timer("Interpolate and plot "):
 
     save_sonic_line( zz, yy, mach )
     
-    define_wall_shape( z*5.2, Case=4, yshift=(h_ridge-h_md) )
+    define_wall_shape( z*5.2, casecode=casecode, yshift=(h_ridge-h_md) )
     
     cbar = r'$Mach$'
     plot_slicex_stat( zz, yy, mach,
@@ -130,11 +145,36 @@ with timer("Interpolate and plot "):
                       cbar_label=cbar)
 
     cbar = r'$S$'
+    cbar_levels=np.linspace(-20000.0,20000.,51)
     plot_slicex_stat( zz, yy, S,
                       filename='S_X',
-                      cbar_label=cbar)
+                      cbar_label=cbar,
+                      cbar_levels=cbar_levels)
     
     cbar = r'$\omega_x$'
     plot_slicex_stat( zz, yy, w1,
                       filename='vorticity_X',
-                      cbar_label=cbar)
+                      cbar_label=cbar,
+                      col_map='coolwarm')
+
+    cbar = r'$u$'
+    cbar_levels=np.linspace(0.0,507.0,51)
+    plot_slicex_stat( zz, yy, u,
+                      filename='u',
+                      cbar_label=cbar,
+                      col_map='coolwarm',
+                      cbar_levels=cbar_levels)
+
+    cbar = r'$v$'
+    plot_slicex_stat( zz, yy, v,
+                      vectors=[w,v],
+                      filename='vertical_velocity_X',
+                      cbar_label=cbar,
+                      col_map='coolwarm')
+    
+    cbar = r'$tke$'
+    plot_slicex_stat( zz, yy, tke,
+                      vectors=[w,v],
+                      filename='tke_X',
+                      cbar_label=cbar,
+                      col_map='coolwarm')

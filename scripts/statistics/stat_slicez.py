@@ -32,9 +32,14 @@ from   vista.plane_analy import save_separation_line
 
 from   vista.plane_analy import shift_coordinates
 
+from   vista.plane_analy import save_isolines
+
 from   vista.plot_style  import plot_slicez_stat
 
 from   vista.tools       import read_case_parameter
+
+
+loc = 0.0
 
 datapath = os.getcwd()
 
@@ -48,7 +53,7 @@ G = GridData( gridfile )
 
 G.read_grid()
 
-block_list, indx_slic = G.select_sliced_blockgrids( 'Z', 0.0 )
+block_list, indx_slic = G.select_sliced_blockgrids( 'Z', loc )
 
 print(f"Selected {len(block_list)} blocks.\n")
 
@@ -68,7 +73,9 @@ with timer("read selected blocks "):
         
         S.compute_vars( block_list, ['mach'] )
         
-        S.compute_gradients( block_list, ['schlieren','shadowgraph'],G)
+        S.compute_gradients( block_list, 
+                             ['schlieren','shadowgraph','vorticity'],
+                             G)
         
 with timer("Get slice dataframe "):
     
@@ -91,8 +98,9 @@ with timer("Interpolate and plot "):
     mach_slice = np.array( df_slice['mach'] )
     gradrho_slice = np.array( df_slice['grad_rho'] )
     T_slice = np.array( df_slice['T'] )
+    w3_slice = np.array( df_slice['w3'] )
     
-    x = np.linspace(-18,12,301)
+    x = np.linspace(-20,12,301)
     y = np.linspace(0.0,10,101)
     
     xx,yy = np.meshgrid(x,y)
@@ -109,6 +117,14 @@ with timer("Interpolate and plot "):
     T    = griddata( (x_slice,y_slice), T_slice,
                      (xx,yy), method='linear')
 
+    w3   = griddata( (x_slice,y_slice), w3_slice,
+                     (xx,yy), method='linear')
+
+#    print(xx[:,0])
+#    print(yy[:,0])
+#    print(u[:,0])
+#    print(w3[:,0])
+    
     
     save_sonic_line( xx,yy, mach )
     
@@ -118,12 +134,14 @@ with timer("Interpolate and plot "):
     
     plot_slicez_stat( xx,yy,mach, 
                       filename='MachZ',
-                      cbar_label=cbar)
+                      cbar_label=cbar,
+                      col_map='coolwarm')
 
     cbar = r'$<T>/T_{\infty}$'
     
     plot_slicez_stat( xx,yy,T/160.15, 
                       filename='TemperatureZ',
+                      col_map='plasma',
                       cbar_label=cbar)
 
     cbar = r'$\nabla{\rho}$'
@@ -132,6 +150,8 @@ with timer("Interpolate and plot "):
                       filename='grad_rho',
                       col_map='Greys',
                       cbar_label=cbar)
+    
+
     
 
 

@@ -644,6 +644,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
 def plot_slicez_stat( xx, yy, v, 
                       sonic=True, 
                       separation=True,
+                      boundary=None,
                       figsize=None, 
                       filename=None,
                       col_map=None,
@@ -668,7 +669,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'white',linewidth=0.8)
+            ax.plot(x_sonic,y_sonic,'magenta',linewidth=0.8)
 
 
     if separation:
@@ -679,6 +680,18 @@ def plot_slicez_stat( xx, yy, v,
             x_sep = line[:,0]
             y_sep = line[:,1]
             ax.plot(x_sep,y_sep,'red',linewidth=0.8)
+
+
+    if boundary is not None:
+        with open( boundary,'rb') as f:
+            lines = pickle.load( f )
+            
+        for line in lines:
+            x_bou = line[:,0]
+            y_bou = line[:,1]
+            ax.plot(x_bou,y_bou,'black',linewidth=0.8)
+    
+    
 
     cbar = plt.colorbar(cs)
     cbar.ax.set_ylabel(cbar_label,fontsize=15)
@@ -694,7 +707,7 @@ def plot_slicez_stat( xx, yy, v,
     plt.gca().set_aspect('equal', adjustable='box')
 
     if filename:
-        plt.savefig( filename )
+        plt.savefig( 'figz_'+filename )
         print(f"{filename} is output.\n")
 
     plt.close()        
@@ -716,12 +729,14 @@ def plot_slicez_stat( xx, yy, v,
 
 def plot_slicex_stat( zz, yy, v,
                       wall=True, 
-                      sonic=True, 
+                      sonic=True,
                       separation=False,
+                      vectors=None, 
                       figsize=None, 
                       filename=None,
                       col_map=None,
-                      cbar_label=None):
+                      cbar_label=None,
+                      cbar_levels=None):
     
     if figsize is None:
         figsize = (15,15)
@@ -730,7 +745,15 @@ def plot_slicex_stat( zz, yy, v,
     
     if col_map is None: col_map='viridis'
     
-    cs = ax.contourf( zz, yy, v, cmap=col_map, levels=51 )
+    if cbar_levels is None: cbar_levels=51
+    
+    cs = ax.contourf( zz, yy, v, cmap=col_map, levels=cbar_levels )
+    
+    if vectors is not None:
+        
+        ax.quiver( zz[::5,::5],yy[::5,::5], 
+                   vectors[0][::5,::5], vectors[1][::5,::5],
+                   width=0.0015)
     
     if wall:
         df_wall = pd.read_csv( 'wall_X.dat', delimiter=r'\s+' )
@@ -747,7 +770,7 @@ def plot_slicex_stat( zz, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'white',linewidth=0.8)
+            ax.plot(x_sonic,y_sonic,'magenta',linewidth=0.8)
     
     
     if separation:
@@ -773,7 +796,7 @@ def plot_slicex_stat( zz, yy, v,
     plt.gca().set_aspect('equal', adjustable='box')
 
     if filename:
-        plt.savefig( filename )
+        plt.savefig( 'figx_'+filename )
         print(f"{filename} is output.\n")
 
     plt.close() 

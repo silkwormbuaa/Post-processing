@@ -275,7 +275,7 @@ def is_above_wavywall( y, z, Case = 1):
 #
 # ----------------------------------------------------------------------
 
-def define_wall_shape( z_list:np.array, Case = 1, 
+def define_wall_shape( z_list:np.array, Case = None, casecode=None,
                        yshift=None, write=True, scale=True ):
 
     """
@@ -292,6 +292,14 @@ def define_wall_shape( z_list:np.array, Case = 1,
     A = 0.26
     
     len_w = 1.04
+    
+    if casecode is not None:
+        if   casecode == '1014': Case=1
+        elif casecode == '0926': Case=2
+        elif casecode == '0825': Case=3
+        elif casecode == '0927': Case=4
+        elif casecode == '1221': Case=5
+        
     
     if   Case == 1:   D = 10.4
     elif Case == 2:   D = 5.2    
