@@ -37,7 +37,7 @@ plt.rcParams.update({'font.size': 25})
 # =============================================================================
 
 output_nr = 5
-pure      = False
+pure      = True
 
 # =============================================================================
 
@@ -100,7 +100,7 @@ with timer("import psd data"):
             nd_fwpsd.append(nd_fwpsd_temp)
             
 if output_nr == 0:
-    #flat_Luis
+    #smooth wall
     St_Lsep = (np.array(St) * 9.628729).tolist()
     print(St_Lsep[0][:10])
     print(St_Lsep[0][-10:])
@@ -108,6 +108,8 @@ if output_nr == 0:
     y_sep = [0.001, 100]
     x_reatt = [1.06795, 1.06795]
     y_reatt = [0.001, 100]
+    x_ppmax = [-7.3333, -7.3333]
+    y_ppmax = [0.001, 100]
     fig_name = "psd_smooth"
 
 elif output_nr == 1:
@@ -118,6 +120,8 @@ elif output_nr == 1:
     y_sep = [0.001,100]
     x_reatt = [1.4002403, 1.4002403]
     y_reatt = [0.001,100]
+    x_ppmax = [-7.712139, -7.712139]
+    y_ppmax = [0.001, 100]
     fig_name = "psd_1014"
 
 elif output_nr == 2:
@@ -128,6 +132,8 @@ elif output_nr == 2:
     y_sep = [0.001,100]
     x_reatt = [1.3595199, 1.3595199]
     y_reatt = [0.001,100]
+    x_ppmax = [-7.49053, -7.49053]
+    y_ppmax = [0.001, 100]
     fig_name = "psd_0926"
 
 elif output_nr == 3:
@@ -138,6 +144,8 @@ elif output_nr == 3:
     y_sep = [0.001,100]
     x_reatt = [2.1609445, 2.1609445]
     y_reatt = [0.001,100]
+    x_ppmax = [-8.70936, -8.70936]
+    y_ppmax = [0.001, 100]
     fig_name = "psd_0825"
 
 elif output_nr == 4:
@@ -149,6 +157,8 @@ elif output_nr == 4:
     y_sep = [0.001,100]
     x_reatt = [2.468831, 2.468831]
     y_reatt = [0.001,100]
+    x_ppmax = [-10.06114, -10.06114]
+    y_ppmax = [0.001, 100]
     fig_name = "psd_0927"
 
 elif output_nr == 5:
@@ -160,6 +170,8 @@ elif output_nr == 5:
     y_sep = [0.001,100]
     x_reatt = [2.58732, 2.58732]
     y_reatt = [0.001,100]
+    x_ppmax = [-8.93096, -8.93096]
+    y_ppmax = [0.001, 100]
     fig_name = 'psd_1221'
     
     #1125
@@ -192,6 +204,7 @@ if not pure:
 
 ax.plot(x_sep,y_sep,'r',linewidth=1.0)
 ax.plot(x_reatt,y_reatt,'r',linewidth=1.0)
+ax.plot(x_ppmax,y_ppmax,'blue',linewidth=1.0)
 
 ax.minorticks_on()
 ax.tick_params(which='major',
@@ -219,7 +232,7 @@ if not pure:
 
 os.chdir( outpath )
 
-if pure: fig_name = fig_name + '_pure'
+if pure: fig_name = fig_name + '_pure_ppmax'
 plt.savefig( fig_name )
 #plt.show()
 

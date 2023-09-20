@@ -142,7 +142,8 @@ with timer("Interpolate and plot "):
     cbar = r'$Mach$'
     plot_slicex_stat( zz, yy, mach,
                       filename='MachX',
-                      cbar_label=cbar)
+                      cbar_label=cbar,
+                      col_map='coolwarm')
 
     cbar = r'$S$'
     cbar_levels=np.linspace(-20000.0,20000.,51)

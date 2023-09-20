@@ -67,11 +67,11 @@ with timer("read selected blocks "):
         
         S.read_stat_header( f )
         
-        vars = ['u','v','w','T','rho']
+        vars = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
         
         S.read_stat_body( f, block_list, vars )
         
-        S.compute_vars( block_list, ['mach'] )
+        S.compute_vars( block_list, ['mach','RS','p`'] )
         
         S.compute_gradients( block_list, 
                              ['schlieren','shadowgraph','vorticity'],
@@ -98,10 +98,11 @@ with timer("Interpolate and plot "):
     mach_slice = np.array( df_slice['mach'] )
     gradrho_slice = np.array( df_slice['grad_rho'] )
     T_slice = np.array( df_slice['T'] )
-    w3_slice = np.array( df_slice['w3'] )
+    tke_slice = np.array( df_slice['tke'] )
+    p_fluc_slice = np.array( df_slice['p`'] )
     
     x = np.linspace(-20,12,301)
-    y = np.linspace(0.0,10,101)
+    y = np.linspace(0.0,10,201)
     
     xx,yy = np.meshgrid(x,y)
     
@@ -117,14 +118,11 @@ with timer("Interpolate and plot "):
     T    = griddata( (x_slice,y_slice), T_slice,
                      (xx,yy), method='linear')
 
-    w3   = griddata( (x_slice,y_slice), w3_slice,
-                     (xx,yy), method='linear')
+    tke   = griddata( (x_slice,y_slice), tke_slice,
+                      (xx,yy), method='linear')
 
-#    print(xx[:,0])
-#    print(yy[:,0])
-#    print(u[:,0])
-#    print(w3[:,0])
-    
+    p_fluc = griddata( (x_slice,y_slice), p_fluc_slice,
+                       (xx,yy), method='linear') 
     
     save_sonic_line( xx,yy, mach )
     
@@ -135,6 +133,7 @@ with timer("Interpolate and plot "):
     plot_slicez_stat( xx,yy,mach, 
                       filename='MachZ',
                       cbar_label=cbar,
+                      wall=True,
                       col_map='coolwarm')
 
     cbar = r'$<T>/T_{\infty}$'
@@ -150,7 +149,20 @@ with timer("Interpolate and plot "):
                       filename='grad_rho',
                       col_map='Greys',
                       cbar_label=cbar)
+
+    cbar = r'$tke$'
     
+    plot_slicez_stat( xx,yy,tke, 
+                      filename='tke',
+                      col_map='coolwarm',
+                      cbar_label=cbar)
+    
+    cbar = 'pressure fluctuation'
+    
+    plot_slicez_stat( xx,yy,p_fluc, 
+                      filename='pressure_fluc',
+                      col_map='coolwarm',
+                      cbar_label=cbar)
 
     
 

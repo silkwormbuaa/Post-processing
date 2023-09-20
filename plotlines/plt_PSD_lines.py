@@ -51,7 +51,8 @@ outpath  = '/home/wencanwu/my_simulation/temp/DataPost/'
 # smooth wall
 with timer("reading smooth wall probe"):
     os.chdir( datapath0 )
-    probefile_s  = 'probe_00142.dat'
+#    probefile_s  = 'probe_00142.dat'
+    probefile_s  = 'probe_00156.dat'
     Lsep_s       = 13.12627403
     probe_s = ProbeData( probefile_s, withT=False )
 
@@ -59,40 +60,44 @@ if output_nr == 1:
     #1014
     with timer("reading one probe"):
         os.chdir( datapath1 )
-        probefile_r = 'probe_00144.dat'
+    #    probefile_r = 'probe_00144.dat'
+        probefile_r = 'probe_00152.dat'
         Lsep_r      = 9.805522
         probe_r = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_1014'
+        fig_name = 'psd_line_1_1014_ppmax'
         label_r  = r"$D/{\delta}_0=2.0$"
 
 elif output_nr == 2:
     #0926
     with timer("reading one probe"):
         os.chdir( datapath2 )
-        probefile_r = 'probe_00145.dat'
+    #    probefile_r = 'probe_00145.dat'
+        probefile_r = 'probe_00154.dat'
         Lsep_r      = 9.676337
         probe_r = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_0926'
+        fig_name = 'psd_line_2_0926_ppmax'
         label_r  = r"$D/{\delta}_0=1.0$"
 
 elif output_nr == 3:
     #0825
     with timer("reading one probe"):
         os.chdir( datapath3 )
-        probefile_r = 'probe_00135.dat'
+    #    probefile_r = 'probe_00135.dat'
+        probefile_r = 'probe_00140.dat'
         Lsep_r      = 11.340638
         probe_r = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_0825'
+        fig_name = 'psd_line_3_0825_ppmax'
         label_r  = r"$D/{\delta}_0=0.5$"
 
 elif output_nr == 4:
     #0927
     with timer("reading one probe"):
         os.chdir( datapath4 )
-        probefile_r = 'probe_00118.dat'
+    #    probefile_r = 'probe_00118.dat'
+        probefile_r = 'probe_00125.dat'
         Lsep_r      = 13.12627
         probe_r = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_0927'
+        fig_name = 'psd_line_4_0927_ppmax'
         label_r  = r"$D/{\delta}_0=0.25$"
 
 elif output_nr == 5:
@@ -100,10 +105,10 @@ elif output_nr == 5:
     with timer("reading one probe"):
         os.chdir( datapath5 )
     #    probefile_r = 'probe_00175.dat'
-        probefile_r = 'probe_00192.dat'
+        probefile_r = 'probe_00195.dat'
         Lsep_r      = 13.266
         probe_r = ProbeData( probefile_r ) 
-        fig_name = 'psd_line_1221'   
+        fig_name = 'psd_line_5_1221_ppmax'   
         label_r  = r"$D/{\delta}_0=0.125$"
 
 
@@ -124,8 +129,8 @@ with timer('psd'):
     
     os.chdir(outpath)
     
-    probe_s.psd( 8, 0.3 )
-    probe_r.psd( 8, 0.3 )
+    probe_s.psd( 8, 0.5 )
+    probe_r.psd( 8, 0.5 )
     
     fig, ax = plt.subplots( figsize=[8,8], constrained_layout=True )
     

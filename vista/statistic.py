@@ -387,7 +387,7 @@ class StatisticData:
         """
         block_list: list of blocks that are going to compute new variables
         vars_new: list of str representing new vars 
-                  ['mach','tke']
+                  ['mach','tke','p`']
         """
         
         
@@ -424,8 +424,15 @@ class StatisticData:
                 self.bl[num-1].df['v`v`'] = vv
                 self.bl[num-1].df['w`w`'] = ww
                 self.bl[num-1].df['u`v`'] = uv
-                self.bl[num-1].df['tke']= tke             
+                self.bl[num-1].df['tke']= tke  
+
+# ---------- compute pressure fluctuation
+
+            if "p`" in vars_new:
                 
+                p_fluc = np.array(df['pp']) - np.array(df['p'])**2
+                
+                self.bl[num-1].df['p`'] = p_fluc
 
 
 # ----------------------------------------------------------------------

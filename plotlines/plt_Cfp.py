@@ -54,7 +54,7 @@ data0_p  = "Cf_flat_new.dat"
 delta    = 5.2
 x_imp    = 50.4
 
-plt_Cf   = True
+plt_Cf   = False
 plt_Cp   = True
 
 # ----------------------------------------------------------------------
@@ -165,7 +165,7 @@ if plt_Cf is True:
     ax1.set_ylabel("$C_fx10^3$",fontdict={'size':40})
     ax1.tick_params(axis='y',labelsize=32)
     
-    ax1.set_xlim([-20.0,12.0])
+    ax1.set_xlim([-20.0,10.0])
     ax1.set_ylim([-2.0,4.5])
 
     ax1.legend(prop={'size':20},loc='best')
@@ -192,15 +192,20 @@ if plt_Cf is True:
 
 if plt_Cp is True:
     
-    fig2, ax2 = plt.subplots( figsize=[10,8.5], constrained_layout=True )
+    fig2, ax2 = plt.subplots( figsize=[12,9], constrained_layout=True )
 
     ax2.plot( d5.df['x_s'],
               d5.df['Cp'],
               'purple',
-              label  = r'$D=0.125\delta_0$', 
+              label  = r'$D/\delta_0=0.125$', 
 #              marker = "^",
 #              markersize = 10,
               linewidth=4)
+    
+    ax2.plot( [-10.6786859,-10.6786859],
+              [0.8,2.4],
+              'purple',
+              linewidth=1)
     
     ax2.plot( d4.df['x_s'],
               d4.df['Cp'],
@@ -208,6 +213,11 @@ if plt_Cp is True:
               label  = r'$D/\delta_0=0.25$', 
               ls     = (0, (7, 3)),
               linewidth=4)
+
+    ax2.plot( [-10.6574429,-10.6574429],
+              [0.8,2.4],
+              'red',
+              linewidth=1)
     
     ax2.plot( d3.df['x_s'],
               d3.df['Cp'],
@@ -215,20 +225,35 @@ if plt_Cp is True:
               label  = r'$D/\delta_0=0.5$',
               ls     = (0, (3, 1, 1, 1, 1, 1)),
               linewidth=4)
-    
+
+    ax2.plot( [-9.179693795,-9.179693795],
+              [0.8,2.4],
+              'black',
+              linewidth=1)
+
     ax2.plot( d2.df['x_s'],
               d2.df['Cp'],
               'blue',
               label  = r'$D/\delta_0=1.0$',
               ls     = '-.',
               linewidth=4)
+
+    ax2.plot( [-8.316817364,-8.316817364],
+              [0.8,2.4],
+              'blue',
+              linewidth=1)
     
     ax2.plot( d1.df['x_s'],
               d1.df['Cp'],
               'green',
-              label  = r'$D\delta_0=2.0$',
+              label  = r'$D/\delta_0=2.0$',
               ls     = ':',
               linewidth=4)
+
+    ax2.plot( [-8.405281852,-8.405281852],
+              [0.8,2.4],
+              'green',
+              linewidth=1)
 
     ax2.plot( d0_p.df['x_s'], 
               d0_p.df['Cp'],
@@ -237,6 +262,10 @@ if plt_Cp is True:
               ls    = '--',
               linewidth=4)
 
+    ax2.plot( [-8.56077913,-8.56077913],
+              [0.8,2.4],
+              'gray',
+              linewidth=1)
 
     ax2.minorticks_on()
 
@@ -246,8 +275,8 @@ if plt_Cp is True:
     ax2.set_ylabel("$<p_w>/p_{\infty}$",fontdict={'size':40})
     ax2.tick_params(axis='y',labelsize=32)
     
-    ax2.set_xlim([-20.0,12.0])
-    #ax.set_ylim([0.3,0.85])
+    ax2.set_xlim([-20.0,10.0])
+    ax2.set_ylim([0.8,2.4])
 
     ax2.legend(prop={'size':20})
     

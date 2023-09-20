@@ -20,7 +20,7 @@ plt.rcParams.update({'font.size': 18})
 
 OutPath  = "/media/wencanwu/Seagate Expansion Drive/temp/221221/DataPost/"
 
-data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/line_p_prime.dat'
+data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 
 data1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/streamwise_line_1014.dat'
 
@@ -88,6 +88,36 @@ ax.plot( d0.df['(x-x_imp)/δ'],
          ls   ='--',
          linewidth=4)
 
+ax.plot( [-10.6786859,-10.6786859],
+         [0.0,0.1],
+         'purple',
+         linewidth=1)
+
+ax.plot( [-10.6574429,-10.6574429],
+         [0.0,0.1],
+            'red',
+            linewidth=1)
+
+ax.plot( [-9.179693795,-9.179693795],
+         [0.0,0.1],
+            'black',
+            linewidth=1)
+
+ax.plot( [-8.316817364,-8.316817364],
+         [0.0,0.1],
+            'blue',
+            linewidth=1)
+
+ax.plot( [-8.405281852,-8.405281852],
+         [0.0,0.1],
+            'green',
+            linewidth=1)
+
+ax.plot( [-8.56077913,-8.56077913],
+         [0.0,0.1],
+            'gray',
+            linewidth=1)
+
 ax.minorticks_on()
 
 ax.set_xlabel("$(x-x_{imp})/δ_0$",fontdict={'size':40})  
@@ -97,6 +127,7 @@ ax.set_ylabel(r"$\sqrt{<p'p'>}/p_{\infty}$",
               fontdict={'size':40})
 ax.tick_params(axis='y',labelsize=32)
 ax.set_xlim([-20,10])
+ax.set_ylim([0.02,0.10])
 
 
 ax.legend(prop={'size':20}) 

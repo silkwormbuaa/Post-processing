@@ -649,7 +649,8 @@ def plot_slicez_stat( xx, yy, v,
                       filename=None,
                       col_map=None,
                       cbar_label=None,
-                      cbar_levels=None):
+                      cbar_levels=None,
+                      wall=None):
     
     if figsize is None:
         figsize = (15,8)
@@ -691,7 +692,12 @@ def plot_slicez_stat( xx, yy, v,
             y_bou = line[:,1]
             ax.plot(x_bou,y_bou,'black',linewidth=0.8)
     
-    
+    if wall:
+        x_wall = np.array([np.min(xx),np.max(xx)])
+        y_wall = np.array([-0.1, -0.1])
+#        ax.plot(z_wall,y_wall,'black')
+        ax.fill_between(x_wall,-0.2,y_wall,color='grey')
+        ax.plot(x_wall,np.array([0.0,0.0]),'--',linewidth=0.2)
 
     cbar = plt.colorbar(cs)
     cbar.ax.set_ylabel(cbar_label,fontsize=15)
