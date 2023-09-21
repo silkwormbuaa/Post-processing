@@ -11,32 +11,34 @@
 '''
 
 import os
-
 import sys
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 import pandas            as     pd
-
 import numpy             as     np
 
 from   vista.statistic   import StatisticData
-
 from   vista.grid        import GridData
-
 from   vista.timer       import timer
 
-#datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
+# =============================================================================
+# option zone
+# =============================================================================
 
+geo_case = 4
+
+#datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
 datapath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/'
+
+# =============================================================================
 
 datafile = datapath + 'statistics.bin'
 gridfile = datapath + 'inca_grid.bin'
+ccfile   = datapath + 'cutcells_setup.dat'
 
 outpath  = datapath
-
-ccfile   = datapath + 'cutcells_setup.dat'
 
 outfile  = 'mean_profile_test.dat'
 
@@ -47,8 +49,6 @@ outfile  = 'mean_profile_test.dat'
 #   3 : 0825 case, D/delta = 0.5
 #   4 : 0927 case, D/delta = 0.25
 #   5 : 1221 case, D/delta = 0.125
-
-geo_case = 4
 
 G = GridData( gridfile )
 
@@ -83,6 +83,7 @@ with timer("read in cut cell info "):
                         ,'fax1','fay1','faz1']
                         , inplace=True )
     
+    
 with timer("assign volume fractions "):
     
     for num in block_list:
@@ -92,17 +93,16 @@ with timer("assign volume fractions "):
         
         # block number starts from 1, but python list index
         # starts from 0
-        
         G.g[num-1].assign_vol_fra( temp_df, geo_case )
 
-S = StatisticData( datafile )
 
 with timer("read block statistics data "):
+
+    S = StatisticData( datafile )
     
     with open( datafile, 'br' ) as f:   
             
         S.read_stat_header( f )
-        
         vars = ['u','v','w','p','rho','T','uu','vv','ww','uv']
         
         # only blocks in the list will be filled data chunk
@@ -112,13 +112,11 @@ with timer("read block statistics data "):
 with timer("match grid and drop ghost cells"):   
      
     S.match_grid( G, block_list )
-    
     S.drop_ghost( G, block_list )
 
 
 with timer("compute profile"):
     
     os.chdir( datapath )
-
     S.compute_profile( block_list, bbox, vars )
         

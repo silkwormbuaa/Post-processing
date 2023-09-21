@@ -9,9 +9,7 @@
 '''
 
 import os
-
 import numpy             as     np
-
 import pandas            as     pd
 
 from   .block            import BlockData
@@ -19,9 +17,7 @@ from   .block            import BlockData
 from   .grid             import GridData
 
 from   .io_binary        import read_int_bin
-
 from   .io_binary        import read_flt_bin
-
 from   .io_binary        import read_log_bin
 
 #%% 
@@ -44,30 +40,32 @@ class StatisticData:
 
     def __init__( self, stat_file ):
         
-        # directory to the statistic file
+        """
+        stat_file: path to statistics.bin
         
+        return:      self.fsize 
+        initialize:  self.pos, self.n_var, self.bl, self.verbose
+        """
+        
+        # directory to the statistic file
         self.file = stat_file
 
         # file size
-        
         self.fsize = os.stat(self.file).st_size
         
         # file pointer position
-        
         self.pos = 0
 
         # number of variables
-        
         self.n_var = 0
         
         # list of blocks
-        
         self.bl = []
                
         # Verbose ? 
-        
         self.verbose = False
-#%%
+        
+
 # ----------------------------------------------------------------------
 # >>> READ STATISTIC BINARY FILE HEADER                           ( 1 )
 # ----------------------------------------------------------------------
@@ -85,6 +83,14 @@ class StatisticData:
 # ----------------------------------------------------------------------
 
     def read_stat_header( self, file ):
+        
+        """
+        file:  opened file object
+        
+        return: 
+            file header info ( self.verbose=True to show)
+            self.pos
+        """
 
         # Internal variables
 
@@ -140,23 +146,14 @@ class StatisticData:
             if self.doublecorr: self.n_var += 36
 
             self.triplecorr       = buf_log[ 2]
-
             self.quadruplecorr    = buf_log[ 3]
-
             self.autocorr         = buf_log[ 4]
-
             self.mean_invar       = buf_log[ 5]
-
             self.schlieren        = buf_log[ 6]
-
             self.cavitation_stats = buf_log[ 7]
-
             self.vapor_gas_stats  = buf_log[ 8]
-
             self.rste             = buf_log[ 9]
-
             self.thermo           = buf_log[10]
-
             self.visc_diff        = buf_log[11]
             
             # if want to see header, set verbose True.            
@@ -185,10 +182,6 @@ class StatisticData:
             raise ValueError('Header format in statistics.bin not supported')
 
 
-    #    if rank == root:
-
-    #        print( 'STATS Number of samples: %d' %(self.n_samples))
-
 # ----------------------------------------------------------------------
 # >>> READ STATISTIC BINARY FILE BODY                             ( 2 )
 # ----------------------------------------------------------------------
@@ -206,7 +199,15 @@ class StatisticData:
 #   (no index issue)
 # ----------------------------------------------------------------------
 
-    def read_stat_body( self, file , fill, vars ):
+    def read_stat_body( self, file , bl_list, sel_vars ):
+        
+        """
+        file       :  opened file object
+        bl_list    :  list of selected blocks' numbers
+        vars       :  list of variable name strings
+        
+        return     :  self.bl (list of BlockData)
+        """
         
         end_of_file = False
                
@@ -218,14 +219,18 @@ class StatisticData:
         
         # vars determine the index of data sequences to read
         
-        vars_indx = self.vars_to_indx( vars )
+        vars_indx = self.vars_to_indx( sel_vars )
+        
+        # total number of variables in the block
+        
+        n_var = self.n_var
         
         while not end_of_file:
         
             # read in block one by one
             # only blocks in fill list will be filled with data chunk
         
-            self.bl.append( BlockData(file, self.n_var, fill, vars, vars_indx) )
+            self.bl.append(BlockData(file, bl_list, n_var, sel_vars, vars_indx))
             
             self.pos = self.pos + self.bl[-1].size
                                     
@@ -245,7 +250,12 @@ class StatisticData:
 # Desc
 #   - from variables list to sequence index list within in BlockData
 # ----------------------------------------------------------------------
+    
     def vars_to_indx( self, vars ):
+        
+        """
+        vars: list of variable name strings
+        """
         
         # list of variables for inquiry
         
@@ -269,19 +279,20 @@ class StatisticData:
             
             displace = 0
             
+            # mean variables
+            
             if var in mean_ls:
-                
                 indx.append( displace + mean_ls.index(var) )
 
             if self.meanvalues: displace += 8
             
+            # double correlated variables
+            
             if var in cor2_ls:
-                
                 indx.append( displace + cor2_ls.index(var) )
                 
             if self.doublecorr: displace += 36
         
-
         return indx        
 
 
@@ -300,6 +311,13 @@ class StatisticData:
 # ----------------------------------------------------------------------
     
     def match_grid( self, G, block_list ):
+        
+        """
+        G          : GridData object
+        block_list : list of selected blocks' numbers 
+        
+        return : x,y,z and vol_frac are added to self.bl[].df
+        """
         
         for num in block_list:
             
@@ -334,11 +352,11 @@ class StatisticData:
     def drop_ghost( self, G, block_list, buff=3 ):
         
         """
-        Applicable to 3D statistics data.
+        Only applicable to 3D statistics data.
         G : GridData instance
         block_list : list of blocks that are going to drop ghost cells
         
-        return : self.bl[num-1].df
+        return : self.bl[].df
         """
         
         for num in block_list:
@@ -364,9 +382,6 @@ class StatisticData:
             
             self.bl[num-1].df = pd.DataFrame(data_chunk,columns=vars)
             
-        #    print( self.bl[num-1].df)    
-                
-
 
 # ----------------------------------------------------------------------
 # >>> compute Mach number                                         (Nr.)
@@ -385,9 +400,10 @@ class StatisticData:
     def compute_vars( self, block_list:list, vars_new:list ):
         
         """
-        block_list: list of blocks that are going to compute new variables
-        vars_new: list of str representing new vars 
-                  ['mach','tke','p`']
+        block_list : list of blocks that are going to compute new variables
+        vars_new   : list of str representing new vars ['mach','tke','p`']
+        
+        return : corresponding variables are added to self.bl[].df
         """
         
         
@@ -458,7 +474,7 @@ class StatisticData:
                ['schlieren','shadowgraph','vorticity']
         G: GridData instance of corresponding case
         
-        return: self.bl[num-1].df['grad_rho'] (...['laplacian'])
+        return: self.bl[].df['grad_rho'] (...['laplacian'])
         """
 
         for num in block_list:
@@ -537,7 +553,6 @@ class StatisticData:
                 self.bl[num-1].df['w1'] = w1.flatten()
                 self.bl[num-1].df['w2'] = w2.flatten()
                 self.bl[num-1].df['w3'] = w3.flatten()
-                
                                
                                
 # ----------------------------------------------------------------------
@@ -628,11 +643,9 @@ class StatisticData:
         outfile: assign outfile name or use default one ''
         """
         
-        
 # ----- collect data frame from all filled blocks
         
         df = pd.concat( [self.bl[num-1].df for num in block_list] )
-        
 
         # reset indexes in case repeated indexes from different blocks
         
@@ -677,10 +690,8 @@ class StatisticData:
             buff = [y]
             
             for var in vars:
-                
                 v = np.sum( np.array(df_temp[var])*vol_frac ) / vol_total
                 buff.append(v)
-            
                 
             if data_chunk is None: data_chunk = [buff]
             else: data_chunk.append( buff )
@@ -713,7 +724,6 @@ class StatisticData:
                             justify='left')
          
             
-
 # ----------------------------------------------------------------------
 # >>> get slice dataframe (statistics.bin)                        (Nr.)
 # ----------------------------------------------------------------------
@@ -732,10 +742,10 @@ class StatisticData:
     def get_slice_df( self, block_list, G, indx_slic, slic_type, buff=3 ):
         
         """
-        block_list: list of sliced blocks
-        G : corresponding GridData instance
-        indx_slic: list of slice indexes on each block
-        slic_type : 'X','Y' or 'Z'
+        block_list : list of sliced blocks
+        G          : corresponding GridData instance
+        indx_slic  : list of slice indexes on each block
+        slic_type  : 'X','Y' or 'Z'
         
         return : dataframe of sliced results
         """
@@ -744,9 +754,9 @@ class StatisticData:
         
         # pass
         
-        for i, bl_num in enumerate( block_list ):
-
 # ----- do slicing on each bl.df
+
+        for i, bl_num in enumerate( block_list ):
             
             bl   = self.bl[bl_num-1]
             g    = G.g[bl_num-1]

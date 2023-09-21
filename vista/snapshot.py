@@ -168,6 +168,10 @@ class Snapshot:
 
     def read_snapshot( self, block_list=None ):
         
+        """
+        block_list: (optional) if None, read all blocks.
+        """
+        
         # End of file marker
 
         end_of_file = False
@@ -216,7 +220,6 @@ class Snapshot:
         print(f"\nSnapshot {self.itstep} {snap_type} is read.\n")
         
 
-
 # ----------------------------------------------------------------------
 # >>> Read snapshot and output snapshot structure/info            ( 0 )
 # ----------------------------------------------------------------------
@@ -236,6 +239,11 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def get_snapshot_struct( self, struct_file=None, info_file=None ):
+        
+        """
+        struct_file : if not given, by default snap_struct.csv.
+        info_file   : if not given, by default snap_info.dat.
+        """
 
         # initialize output struct/info file name
        
@@ -321,6 +329,10 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def read_snap_header( self, file ):
+        
+        """
+        file : opened file object
+        """
   
         # Book-keeping
         
@@ -329,9 +341,7 @@ class Snapshot:
         # Default float size
   
         sin = 4
-  
         slg = 4
-  
         sfl = 8
   
         # Header format
@@ -369,27 +379,17 @@ class Snapshot:
         # Assign to class variables
   
         self.hformat       = hformat
-  
         self.kind          = kind
-  
         self.itstep        = itstep
-  
         self.itime         = itime
-  
         self.n_species     = nspec
   
         self.snap_lean     = buf_log[0]
-  
         self.compressible  = buf_log[1]
-  
         self.snap_with_gx  = buf_log[2]
-  
         self.snap_with_tp  = buf_log[3]
-  
         self.snap_with_vp  = buf_log[4]
-  
         self.snap_with_cp  = buf_log[5]
-  
         self.snap_with_mu  = buf_log[6]
   
         # just in case ?
@@ -421,13 +421,10 @@ class Snapshot:
         else:
   
             self.snap_with_cf  = buf_log[7]
-  
             self.snap_with_wd  = buf_log[8]
-  
             self.snap_with_bg  = buf_log[9]
   
             self.header_size += 10*slg
-  
   
         
         # Count variables
@@ -435,41 +432,35 @@ class Snapshot:
         if self.snap_lean: 
             
             self.n_vars += 3
-            
             self.vars_name += ['u', 'v', 'w']
   
         else: 
             
             self.n_vars += 5
-        
             self.vars_name += ['u', 'v', 'w', 'xx', 'xx']
             
   
         if self.snap_with_tp: 
             
             self.n_vars += 2
-            
             self.vars_name += ['T', 'p']
             
   
         if self.snap_with_vp: 
             
             self.n_vars += 1
-        
             self.vars_name += ['vapor']
             
             
         if self.snap_with_cp: 
             
             self.n_vars += 2
-            
             self.vars_name += ['cappa', 'cp']
             
   
         if self.snap_with_mu: 
             
             self.n_vars += 1
-        
             self.vars_name += ['mu']
         
         
@@ -480,58 +471,38 @@ class Snapshot:
             if self.slic_type == 'W': 
                 
                 self.n_vars += 1
-                
                 self.vars_name += ['cf']
             
             
         if self.snap_with_wd: 
             
             self.n_vars += 1
-            
             self.vars_name += ['wd']
             
 
-  
         # Inform user
   
         if self.verbose:
   
             print( '' )
-   
             print( 'Current snapshot: ...' + self.dir[-50:] )
-   
             print( ' - File size is %d Mb (%d B)'%(self.fsize/(1000000),self.fsize) )
-   
             print( ' - Kind   := %d' %(self.kind  ) )
-   
             print( ' - Fields := %d' %(self.n_vars) )
-   
             print( ' - Time   := %.4e'%(self.itime ) )
-   
             print( ' - Step   := %d' %(self.itstep) )
-            
             print( ' - lean   := %d' %(self.snap_lean) )
-            
             print( ' - compressible := %d' %(self.compressible) )
-            
             print( ' - gx     := %d' %(self.snap_with_gx) )
-            
             print( ' - tp     := %d' %(self.snap_with_tp) )
-   
             print( ' - vp     := %d' %(self.snap_with_vp) )
-            
             print( ' - cp     := %d' %(self.snap_with_cp) )
-            
             print( ' - mu     := %d' %(self.snap_with_mu) )
-            
             print( ' - wd     := %d' %(self.snap_with_wd) )
-            
             print( ' - Cf     := %d' %(self.snap_with_cf) )
-            
             print( ' - n_vars := %d' %(self.n_vars) )
-            
+   
             print( '' ); sys.stdout.flush()
-
 
 
 # ----------------------------------------------------------------------
@@ -784,16 +755,29 @@ class Snapshot:
                 self.snap_data.append( [ bl_num, N1, N2, N3, GX, df_sol ] )
 
 
+# ----------------------------------------------------------------------
+# >>> compute gradient for 3D snapshot data                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/16  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
-    def compute_gradients( self, block_list:list, grads:list, 
-                           grid3d:GridData, buff=3):
+    def compute_gradients( self, block_list:list,  grads:list, 
+                                 grid3d:GridData,  buff=3):
         """
-        block_list: list of blocks that are going to compute gradients
-        grads: list of str representing gradients 
-               ['schlieren','shadowgraph','grad_V']
-        G: GridData instance of corresponding case
+        block_list : list of blocks that are going to compute gradients
+        grads      : list of str representing gradients 
+                     ['schlieren','shadowgraph','grad_V']
+        G          : GridData instance of corresponding case
         
-        return: self.snap_data[num-1][5]['grad_rho'] (...['laplacian'])        
+        return : self.snap_data[num-1][5]['grad_rho'] (...['laplacian'])        
         """
         
         for num in block_list:
@@ -826,7 +810,6 @@ class Snapshot:
                 grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
                 
                 df['grad_rho'] = grad_rho.flatten()
-
                 
 # --------- compute Laplacian of the density
 
@@ -887,8 +870,6 @@ class Snapshot:
                 
                 df['Q-criterion'] = Q.flatten()
                 
-                
-
 
 # ----------------------------------------------------------------------
 # >>> Drop ghost point data                                     ( 4 )
@@ -906,6 +887,11 @@ class Snapshot:
 # ----------------------------------------------------------------------
    
     def drop_ghost( self , buff=3 ):
+        
+        """
+        self.snap_data will be replaced by self.snap_cleandata
+        self.n_cells (total number of cell after dropping ghost) will be counted
+        """
 
         # Check if data is available
         
@@ -1052,6 +1038,7 @@ class Snapshot:
                 
                 self.n_cells += snap_bl[1] * snap_bl[2] * snap_bl[3]
 
+
 # ----------------------------------------------------------------------
 # >>> check the range of snapshot                                ( 5 )
 # ----------------------------------------------------------------------
@@ -1069,7 +1056,9 @@ class Snapshot:
 
     def check_range( self, clean=True ):
         
-        # Check if data is available
+        """
+        print x,y,z range of data
+        """
     
             
         # Data without ghost cells is clean data
@@ -1168,7 +1157,6 @@ class Snapshot:
                 print( 'y range [ %f, %f ]' % (ymin,ymax) )
 
 
-
 # ----------------------------------------------------------------------
 # >>>  Assemble block snap_cleandata                              ( 6 )
 # ----------------------------------------------------------------------
@@ -1186,6 +1174,12 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def assemble_block( self ):
+        
+        """
+        self.snap_cleandata should be ready!
+        assembling cleandata(without ghost cells) blocks into a
+        snapshot's full data, return a pandas data frame.
+        """
         
         # Different ways of assemble blocks with different shapes
 
@@ -1419,7 +1413,6 @@ class Snapshot:
         
         self.df = df
 
-   
 
 # ----------------------------------------------------------------------
 # >>> Get grid vectors                                           ( 7 )
@@ -1440,10 +1433,13 @@ class Snapshot:
 
     def get_grid_vectors( self, buff=3 ):
         
+        """
+        return GX (tall numpy array) for DMD
+        """
+        
         self.verbose = False
         
         self.read_snapshot()
-        
         
         if self.type == 'block':
             
@@ -1555,7 +1551,14 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def get_slice( self, slic_type, loc, buff=3 ):
+    def get_slice( self, slic_type, loc:float, buff=3 ):
+        
+        """
+        slic_type : 'X','Y' or 'Z'
+        loc       : location of slice
+        
+        return    : 2D Snapshot object
+        """
              
 # ----- check if current snapshots 3D?
         
@@ -1738,9 +1741,7 @@ class Snapshot:
         snap_2d.n_vars       = self.n_vars
         snap_2d.vars_name    = self.vars_name
         
-        
         return snap_2d
-
 
 
 # ----------------------------------------------------------------------
@@ -1758,6 +1759,13 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def get_slice_df( self, slic_type, loc, buff=3 ):
+        
+        """
+        slic_type : 'X','Y' or 'Z'
+        loc       : location of slice
+        
+        return    : pandas dataframe of clean data(without ghost) on the slice
+        """
         
         snapshot2d = self.get_slice( slic_type, loc, buff=buff )
         
@@ -1785,6 +1793,10 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def write_snapshot( self, filename ):
+        
+        """
+        filename : filename of output snapshot
+        """
         
         verbose = self.verbose
         

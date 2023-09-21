@@ -38,7 +38,15 @@ from   .io_binary        import read_log_bin
 
 class BlockData:
     
-    def __init__( self, file, n_var, block_list, vars, var_indx ):
+    def __init__( self, file, block_list, n_var, vars, var_indx ):
+        
+        """
+        file       : opened file object
+        block_list : list of blocks's numbers
+        n_var      : number vars in the stored blocks
+        vars       : list of selected variable name strings
+        var_indx   : list of indexes of selected variables in data chunk
+        """
         
         self.verbose = False
         
@@ -80,7 +88,7 @@ class BlockData:
         if self.num in block_list: self.to_fill = True
 
         # primitive variables 'u,v,w,rho,rhoE'
-        # read primitive variables + 'p T mu', when fill is true.
+        # mean variables = primitive variables + 'p T mu'
         if self.to_fill:
             
             for i, var in enumerate(vars):
@@ -93,7 +101,6 @@ class BlockData:
 
                 self.df[var] = buff
                 
-                  
             
         # calculate the block data size in byte
         
