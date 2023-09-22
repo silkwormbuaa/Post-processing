@@ -497,7 +497,40 @@ def distribute_mpi_work(n_tasks, n_processors, rank):
         
     
     return i_start, i_end
-        
+
+
+# ----------------------------------------------------------------------
+# >>> Sutherland Law                                              (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def sutherland( Ts ):
+    
+    """
+    Ts     : static temperature
+    
+    return : mu
+    """
+    
+    T_ref   = 273.15
+    mu_ref = 17.16e-6
+    S_ref   = 110.4
+    a1 = (T_ref + S_ref) / (Ts + S_ref)
+    b1 = np.power(Ts/T_ref, 1.5)
+    mu_s = mu_ref * a1 * b1
+    
+    return mu_s
+
+  
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
