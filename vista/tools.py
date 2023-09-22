@@ -530,7 +530,57 @@ def sutherland( Ts ):
     
     return mu_s
 
-  
+
+
+# ----------------------------------------------------------------------
+# >>> bilinear interpolation                                     (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/22  - created
+#
+# Desc
+#
+#      f(3)  # . . . . . . . . # f(4)
+#     (x1,y2).                 . (x2,y2)
+#            .                 .
+#            .         f(x,y)  .
+#            .            *    .
+#            .                 .
+#      f(1)  # . . . . . . . . # f(2)
+#       (x1,y1)                (x2,y1)
+#
+# ----------------------------------------------------------------------
+
+def bilin_interp(x1,x2,y1,y2,f,x,y):
+    
+    
+    """
+    x1,x2,y1,y3 : coordinates at left-bottom and right-top corner
+    f           : values at (x1,y1)--(x2,y1)--(x1,y2)--(x2,y2)
+    x,y         : interpolation point location 
+    
+    return : f(x,y)
+    """
+
+#---- calculate weights
+
+    u = (x - x1) / (x2 - x1)
+    v = (y - y1) / (y2 - y1)
+
+#---- calculate interpolated value
+
+    value =   (1.0-u)*(1.0-v) * f[0] \
+            +      u *(1.0-v) * f[1] \
+            + (1.0-u)*     v  * f[2] \
+            +      u *     v  * f[3]
+    
+    return value
+
+
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
