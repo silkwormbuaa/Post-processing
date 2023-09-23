@@ -12,8 +12,11 @@
 
 import os
 import sys
-import numpy             as    np
-import pandas            as    pd
+import pickle
+import numpy             as     np
+import pandas            as     pd
+import matplotlib.pyplot as     plt
+import matplotlib.colors as     colors
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -24,11 +27,9 @@ from   vista.snapshot    import Snapshot
 
 from   vista.grid        import GridData
 
-from   vista.tools       import sutherland
-
-from   vista.tools       import bilin_interp
-
 from   vista.timer       import timer
+
+from   vista.plane_analy import save_isolines
 
 from   vista.lib.form    import phy
 from   vista.lib.form    import mth
@@ -76,6 +77,7 @@ for num in block_list:
 print(S.bl[num-1].df)
 
 with timer("read cutcell info"):
+    
     cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
 
     cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], inplace=True )
@@ -83,7 +85,40 @@ with timer("read cutcell info"):
 with timer("compute friction projection"):
     
     S.friction_projection( block_list, G, cc_df )
+    
 
+
+xx = np.array( S.df_fric['x'] )
+zz = np.array( S.df_fric['z'] )
+fric = np.array( S.df_fric['fric'] )
+
+npx = len( np.unique(xx) )
+npz = len( np.unique(zz) )
+
+xx = xx.reshape(npz,npx)
+zz = zz.reshape(npz,npx)
+fric = fric.reshape(npz,npx)
+
+save_isolines(xx,zz,fric,0.0,"separation_lines.pkl")
+
+fig, ax = plt.subplots()
+
+cs = ax.contourf(xx,zz,fric,levels=51,cmap='coolwarm',norm=colors.CenteredNorm())
+
+cbar = plt.colorbar(cs)
+
+with open('separation_lines.pkl','rb') as f:
+    lines = pickle.load( f )
+    
+    for line in lines:
+        x_sep = line[:,0]
+        z_sep = line[:,1]
+        ax.plot(x_sep,z_sep,'black',linewidth=0.8)
+
+plt.show()
+
+
+    
 #    for num in block_list:
 #        
 #        temp_df = cc_df[ cc_df['block_number'] == num ]

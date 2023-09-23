@@ -46,10 +46,10 @@ class StatisticData:
     def __init__( self, stat_file ):
         
         """
-        stat_file: path to statistics.bin
+        stat_file: path to statistics.bin \n
         
-        return:      self.fsize 
-        initialize:  self.pos, self.n_var, self.bl, self.verbose
+        return     :  self.fsize \n  
+        initialize :  self.pos, self.n_var, self.bl, self.verbose
         """
         
         # directory to the statistic file
@@ -71,8 +71,10 @@ class StatisticData:
         self.verbose = False
         
         # Grid3d (including all blocks grids from inca_grid.bin file)
-
         self.grid3d = None
+        
+        # Dataframe for friction projection 
+        self.df_fric = None
         
         
 # ----------------------------------------------------------------------
@@ -94,11 +96,11 @@ class StatisticData:
     def read_stat_header( self, file ):
         
         """
-        file:  opened file object
+        file:  opened file object\n
         
-        return: 
-            file header info ( self.verbose=True to show)
-            self.pos
+        return: \n
+            file header info ( self.verbose=True to show) and
+            self.pos will be updated
         """
 
         # Internal variables
@@ -211,9 +213,9 @@ class StatisticData:
     def read_stat_body( self, file , bl_list, sel_vars ):
         
         """
-        file       :  opened file object
-        bl_list    :  list of selected blocks' numbers
-        vars       :  list of variable name strings
+        file       :  opened file object \n
+        bl_list    :  list of selected blocks' numbers \n 
+        vars       :  list of variable name strings \n
         
         return     :  self.bl (list of BlockData)
         """
@@ -322,10 +324,10 @@ class StatisticData:
     def match_grid( self, G, block_list ):
         
         """
-        G          : GridData object
-        block_list : list of selected blocks' numbers 
+        G          : GridData object \n
+        block_list : list of selected blocks' numbers \n
         
-        return : x,y,z and vol_frac are added to self.bl[].df
+        return : x,y,z and vol_frac are added to self.bl[].df \n
         """
         
         for num in block_list:
@@ -361,9 +363,9 @@ class StatisticData:
     def drop_ghost( self, G, block_list, buff=3 ):
         
         """
-        Only applicable to 3D statistics data.
-        G : GridData instance
-        block_list : list of blocks that are going to drop ghost cells
+        Only applicable to 3D statistics data. \n
+        G          : GridData instance \n
+        block_list : list of blocks that are going to drop ghost cells \n
         
         return : self.bl[].df
         """
@@ -409,8 +411,9 @@ class StatisticData:
     def compute_vars( self, block_list:list, vars_new:list ):
         
         """
-        block_list : list of blocks that are going to compute new variables
-        vars_new   : list of str representing new vars ['mach','tke','p`','mu']
+        block_list : list of blocks that are going to compute new variables\n
+        vars_new   : list of str representing new vars 
+                     ['mach','tke','p`','mu']\n
         
         return : corresponding variables are added to self.bl[].df
         """
@@ -486,10 +489,10 @@ class StatisticData:
                            buff=3):
 
         """
-        block_list: list of blocks that are going to compute gradients
+        block_list: list of blocks that are going to compute gradients\n
         grads: list of str representing gradients 
-               ['schlieren','shadowgraph','vorticity']
-        G: GridData instance of corresponding case
+               ['schlieren','shadowgraph','vorticity'] \n
+        G: GridData instance of corresponding case\n
         
         return: self.bl[].df['grad_rho'] (...['laplacian'])
         """
@@ -589,8 +592,8 @@ class StatisticData:
     def compute_source_terms( self, block_list:list, G:GridData, buff=3):
         
         """
-        block_list: list of blocks that are going to compute gradients
-        G: GridData instance of corresponding case
+        block_list: list of blocks that are going to compute gradients\n
+        G: GridData instance of corresponding case\n
         
         return: self.bl[num-1].df['S1'] (...['S2'])
         """
@@ -653,10 +656,10 @@ class StatisticData:
     def compute_profile( self, block_list, bbox, vars, RS=True, outfile=False ):
         
         """
-        block list: selected block list (within bounding box)
-        bbox: bounding box coordinates [xmin,xmax,ymin,ymax,zmin,zmax]
-        vars: variable names list
-        RS: set True to compute Reynolds Stresses, otherwise drop them
+        block list: selected block list (within bounding box)\n
+        bbox: bounding box coordinates [xmin,xmax,ymin,ymax,zmin,zmax]\n
+        vars: variable names list\n
+        RS: set True to compute Reynolds Stresses, otherwise drop them\n
         outfile: assign outfile name or use default one ''
         """
         
@@ -759,10 +762,10 @@ class StatisticData:
     def get_slice_df( self, block_list, G, indx_slic, slic_type, buff=3 ):
         
         """
-        block_list : list of sliced blocks
-        G          : corresponding GridData instance
-        indx_slic  : list of slice indexes on each block
-        slic_type  : 'X','Y' or 'Z'
+        block_list : list of sliced blocks \n
+        G          : corresponding GridData instance \n
+        indx_slic  : list of slice indexes on each block \n
+        slic_type  : 'X','Y' or 'Z' \n
         
         return : dataframe of sliced results
         """
@@ -977,7 +980,16 @@ class StatisticData:
                         f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h \
                                          * fay[cc_j] * len_ratio[cc_j]
             
-            self.bl[num-1].f_visc = f_visc
+            xx,zz = np.meshgrid( g.gx, g.gz )
+            
+            df_fric = pd.DataFrame(columns=['x','z','fric'])
+            df_fric['x'] = xx[buff:-buff,buff:-buff].flatten()
+            df_fric['z'] = zz[buff:-buff,buff:-buff].flatten()
+            df_fric['fric'] = f_visc[buff:-buff,buff:-buff].T.flatten()
+            self.bl[num-1].df_fric = df_fric
             
             print(f"block {num} has mean friction {np.mean(f_visc)}.\n")
 
+        self.df_fric = pd.concat([self.bl[num-1].df_fric for num in block_list])
+        self.df_fric.reset_index( drop=True, inplace=True )
+        self.df_fric.sort_values( by=['z','x'],inplace=True )

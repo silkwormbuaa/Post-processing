@@ -70,7 +70,7 @@ class BlockData:
         
         # matrix of friction projection on x-z plane
 
-        self.f_visc = None
+        self.df_fric = None
         
         # size of type 
         
