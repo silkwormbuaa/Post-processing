@@ -636,7 +636,6 @@ class BlockGrid:
         self.pz[1:] = self.gz + 0.5*self.hz
         
 
-
 # ----------------------------------------------------------------------
 # >>> Define Cut Cell                                          ( 2-1 )
 # ----------------------------------------------------------------------
@@ -659,7 +658,7 @@ class BlockGrid:
         if len(df) > 0:
                 
             # check block number
-            if df.iloc[0,4] != self.num :
+            if df['block_number'].iloc[0] != self.num :
                 raise ValueError("block number does not match!")
             
             # take out data from df

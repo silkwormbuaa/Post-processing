@@ -13,12 +13,12 @@ import os
 
 import sys
 
-source_dir = os.path.realpath(__file__).split('scripts')[0]
-sys.path.append( source_dir )
-
 import numpy             as     np
 
 from   scipy.interpolate import griddata
+
+source_dir = os.path.realpath(__file__).split('scripts')[0]
+sys.path.append( source_dir )
 
 from   vista.statistic   import StatisticData
 
@@ -27,11 +27,8 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 
 from   vista.plane_analy import save_sonic_line
-
 from   vista.plane_analy import save_separation_line
-
 from   vista.plane_analy import shift_coordinates
-
 from   vista.plane_analy import save_isolines
 
 from   vista.plot_style  import plot_slicez_stat
