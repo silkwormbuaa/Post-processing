@@ -874,13 +874,13 @@ class StatisticData:
                              G:GridData, cc_df:pd.DataFrame, buff=3 ):
         
         """
-        block_list : list of selected blocks' numbers
-        G          : GridData object
-        cc_df      : cutcell dataframe from cutcells_setup.dat
+        block_list : list of selected blocks' numbers\n
+        G          : GridData object\n
+        cc_df      : cutcell dataframe from cutcells_setup.dat\n
         
-        return     : dataframe of x-z plane data with coordinates and f
+        return     : dataframe of x-z plane data with coordinates and f\n
         
-        Need data chunk with u,mu,wd ready.
+        Need data chunk with u,mu,wd ready.\n
         Only applicable to geometry with homogeneous shape along x
         """
         
@@ -913,62 +913,71 @@ class StatisticData:
             
             f_visc = np.zeros( (npx,npz),dtype='f' )
             
-            for i in range( buff+1, g.nx+buff+1 ):
-                for k in range( buff+1, g.nz+buff+1 ):
+            for k in range( buff+1, g.nz+buff+1 ):
+                
+                # get a cut cell group dataframe
+                try:
+                    df = cc_group.get_group((buff+1,k))
+                except KeyError:
+                    print(f"block {num}, point ({buff+1},{k}) no cut cell")
                     
-                    # get a cut cell group dataframe
-                    try:
-                        df = cc_group.get_group((i,k))
-                    except KeyError:
-                        print(f"block {num}, point ({i},{k}) no cut cell")
-
+                for i in range( buff+1, g.nx+buff+1 ):
+                    
+                    if i == buff + 1:
+                        
+                        wd_cc  = []
+                        y_cc   = [];   z_cc      = []
+                        ny_cc  = [];   nz_cc     = []
+                        fay    = [];   len_ratio = []
+                        y_prj  = [];   z_prj     = []
+                        jl_prj = [];   jr_prj    = []
+                        kl_prj = [];   kr_prj    = []
+                        
+                        for cc_j in range( len(df) ):
+                            
+                            j = df['j'].iloc[cc_j]
+                            
+                            wd_cc.append( wd[k-1,j-1,i-1] )
+                            y_cc .append( df['y'].iloc[cc_j])
+                            z_cc .append( df['z'].iloc[cc_j])
+                            ny_cc.append( df['ny'].iloc[cc_j])
+                            nz_cc.append( df['nz'].iloc[cc_j])
+                            fay  .append( df['fay1'].iloc[cc_j]
+                                        - df['fay0'].iloc[cc_j])
+                            len_ratio.append( ny_cc[cc_j] / np.sqrt( 
+                                              ny_cc[cc_j]**2 + nz_cc[cc_j]**2 ))
+                            
+                            y_prj.append(y_cc[cc_j]+(h-wd_cc[cc_j])*ny_cc[cc_j])
+                            z_prj.append(z_cc[cc_j]+(h-wd_cc[cc_j])*nz_cc[cc_j])
+                            
+                            jl, jr = find_indices( g.gy, y_prj[cc_j] )
+                            kl, kr = find_indices( g.gz, z_prj[cc_j] )
+                            
+                            jl_prj.append(jl)
+                            jr_prj.append(jr)
+                            kl_prj.append(kl)
+                            kr_prj.append(kr)
             
                     for cc_j in range( len(df) ):
                         
                         j = df['j'].iloc[cc_j]
                         
-                        wd_cc = wd[k-1,j-1,i-1]
-                        y_cc  = df['y'].iloc[cc_j]
-                        z_cc  = df['z'].iloc[cc_j]
-                        ny_cc = df['ny'].iloc[cc_j]
-                        nz_cc = df['nz'].iloc[cc_j]
-                        fay   = df['fay1'].iloc[cc_j] - df['fay0'].iloc[cc_j]
-                        len_ratio = ny_cc / np.sqrt( ny_cc**2 + nz_cc**2 )
+                        f = np.array([u[kl_prj[cc_j],jl_prj[cc_j],i],
+                                      u[kr_prj[cc_j],jl_prj[cc_j],i],
+                                      u[kl_prj[cc_j],jr_prj[cc_j],i],
+                                      u[kr_prj[cc_j],jr_prj[cc_j],i]])
                         
-                        y_prj = y_cc + (h-wd_cc)*ny_cc
-                        z_prj = z_cc + (h-wd_cc)*nz_cc
+                        u_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
+                                                  g.gz[kr_prj[cc_j]],
+                                                  g.gy[jl_prj[cc_j]],
+                                                  g.gy[jr_prj[cc_j]],
+                                                  f,
+                                                  z_prj[cc_j], y_prj[cc_j])
                         
-        #                print(f"({y_cc:10.7f},{z_cc:10.7f})->({y_prj:10.7f},{z_prj:10.7f}),wd is {wd_cc}\n")
-                        
-                        jl_prj, jr_prj = find_indices( g.gy, y_prj )
-                        kl_prj, kr_prj = find_indices( g.gz, z_prj )
-                        
-        #                print(f"({kl_prj,kr_prj,jl_prj,jr_prj})\n")
-                        
-                        f = np.array([u[kl_prj,jl_prj,i],
-                                    u[kr_prj,jl_prj,i],
-                                    u[kl_prj,jr_prj,i],
-                                    u[kr_prj,jr_prj,i]])
-                        
-                        u_prj = mth.bilin_interp( g.gz[kl_prj],g.gz[kr_prj],
-                                                g.gy[jl_prj],g.gy[jr_prj],
-                                                f,
-                                                z_prj, y_prj)
-                        
-                        f_visc[i-1,k-1] += mu[k-1,j-1,i-1]*u_prj/h*fay*len_ratio
+                        f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h \
+                                         * fay[cc_j] * len_ratio[cc_j]
             
             self.bl[num-1].f_visc = f_visc
             
             print(f"block {num} has mean friction {np.mean(f_visc)}.\n")
-
-        #                print(f"{f} -> {u_prj}, gradient is {u_prj/h}")
-        #                print( f"f_visc = {f_visc[i-1,k-1]}" )
-        #                print("======\n")
-
-            
-            
-
-
-
-                    
 
