@@ -20,7 +20,10 @@ from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_log_bin
 
+from   .tools            import find_indices
+
 from   .lib.form         import phy
+from   .lib.form         import mth
 
 #%% 
 class StatisticData:
@@ -850,3 +853,122 @@ class StatisticData:
         df_slice.reset_index( drop=True, inplace=True)
         
         return df_slice
+    
+
+# ----------------------------------------------------------------------
+# >>> friction_projection                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/23  - created
+#
+# Desc
+#    - compute the friction distribution projected on x-z plane
+#    - return a dataframe 
+# ----------------------------------------------------------------------
+
+    def friction_projection( self,       block_list:list, 
+                             G:GridData, cc_df:pd.DataFrame, buff=3 ):
+        
+        """
+        block_list : list of selected blocks' numbers
+        G          : GridData object
+        cc_df      : cutcell dataframe from cutcells_setup.dat
+        
+        return     : dataframe of x-z plane data with coordinates and f
+        
+        Need data chunk with u,mu,wd ready.
+        Only applicable to geometry with homogeneous shape along x
+        """
+        
+        for num in block_list:
+            
+# --------- get cut cell dataframe and grid of this block 
+
+            cc_df_block = cc_df[ cc_df['block_number'] == num ]
+            cc_group = cc_df_block.groupby(['i','k'])
+            
+            g = G.g[num-1]
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+            h = 0.5*np.sqrt( g.hy[buff]**2 + g.hz[buff]**2 )
+            
+# --------- prepare block data chunk
+
+            data_df = self.bl[num-1].df
+            
+            u  = np.array( data_df['u']  ).reshape( npz, npy, npx )
+            mu = np.array( data_df['mu'] ).reshape( npz, npy, npx )
+            wd = np.array( data_df['wd'] ).reshape( npz, npy, npx )
+            
+# --------- loop over each cut cell group
+
+            # !!! i,j,k follow Fortran index, starting from 1.
+            
+            f_visc = np.zeros( (npx,npz),dtype='f' )
+            
+            for i in range( buff+1, g.nx+buff+1 ):
+                for k in range( buff+1, g.nz+buff+1 ):
+                    
+                    # get a cut cell group dataframe
+                    try:
+                        df = cc_group.get_group((i,k))
+                    except KeyError:
+                        print(f"block {num}, point ({i},{k}) no cut cell")
+
+            
+                    for cc_j in range( len(df) ):
+                        
+                        j = df['j'].iloc[cc_j]
+                        
+                        wd_cc = wd[k-1,j-1,i-1]
+                        y_cc  = df['y'].iloc[cc_j]
+                        z_cc  = df['z'].iloc[cc_j]
+                        ny_cc = df['ny'].iloc[cc_j]
+                        nz_cc = df['nz'].iloc[cc_j]
+                        fay   = df['fay1'].iloc[cc_j] - df['fay0'].iloc[cc_j]
+                        len_ratio = ny_cc / np.sqrt( ny_cc**2 + nz_cc**2 )
+                        
+                        y_prj = y_cc + (h-wd_cc)*ny_cc
+                        z_prj = z_cc + (h-wd_cc)*nz_cc
+                        
+        #                print(f"({y_cc:10.7f},{z_cc:10.7f})->({y_prj:10.7f},{z_prj:10.7f}),wd is {wd_cc}\n")
+                        
+                        jl_prj, jr_prj = find_indices( g.gy, y_prj )
+                        kl_prj, kr_prj = find_indices( g.gz, z_prj )
+                        
+        #                print(f"({kl_prj,kr_prj,jl_prj,jr_prj})\n")
+                        
+                        f = np.array([u[kl_prj,jl_prj,i],
+                                    u[kr_prj,jl_prj,i],
+                                    u[kl_prj,jr_prj,i],
+                                    u[kr_prj,jr_prj,i]])
+                        
+                        u_prj = mth.bilin_interp( g.gz[kl_prj],g.gz[kr_prj],
+                                                g.gy[jl_prj],g.gy[jr_prj],
+                                                f,
+                                                z_prj, y_prj)
+                        
+                        f_visc[i-1,k-1] += mu[k-1,j-1,i-1]*u_prj/h*fay*len_ratio
+            
+            self.bl[num-1].f_visc = f_visc
+            
+            print(f"block {num} has mean friction {np.mean(f_visc)}.\n")
+
+        #                print(f"{f} -> {u_prj}, gradient is {u_prj/h}")
+        #                print( f"f_visc = {f_visc[i-1,k-1]}" )
+        #                print("======\n")
+
+            
+            
+
+
+
+                    
+

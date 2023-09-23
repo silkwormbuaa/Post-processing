@@ -282,7 +282,7 @@ class GridData:
     def select_blockgrids( self, bbox, mode='overlap' ):
         
         """
-        bbox : [xmin,xmax,ymin,ymax,zmin,zmax]
+        bbox : [xmin,xmax,ymin,ymax,zmin,zmax]   \n
         mode : 'overlap' or 'within'
         """
         
@@ -336,10 +336,10 @@ class GridData:
     def select_sliced_blockgrids( self, slic_type, loc, bbox=None, buff=3 ):
         
         """
-        input:
-        slic_type : 'X', 'Y', or 'Z' ( normal direction of slice)
-        loc       : coordinate
-        bbox      : [xmin,xmax,ymin,ymax,zmin,zmax]
+        input:\n
+        slic_type : 'X', 'Y', or 'Z' ( normal direction of slice) \n
+        loc       : coordinate \n
+        bbox      : [xmin,xmax,ymin,ymax,zmin,zmax] \n
         
         return : list of selected bl_nums, list of slice indexes on each bl
         """

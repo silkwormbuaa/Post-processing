@@ -55,16 +55,23 @@ class BlockData:
         pos_start = file.tell()
         
         # index of block, can be read from blockdata itself
+        
         self.num = 0
         
         # size of this BlockData (in bytes)
+        
         self.size = 0
         self.n_var = n_var
         self.dim = []
         
         # empty list for future use
+        
         self.df = pd.DataFrame(columns=vars)
+        
+        # matrix of friction projection on x-z plane
 
+        self.f_visc = None
+        
         # size of type 
         
         sin = 4
