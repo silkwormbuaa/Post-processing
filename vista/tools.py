@@ -582,6 +582,45 @@ def bilin_interp(x1,x2,y1,y2,f,x,y):
 
 
 # ----------------------------------------------------------------------
+# >>> find indices                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/23  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def find_indices( arr, target ):
+    
+    """
+    arr    : 1D list or numpy array
+    target : target value
+    
+    return : left and right indices 
+    """
+    
+    left, right = 0, len(arr) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2  # avoid integer overflow
+
+        if arr[mid] == target:
+            return mid, mid + 1  # find target value
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    # return left and right index
+    return right, left
+
+
+# ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
 #
