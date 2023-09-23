@@ -20,6 +20,8 @@ from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_log_bin
 
+from   .lib.form         import phy
+
 #%% 
 class StatisticData:
 
@@ -65,7 +67,11 @@ class StatisticData:
         # Verbose ? 
         self.verbose = False
         
+        # Grid3d (including all blocks grids from inca_grid.bin file)
 
+        self.grid3d = None
+        
+        
 # ----------------------------------------------------------------------
 # >>> READ STATISTIC BINARY FILE HEADER                           ( 1 )
 # ----------------------------------------------------------------------
@@ -401,7 +407,7 @@ class StatisticData:
         
         """
         block_list : list of blocks that are going to compute new variables
-        vars_new   : list of str representing new vars ['mach','tke','p`']
+        vars_new   : list of str representing new vars ['mach','tke','p`','mu']
         
         return : corresponding variables are added to self.bl[].df
         """
@@ -449,6 +455,14 @@ class StatisticData:
                 p_fluc = np.array(df['pp']) - np.array(df['p'])**2
                 
                 self.bl[num-1].df['p`'] = p_fluc
+
+# ---------- compute viscosity mu
+
+            if "mu" in vars_new:
+                
+                mu = np.array( df['T'].apply(phy.sutherland) )
+                
+                self.bl[num-1].df['mu'] = mu
 
 
 # ----------------------------------------------------------------------
