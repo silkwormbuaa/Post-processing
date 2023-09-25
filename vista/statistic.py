@@ -914,7 +914,7 @@ class StatisticData:
 
             # !!! i,j,k follow Fortran index, starting from 1.
             
-            f_visc = np.zeros( (npx,npz),dtype='f' )
+            f_visc = np.zeros( (npx,npz), dtype='f' )
             
             for k in range( buff+1, g.nz+buff+1 ):
                 
@@ -926,6 +926,10 @@ class StatisticData:
                     
                 for i in range( buff+1, g.nx+buff+1 ):
                     
+                    # when i == 1, find the interpolation stencil points
+                    # (therefore, this code is just applicable to geometry
+                    # with homogeneous shape in x direction.)
+                    
                     if i == buff + 1:
                         
                         wd_cc  = []
@@ -935,6 +939,8 @@ class StatisticData:
                         y_prj  = [];   z_prj     = []
                         jl_prj = [];   jr_prj    = []
                         kl_prj = [];   kr_prj    = []
+                        
+                        # loop over all cut cells sharing same x-z
                         
                         for cc_j in range( len(df) ):
                             
@@ -950,9 +956,11 @@ class StatisticData:
                             len_ratio.append( ny_cc[cc_j] / np.sqrt( 
                                               ny_cc[cc_j]**2 + nz_cc[cc_j]**2 ))
                             
+                            # projection point coordinates
                             y_prj.append(y_cc[cc_j]+(h-wd_cc[cc_j])*ny_cc[cc_j])
                             z_prj.append(z_cc[cc_j]+(h-wd_cc[cc_j])*nz_cc[cc_j])
                             
+                            # indices of interpolation stencil points
                             jl, jr = find_indices( g.gy, y_prj[cc_j] )
                             kl, kr = find_indices( g.gz, z_prj[cc_j] )
                             
@@ -960,7 +968,9 @@ class StatisticData:
                             jr_prj.append(jr)
                             kl_prj.append(kl)
                             kr_prj.append(kr)
-            
+
+                    # compute interpolated u, then friction
+                    
                     for cc_j in range( len(df) ):
                         
                         j = df['j'].iloc[cc_j]
@@ -980,6 +990,8 @@ class StatisticData:
                         f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h \
                                          * fay[cc_j] * len_ratio[cc_j]
             
+# --------- match with coordinates
+            
             xx,zz = np.meshgrid( g.gx, g.gz )
             
             df_fric = pd.DataFrame(columns=['x','z','fric'])
@@ -989,6 +1001,8 @@ class StatisticData:
             self.bl[num-1].df_fric = df_fric
             
             print(f"block {num} has mean friction {np.mean(f_visc)}.\n")
+
+# --------- save friction into StatisticsData.df_fric (a single pd.DataFrame)
 
         self.df_fric = pd.concat([self.bl[num-1].df_fric for num in block_list])
         self.df_fric.reset_index( drop=True, inplace=True )
