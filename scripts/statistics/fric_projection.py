@@ -30,16 +30,27 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 
 from   vista.plane_analy import save_isolines
+from   vista.plane_analy import shift_coordinates
+
+from   vista.tools       import get_filelist
+from   vista.tools       import read_case_parameter
 
 from   vista.lib.form    import phy
 from   vista.lib.form    import mth
 
-snapshotfile = '/home/wencanwu/my_simulation/temp/220927_lowRe/wall_dist/snapshot_01329504/snapshot.bin'
-resultspath  = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
+
+resultspath = os.getcwd()
+
+#resultspath  = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
 
 stat_file = resultspath + '/statistics.bin'
 grid_file = resultspath + '/inca_grid.bin'
-ccfile = resultspath + '/cutcells_setup.dat'
+ccfile    = resultspath + '/cutcells_setup.dat'
+
+snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
+                            key='snapshot.bin')[0]
+
+parametersfile = resultspath.split('/results')[0] + '/case_parameters'
 
 bbox = [ -60.0, 100.0, -1.3, 0.01, -11.0, 11.0]
 
@@ -117,31 +128,5 @@ with open('separation_lines.pkl','rb') as f:
 
 plt.show()
 
-
-    
-#    for num in block_list:
-#        
-#        temp_df = cc_df[ cc_df['block_number'] == num ]
-#        
-#        print(temp_df)
-#        
-#        G.g[num-1].assign_vol_fra( temp_df, geo_case )
-#
-#with timer("get a df with same i,k"):
-#    
-##    for i in range(1,38):
-##        for k in range(1,38):
-##    
-##            df = temp_df[ (temp_df['i'] == i) & (temp_df['k'] == k) ]
-#    group = temp_df.groupby(['i','k'])
-#
-#    print(group.ngroups)
-#    
-#    for i in range(4,36):
-#        for k in range(4,36):
-#            try:
-#                df = group.get_group((i,k))
-#            except KeyError:
-#                print(f"{i},{k} no value")
 
             
