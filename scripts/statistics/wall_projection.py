@@ -105,7 +105,9 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
         
         S.pressure_projection( block_list, G, cc_df )
 
+
 else:
+    
     with timer("read projection data"):
         S = StatisticData( stat_file )
         
@@ -122,6 +124,11 @@ with timer("plotting"):
     h_ridge = float( parameters.get('H') )
     h_md    = float( parameters.get('H_md') )
     x_imp   = float( parameters.get('x_imp') )
+    rho_ref = float( parameters.get('rho_ref') )
+    u_ref   = float( parameters.get('u_ref') )
+    p_ref   = float( parameters.get('p_ref') )
+    
+    dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
     S.df_fric = shift_coordinates( S.df_fric, delta, h_ridge, h_md, x_imp)
 
@@ -143,16 +150,27 @@ with timer("plotting"):
     save_isolines( xx, zz, fric,
                    1.0,"projected_separation_line.pkl")
     
-    plot_wall_projection( xx, zz, fric, filename='fric' )
+    plot_wall_projection( xx, zz, fric/dyn_p*1000.0, filename='fric' )
     
-    plot_wall_projection( xx, zz, p, filename='pressure' )
+    plot_wall_projection( xx, zz, p/p_ref, filename='pressure' )
     
-    plot_wall_projection( xx, zz, p_fluc, filename='pressure_fluc' )
+    plot_wall_projection( xx, zz, p_fluc/p_ref, separation=False, filename='pressure_fluc' )
     
+with timer("save spanwise averaged variable distribution along x"):
     
+    fric_mean   = np.mean( fric/dyn_p*1000.0, axis=0 )
+    p_mean      = np.mean( p/p_ref, axis=0 )
+    p_fluc_mean = np.mean( p_fluc/p_ref, axis=0 )
 
-
-
-
-
-            
+    df_streamwise = pd.DataFrame(columns=['x','fric_ave','p_ave','p_fluc_ave'])
+    df_streamwise['x']  = np.unique( xx )
+    df_streamwise['Cf'] = np.array( fric_mean )
+    df_streamwise['Cp'] = np.array( p_mean )
+    df_streamwise['p_fluc'] = np.array( p_fluc_mean )
+    
+    with open('streamwise_vars.pkl','wb') as f:
+        
+        pickle.dump( df_streamwise, f )
+        
+    
+         

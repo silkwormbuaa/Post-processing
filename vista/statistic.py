@@ -905,8 +905,6 @@ class StatisticData:
             npy = g.ny + buff*2
             npz = g.nz + buff*2
             
-            h = 0.5*np.sqrt( g.hy[buff]**2 + g.hz[buff]**2 )
-            
 # --------- prepare block data chunk
 
             data_df = self.bl[num-1].df
@@ -937,7 +935,7 @@ class StatisticData:
                     
                     if i == buff + 1:
                         
-                        wd_cc  = []
+                        wd_cc  = [];   h         = []
                         y_cc   = [];   z_cc      = []
                         ny_cc  = [];   nz_cc     = []
                         fay    = [];   len_ratio = []
@@ -956,14 +954,21 @@ class StatisticData:
                             z_cc .append( df['z'].iloc[cc_j])
                             ny_cc.append( df['ny'].iloc[cc_j])
                             nz_cc.append( df['nz'].iloc[cc_j])
+                            
+                            h.append( 0.22*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
+                                                  +(g.hz[buff]*nz_cc[cc_j])**2) )
+                            
                             fay  .append( df['fay1'].iloc[cc_j]
                                         - df['fay0'].iloc[cc_j])
+                            
                             len_ratio.append( ny_cc[cc_j] / np.sqrt( 
                                               ny_cc[cc_j]**2 + nz_cc[cc_j]**2 ))
                             
                             # projection point coordinates
-                            y_prj.append(y_cc[cc_j]+(h-wd_cc[cc_j])*ny_cc[cc_j])
-                            z_prj.append(z_cc[cc_j]+(h-wd_cc[cc_j])*nz_cc[cc_j])
+                            y_prj.append( y_cc[cc_j] 
+                                        + (h[cc_j]-wd_cc[cc_j])*ny_cc[cc_j])
+                            z_prj.append( z_cc[cc_j] 
+                                        + (h[cc_j]-wd_cc[cc_j])*nz_cc[cc_j])
                             
                             # indices of interpolation stencil points
                             jl, jr = find_indices( g.gy, y_prj[cc_j] )
@@ -992,7 +997,7 @@ class StatisticData:
                                                   f,
                                                   z_prj[cc_j], y_prj[cc_j])
                         
-                        f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h \
+                        f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h[cc_j] \
                                          * fay[cc_j] * len_ratio[cc_j]
             
 # --------- match with coordinates
@@ -1063,8 +1068,6 @@ class StatisticData:
             npy = g.ny + buff*2
             npz = g.nz + buff*2
             
-            h = 0.5*np.sqrt( g.hy[buff]**2 + g.hz[buff]**2 )
-            
 # --------- prepare block data chunk
 
             data_df = self.bl[num-1].df
@@ -1096,7 +1099,7 @@ class StatisticData:
                     
                     if i == buff + 1:
                         
-                        wd_cc  = []
+                        wd_cc  = [];   h         = []
                         y_cc   = [];   z_cc      = []
                         ny_cc  = [];   nz_cc     = []
                         fay    = []
@@ -1115,12 +1118,18 @@ class StatisticData:
                             z_cc .append( df['z'].iloc[cc_j])
                             ny_cc.append( df['ny'].iloc[cc_j])
                             nz_cc.append( df['nz'].iloc[cc_j])
+
+                            h.append( 0.22*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
+                                                  +(g.hz[buff]*nz_cc[cc_j])**2))
+                            
                             fay  .append( df['fay1'].iloc[cc_j]
                                         - df['fay0'].iloc[cc_j])
                             
                             # projection point coordinates
-                            y_prj.append(y_cc[cc_j]+(h-wd_cc[cc_j])*ny_cc[cc_j])
-                            z_prj.append(z_cc[cc_j]+(h-wd_cc[cc_j])*nz_cc[cc_j])
+                            y_prj.append( y_cc[cc_j]
+                                        + (h[cc_j]-wd_cc[cc_j])*ny_cc[cc_j])
+                            z_prj.append( z_cc[cc_j]
+                                        + (h[cc_j]-wd_cc[cc_j])*nz_cc[cc_j])
                             
                             # indices of interpolation stencil points
                             jl, jr = find_indices( g.gy, y_prj[cc_j] )
