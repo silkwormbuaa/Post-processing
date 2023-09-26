@@ -9,13 +9,11 @@
 '''
 
 import pickle
-
 import numpy             as     np
-
 import pandas            as     pd
 
 import matplotlib.pyplot as     plt
-
+import matplotlib.colors as     colors
 import matplotlib.ticker as     ticker
 
 from   matplotlib.patches import Circle
@@ -808,7 +806,69 @@ def plot_slicex_stat( zz, yy, v,
     plt.close() 
 
 
+# ----------------------------------------------------------------------
+# >>> plot friction projection                                    (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/26  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
+def plot_wall_projection( xx, zz, v,
+                          separation=True,
+                          figsize=None,
+                          filename=None,
+                          col_map=None,
+                          cbar_label=None,
+                          cbar_levels=None):
+
+    if figsize is None: figsize = (30,10)
+
+    fig, ax = plt.subplots( figsize=figsize )
+
+    if col_map is None: col_map='coolwarm'
+
+    if cbar_levels is None: cbar_levels=51
+
+    cs = ax.contourf( xx, zz, v,
+                      levels=cbar_levels,
+                      cmap=col_map,
+                      norm=colors.CenteredNorm())
+
+    if separation:
+        
+        with open('projected_separation_line.pkl','rb') as f:
+            
+            lines = pickle.load( f )
+            for line in lines:
+                x_sep = line[:,0]
+                z_sep = line[:,1]
+                ax.plot(x_sep,z_sep,'black',linewidth=0.8)
+                
+    cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7)
+    cbar.ax.set_ylabel(cbar_label,fontsize=30)
+    cbar.ax.tick_params(labelsize=30)
+
+    ax.tick_params(axis='x',labelsize=30,pad=10)
+    ax.tick_params(axis='y',labelsize=30,pad=10)
+    
+    # set axises stay with contour and x,y unit length equal
+    
+    plt.axis('tight')
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    if filename:
+        plt.savefig( 'wall_'+filename )
+        print(f"{filename} is output.\n")
+
+    plt.close() 
+    
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
