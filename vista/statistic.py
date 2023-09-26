@@ -9,6 +9,7 @@
 '''
 
 import os
+import pickle
 import numpy             as     np
 import pandas            as     pd
 
@@ -73,8 +74,9 @@ class StatisticData:
         # Grid3d (including all blocks grids from inca_grid.bin file)
         self.grid3d = None
         
-        # Dataframe for friction projection 
+        # Dataframe for friction and pressure projection 
         self.df_fric = None
+        self.df_pres = None
         
         
 # ----------------------------------------------------------------------
@@ -660,6 +662,7 @@ class StatisticData:
         bbox: bounding box coordinates [xmin,xmax,ymin,ymax,zmin,zmax]\n
         vars: variable names list\n
         RS: set True to compute Reynolds Stresses, otherwise drop them\n
+        
         outfile: assign outfile name or use default one ''
         """
         
@@ -859,7 +862,7 @@ class StatisticData:
     
 
 # ----------------------------------------------------------------------
-# >>> friction_projection                                        (Nr.)
+# >>> wall variables projection                                        (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -870,16 +873,18 @@ class StatisticData:
 #
 # Desc
 #    - compute the friction distribution projected on x-z plane
-#    - return a dataframe 
+#    - return a dataframe and output file
 # ----------------------------------------------------------------------
 
-    def friction_projection( self,       block_list:list, 
-                             G:GridData, cc_df:pd.DataFrame, buff=3 ):
+    def friction_projection( self,         block_list:list,
+                             G:GridData,   cc_df:pd.DataFrame, 
+                             outfile=None, buff=3 ):
         
         """
         block_list : list of selected blocks' numbers\n
         G          : GridData object\n
         cc_df      : cutcell dataframe from cutcells_setup.dat\n
+        outfile    : output file name. If None, using 'wall_var_projection.pkl'
         
         return     : dataframe of x-z plane data with coordinates and f\n
         
@@ -906,9 +911,9 @@ class StatisticData:
 
             data_df = self.bl[num-1].df
             
-            u  = np.array( data_df['u']  ).reshape( npz, npy, npx )
-            mu = np.array( data_df['mu'] ).reshape( npz, npy, npx )
             wd = np.array( data_df['wd'] ).reshape( npz, npy, npx )
+            u  = np.array( data_df['u' ] ).reshape( npz, npy, npx )
+            mu = np.array( data_df['mu'] ).reshape( npz, npy, npx )
             
 # --------- loop over each cut cell group
 
@@ -1007,3 +1012,189 @@ class StatisticData:
         self.df_fric = pd.concat([self.bl[num-1].df_fric for num in block_list])
         self.df_fric.reset_index( drop=True, inplace=True )
         self.df_fric.sort_values( by=['z','x'],inplace=True )
+        
+        if outfile is None: outfile = 'friction_projection.pkl'
+        
+        with open( outfile, 'wb' ) as f:
+            pickle.dump( self.df_fric, f )
+
+
+# ----------------------------------------------------------------------
+# >>> pressure projection                                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/09/26  - created
+#
+# Desc
+#    - compute the pressure(fluctuation) distribution projected on x-z plane
+#    - return a dataframe and output file
+# ----------------------------------------------------------------------
+
+    def pressure_projection( self,         block_list:list,
+                             G:GridData,   cc_df:pd.DataFrame, 
+                             outfile=None, buff=3 ):
+        
+        """
+        block_list : list of selected blocks' numbers\n
+        G          : GridData object\n
+        cc_df      : cutcell dataframe from cutcells_setup.dat\n
+        outfile    : output file name. If None, using 'pressure_projection.pkl'
+        
+        return     : dataframe of x-z plane data with coordinates and f\n
+        
+        Need data chunk with <p> <pp> ready.\n
+        Only applicable to geometry with homogeneous shape along x
+        """
+        
+        for num in block_list:
+            
+# --------- get cut cell dataframe and grid of this block 
+
+            cc_df_block = cc_df[ cc_df['block_number'] == num ]
+            cc_group = cc_df_block.groupby(['i','k'])
+            
+            g = G.g[num-1]
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+            h = 0.5*np.sqrt( g.hy[buff]**2 + g.hz[buff]**2 )
+            
+# --------- prepare block data chunk
+
+            data_df = self.bl[num-1].df
+            
+            wd = np.array( data_df['wd'] ).reshape( npz, npy, npx )
+            p  = np.array( data_df['p' ] ).reshape( npz, npy, npx )
+            pp = np.array( data_df['pp'] ).reshape( npz, npy, npx )
+            
+# --------- loop over each cut cell group
+
+            # !!! i,j,k follow Fortran index, starting from 1.
+            
+            p_plane  = np.zeros( (npx,npz), dtype='f' )
+            pp_plane = np.zeros( (npx,npz), dtype='f' )
+            
+            for k in range( buff+1, g.nz+buff+1 ):
+                
+                # get a cut cell group dataframe
+                try:
+                    df = cc_group.get_group((buff+1,k))
+                except KeyError:
+                    print(f"block {num}, point ({buff+1},{k}) no cut cell")
+                    
+                for i in range( buff+1, g.nx+buff+1 ):
+                    
+                    # when i == 1, find the interpolation stencil points
+                    # (therefore, this code is just applicable to geometry
+                    # with homogeneous shape in x direction.)
+                    
+                    if i == buff + 1:
+                        
+                        wd_cc  = []
+                        y_cc   = [];   z_cc      = []
+                        ny_cc  = [];   nz_cc     = []
+                        fay    = []
+                        y_prj  = [];   z_prj     = []
+                        jl_prj = [];   jr_prj    = []
+                        kl_prj = [];   kr_prj    = []
+                        
+                        # loop over all cut cells sharing same x-z
+                        
+                        for cc_j in range( len(df) ):
+                            
+                            j = df['j'].iloc[cc_j]
+                            
+                            wd_cc.append( wd[k-1,j-1,i-1] )
+                            y_cc .append( df['y'].iloc[cc_j])
+                            z_cc .append( df['z'].iloc[cc_j])
+                            ny_cc.append( df['ny'].iloc[cc_j])
+                            nz_cc.append( df['nz'].iloc[cc_j])
+                            fay  .append( df['fay1'].iloc[cc_j]
+                                        - df['fay0'].iloc[cc_j])
+                            
+                            # projection point coordinates
+                            y_prj.append(y_cc[cc_j]+(h-wd_cc[cc_j])*ny_cc[cc_j])
+                            z_prj.append(z_cc[cc_j]+(h-wd_cc[cc_j])*nz_cc[cc_j])
+                            
+                            # indices of interpolation stencil points
+                            jl, jr = find_indices( g.gy, y_prj[cc_j] )
+                            kl, kr = find_indices( g.gz, z_prj[cc_j] )
+                            
+                            jl_prj.append(jl)
+                            jr_prj.append(jr)
+                            kl_prj.append(kl)
+                            kr_prj.append(kr)
+
+                    # compute interpolated pressure and pressure fluctuation
+                    
+                    for cc_j in range( len(df) ):
+                        
+                        j = df['j'].iloc[cc_j]
+                        
+                        # interpolate p
+                        f = np.array([p[kl_prj[cc_j],jl_prj[cc_j],i],
+                                      p[kr_prj[cc_j],jl_prj[cc_j],i],
+                                      p[kl_prj[cc_j],jr_prj[cc_j],i],
+                                      p[kr_prj[cc_j],jr_prj[cc_j],i]])
+                        
+                        p_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
+                                                  g.gz[kr_prj[cc_j]],
+                                                  g.gy[jl_prj[cc_j]],
+                                                  g.gy[jr_prj[cc_j]],
+                                                  f,
+                                                  z_prj[cc_j], y_prj[cc_j])
+                        
+                        p_plane[i-1,k-1] += p_prj * fay[cc_j]
+
+                        # interpolate pp                        
+                        f = np.array([pp[kl_prj[cc_j],jl_prj[cc_j],i],
+                                      pp[kr_prj[cc_j],jl_prj[cc_j],i],
+                                      pp[kl_prj[cc_j],jr_prj[cc_j],i],
+                                      pp[kr_prj[cc_j],jr_prj[cc_j],i]])
+                        
+                        pp_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
+                                                   g.gz[kr_prj[cc_j]],
+                                                   g.gy[jl_prj[cc_j]],
+                                                   g.gy[jr_prj[cc_j]],
+                                                   f,
+                                                   z_prj[cc_j], y_prj[cc_j])
+                        
+                        pp_plane[i-1,k-1] += pp_prj * fay[cc_j]
+
+# --------- match with coordinates
+            
+            xx,zz = np.meshgrid( g.gx, g.gz )
+            
+            df_pres = pd.DataFrame(columns=['x','z','p','pp'])
+            df_pres['x']  = xx[buff:-buff,buff:-buff].flatten()
+            df_pres['z']  = zz[buff:-buff,buff:-buff].flatten()
+            df_pres['p']  = p_plane[buff:-buff,buff:-buff].T.flatten()
+            df_pres['pp'] = pp_plane[buff:-buff,buff:-buff].T.flatten()
+            
+            # compute pressure fluctuation
+            df_pres['p`'] = np.sqrt( np.array( df_pres['pp']-df_pres['p']**2 ))
+            
+            self.bl[num-1].df_pres = df_pres
+            
+            p_ave      = np.mean( np.array(df_pres['p'])  )
+            p_fluc_ave = np.mean( np.array(df_pres['p`']) )
+            
+            print(f"block {num} has mean pressure {np.mean(p_ave)},",end='')
+            print(f" mean pressure fluctuation {np.mean(p_fluc_ave)}.\n")
+
+# --------- save friction into StatisticsData.df_fric (a single pd.DataFrame)
+
+        self.df_pres = pd.concat([self.bl[num-1].df_pres for num in block_list])
+        self.df_pres.reset_index( drop=True, inplace=True )
+        self.df_pres.sort_values( by=['z','x'],inplace=True )
+        
+        if outfile is None: outfile = 'pressure_projection.pkl'
+        
+        with open( outfile, 'wb' ) as f:
+            pickle.dump( self.df_pres, f )
