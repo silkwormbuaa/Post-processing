@@ -995,7 +995,10 @@ class StatisticData:
                                                   g.gy[jl_prj[cc_j]],
                                                   g.gy[jr_prj[cc_j]],
                                                   f,
-                                                  z_prj[cc_j], y_prj[cc_j])
+                                                  z_prj[cc_j], y_prj[cc_j])                        
+                        
+                        # if geometry is fully 3D, extra term 4./3.u_norm 
+                        # should be considered to add
                         
                         f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h[cc_j] \
                                          * fay[cc_j] / len_ratio[cc_j]
@@ -1096,49 +1099,21 @@ class StatisticData:
                     # when i == 1, find the interpolation stencil points
                     # (therefore, this code is just applicable to geometry
                     # with homogeneous shape in x direction.)
+                    # Pressure and pressure fluctuation can use value on 
+                    # cut cell directly, instead of interpolation.
                     
                     if i == buff + 1:
                         
-                        wd_cc  = [];   h         = []
-                        y_cc   = [];   z_cc      = []
-                        ny_cc  = [];   nz_cc     = []
                         fay    = []
-                        y_prj  = [];   z_prj     = []
-                        jl_prj = [];   jr_prj    = []
-                        kl_prj = [];   kr_prj    = []
-                        
+
                         # loop over all cut cells sharing same x-z
                         
                         for cc_j in range( len(df) ):
                             
                             j = df['j'].iloc[cc_j]
-                            
-                            wd_cc.append( wd[k-1,j-1,i-1] )
-                            y_cc .append( df['y'].iloc[cc_j])
-                            z_cc .append( df['z'].iloc[cc_j])
-                            ny_cc.append( df['ny'].iloc[cc_j])
-                            nz_cc.append( df['nz'].iloc[cc_j])
-                            
-                            h.append( 0.50*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
-                                                  +(g.hz[buff]*nz_cc[cc_j])**2))
-                            
-                            fay  .append( df['fay1'].iloc[cc_j]
-                                        - df['fay0'].iloc[cc_j])
-                            
-                            # projection point coordinates
-                            y_prj.append( y_cc[cc_j]
-                                        + (h[cc_j]-wd_cc[cc_j])*ny_cc[cc_j])
-                            z_prj.append( z_cc[cc_j]
-                                        + (h[cc_j]-wd_cc[cc_j])*nz_cc[cc_j])
-                            
-                            # indices of interpolation stencil points
-                            jl, jr = find_indices( g.gy, y_prj[cc_j] )
-                            kl, kr = find_indices( g.gz, z_prj[cc_j] )
-                            
-                            jl_prj.append(jl)
-                            jr_prj.append(jr)
-                            kl_prj.append(kl)
-                            kr_prj.append(kr)
+                                                        
+                            fay.append( df['fay1'].iloc[cc_j]
+                                      - df['fay0'].iloc[cc_j])
 
                     # compute interpolated pressure and pressure fluctuation
                     
@@ -1146,35 +1121,9 @@ class StatisticData:
                         
                         j = df['j'].iloc[cc_j]
                         
-                        # interpolate p
-                        f = np.array([p[kl_prj[cc_j],jl_prj[cc_j],i],
-                                      p[kr_prj[cc_j],jl_prj[cc_j],i],
-                                      p[kl_prj[cc_j],jr_prj[cc_j],i],
-                                      p[kr_prj[cc_j],jr_prj[cc_j],i]])
-                        
-                        p_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
-                                                  g.gz[kr_prj[cc_j]],
-                                                  g.gy[jl_prj[cc_j]],
-                                                  g.gy[jr_prj[cc_j]],
-                                                  f,
-                                                  z_prj[cc_j], y_prj[cc_j])
-                        
-                        p_plane[i-1,k-1] += p_prj * fay[cc_j]
+                        p_plane[i-1,k-1] += p[k-1,j-1,i-1] * fay[cc_j]
 
-                        # interpolate pp                        
-                        f = np.array([pp[kl_prj[cc_j],jl_prj[cc_j],i],
-                                      pp[kr_prj[cc_j],jl_prj[cc_j],i],
-                                      pp[kl_prj[cc_j],jr_prj[cc_j],i],
-                                      pp[kr_prj[cc_j],jr_prj[cc_j],i]])
-                        
-                        pp_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
-                                                   g.gz[kr_prj[cc_j]],
-                                                   g.gy[jl_prj[cc_j]],
-                                                   g.gy[jr_prj[cc_j]],
-                                                   f,
-                                                   z_prj[cc_j], y_prj[cc_j])
-                        
-                        pp_plane[i-1,k-1] += pp_prj * fay[cc_j]
+                        pp_plane[i-1,k-1] += pp[k-1,j-1,i-1] * fay[cc_j]
 
 # --------- match with coordinates
             
