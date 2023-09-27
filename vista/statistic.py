@@ -955,7 +955,7 @@ class StatisticData:
                             ny_cc.append( df['ny'].iloc[cc_j])
                             nz_cc.append( df['nz'].iloc[cc_j])
                             
-                            h.append( 0.22*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
+                            h.append( 0.50*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
                                                   +(g.hz[buff]*nz_cc[cc_j])**2) )
                             
                             fay  .append( df['fay1'].iloc[cc_j]
@@ -998,7 +998,7 @@ class StatisticData:
                                                   z_prj[cc_j], y_prj[cc_j])
                         
                         f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h[cc_j] \
-                                         * fay[cc_j] * len_ratio[cc_j]
+                                         * fay[cc_j] / len_ratio[cc_j]
             
 # --------- match with coordinates
             
@@ -1118,8 +1118,8 @@ class StatisticData:
                             z_cc .append( df['z'].iloc[cc_j])
                             ny_cc.append( df['ny'].iloc[cc_j])
                             nz_cc.append( df['nz'].iloc[cc_j])
-
-                            h.append( 0.22*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
+                            
+                            h.append( 0.50*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
                                                   +(g.hz[buff]*nz_cc[cc_j])**2))
                             
                             fay  .append( df['fay1'].iloc[cc_j]
