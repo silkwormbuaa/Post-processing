@@ -821,7 +821,7 @@ def plot_slicex_stat( zz, yy, v,
 # ----------------------------------------------------------------------
 
 def plot_wall_projection( xx, zz, v,
-                          separation=True,
+                          separation=None,
                           figsize=None,
                           filename=None,
                           col_map=None,
@@ -841,9 +841,9 @@ def plot_wall_projection( xx, zz, v,
                       cmap=col_map,
                       norm=colors.CenteredNorm())
 
-    if separation:
+    if separation is not None:
         
-        with open('projected_separation_line.pkl','rb') as f:
+        with open(separation,'rb') as f:
             
             lines = pickle.load( f )
             for line in lines:
@@ -857,6 +857,8 @@ def plot_wall_projection( xx, zz, v,
 
     ax.tick_params(axis='x',labelsize=30,pad=10)
     ax.tick_params(axis='y',labelsize=30,pad=10)
+    
+    ax.set_ylim(-2,2)
     
     # set axises stay with contour and x,y unit length equal
     

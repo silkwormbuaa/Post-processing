@@ -9,7 +9,6 @@
 @Desc    :   None
 '''
 
-
 import os
 import sys
 import pickle
@@ -29,16 +28,18 @@ from   vista.timer       import timer
 
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
+from   vista.plane_analy import periodic_average
 
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_wall_projection
 
-from   vista.lib.form    import phy
-from   vista.lib.form    import mth
+# =============================================================================
 
 bbox = [ -60.0, 100.0, -1.3, 0.01, -11.0, 11.0]
+
+# =============================================================================
 
 resultspath = os.getcwd()
 
@@ -58,13 +59,15 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
 
     # read in statistics.bin and also grid and cut cell info.
     with timer("read in grid"):
+        
         G = GridData( grid_file )
         G.read_grid()
         
         block_list = G.select_blockgrids( bbox, mode='within' )
-
+#        block_list = [885,870,855,840,825,810,795,780]  #upstream blocks
 
     with timer("read statistics"):
+        
         S = StatisticData( stat_file )
 
         vars = ['u','mu','p','pp']
@@ -75,16 +78,16 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
         
         S.grid3d = G
         
-        
     # read in wall distance
-
-    wd_snap = Snapshot( snapshotfile )
-    wd_snap.read_snapshot(block_list)
-
-    for num in block_list:
-        S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1][5]['wd']
+    with timer("read wall distance field"):
         
-    print(S.bl[num-1].df)
+        wd_snap = Snapshot( snapshotfile )
+        wd_snap.read_snapshot(block_list)
+
+        for num in block_list:
+            S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1][5]['wd']
+            
+        print(S.bl[num-1].df)
 
 
     # read in cutcell info
@@ -127,6 +130,7 @@ with timer("plotting"):
     rho_ref = float( parameters.get('rho_ref') )
     u_ref   = float( parameters.get('u_ref') )
     p_ref   = float( parameters.get('p_ref') )
+    period  = int(   parameters.get('period') )
     
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
@@ -147,14 +151,32 @@ with timer("plotting"):
     p      = p.reshape( npz, npx )
     p_fluc = p_fluc.reshape( npz, npx )
 
-    save_isolines( xx, zz, fric,
-                   1.0,"projected_separation_line.pkl")
+    save_isolines( xx, zz, fric, 1.0, "separationline_xz.pkl")
     
-    plot_wall_projection( xx, zz, fric/dyn_p*1000.0, filename='fric' )
+    plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
+                          separation="separationline_xz.pkl",
+                          filename='fric_periodic' )
     
-    plot_wall_projection( xx, zz, p/p_ref, filename='pressure' )
+    plot_wall_projection( xx, zz, p/p_ref, 
+                          separation="separationline_xz.pkl",
+                          filename='pressure' )
     
-    plot_wall_projection( xx, zz, p_fluc/p_ref, separation=False, filename='pressure_fluc' )
+    plot_wall_projection( xx, zz, p_fluc/p_ref, filename='pressure_fluc' )
+    
+    
+    fric = periodic_average( fric, period )
+    
+    save_isolines( xx, zz, fric, 1.0, "separationline_xz_periodic.pkl")
+    
+    plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
+                          separation="separationline_xz_periodic.pkl",
+                          filename='fric_periodic' )
+
+    plot_wall_projection( xx, zz, p/p_ref, 
+                          separation="separationline_xz_periodic.pkl",
+                          filename='pressure_periodic' )
+#    
+#    
     
 with timer("save spanwise averaged variable distribution along x"):
     

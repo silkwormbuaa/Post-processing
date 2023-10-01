@@ -54,7 +54,6 @@ def save_sonic_line( xx, yy, mach ):
         pickle.dump( lines, f )
         
 
-
 # ----------------------------------------------------------------------
 # >>> Save separation line                                       (Nr.)
 # ----------------------------------------------------------------------
@@ -93,7 +92,6 @@ def save_separation_line( xx, yy, u ):
     with open('separationlines.pkl','wb') as f:
         
         pickle.dump( lines, f)
-
 
 
 # ----------------------------------------------------------------------
@@ -135,7 +133,6 @@ def save_isolines( xx, yy, v, value:float, file ):
         
         pickle.dump( lines, f)
         
-
 
 # ----------------------------------------------------------------------
 # >>> shift coordinates                                          (Nr.)
@@ -182,6 +179,43 @@ def shift_coordinates( df:pd.DataFrame, delta, H, H_md, x_imp ):
     return df
 
 
+# ----------------------------------------------------------------------
+# >>> Periodic Average                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def periodic_average( array, N:int, axis=0 ):
+    
+    """
+    array    : target array
+    N        : number of periods
+    axis     : which axis to do periodic average
+    
+    return: same shape array after periodic average    
+    """
+
+    if axis==1:
+        array = array.T
+        
+    n0, n1 = np.array( array ).shape
+    array = np.array( array ).reshape( N, int(n0/N), n1 )
+    array = np.mean( array, axis=0 )
+    array = np.array( [array]*N ).reshape( n0, n1 )
+    
+    if axis==1:
+        array = array.T
+    
+    return array
+    
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
