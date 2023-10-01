@@ -462,7 +462,7 @@ class StatisticData:
                 
                 p_fluc = np.array(df['pp']) - np.array(df['p'])**2
                 
-                self.bl[num-1].df['p`'] = p_fluc
+                self.bl[num-1].df['p`'] = np.sqrt( p_fluc )
 
 # ---------- compute viscosity mu
 
