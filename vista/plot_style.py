@@ -740,7 +740,8 @@ def plot_slicex_stat( zz, yy, v,
                       filename=None,
                       col_map=None,
                       cbar_label=None,
-                      cbar_levels=None):
+                      cbar_levels=None,
+                      title=None):
     
     if figsize is None:
         figsize = (15,15)
@@ -786,7 +787,11 @@ def plot_slicex_stat( zz, yy, v,
             y_sep = line[:,1]
             ax.plot(x_sep,y_sep,'red',linewidth=0.8)
 
-    cbar = plt.colorbar(cs)
+
+    if title is not None:
+        ax.text(0.5,1.2,title,fontsize=12,transform=ax.transAxes)
+        
+    cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.8)
     cbar.ax.set_ylabel(cbar_label,fontsize=15)
     cbar.ax.tick_params(labelsize=15)
 
