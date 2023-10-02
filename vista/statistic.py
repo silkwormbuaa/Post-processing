@@ -415,7 +415,7 @@ class StatisticData:
         """
         block_list : list of blocks that are going to compute new variables\n
         vars_new   : list of str representing new vars 
-                     ['mach','tke','p`','mu']\n
+                     ['mach','RS','p`','mu']\n
         
         return : corresponding variables are added to self.bl[].df
         """
@@ -460,7 +460,8 @@ class StatisticData:
 
             if "p`" in vars_new:
                 
-                p_fluc = np.array(df['pp']) - np.array(df['p'])**2
+                # in solid cells, may appear negative values, so use abs.
+                p_fluc = abs(np.array(df['pp']) - np.array(df['p'])**2)
                 
                 self.bl[num-1].df['p`'] = np.sqrt( p_fluc )
 

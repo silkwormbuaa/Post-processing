@@ -60,6 +60,7 @@ h_ridge = float( parameters.get('H') )
 h_md    = float( parameters.get('H_md') )
 x_imp   = float( parameters.get('x_imp') )
 p_ref   = float( parameters.get('p_ref') )
+u_ref   = float( parameters.get('u_ref') )
 casecode =  str( parameters.get('casecode') )
 
 locs = locs_delta*delta + 50.4
@@ -81,8 +82,11 @@ os.chdir(outpath)
 # do slicing and output slices
 
 for i, loc in enumerate(locs):
+
+    loc_delta = locs_delta[i]
+    title = 'x= '+str(loc_delta)
     
-    print(f"Start doing slicing at x = {loc:10.5f}.\n")
+    print(f"Start doing slicing at x = {loc_delta:10.2f}.\n")
 
     block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
 
@@ -121,6 +125,7 @@ for i, loc in enumerate(locs):
         
         mach_slice = np.array( df_slice['mach'] )
         tke_slice = np.array( df_slice['tke'] )
+        RS_slice = np.array( df_slice['u`v`'] )
         S_slice = np.array( df_slice['S'] )
         w1_slice = np.array( df_slice['w1'] )
         u_slice = np.array( df_slice['u'] )
@@ -137,6 +142,9 @@ for i, loc in enumerate(locs):
                          (zz,yy), method='linear')
         
         tke = griddata( (z_slice,y_slice), tke_slice,
+                        (zz,yy), method='linear')
+
+        RS = griddata( (z_slice,y_slice), RS_slice,
                         (zz,yy), method='linear')
         
         S = griddata( (z_slice,y_slice), S_slice,
@@ -165,8 +173,6 @@ for i, loc in enumerate(locs):
         
         define_wall_shape( z*5.2, casecode=casecode, yshift=(h_ridge-h_md) )
         
-        loc_delta = locs_delta[i]
-        title = 'x= '+str(loc_delta)
         
         cbar = r'$Mach$'
         plot_slicex_stat( zz, yy, mach,
@@ -190,9 +196,9 @@ for i, loc in enumerate(locs):
                           col_map='coolwarm',
                           title=title)
 
-        cbar = r'$u$'
-        cbar_levels=np.linspace(0.0,507.0,51)
-        plot_slicex_stat( zz, yy, u,
+        cbar = r'$u/u_{\infty}$'
+        cbar_levels=np.linspace(-0.2,1.1,14)
+        plot_slicex_stat( zz, yy, u/u_ref,
                           filename='u_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
@@ -215,6 +221,13 @@ for i, loc in enumerate(locs):
                           col_map='coolwarm',
                           title=title)
 
+        cbar = r'$-<u`v`>$'
+        plot_slicex_stat( zz, yy, -RS,
+                          filename='RS_'+str(i+1),
+                          cbar_label=cbar,
+                          col_map='coolwarm',
+                          title=title)
+
         cbar = r'$p`$'
         plot_slicex_stat( zz, yy, p_fluc/p_ref,
                           vectors=[w,v],
@@ -223,6 +236,6 @@ for i, loc in enumerate(locs):
                           col_map='coolwarm',
                           title=title)
         
-    print(f"Finished doing slicing at x = {loc:10.5f}.",end='') 
+    print(f"Finished doing slicing at x = {loc_delta:10.2f}.",end='') 
     print(f" Progress {(i+1)/len(locs)*100:5.2f} %.")
     print(f"=====================================\n")
