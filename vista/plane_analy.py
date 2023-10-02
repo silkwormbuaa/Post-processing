@@ -215,6 +215,49 @@ def periodic_average( array, N:int, axis=0 ):
         array = array.T
     
     return array
+
+
+# ----------------------------------------------------------------------
+# >>> Compute the separation ratio                                  (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/02  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def compute_separation_ratio( array, write=True ):
+    
+    """
+    array: equally spaced 2D array of friction or Cf
+    
+    return: the ratio of separation area over the whole covered area\n
+    write out separation length ratio along z (same size with z)
+    """
+    
+    total_size = array.size
+    
+    sep_size = np.sum( array < 0.0 )
+    
+    area_ratio = sep_size/total_size
+    
+    npz = array.shape[0]
+    npx = array.shape[1]
+    
+    len_ratio = [ np.sum(array[i,:]<0.0)/npx for i in range(npz) ]
+    
+    if write:
+        with open('separation_ratio_area.dat','w') as f:
+            f.write( f"{area_ratio:10.5f}" )
+        with open('separation_ratio_len.pkl','wb') as f:
+            pickle.dump( len_ratio, f )
+    
+    return area_ratio
     
 
 # ----------------------------------------------------------------------

@@ -29,6 +29,7 @@ from   vista.timer       import timer
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
+from   vista.plane_analy import compute_separation_ratio
 
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
@@ -43,17 +44,28 @@ bbox = [ -60.0, 100.0, -1.3, 0.01, -11.0, 11.0]
 
 resultspath = os.getcwd()
 
+outpath   = resultspath + '/wall_projection'
+
 stat_file = resultspath + '/statistics.bin'
 grid_file = resultspath + '/inca_grid.bin'
 ccfile    = resultspath + '/cutcells_setup.dat'
+
+fric_file = outpath + '/friction_projection.pkl'
+pres_file = outpath + '/pressure_projection.pkl'
 
 snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
                             key='snapshot.bin')[0]
 
 parametersfile = resultspath.split('/results')[0] + '/case_parameters'
 
-fric_file = resultspath + '/friction_projection.pkl'
-pres_file = resultspath + '/pressure_projection.pkl'
+# - enter outpath
+
+if not os.path.exists(outpath): 
+    os.mkdir( outpath )
+    print(f"Created directory {outpath}.\n")
+
+os.chdir(outpath)
+
 
 if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
 
@@ -135,6 +147,11 @@ with timer("plotting"):
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
     S.df_fric = shift_coordinates( S.df_fric, delta, h_ridge, h_md, x_imp)
+    S.df_pres = shift_coordinates( S.df_pres, delta, h_ridge, h_md, x_imp)
+    
+    # drop points that before -20.0 delta or after 10.0 delta
+    S.df_fric = S.df_fric[ (S.df_fric['xs']>-20.0) & (S.df_fric['xs']< 10.0) ]
+    S.df_pres = S.df_pres[ (S.df_pres['xs']>-20.0) & (S.df_pres['xs']< 10.0) ]
 
     xx     = np.array( S.df_fric['xs'] )
     zz     = np.array( S.df_fric['zs'] )
@@ -151,11 +168,13 @@ with timer("plotting"):
     p      = p.reshape( npz, npx )
     p_fluc = p_fluc.reshape( npz, npx )
 
+# --- save original wall projection results
+
     save_isolines( xx, zz, fric, 1.0, "separationline_xz.pkl")
     
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz.pkl",
-                          filename='fric_periodic' )
+                          filename='fric' )
     
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
@@ -163,10 +182,11 @@ with timer("plotting"):
     
     plot_wall_projection( xx, zz, p_fluc/p_ref, filename='pressure_fluc' )
     
+# --- periodic average results
     
     fric = periodic_average( fric, period )
     
-    save_isolines( xx, zz, fric, 1.0, "separationline_xz_periodic.pkl")
+    save_isolines( xx, zz, fric, 1.0, "separationline_xz_periodic.pkl" )
     
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz_periodic.pkl",
@@ -175,6 +195,10 @@ with timer("plotting"):
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz_periodic.pkl",
                           filename='pressure_periodic' )
+
+# --- output separation area ratio and length ratio distribution
+
+    print(f"separation ratio {compute_separation_ratio(fric):10.5f}.")
 #    
 #    
     

@@ -860,10 +860,23 @@ def plot_wall_projection( xx, zz, v,
     cbar.ax.set_ylabel(cbar_label,fontsize=30)
     cbar.ax.tick_params(labelsize=30)
 
+    ax.minorticks_on()
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='out',
+                    length=15,
+                    width=2)
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='out',
+                    length=10,
+                    width=1)
+
     ax.tick_params(axis='x',labelsize=30,pad=10)
     ax.tick_params(axis='y',labelsize=30,pad=10)
     
     ax.set_ylim(-2,2)
+    ax.set_xlim(-20,10)
     
     # set axises stay with contour and x,y unit length equal
     
