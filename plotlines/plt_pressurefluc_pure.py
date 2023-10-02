@@ -10,6 +10,10 @@
 
 import os
 
+import pickle
+
+import numpy             as     np
+
 from   plt_tools         import PlotDataframe
 
 import matplotlib.pyplot as     plt
@@ -20,7 +24,7 @@ plt.rcParams.update({'font.size': 18})
 
 OutPath  = "/home/wencanwu/my_simulation/temp/DataPost/"
 
-data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/line_p_prime.dat'
+data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 
 data1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/streamwise_line_1014.dat'
 
@@ -30,8 +34,7 @@ data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/streamwise_line_082
 
 data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/streamwise_line_0927.dat'
 
-data5 = '/home/wencanwu/my_simulation/temp/221125_lowRe/streamwise_line_1125.dat'
-
+data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/streamwise_line_1221.dat'
 
 
 d1 = PlotDataframe(data1)
@@ -121,5 +124,5 @@ ax.grid(visible=True, which='both',axis='both',color='gray',
             linestyle='--',linewidth=0.2)
 
 os.chdir(OutPath)
-plt.savefig("pressure_fluctuation_pure")
+plt.savefig("pressure_fluctuation_compare")
 plt.show()

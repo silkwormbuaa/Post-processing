@@ -10,6 +10,8 @@
 
 import os
 
+import pickle
+
 from   plt_tools         import PlotDataframe
 
 import matplotlib.pyplot as     plt
@@ -32,7 +34,16 @@ data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/streamwise_line_0927.dat
 
 data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/streamwise_line_1221.dat'
 
-
+df1file = '/media/wencanwu/Seagate Expansion Drive/temp/221014/results/streamwise_vars.pkl'
+df2file = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/streamwise_vars.pkl'
+df3file = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results/streamwise_vars.pkl'
+df4file = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/streamwise_vars.pkl'
+df5file = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/streamwise_vars.pkl'
+with open(df1file,'rb') as f:  df1 = pickle.load( f )
+with open(df2file,'rb') as f:  df2 = pickle.load( f )
+with open(df3file,'rb') as f:  df3 = pickle.load( f )
+with open(df4file,'rb') as f:  df4 = pickle.load( f )
+with open(df5file,'rb') as f:  df5 = pickle.load( f )
 
 d1 = PlotDataframe(data1)
 d2 = PlotDataframe(data2)
@@ -88,35 +99,41 @@ ax.plot( d0.df['(x-x_imp)/δ'],
          ls   ='--',
          linewidth=4)
 
-ax.plot( [-10.6786859,-10.6786859],
-         [0.0,0.1],
-         'purple',
-         linewidth=1)
+ax.plot( df1['x'], df1['p_fluc'], 'green',ls='--')
+ax.plot( df2['x'], df2['p_fluc'], 'blue', ls='--')
+ax.plot( df3['x'], df3['p_fluc'], 'black',ls='--')
+ax.plot( df4['x'], df4['p_fluc'], 'red',ls='--')    
+ax.plot( df5['x'], df5['p_fluc'], 'purple',ls='--')
 
-ax.plot( [-10.6574429,-10.6574429],
-         [0.0,0.1],
-            'red',
-            linewidth=1)
-
-ax.plot( [-9.179693795,-9.179693795],
-         [0.0,0.1],
-            'black',
-            linewidth=1)
-
-ax.plot( [-8.316817364,-8.316817364],
-         [0.0,0.1],
-            'blue',
-            linewidth=1)
-
-ax.plot( [-8.405281852,-8.405281852],
-         [0.0,0.1],
-            'green',
-            linewidth=1)
-
-ax.plot( [-8.56077913,-8.56077913],
-         [0.0,0.1],
-            'gray',
-            linewidth=1)
+#ax.plot( [-10.6786859,-10.6786859],
+#         [0.0,0.1],
+#         'purple',
+#         linewidth=1)
+#
+#ax.plot( [-10.6574429,-10.6574429],
+#         [0.0,0.1],
+#            'red',
+#            linewidth=1)
+#
+#ax.plot( [-9.179693795,-9.179693795],
+#         [0.0,0.1],
+#            'black',
+#            linewidth=1)
+#
+#ax.plot( [-8.316817364,-8.316817364],
+#         [0.0,0.1],
+#            'blue',
+#            linewidth=1)
+#
+#ax.plot( [-8.405281852,-8.405281852],
+#         [0.0,0.1],
+#            'green',
+#            linewidth=1)
+#
+#ax.plot( [-8.56077913,-8.56077913],
+#         [0.0,0.1],
+#            'gray',
+#            linewidth=1)
 
 ax.minorticks_on()
 
@@ -136,5 +153,5 @@ ax.legend(prop={'size':20})
 ax.grid()
 
 os.chdir(OutPath)
-plt.savefig("pressure_fluctuation_mean")
+plt.savefig("pressure_fluctuation_mean_compare")
 plt.show()
