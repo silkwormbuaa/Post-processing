@@ -656,7 +656,8 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def compute_profile( self, block_list, bbox, vars, RS=True, outfile=False ):
+    def compute_profile( self, block_list, bbox, vars:list, 
+                         RS=True, outfile=False ):
         
         """
         block list: selected block list (within bounding box)\n
@@ -664,7 +665,7 @@ class StatisticData:
         vars: variable names list\n
         RS: set True to compute Reynolds Stresses, otherwise drop them\n
         
-        outfile: assign outfile name or use default one ''
+        outfile: assign outfile name or use default 'profile_spanwisemean.dat'
         """
         
 # ----- collect data frame from all filled blocks
@@ -690,10 +691,13 @@ class StatisticData:
         # compute turbulence (Reynolds Stress)
         
         if RS:
-            df['uu'] = np.array(df['uu']) - np.array(df['u'])*np.array(df['u'])
-            df['vv'] = np.array(df['vv']) - np.array(df['v'])*np.array(df['v'])
-            df['ww'] = np.array(df['ww']) - np.array(df['w'])*np.array(df['w'])
-            df['uv'] = np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+            df['u`u`']= np.array(df['uu']) - np.array(df['u'])**2
+            df['v`v`']= np.array(df['vv']) - np.array(df['v'])**2
+            df['w`w`']= np.array(df['ww']) - np.array(df['w'])**2
+            df['u`v`']= np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+            
+            vars = [var for var in vars if var not in ['uu','vv','ww','uv']]
+            vars += ['u`u`','v`v`','w`w`','u`v`']
             
             print(df)
             
@@ -743,9 +747,10 @@ class StatisticData:
 
         if outfile is False: outfile = 'profile_spanwisemean.dat'
 
-        df_profile.to_string(outfile, index=False,
-                            float_format='%15.7f',
-                            justify='left')
+        df_profile.to_string( outfile,  
+                              index=False,
+                              float_format='%15.7f',
+                              justify='left')
          
             
 # ----------------------------------------------------------------------

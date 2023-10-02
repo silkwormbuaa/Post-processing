@@ -645,6 +645,7 @@ class BlockGrid:
 # History
 #
 # 2023/02/05  - created
+# 2023/10/02  - revised, using wall distance field
 #
 # Desc
 #
@@ -653,7 +654,14 @@ class BlockGrid:
 # - 2. for cells, which is above wall and is not cut cell, vol_fra = 1.0
 # ----------------------------------------------------------------------
 
-    def assign_vol_fra( self, df, Case ):
+    def assign_vol_fra( self, df, wall_dist ):
+        
+        """
+        df        : cutcell info dataframe\n
+        wall_dist : array of wall distance of a block, 1D, order as Snapshot\n
+        
+        return: self.vol_fra
+        """
         
         if len(df) > 0:
                 
@@ -667,7 +675,13 @@ class BlockGrid:
             k = np.array( df['k'] )
             vol = np.array( df['vol'] )
             
+            wall_dist = wall_dist.reshape(self.nz+6,self.ny+6,self.nx+6)
+            wall_dist = wall_dist.T
+            
             self.vol_fra = np.zeros( shape=(self.nx+6,self.ny+6,self.nz+6) )
+            
+            # for cells that above wall and not cut cell, set vol_fra = 1
+            self.vol_fra[np.where(wall_dist >= 0.0)] = 1.0
             
             # df['i'], df['j'], df['k'] all count from 1 like Fortran
             # well in python, array count from 0.
@@ -675,21 +689,8 @@ class BlockGrid:
                 
                 self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
             
-            # for cells that above wall and not cut cell, set vol_fra = 1
-            for kk in range( 3,self.nz+3 ):
-                for jj in range( 3,self.ny+3 ):
-                    
-                    y = self.gy[jj]
-                    z = self.gz[kk]
-                    above_wall = is_above_wavywall( y, z, Case )
-                    
-                    if above_wall and (self.vol_fra[3][jj][kk] < 0.0000001) :
-                        
-                        # now because in x direction, the geometry is uniform, 
-                        # so set vol_fra in x direction constant
-                        self.vol_fra[3:self.nx+3,jj,kk] = 1.0
-            
             print("Block %d cut cell volume fractions are assigned."%self.num)
+
 
         elif len(df) == 0:
             

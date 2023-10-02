@@ -20,59 +20,65 @@ import pandas            as     pd
 import numpy             as     np
 
 from   vista.statistic   import StatisticData
+from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.tools       import get_filelist
 
 # =============================================================================
 # option zone
 # =============================================================================
 
-geo_case = 4
-
-#datapath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/'
-datapath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/'
+bbox = [-57, -49.625, -1.2576, 45.0, -11.0, 11.0]
 
 # =============================================================================
 
-datafile = datapath + 'statistics.bin'
-gridfile = datapath + 'inca_grid.bin'
-ccfile   = datapath + 'cutcells_setup.dat'
+resultspath = os.getcwd()
 
-outpath  = datapath
+outpath  = resultspath + '/profile'
+datafile = resultspath + '/statistics.bin'
+gridfile = resultspath + '/inca_grid.bin'
+ccfile   = resultspath + '/cutcells_setup.dat'
 
-outfile  = 'mean_profile_test.dat'
+snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
+                            key='snapshot.bin')[0]
 
-# - select which wavy wall case
-#
-#   1 : 1014 case, D/delta = 2
-#   2 : 0926 case, D/delta = 1
-#   3 : 0825 case, D/delta = 0.5
-#   4 : 0927 case, D/delta = 0.25
-#   5 : 1221 case, D/delta = 0.125
+parametersfile = resultspath.split('/results')[0] + '/case_parameters'
 
-G = GridData( gridfile )
-
-#os.chdir( outpath )
-
-G.verbose = False
-
-## read in whole grid info
-
-# 1. read_grid() : read_grid_header() + read_grid_body()
-#   * grid headers: containing what will be read
-#   * grid body: every block's grids information
-# 2. sorted_group: sort and group block index basd on x,y,z
-
-G.read_grid()
-
-G.get_sorted_groups()
+outfile  = 'profile_mean.dat'
 
 
-# given a rectangular region, get a list of blocks within the region
+# - enter outpath
 
-bbox = [-57, -49.625, -1.2576, 45.0, -11.0, 11.0]
+if not os.path.exists(outpath): 
+    os.mkdir( outpath )
+    print(f"Created directory {outpath}.\n")
 
-block_list = G.select_blockgrids( bbox )
+os.chdir(outpath)
+
+
+# - read in grid file
+
+with timer("read in grid"):
+    
+    G = GridData( gridfile )
+    G.verbose = False
+
+    G.read_grid()
+    
+    # given a rectangular region, get a list of blocks in the region
+    block_list = G.select_blockgrids( bbox )
+
+
+# - read in wall distance data
+
+with timer("read wall distance field"):
+    
+    wd_snap = Snapshot( snapshotfile )
+    wd_snap.read_snapshot( block_list )
+
+
+# - read in cut cell data and assign vol_fra
 
 with timer("read in cut cell info "):
 
@@ -83,18 +89,19 @@ with timer("read in cut cell info "):
                         ,'fax1','fay1','faz1']
                         , inplace=True )
     
-    
-with timer("assign volume fractions "):
-    
     for num in block_list:
 
         # dataframe slice for a certain block
-        temp_df = cc_df[cc_df['block_number'] == num ]
+        temp_df = cc_df[ cc_df['block_number'] == num ]
+        
+        wall_dist = np.array( wd_snap.snap_data[num-1][5]['wd'] )
         
         # block number starts from 1, but python list index
         # starts from 0
-        G.g[num-1].assign_vol_fra( temp_df, geo_case )
+        G.g[num-1].assign_vol_fra( temp_df, wall_dist )
 
+
+# - read in statistics data
 
 with timer("read block statistics data "):
 
@@ -117,6 +124,5 @@ with timer("match grid and drop ghost cells"):
 
 with timer("compute profile"):
     
-    os.chdir( datapath )
-    S.compute_profile( block_list, bbox, vars )
+    S.compute_profile( block_list, bbox, vars, outfile=outfile )
         
