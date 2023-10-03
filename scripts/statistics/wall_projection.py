@@ -51,7 +51,7 @@ grid_file = resultspath + '/inca_grid.bin'
 ccfile    = resultspath + '/cutcells_setup.dat'
 
 fric_file = outpath + '/friction_projection.pkl'
-pres_file = outpath + '/pressure_projection.pkl'
+pres_file = outpath + '/wall_vars_projection.pkl'
 
 snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
                             key='snapshot.bin')[0]
@@ -118,7 +118,7 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
 
     with timer("compute pressure projection"):
         
-        S.pressure_projection( block_list, G, cc_df )
+        S.wall_vars_projection( block_list, G, cc_df )
 
 
 else:
@@ -130,7 +130,7 @@ else:
             S.df_fric = pickle.load( f )
         
         with open( pres_file, 'rb' ) as f:
-            S.df_pres = pickle.load( f )
+            S.df_wall = pickle.load( f )
 
 with timer("plotting"):
 
@@ -147,17 +147,17 @@ with timer("plotting"):
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
     S.df_fric = shift_coordinates( S.df_fric, delta, h_ridge, h_md, x_imp)
-    S.df_pres = shift_coordinates( S.df_pres, delta, h_ridge, h_md, x_imp)
+    S.df_wall = shift_coordinates( S.df_wall, delta, h_ridge, h_md, x_imp)
     
     # drop points that before -20.0 delta or after 10.0 delta
     S.df_fric = S.df_fric[ (S.df_fric['xs']>-20.0) & (S.df_fric['xs']< 10.0) ]
-    S.df_pres = S.df_pres[ (S.df_pres['xs']>-20.0) & (S.df_pres['xs']< 10.0) ]
+    S.df_wall = S.df_wall[ (S.df_wall['xs']>-20.0) & (S.df_wall['xs']< 10.0) ]
 
     xx     = np.array( S.df_fric['xs'] )
     zz     = np.array( S.df_fric['zs'] )
     fric   = np.array( S.df_fric['fric'] )
-    p      = np.array( S.df_pres['p'] )
-    p_fluc = np.array( S.df_pres['p`'] )
+    p      = np.array( S.df_wall['p'] )
+    p_fluc = np.array( S.df_wall['p`'] )
 
     npx = len( np.unique(xx) )
     npz = len( np.unique(zz) )

@@ -76,7 +76,7 @@ class StatisticData:
         
         # Dataframe for friction and pressure projection 
         self.df_fric = None
-        self.df_pres = None
+        self.df_wall = None
         
         
 # ----------------------------------------------------------------------
@@ -696,7 +696,9 @@ class StatisticData:
             df['w`w`']= np.array(df['ww']) - np.array(df['w'])**2
             df['u`v`']= np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
             
-            vars = [var for var in vars if var not in ['uu','vv','ww','uv']]
+            # delete some var in vars and add some
+            
+            vars =[var for var in vars if var not in ['uu','vv','ww','uv','pp']]
             vars += ['u`u`','v`v`','w`w`','u`v`']
             
             print(df)
@@ -962,7 +964,7 @@ class StatisticData:
                             nz_cc.append( df['nz'].iloc[cc_j])
                             
                             h.append( 0.50*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
-                                                  +(g.hz[buff]*nz_cc[cc_j])**2) )
+                                                  +(g.hz[buff]*nz_cc[cc_j])**2))
                             
                             fay  .append( df['fay1'].iloc[cc_j]
                                         - df['fay0'].iloc[cc_j])
@@ -1034,7 +1036,7 @@ class StatisticData:
 
 
 # ----------------------------------------------------------------------
-# >>> pressure projection                                      (Nr.)
+# >>> wall variables projection                                    (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -1048,15 +1050,15 @@ class StatisticData:
 #    - return a dataframe and output file
 # ----------------------------------------------------------------------
 
-    def pressure_projection( self,         block_list:list,
-                             G:GridData,   cc_df:pd.DataFrame, 
-                             outfile=None, buff=3 ):
+    def wall_vars_projection( self,         block_list:list,
+                              G:GridData,   cc_df:pd.DataFrame, 
+                              outfile=None, buff=3 ):
         
         """
         block_list : list of selected blocks' numbers\n
         G          : GridData object\n
         cc_df      : cutcell dataframe from cutcells_setup.dat\n
-        outfile    : output file name. If None, using 'pressure_projection.pkl'
+        outfile    : output file name. If None, using 'wall_vars_projection.pkl'
         
         return     : dataframe of x-z plane data with coordinates and f\n
         
@@ -1081,16 +1083,20 @@ class StatisticData:
 
             data_df = self.bl[num-1].df
             
-            wd = np.array( data_df['wd'] ).reshape( npz, npy, npx )
-            p  = np.array( data_df['p' ] ).reshape( npz, npy, npx )
-            pp = np.array( data_df['pp'] ).reshape( npz, npy, npx )
+            wd  = np.array( data_df['wd'] ).reshape( npz, npy, npx )
+            p   = np.array( data_df['p' ] ).reshape( npz, npy, npx )
+            pp  = np.array( data_df['pp'] ).reshape( npz, npy, npx )
+            mu  = np.array( data_df['mu'] ).reshape( npz, npy, npx )
+            rho = np.array( data_df['rho'] ).reshape( npz, npy, npx )
             
 # --------- loop over each cut cell group
 
             # !!! i,j,k follow Fortran index, starting from 1.
             
-            p_plane  = np.zeros( (npx,npz), dtype='f' )
-            pp_plane = np.zeros( (npx,npz), dtype='f' )
+            p_plane   = np.zeros( (npx,npz), dtype='f' )
+            pp_plane  = np.zeros( (npx,npz), dtype='f' )
+            mu_plane  = np.zeros( (npx,npz), dtype='f' )
+            rho_plane = np.zeros( (npx,npz), dtype='f' )
             
             for k in range( buff+1, g.nz+buff+1 ):
                 
@@ -1127,41 +1133,48 @@ class StatisticData:
                         
                         j = df['j'].iloc[cc_j]
                         
-                        p_plane[i-1,k-1] += p[k-1,j-1,i-1] * fay[cc_j]
+                        p_plane[i-1,k-1]   += p[k-1,j-1,i-1]   * fay[cc_j]
+                        pp_plane[i-1,k-1]  += pp[k-1,j-1,i-1]  * fay[cc_j]
+                        mu_plane[i-1,k-1]  += mu[k-1,j-1,i-1]  * fay[cc_j]
+                        rho_plane[i-1,k-1] += rho[k-1,j-1,i-1] * fay[cc_j]
 
-                        pp_plane[i-1,k-1] += pp[k-1,j-1,i-1] * fay[cc_j]
 
 # --------- match with coordinates
             
             xx,zz = np.meshgrid( g.gx, g.gz )
             
-            df_pres = pd.DataFrame(columns=['x','z','p','pp'])
-            df_pres['x']  = xx[buff:-buff,buff:-buff].flatten()
-            df_pres['z']  = zz[buff:-buff,buff:-buff].flatten()
-            df_pres['p']  = p_plane[buff:-buff,buff:-buff].T.flatten()
-            df_pres['pp'] = pp_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall = pd.DataFrame(columns=['x','z','p','pp','mu','rho'])
+            df_wall['x']   = xx[buff:-buff,buff:-buff].flatten()
+            df_wall['z']   = zz[buff:-buff,buff:-buff].flatten()
+            df_wall['p']   = p_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall['pp']  = pp_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall['mu']  = mu_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall['rho'] = rho_plane[buff:-buff,buff:-buff].T.flatten()
             
             # compute pressure fluctuation
-            df_pres['p`'] = np.sqrt( np.array( df_pres['pp']-df_pres['p']**2 ))
+            df_wall['p`'] = np.sqrt( np.array( df_wall['pp']-df_wall['p']**2 ))
             
-            self.bl[num-1].df_pres = df_pres
+            self.bl[num-1].df_wall = df_wall
             
-            p_ave      = np.mean( np.array(df_pres['p'])  )
-            p_fluc_ave = np.mean( np.array(df_pres['p`']) )
+            p_ave      = np.mean( np.array(df_wall['p'])  )
+            p_fluc_ave = np.mean( np.array(df_wall['p`']) )
+            mu_ave     = np.mean( np.array(df_wall['mu']) )
+            rho_ave    = np.mean( np.array(df_wall['rho']) )
             
-            print(f"block {num} has mean pressure {np.mean(p_ave)},",end='')
-            print(f" mean pressure fluctuation {np.mean(p_fluc_ave)}.\n")
+            
+            print(f"block {num} has mean p {p_ave},",end='')
+            print(f" p` {p_fluc_ave}, mu {mu_ave}, rho {rho_ave}.\n")
 
 # --------- save friction into StatisticsData.df_fric (a single pd.DataFrame)
 
-        self.df_pres = pd.concat([self.bl[num-1].df_pres for num in block_list])
-        self.df_pres.reset_index( drop=True, inplace=True )
-        self.df_pres.sort_values( by=['z','x'],inplace=True )
+        self.df_wall = pd.concat([self.bl[num-1].df_wall for num in block_list])
+        self.df_wall.reset_index( drop=True, inplace=True )
+        self.df_wall.sort_values( by=['z','x'],inplace=True )
         
-        if outfile is None: outfile = 'pressure_projection.pkl'
+        if outfile is None: outfile = 'wall_vars_projection.pkl'
         
         with open( outfile, 'wb' ) as f:
-            pickle.dump( self.df_pres, f )
+            pickle.dump( self.df_wall, f )
 
 
 # ----------------------------------------------------------------------
