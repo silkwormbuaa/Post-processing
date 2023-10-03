@@ -5,62 +5,54 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   T, and Mt profile not yet finished.
 '''
 
 import os
-
-import numpy             as     np
+import sys
 
 import matplotlib
-
 import matplotlib.pyplot as     plt
+import matplotlib.ticker as     ticker
 
-from   plt_tools         import PlotDataframe
+import numpy             as     np
+import pandas            as     pd
 
-# ----------------------------------------------------------------------
-# >>> Input Info                                               
-# ----------------------------------------------------------------------
-#
-# Wencan Wu : w.wu-3@tudelft.nl
-#
-# History
-#
-# 2022/11/01  - created
-#
-# Desc
-#
-# ----------------------------------------------------------------------
+source_dir = os.path.realpath(__file__).split('plotlines')[0]
+sys.path.append( source_dir )
 
-OutPath  = "/media/wencanwu/Seagate Expansion Drive/temp/221221/DataPost/"
+from   vista.line        import ProfileData
 
-data1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/mean_result_ib_real.dat'
-norm1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/statistic_average.dat'
 
-data2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/mean_result_ib_real.dat'
-norm2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/statistic_average.dat' 
+OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
 
-data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/mean_result_ib_real.dat'
-norm3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/statistic_average.dat'
+data1 = '/media/wencanwu/Seagate Expansion Drive/temp/221014/results/profile'
+data2 = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/profile'
+data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results/profile'
+data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/profile'
+data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/profile'
 
-data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/mean_result_ib_real.dat'
-norm4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/statistic_average.dat'
+data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
-data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/mean_result_ib_real.dat'
-norm5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/statistic_average.dat'
+datalist = [data1,   data2,   data3,                   data4,        data5]
+dy       = [0.494,   0.468,   0.416,                   0.312,        0.26]
+color    = ['green', 'blue', 'black',                  'red',        'purple']
+label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
+lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
+width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
+lines = []
 
-data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-53.6_1storder.dat'
+plt_u_vd  = False
+plt_u     = False
+plt_RS_uu = False
+plt_RS_vv = True
+plt_RS_ww = True
+plt_RS_uv = True
+plt_rho   = True
+plt_T     = False
+plt_Mt    = False
 
-plt_u_vd = True
-vd_mode  = 'bottom'
-
-plt_u    = True
-plt_RS   = True
-plt_rho  = True
-plt_T    = True
-plt_Mt   = True
-Compare  = True
-
+pure = False
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -76,61 +68,32 @@ Compare  = True
 #
 # ----------------------------------------------------------------------
 
-d1 = PlotDataframe( data1 )
-d1.shift_y( 0.494 )
-#d1.shift_y( 0.0 )
-d1.read_norm( norm1 )
-d1.get_norm()
-d1.vd_transform(mode=vd_mode)
-d1.get_Mt()
+for i, datapath in enumerate(datalist):
+    
+    os.chdir(datapath)
+    
+    line = ProfileData('profile_mean.dat') 
+    line.shift_y( dy[i] )
+    line.inner_normalize('wall_statistics.dat')
+    line.vd_transform()
+    
+    line.label = r'$\mathrm{D/\delta_0=}$' + label[i]
+    line.color = color[i]
+    line.width = width[i]
+    line.lstyle = lstyle[i]
+    
+    lines.append(line)
+    
 
-d2 = PlotDataframe( data2 )
-d2.shift_y( 0.468 )
-#d2.shift_y( 0.0 )
-d2.read_norm( norm2 )
-d2.get_norm()
-d2.vd_transform(mode=vd_mode)
-d2.get_Mt()
-
-d3 = PlotDataframe( data3 )
-d3.shift_y( 0.416 )
-#d3.shift_y( 0.0 )
-d3.read_norm( norm3 )
-d3.get_norm()
-d3.vd_transform(mode=vd_mode)
-d3.get_Mt()
-
-d4 = PlotDataframe( data4 )
-d4.shift_y( 0.312 )
-#d4.shift_y( 0.0 )
-d4.read_norm( norm4 )
-d4.get_norm()
-d4.vd_transform(mode=vd_mode)
-d4.get_Mt()
-
-d5 = PlotDataframe( data5 )
-d5.shift_y( 0.26 )
-#d5.shift_y( 0.0 )
-d5.read_norm( norm5 )
-d5.get_norm()
-d5.vd_transform(mode=vd_mode)
-d5.get_Mt()    
-
-d0 = PlotDataframe( data0 )
-d0.rho_w = d0.df['<rho>'][0]
-d0.vd_transform()
-d0.T_inf = 160.15
-d0.df['T_nd'] = np.array(d0.df['<T>']) / d0.T_inf
-d0.get_Mt()
+line0 = ProfileData(data0)
+line0.rho_ave = line0.df['rho'][0]
+line0.vd_transform()
+line0.label = 'smooth'
+line0.color = 'gray'
+line0.width = 4.0
+line0.lstyle = '--'
 
 os.chdir( OutPath )
-
-d0.df.to_excel("smooth.xlsx")
-d1.df.to_excel("1014.xlsx")
-d2.df.to_excel("0926.xlsx")
-d3.df.to_excel("0825.xlsx")
-d4.df.to_excel("0927.xlsx")
-d5.df.to_excel("1221.xlsx")
 
 # ----------------------------------------------------------------------
 # >>> Plot van Driest transformed u profile                      ( 1 )
@@ -150,66 +113,66 @@ if plt_u_vd :
     
     fig, ax = plt.subplots(figsize=[10,8])
     
-    if Compare :
+    for line in lines:
         
-        ax.plot( d0.df['y_plus'], 
-                 d0.df['u_plus_vd'],
-                 'gray', 
-                 label = r'$smooth$', 
-                 ls    = '--')
-
-    ax.plot( d1.df['y_s_plus'], 
-             d1.df['u_plus_vd'],
-             'green',   
-             label = r'$D=2.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d2.df['y_s_plus'], 
-             d2.df['u_plus_vd'],
-             'blue',  
-             label = r'$D=1.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d3.df['y_s_plus'], 
-             d3.df['u_plus_vd'],
-             'black', 
-             label = r'$D=0.5\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d4.df['y_s_plus'], 
-             d4.df['u_plus_vd'],
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             ls     = '-')
-
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['u_plus_vd'],
-             'purple',
-             label  = r'$D=0.125\delta_0$', 
-             ls     = '-')
+        ax.plot( line.df['ys+'], 
+                 line.df['u+_vd'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
+    ax.plot( line0.df['y+'], 
+             line0.df['u+_vd'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
 
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-    ax.tick_params( axis='x', labelsize=15 )
-    
-    ax.set_ylabel( r'$u^+_{VD}$', fontdict={'size':24} )
-    ax.tick_params( axis='y', labelsize=15 )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
     
     ax.set_xlim( [1,1000] )
+    ax.set_ylim( [0,23] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0) )
     
     ax.xaxis.set_minor_locator( x_minor )
 
-    ax.legend( prop={'size':20} ) 
-    ax.set_title( r"$u^+_{VD}$ profile", size=20 )
 
-    ax.grid()
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
     
-    plt.savefig( "u_VD_shifted_new" )
+    figname = 'Uvd'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.set_ylabel( r'$u^+_{VD}$', fontdict={'size':24} )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':22,'family':'sans-serif'} ) 
+        ax.set_title( r"$u^+_{VD}$ profile", size=20 )
+    
+    plt.savefig( figname )
     plt.show()
 
 
@@ -231,66 +194,67 @@ if plt_u :
     
     fig, ax = plt.subplots(figsize=[10,8])
     
-    if Compare :
+    for line in lines:
         
-        ax.plot( d0.df['y_plus'], 
-                 d0.df['u_plus'],
-                 'gray', 
-                 label = r'$smooth$', 
-                 ls    = '--')
-
-    ax.plot( d1.df['y_s_plus'], 
-             d1.df['u_plus'],
-             'green',   
-             label = r'$D=2.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d2.df['y_s_plus'], 
-             d2.df['u_plus'],
-             'blue',  
-             label = r'$D=1.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d3.df['y_s_plus'], 
-             d3.df['u_plus'],
-             'black', 
-             label = r'$D=0.5\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d4.df['y_s_plus'], 
-             d4.df['u_plus'],
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             ls     = '-')
-
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['u_plus'],
-             'purple',
-             label  = r'$D=0.125\delta_0$', 
-             ls     = '-')
+        ax.plot( line.df['ys+'], 
+                 line.df['u+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
+    ax.plot( line0.df['y+'], 
+             line0.df['u+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
 
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-    ax.tick_params( axis='x', labelsize=15 )
-    
-    ax.set_ylabel( r'$u^+$', fontdict={'size':24} )
-    ax.tick_params( axis='y', labelsize=15 )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
     
     ax.set_xlim( [1,1000] )
+    ax.set_ylim( [0,23] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0) )
     
     ax.xaxis.set_minor_locator( x_minor )
 
-    ax.legend( prop={'size':20} ) 
-    ax.set_title( r"$u^+$ profile", size=20 )
 
-    ax.grid()
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
     
-    plt.savefig( "u_profile_shifted_new" )
+    figname = 'u'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.set_ylabel( r'$u^+$', fontdict={'size':24} )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':22,'family':'sans-serif'} ) 
+        ax.set_title( r"$u^+$ profile", size=20 )
+
+
+    plt.savefig( figname )
     plt.show()
 
 
@@ -308,87 +272,286 @@ if plt_u :
 #
 # ----------------------------------------------------------------------
 
-if plt_RS :
-    
-    fig, ax = plt.subplots( figsize=[10,8] )
-    
-    if Compare :
-            
-        ax.plot( d0.df['y_plus'],
-                 d0.df['<u`u`>+'],
-                 'blue',
-                 label = r'$u^\prime u^\prime$ smooth',
-                 ls    = "-")
+if plt_RS_uu:
+
+    fig, ax = plt.subplots( figsize=[8,8] )
+
+    #ax.plot(dP.df['y+'],
+    #        dP.df['urms+']*dP.df['urms+'],
+    #        'gray',
+    #        label = r'$u^\prime u^\prime$ pirozzoli',
+    #        ls    = "",
+    #        marker='+',
+    #        \linewidth=4)
+
+    for line in lines:
         
-        ax.plot( d0.df['y_plus'],
-                 d0.df['<u`v`>+'],
-                 'y',
-                 label = r'$u^\prime v^\prime$ smooth',
-                 ls    = "-")
+        ax.plot( line.df['ys+'], 
+                 line.df['u`u`+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
         
-        ax.plot( d0.df['y_plus'],
-                 d0.df['<v`v`>+'],
-                 'green',
-                 label = r'$v^\prime v^\prime$ smooth',
-                 ls    = "-")
-        
-        ax.plot( d0.df['y_plus'],
-                 d0.df['<w`w`>+'],
-                 'red',
-                 label = r'$w^\prime w^\prime$ smooth',
-                 ls    = "-")
-    
-    ax.plot( d5.df['y_s_plus'],
-             d5.df['<u`u`>+'],
-             'blue',
-             label  = r'$u^\prime u^\prime \ D=0.125\delta_0$',
-             ls     = "--")
-    
-    ax.plot( d5.df['y_s_plus'],
-             d5.df['<u`v`>+'],
-             'y',
-             label  = r'$u^\prime v^\prime \ D=0.125\delta_0$',
-             ls     = "--")
-    
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['<v`v`>+'],
-             'green',
-             label = r'$v^\prime v^\prime \ D=0.125\delta_0$',
-             ls    = "--")
-    
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['<w`w`>+'],
-             'r',
-             label = r'$w^\prime w^\prime \ D=0.125\delta_0$',
-             ls    = "--")
+    ax.plot( line0.df['y+'], 
+             line0.df['u`u`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,1000] )
+    ax.set_ylim( [-1,8]   )
 
     ax.minorticks_on()
-    
-    ax.set_xscale( "symlog", linthresh=1 )
-    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-    ax.tick_params( axis='x', labelsize=15 )
-    
-    ax.set_xlim( [1,1000] )
-    
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=10,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=5,
+                    width=1)
     x_minor = matplotlib.ticker.LogLocator( 
                         base = 10.0, subs = np.arange(1.0,10.0) )
-    
     ax.xaxis.set_minor_locator( x_minor )
-    
-    ax.set_ylabel( r'$\xi u^\prime_i u^\prime_j$',
-                   fontdict={'size':24} )
-    
-    ax.tick_params( axis='y', labelsize=15 )
 
-    ax.legend( prop={'size':12}, loc='upper right' ) 
-    ax.set_title( "Reynolds Stress profile", size=20 )
+    # set spacing between major tickers.
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
 
-    ax.grid()
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
     
-    os.chdir( OutPath )
-    plt.savefig( "oneeights_delta_RS_new" )
+    figname = 'RS_uu'
+    
+    if pure:    
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.set_ylabel( r'$\xi u^\prime u^\prime$',
+                        fontdict={'size':24} )
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':15}, loc='upper right' ) 
+        ax.set_title( "Reynolds Stress profile u`u`", size=20 )
+
+    plt.savefig( figname )
     plt.show()
 
+
+if plt_RS_vv:
+    
+    fig, ax = plt.subplots( figsize=[8,8] )
+    
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['v`v`+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
+    ax.plot( line0.df['y+'], 
+             line0.df['v`v`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+    
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,1000] )
+    ax.set_ylim( [-0.1,1.5]   )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=10,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=5,
+                    width=1)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0) )
+    ax.xaxis.set_minor_locator( x_minor )
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'RS_vv'
+    
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.set_ylabel( r'$\xi v^\prime v^\prime$',
+                        fontdict={'size':24} )
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':15}, loc='upper left' ) 
+        ax.set_title( "Reynolds Stress profile v`v`", size=20 )
+
+    plt.savefig( figname )
+    plt.show()
+    
+
+if plt_RS_ww:
+    
+    fig, ax = plt.subplots( figsize=[8,8] )
+    
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['w`w`+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
+    ax.plot( line0.df['y+'], 
+             line0.df['w`w`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+    
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,1000] )
+    ax.set_ylim( [-0.1,2]   )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=10,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=5,
+                    width=1)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0) )
+    ax.xaxis.set_minor_locator( x_minor )
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'RS_ww'
+    
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.set_ylabel( r'$\xi w^\prime w^\prime$',
+                        fontdict={'size':24} )
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':15}, loc='upper left' ) 
+        ax.set_title( "Reynolds Stress profile w`w`", size=20 )
+
+    plt.savefig( figname )
+    plt.show()
+
+
+if plt_RS_uv:
+
+    fig, ax = plt.subplots( figsize=[8,8] )
+    
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['u`v`+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
+    ax.plot( line0.df['y+'], 
+             line0.df['u`v`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+    
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,1000] )
+    ax.set_ylim( [-1,0.2] )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=10,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=5,
+                    width=1)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0) )
+    ax.xaxis.set_minor_locator( x_minor )
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'RS_uv'
+    
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.set_ylabel( r'$\xi u^\prime v^\prime$',
+                        fontdict={'size':24} )
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':15}, loc='best' ) 
+        ax.set_title( "Reynolds Stress profile u`v`", size=20 )
+
+    plt.savefig( figname )
+    plt.show()
+    
 
 # ----------------------------------------------------------------------
 # >>> Plot rho profile                                           ( 4 )
@@ -408,43 +571,21 @@ if plt_rho :
     
     fig, ax = plt.subplots(figsize=[10,8])
     
-    if Compare :
+    for line in lines:
         
-        ax.plot( d0.df['y_plus'], 
-                 d0.df['<rho>'],
-                 'gray', 
-                 label = r'$smooth$', 
-                 ls    = '--')
-
-    ax.plot( d1.df['y_s_plus'], 
-             d1.df['<rho>'],
-             'green',   
-             label = r'$D=2.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d2.df['y_s_plus'], 
-             d2.df['<rho>'],
-             'blue',  
-             label = r'$D=1.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d3.df['y_s_plus'], 
-             d3.df['<rho>'],
-             'black', 
-             label = r'$D=0.5\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d4.df['y_s_plus'], 
-             d4.df['<rho>'],
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             ls     = '-')
-
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['<rho>'],
-             'purple',
-             label  = r'$D=0.125\delta_0$', 
-             ls     = '-')
+        ax.plot( line.df['ys+'], 
+                 line.df['rho'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
+    ax.plot( line0.df['y+'], 
+             line0.df['rho'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
 
     ax.minorticks_on()
     
@@ -467,7 +608,7 @@ if plt_rho :
 
     ax.grid()
     
-    plt.savefig( "rho_shifted_new" )
+    plt.savefig( "rho_shifted" )
     plt.show()
 
 
@@ -489,43 +630,7 @@ if plt_T :
     
     fig, ax = plt.subplots(figsize=[10,8])
     
-    if Compare :
-        
-        ax.plot( d0.df['y_plus'], 
-                 d0.df['T_nd'],
-                 'gray', 
-                 label = r'$smooth$', 
-                 ls    = '--')
 
-    ax.plot( d1.df['y_s_plus'], 
-             d1.df['T_nd'],
-             'green',   
-             label = r'$D=2.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d2.df['y_s_plus'], 
-             d2.df['T_nd'],
-             'blue',  
-             label = r'$D=1.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d3.df['y_s_plus'], 
-             d3.df['T_nd'],
-             'black', 
-             label = r'$D=0.5\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d4.df['y_s_plus'], 
-             d4.df['T_nd'],
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             ls     = '-')
-
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['T_nd'],
-             'purple',
-             label  = r'$D=0.125\delta_0$', 
-             ls     = '-')
 
     ax.minorticks_on()
     
@@ -569,43 +674,7 @@ if plt_Mt :
     
     fig, ax = plt.subplots(figsize=[10,8])
     
-    if Compare :
-        
-        ax.plot( d0.df['y_plus'], 
-                 d0.df['Mt'],
-                 'gray', 
-                 label = r'$smooth$', 
-                 ls    = '--')
 
-    ax.plot( d1.df['y_s_plus'], 
-             d1.df['Mt'],
-             'green',   
-             label = r'$D=2.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d2.df['y_s_plus'], 
-             d2.df['Mt'],
-             'blue',  
-             label = r'$D=1.0\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d3.df['y_s_plus'], 
-             d3.df['Mt'],
-             'black', 
-             label = r'$D=0.5\delta_0$', 
-             ls    = '-')
-    
-    ax.plot( d4.df['y_s_plus'], 
-             d4.df['Mt'],
-             'red',
-             label  = r'$D=0.25\delta_0$', 
-             ls     = '-')
-
-    ax.plot( d5.df['y_s_plus'], 
-             d5.df['Mt'],
-             'purple',
-             label  = r'$D=0.125\delta_0$', 
-             ls     = '-')
 
     ax.minorticks_on()
     
