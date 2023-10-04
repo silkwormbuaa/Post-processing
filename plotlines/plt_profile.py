@@ -42,17 +42,18 @@ lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
+plt_u_vd_lw = True
 plt_u_vd  = False
 plt_u     = False
 plt_RS_uu = False
-plt_RS_vv = True
-plt_RS_ww = True
-plt_RS_uv = True
-plt_rho   = True
+plt_RS_vv = False
+plt_RS_ww = False
+plt_RS_uv = False
+plt_rho   = False
 plt_T     = False
 plt_Mt    = False
 
-pure = False
+pure = True
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -94,6 +95,90 @@ line0.width = 4.0
 line0.lstyle = '--'
 
 os.chdir( OutPath )
+
+# ----------------------------------------------------------------------
+# >>> plot comparison between smooth wall and law of wall                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/04  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_u_vd_lw:
+    
+    x1 = np.linspace(1,12,50)
+    y1 = np.linspace(1,12,50)
+    
+    x2 = np.linspace(8,400,300)
+    y2  = np.log(x2)/0.41 + 5.1    
+
+    fig, ax = plt.subplots(figsize=[10,8])
+    
+    ax.plot( x1,y1,'black',ls=':')
+    ax.plot( x2,y2,'black',ls=':')
+       
+    ax.plot( line0.df['y+'], 
+             line0.df['u+_vd'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+    
+    
+    ax.minorticks_on()
+    
+    ax.set_xscale( "symlog", linthresh = 1 )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
+    
+    ax.set_xlim( [1,1000] )
+    ax.set_ylim( [0,23] )
+    
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base=10.0, subs = np.arange(1.0,10.0) )
+    
+    ax.xaxis.set_minor_locator( x_minor )
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'law_wall'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.set_ylabel( r'$u^+_{VD}$', fontdict={'size':24} )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':22,'family':'sans-serif'} ) 
+        ax.set_title( r"$u^+_{VD}$ profile", size=20 )
+    
+    plt.savefig( figname )
+    plt.show()    
+
+
+
 
 # ----------------------------------------------------------------------
 # >>> Plot van Driest transformed u profile                      ( 1 )
