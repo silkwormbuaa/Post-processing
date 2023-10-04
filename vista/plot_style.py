@@ -832,6 +832,11 @@ def plot_wall_projection( xx, zz, v,
                           col_map=None,
                           cbar_label=None,
                           cbar_levels=None):
+    
+    """
+    only applicable to the ridge type smooth wall case setting.
+    Range in z is manually set [-2.0,2.0]
+    """
 
     if figsize is None: figsize = (30,10)
 
@@ -841,6 +846,9 @@ def plot_wall_projection( xx, zz, v,
 
     if cbar_levels is None: cbar_levels=51
 
+    zz[0,:] =-2.0   # for the convenience of plotting
+    zz[-1,:]= 2.0
+    
     cs = ax.contourf( xx, zz, v,
                       levels=cbar_levels,
                       cmap=col_map,
@@ -875,8 +883,8 @@ def plot_wall_projection( xx, zz, v,
     ax.tick_params(axis='x',labelsize=30,pad=10)
     ax.tick_params(axis='y',labelsize=30,pad=10)
     
-    ax.set_ylim(-2,2)
-    ax.set_xlim(-20,10)
+    ax.set_ylim([-2.0,2.0])
+    ax.set_xlim([-20.0,10.0])
     
     # set axises stay with contour and x,y unit length equal
     

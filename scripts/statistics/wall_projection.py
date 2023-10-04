@@ -38,7 +38,7 @@ from   vista.plot_style  import plot_wall_projection
 
 # =============================================================================
 
-bbox = [ -60.0, 100.0, -1.3, 0.01, -11.0, 11.0]
+bbox = [ -60.0, 108.0, -1.3, 0.01, -11.0, 11.0]
 
 # =============================================================================
 
@@ -82,7 +82,7 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
         
         S = StatisticData( stat_file )
 
-        vars = ['u','mu','p','pp']
+        vars = ['u','mu','rho','p','pp']
 
         with open( stat_file, 'br' ) as f:
             S.read_stat_header( f )
@@ -150,8 +150,8 @@ with timer("plotting"):
     S.df_wall = shift_coordinates( S.df_wall, delta, h_ridge, h_md, x_imp)
     
     # drop points that before -20.0 delta or after 10.0 delta
-    S.df_fric = S.df_fric[ (S.df_fric['xs']>-20.0) & (S.df_fric['xs']< 10.0) ]
-    S.df_wall = S.df_wall[ (S.df_wall['xs']>-20.0) & (S.df_wall['xs']< 10.0) ]
+    S.df_fric = S.df_fric[ (S.df_fric['xs']>=-20.01) &(S.df_fric['xs']<= 10.01)]
+    S.df_wall = S.df_wall[ (S.df_wall['xs']>=-20.01) &(S.df_wall['xs']<= 10.01)]
 
     xx     = np.array( S.df_fric['xs'] )
     zz     = np.array( S.df_fric['zs'] )
@@ -208,7 +208,7 @@ with timer("save spanwise averaged variable distribution along x"):
     p_mean      = np.mean( p/p_ref, axis=0 )
     p_fluc_mean = np.mean( p_fluc/p_ref, axis=0 )
 
-    df_streamwise = pd.DataFrame(columns=['x','fric_ave','p_ave','p_fluc_ave'])
+    df_streamwise = pd.DataFrame(columns=['x','Cf','Cp','p_fluc'])
     df_streamwise['x']  = np.unique( xx )
     df_streamwise['Cf'] = np.array( fric_mean )
     df_streamwise['Cp'] = np.array( p_mean )
