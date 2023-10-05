@@ -42,6 +42,7 @@ from   vista.plot_style  import plot_slicex_stat
 # =============================================================================
 
 locs_delta = np.linspace(-20,10,16)
+outfolder  = '/yz_planes_streamline'
 
 # =============================================================================
 
@@ -49,7 +50,7 @@ datapath = os.getcwd()
 
 datafile = datapath + '/statistics.bin'
 gridfile = datapath + '/inca_grid.bin'
-outpath  = datapath + '/yz_planes'
+outpath  = datapath + outfolder
 parametersfile = datapath.split('/results')[0] + '/case_parameters'
 
 # - read in case paramters
@@ -108,7 +109,7 @@ for i, loc in enumerate(locs):
             
             S.compute_vars( block_list, ['mach','RS','p`'] )
             
-            S.compute_gradients( block_list, ['vorticity'],G,)
+            S.compute_gradients( block_list, ['vorticity'], G)
             
             S.compute_source_terms( block_list, G )
             
@@ -176,18 +177,19 @@ for i, loc in enumerate(locs):
         
         cbar = r'$Mach$'
         plot_slicex_stat( zz, yy, mach,
+                          vectors=[w,v],
                           filename='Mach_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
                           title=title)
 
-        cbar = r'$S$'
-        cbar_levels=np.linspace(-20000.0,20000.,51)
-        plot_slicex_stat( zz, yy, S,
-                          filename='S_'+str(i+1),
-                          cbar_label=cbar,
-                          cbar_levels=cbar_levels,
-                          title=title)
+#        cbar = r'$S$'
+#        cbar_levels=np.linspace(-20000.0,20000.,51)
+#        plot_slicex_stat( zz, yy, S,
+#                          filename='S_'+str(i+1),
+#                          cbar_label=cbar,
+#                          cbar_levels=cbar_levels,
+#                          title=title)
         
         cbar = r'$\omega_x$'
         plot_slicex_stat( zz, yy, w1,
@@ -206,7 +208,7 @@ for i, loc in enumerate(locs):
                           title=title)
 
         cbar = r'$v$'
-        plot_slicex_stat( zz, yy, v,
+        plot_slicex_stat( zz, yy, v/u_ref*100,
                           vectors=[w,v],
                           filename='v_'+str(i+1),
                           cbar_label=cbar,
@@ -214,7 +216,7 @@ for i, loc in enumerate(locs):
                           title=title)
         
         cbar = r'$tke$'
-        plot_slicex_stat( zz, yy, tke,
+        plot_slicex_stat( zz, yy, tke/(u_ref**2),
                           vectors=[w,v],
                           filename='tke_'+str(i+1),
                           cbar_label=cbar,
@@ -222,7 +224,7 @@ for i, loc in enumerate(locs):
                           title=title)
 
         cbar = r'$-<u`v`>$'
-        plot_slicex_stat( zz, yy, -RS,
+        plot_slicex_stat( zz, yy, -RS/(u_ref**2),
                           filename='RS_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',

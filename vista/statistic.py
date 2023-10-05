@@ -497,7 +497,7 @@ class StatisticData:
                ['schlieren','shadowgraph','vorticity'] \n
         G: GridData instance of corresponding case\n
         
-        return: self.bl[].df['grad_rho'] (...['laplacian'])
+        return: self.bl[].df['grad_rho'] (...['laplacian']/['w1']/['w2']/['w3])
         """
 
         for num in block_list:

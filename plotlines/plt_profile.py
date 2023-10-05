@@ -43,12 +43,12 @@ width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
 plt_u_vd_lw = True
-plt_u_vd  = False
+plt_u_vd  = True
 plt_u     = False
-plt_RS_uu = False
-plt_RS_vv = False
-plt_RS_ww = False
-plt_RS_uv = False
+plt_RS_uu = True
+plt_RS_vv = True
+plt_RS_ww = True
+plt_RS_uv = True
 plt_rho   = False
 plt_T     = False
 plt_Mt    = False

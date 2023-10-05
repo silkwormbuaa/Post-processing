@@ -290,6 +290,12 @@ if plt_Cf:
             label=r'$smooth$', 
             ls   ='--',
             linewidth=4)
+    
+    ax.plot( [-20,12],
+             [0,0],
+             'black',
+             ls = '--',
+             linewidth=1 )
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))

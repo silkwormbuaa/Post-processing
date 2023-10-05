@@ -12,6 +12,7 @@ import pickle
 import numpy             as     np
 import pandas            as     pd
 
+import matplotlib
 import matplotlib.pyplot as     plt
 import matplotlib.colors as     colors
 import matplotlib.ticker as     ticker
@@ -741,10 +742,12 @@ def plot_slicex_stat( zz, yy, v,
                       col_map=None,
                       cbar_label=None,
                       cbar_levels=None,
-                      title=None):
+                      title=None,
+                      arrow=False,
+                      pure=True):
     
     if figsize is None:
-        figsize = (15,15)
+        figsize = (15,9)
     
     fig, ax = plt.subplots( figsize=figsize )
     
@@ -753,20 +756,6 @@ def plot_slicex_stat( zz, yy, v,
     if cbar_levels is None: cbar_levels=51
     
     cs = ax.contourf( zz, yy, v, cmap=col_map, levels=cbar_levels )
-    
-    if vectors is not None:
-        
-        ax.quiver( zz[::5,::5],yy[::5,::5], 
-                   vectors[0][::5,::5], vectors[1][::5,::5],
-                   width=0.0015)
-    
-    if wall:
-        df_wall = pd.read_csv( 'wall_X.dat', delimiter=r'\s+' )
-        z_wall = np.array(df_wall['x'])
-        y_wall = np.array(df_wall['y'])
-#        ax.plot(z_wall,y_wall,'black')
-        ax.fill_between(z_wall,-0.1,y_wall,color='grey')
-    
     
     if sonic: 
         with open('soniclines.pkl','rb') as f:
@@ -786,26 +775,80 @@ def plot_slicex_stat( zz, yy, v,
             x_sep = line[:,0]
             y_sep = line[:,1]
             ax.plot(x_sep,y_sep,'red',linewidth=0.8)
-
-
-    if title is not None:
-        ax.text(0.5,1.2,title,fontsize=12,transform=ax.transAxes)
+    
+    if vectors is not None:
         
-    cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.8)
-    cbar.ax.set_ylabel(cbar_label,fontsize=15)
-    cbar.ax.tick_params(labelsize=15)
+        if arrow:
+            ax.quiver( zz[::6,::5],yy[::6,::5], 
+                    vectors[0][::6,::5], vectors[1][::6,::5],
+                    width=0.0015,
+                    angles='xy',
+                    scale_units='xy', 
+                    scale = 160,
+                    headwidth=5,
+                    headlength=7)
+            
+            rect = matplotlib.patches.Rectangle( (-0.9,0.9), 0.3,0.15, 
+                                                facecolor='white',
+                                                alpha=0.9 ) # transpanrency
+            ax.add_patch(rect)
+            
+            ax.quiver(-0.89,0.975,
+                    15.21,0.0, 
+                    width=0.0015,
+                    angles='xy',
+                    scale_units='xy',
+                    scale = 160,
+                    headwidth=5,
+                    headlength=7)
+            
+            ax.text( -0.78,0.975,
+                    r"$3\%u_{\infty}$",
+                    va='center',
+                    fontsize=30)
+        else:   # streamline
+#            speed = np.sqrt( vectors[0]**2+ vectors[1]**2 )
+#            lw = speed/speed.max()
+            ax.streamplot( zz,yy, 
+                           vectors[0], vectors[1],
+                           density=2.5,            # linewidth=lw,
+                           color='black',
+                           linewidth=0.5)
+        
+    
+    if wall:
+        df_wall = pd.read_csv( 'wall_X.dat', delimiter=r'\s+' )
+        z_wall = np.array(df_wall['x'])
+        y_wall = np.array(df_wall['y'])
+#        ax.plot(z_wall,y_wall,'black')
+        ax.fill_between(z_wall,-0.1,y_wall,color='grey',zorder=10)
+    
+    
+    if not pure: 
+           
+        if title is not None:
+            ax.text(0.5,1.1,title,fontsize=20,transform=ax.transAxes)
+        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.8)
+        cbar.ax.set_ylabel(cbar_label,fontsize=20)
+        cbar.ax.tick_params(labelsize=20)
 
-    ax.tick_params(axis='x',labelsize=15,pad=10)
-    ax.tick_params(axis='y',labelsize=15,pad=10)
+        ax.tick_params(axis='x',labelsize=20,pad=10)
+        ax.tick_params(axis='y',labelsize=20,pad=10)
 
+        plt.gca().set_aspect('equal', adjustable='box')
 
     # set axises stay with contour and x,y unit length equal
     
-    plt.axis('tight')
-    plt.gca().set_aspect('equal', adjustable='box')
+#    plt.axis('scaled')
 
     if filename:
+        if pure: 
+            filename+='_pure'
+            fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+            
         plt.savefig( 'figx_'+filename )
+        
+        
         print(f"{filename} is output.\n")
 
     plt.close() 
