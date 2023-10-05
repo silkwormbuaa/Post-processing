@@ -29,20 +29,42 @@ from   vista.timer       import timer
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_separation_line
 from   vista.plane_analy import shift_coordinates
-from   vista.plane_analy import save_isolines
 
 from   vista.plot_style  import plot_slicez_stat
 
 from   vista.tools       import read_case_parameter
 
 
-loc = 0.0
+
+# =============================================================================
+
+# locs = [ridge location, valley location]
+
+outfoler = '/xz_planes'
+
+# =============================================================================
+
 
 datapath = os.getcwd()
 
 datafile = datapath + '/statistics.bin'
 gridfile = datapath + '/inca_grid.bin'
+outpath  = datapath + outfoler
 parametersfile = datapath.split('/results')[0] + '/case_parameters'
+
+# - read in case parameters
+
+parameters = read_case_parameter( parametersfile )
+delta   = float( parameters.get('delta_0') )
+h_ridge = float( parameters.get('H') )
+h_md    = float( parameters.get('H_md') )
+x_imp   = float( parameters.get('x_imp') )
+p_ref   = float( parameters.get('p_ref') )
+u_ref   = float( parameters.get('u_ref') )
+casecode =  str( parameters.get('casecode') )
+
+
+locs = [ 0.0, 0.5*float( parameters.get('D')) ]
 
 # - read in grid info
 
@@ -50,116 +72,134 @@ G = GridData( gridfile )
 
 G.read_grid()
 
-block_list, indx_slic = G.select_sliced_blockgrids( 'Z', loc )
+# - enter outpath
 
-print(f"Selected {len(block_list)} blocks.\n")
+if not os.path.exists(outpath): 
+    os.mkdir( outpath )
+    print(f"Created directory {outpath}.\n")
 
-# - read statistics data file
+os.chdir(outpath)
 
-S = StatisticData( datafile )
+# - do slicing and output slices
 
-with timer("read selected blocks "):
-    
-    with open(datafile,'br') as f:
-        
-        S.read_stat_header( f )
-        
-        vars = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
-        
-        S.read_stat_body( f, block_list, vars )
-        
-        S.compute_vars( block_list, ['mach','RS','p`'] )
-        
-        S.compute_gradients( block_list, 
-                             ['schlieren','shadowgraph','vorticity'],
-                             G)
-        
-with timer("Get slice dataframe "):
-    
-    df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
+for i, loc in enumerate( locs ):
 
-with timer("Interpolate and plot "):
-    
-    parameters = read_case_parameter( parametersfile )
-    delta   = float( parameters.get('delta_0') )
-    h_ridge = float( parameters.get('H') )
-    h_md    = float( parameters.get('H_md') )
-    x_imp   = float( parameters.get('x_imp') )
-    
-    df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
-    
-    x_slice = np.array( df_slice['xs'] )
-    y_slice = np.array( df_slice['y_scale'] )
-    
-    u_slice = np.array( df_slice['u'] )
-    mach_slice = np.array( df_slice['mach'] )
-    gradrho_slice = np.array( df_slice['grad_rho'] )
-    T_slice = np.array( df_slice['T'] )
-    tke_slice = np.array( df_slice['tke'] )
-    p_fluc_slice = np.array( df_slice['p`'] )
-    
-    x = np.linspace(-20,12,301)
-    y = np.linspace(0.0,10,201)
-    
-    xx,yy = np.meshgrid(x,y)
-    
-    mach = griddata( (x_slice,y_slice), mach_slice,
-                     (xx,yy), method='linear')
-    
-    u    = griddata( (x_slice,y_slice), u_slice,
-                     (xx,yy), method='linear')
-    
-    gradrho = griddata( (x_slice,y_slice), gradrho_slice,
+    block_list, indx_slic = G.select_sliced_blockgrids( 'Z', loc )
+
+    print(f"Selected {len(block_list)} blocks.\n")
+
+    # - read statistics data file
+
+    S = StatisticData( datafile )
+
+    with timer("read selected blocks "):
+        
+        with open(datafile,'br') as f:
+            
+            S.read_stat_header( f )
+            
+            vars = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
+            
+            S.read_stat_body( f, block_list, vars )
+            
+            S.compute_vars( block_list, ['mach','RS','p`'] )
+            
+            S.compute_gradients( block_list, 
+                                ['schlieren','shadowgraph','vorticity'],
+                                G)
+            
+    with timer("Get slice dataframe "):
+        
+        df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
+
+    with timer("Interpolate and plot "):
+        
+        df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
+        
+        x_slice = np.array( df_slice['xs'] )
+        y_slice = np.array( df_slice['y_scale'] )
+        
+        u_slice = np.array( df_slice['u'] )
+        mach_slice = np.array( df_slice['mach'] )
+        gradrho_slice = np.array( df_slice['grad_rho'] )
+        T_slice = np.array( df_slice['T'] )
+        tke_slice = np.array( df_slice['tke'] )
+        p_fluc_slice = np.array( df_slice['p`'] )
+        
+        x = np.linspace(-20,10,301)
+        
+        if i == 0:
+            y = np.linspace(0.0, 8, 201)
+            wall = False
+        
+        if i == 1:
+            if casecode == 'smooth_wall':  y = np.linspace(0.0, 8, 201)
+            else:                          y = np.linspace(-0.1,8, 405)
+            wall=False
+        
+        xx,yy = np.meshgrid(x,y)
+        
+        mach = griddata( (x_slice,y_slice), mach_slice,
+                        (xx,yy), method='linear')
+        
+        u    = griddata( (x_slice,y_slice), u_slice,
+                        (xx,yy), method='linear')
+        
+        gradrho = griddata( (x_slice,y_slice), gradrho_slice,
+                            (xx,yy), method='linear')
+
+        T    = griddata( (x_slice,y_slice), T_slice,
                         (xx,yy), method='linear')
 
-    T    = griddata( (x_slice,y_slice), T_slice,
-                     (xx,yy), method='linear')
+        tke   = griddata( (x_slice,y_slice), tke_slice,
+                        (xx,yy), method='linear')
 
-    tke   = griddata( (x_slice,y_slice), tke_slice,
-                      (xx,yy), method='linear')
+        p_fluc = griddata( (x_slice,y_slice), p_fluc_slice,
+                        (xx,yy), method='linear') 
+        
+        save_sonic_line( xx,yy, mach )
+        
+        save_separation_line( xx, yy, u )
+        
+        cbar = r'$Mach$'
+        
+        plot_slicez_stat( xx,yy,mach, 
+                          filename='MachZ_'+str(i+1),
+                          cbar_label=cbar,
+                          col_map='coolwarm',
+                          wall=wall)
 
-    p_fluc = griddata( (x_slice,y_slice), p_fluc_slice,
-                       (xx,yy), method='linear') 
-    
-    save_sonic_line( xx,yy, mach )
-    
-    save_separation_line( xx, yy, u )
-    
-    cbar = r'$Mach$'
-    
-    plot_slicez_stat( xx,yy,mach, 
-                      filename='MachZ',
-                      cbar_label=cbar,
-                      wall=True,
-                      col_map='coolwarm')
+        cbar = r'$<T>/T_{\infty}$'
+        
+        plot_slicez_stat( xx,yy,T/160.15, 
+                          filename='TemperatureZ_'+str(i+1),
+                          col_map='plasma',
+                          cbar_label=cbar,
+                          wall=wall)
 
-    cbar = r'$<T>/T_{\infty}$'
-    
-    plot_slicez_stat( xx,yy,T/160.15, 
-                      filename='TemperatureZ',
-                      col_map='plasma',
-                      cbar_label=cbar)
+        cbar = r'$\nabla{\rho}$'
+        
+        plot_slicez_stat( xx,yy,gradrho, 
+                        filename='grad_rho_'+str(i+1),
+                        col_map='Greys',
+                        cbar_label=cbar,
+                        wall=wall)
 
-    cbar = r'$\nabla{\rho}$'
-    
-    plot_slicez_stat( xx,yy,gradrho, 
-                      filename='grad_rho',
-                      col_map='Greys',
-                      cbar_label=cbar)
-
-    cbar = r'$tke$'
-    
-    plot_slicez_stat( xx,yy,tke, 
-                      filename='tke',
-                      col_map='coolwarm',
-                      cbar_label=cbar)
-    
-    cbar = 'pressure fluctuation'
-    
-    plot_slicez_stat( xx,yy,p_fluc, 
-                      filename='pressure_fluc',
-                      col_map='coolwarm',
-                      cbar_label=cbar)
+        cbar = r'$tke$'
+        
+        plot_slicez_stat( xx,yy,tke, 
+                        filename='tke_'+str(i+1),
+                        col_map='coolwarm',
+                        cbar_label=cbar,
+                        wall=wall)
+        
+        cbar = 'pressure fluctuation'
+        
+        plot_slicez_stat( xx,yy,p_fluc, 
+                        filename='pressure_fluc_'+str(i+1),
+                        col_map='coolwarm',
+                        cbar_label=cbar,
+                        wall=wall)
 
     
 

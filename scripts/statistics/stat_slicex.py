@@ -176,10 +176,12 @@ for i, loc in enumerate(locs):
         
         
         cbar = r'$Mach$'
+        cbar_levels = np.linspace(0.0,2.0,21)
         plot_slicex_stat( zz, yy, mach,
                           vectors=[w,v],
                           filename='Mach_'+str(i+1),
                           cbar_label=cbar,
+                          cbar_levels=cbar_levels,
                           col_map='coolwarm',
                           title=title)
 
@@ -208,18 +210,22 @@ for i, loc in enumerate(locs):
                           title=title)
 
         cbar = r'$v$'
+        cbar_levels = np.linspace(-3.0,3.0,31)
         plot_slicex_stat( zz, yy, v/u_ref*100,
                           vectors=[w,v],
+                          arrow=True,
                           filename='v_'+str(i+1),
                           cbar_label=cbar,
+                          cbar_levels=cbar_levels,
                           col_map='coolwarm',
                           title=title)
         
         cbar = r'$tke$'
-        plot_slicex_stat( zz, yy, tke/(u_ref**2),
-                          vectors=[w,v],
+        cbar_levels = np.linspace(0.0,2.5,26)
+        plot_slicex_stat( zz, yy, tke/(u_ref**2)*100,
                           filename='tke_'+str(i+1),
                           cbar_label=cbar,
+                          cbar_levels=cbar_levels,
                           col_map='coolwarm',
                           title=title)
 
@@ -231,10 +237,11 @@ for i, loc in enumerate(locs):
                           title=title)
 
         cbar = r'$p`$'
+        cbar_levels = np.linspace(0.0, 0.035)
         plot_slicex_stat( zz, yy, p_fluc/p_ref,
-                          vectors=[w,v],
                           filename='p_fluc_'+str(i+1),
                           cbar_label=cbar,
+                          cbar_levels=cbar_levels,
                           col_map='coolwarm',
                           title=title)
         

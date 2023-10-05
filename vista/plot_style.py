@@ -744,7 +744,7 @@ def plot_slicex_stat( zz, yy, v,
                       cbar_levels=None,
                       title=None,
                       arrow=False,
-                      pure=True):
+                      pure=False):
     
     if figsize is None:
         figsize = (15,9)
