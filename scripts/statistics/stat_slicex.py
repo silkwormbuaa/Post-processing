@@ -30,12 +30,11 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 
 from   vista.tools       import define_wall_shape
-
 from   vista.tools       import read_case_parameter
 
 from   vista.plane_analy import save_sonic_line
-
 from   vista.plane_analy import shift_coordinates
+from   vista.plane_analy import periodic_average
 
 from   vista.plot_style  import plot_slicex_stat
 
@@ -134,10 +133,17 @@ for i, loc in enumerate(locs):
         w_slice = np.array( df_slice['w'] )
         p_fluc_slice = np.array( df_slice['p`'] )
         
+        # generate interpolation grid
+        
         z = np.linspace(-1.0,1.0, 201)
-        y = np.linspace(-0.1, 1.1, 121)
+        if casecode == 'smooth_wall':
+            y = np.linspace(0.02, 1.1, 55)
+        else:
+            y = np.linspace(-0.1, 1.1, 121)
         
         zz,yy = np.meshgrid(z,y)
+        
+        # mapping variables
         
         mach = griddata( (z_slice,y_slice), mach_slice,
                          (zz,yy), method='linear')
@@ -166,6 +172,23 @@ for i, loc in enumerate(locs):
         p_fluc = griddata( (z_slice,y_slice), p_fluc_slice,
                            (zz,yy), method='linear')   
         
+# ------ extending corner grid for smooth wall
+
+        if casecode == 'smooth_wall':
+            
+            len_ext = np.shape(zz)[1]
+            zz = np.concatenate(([zz[0,:]],zz),axis=0)
+            yy = np.concatenate(([np.zeros(len_ext)],yy),axis=0)
+            mach = np.concatenate(([np.zeros(len_ext)],mach),axis=0)
+            tke = np.concatenate(([np.zeros(len_ext)],tke),axis=0)
+            RS = np.concatenate(([np.zeros(len_ext)],RS),axis=0)
+            S  = np.concatenate(([np.zeros(len_ext)],S),axis=0)
+            w1 = np.concatenate(([w1[0,:]],w1),axis=0)
+            u  = np.concatenate(([np.zeros(len_ext)],u),axis=0)
+            v  = np.concatenate(([np.zeros(len_ext)],v),axis=0)
+            w  = np.concatenate(([np.zeros(len_ext)],w),axis=0)
+            p_fluc = np.concatenate(([p_fluc[0,:]],p_fluc),axis=0)
+        
         fig, ax = plt.subplots()
         
     #    ax.contourf( zz, yy, mach, levels=51, cmap='bwr' )
@@ -174,6 +197,9 @@ for i, loc in enumerate(locs):
         
         define_wall_shape( z*5.2, casecode=casecode, yshift=(h_ridge-h_md) )
         
+        if casecode == "1221":  # otherwise streamline looks too messy
+            w = periodic_average(w,16,axis=1)
+            v = periodic_average(v,16,axis=1)
         
         cbar = r'$Mach$'
         cbar_levels = np.linspace(0.0,2.0,21)
@@ -221,7 +247,7 @@ for i, loc in enumerate(locs):
                           title=title)
         
         cbar = r'$tke$'
-        cbar_levels = np.linspace(0.0,2.5,26)
+        cbar_levels = np.linspace(0.0,2.6,27)
         plot_slicex_stat( zz, yy, tke/(u_ref**2)*100,
                           filename='tke_'+str(i+1),
                           cbar_label=cbar,

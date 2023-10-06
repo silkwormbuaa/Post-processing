@@ -299,6 +299,7 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
         elif casecode == '0825': Case=3
         elif casecode == '0927': Case=4
         elif casecode == '1221': Case=5
+        elif casecode == 'smooth_wall': Case=0
         
     
     if   Case == 1:   D = 10.4
@@ -312,25 +313,33 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     
     y_list = []
     
-    for z in z_list:
-    
-        z0 = z % D 
-        
-        # when z0 is less than half wave length
-        if abs(z0) <= (len_w*0.5):
-        
-            y_w = -A + A*math.cos( z0/len_w*2*math.pi )
-        
-        elif abs(z0-D) <= (len_w*0.5):
-        
-            y_w = -A + A*math.cos( (z0-D)/len_w*2*math.pi )
-        
-        else:
-            # for case 5, this will not happen
-            y_w = -2.0*A
+# - define wall shape    
 
-        y_list.append( y_w )
+    if Case == 0:
+        y_list = np.zeros_like(z_list)
     
+    else:
+        for z in z_list:
+        
+            z0 = z % D 
+            
+            # when z0 is less than half wave length
+            if abs(z0) <= (len_w*0.5):
+            
+                y_w = -A + A*math.cos( z0/len_w*2*math.pi )
+            
+            elif abs(z0-D) <= (len_w*0.5):
+            
+                y_w = -A + A*math.cos( (z0-D)/len_w*2*math.pi )
+            
+            else:
+                # for case 5, this will not happen
+                y_w = -2.0*A
+
+            y_list.append( y_w )
+
+# - shift y?
+ 
     if yshift is not None:
         y_list = np.array(y_list) + yshift
         

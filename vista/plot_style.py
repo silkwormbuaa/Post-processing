@@ -744,7 +744,11 @@ def plot_slicex_stat( zz, yy, v,
                       cbar_levels=None,
                       title=None,
                       arrow=False,
-                      pure=False):
+                      pure=True):
+    
+    """
+    zz,yy are required to be equally spaced by streamplot
+    """
     
     if figsize is None:
         figsize = (15,9)
@@ -766,7 +770,7 @@ def plot_slicex_stat( zz, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'magenta',linewidth=0.8)
+            ax.plot(x_sonic,y_sonic,'magenta',linewidth=2.0)
     
     
     if separation:
@@ -813,9 +817,9 @@ def plot_slicex_stat( zz, yy, v,
 #            lw = speed/speed.max()
             ax.streamplot( zz,yy, 
                            vectors[0], vectors[1],
-                           density=2.5,            # linewidth=lw,
+                           density=2.0,            # linewidth=lw,
                            color='black',
-                           linewidth=0.5)
+                           linewidth=2.0)
         
     
     if wall:
