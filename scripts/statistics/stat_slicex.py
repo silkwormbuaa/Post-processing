@@ -41,8 +41,8 @@ from   vista.plot_style  import plot_slicex_stat
 
 # =============================================================================
 
-locs_delta = np.linspace(-20,10,16)
-outfolder  = '/yz_planes_streamline'
+locs_delta = np.linspace(-20,-6,8)
+outfolder  = '/yz_planes'
 
 # =============================================================================
 
@@ -237,7 +237,7 @@ for i, loc in enumerate(locs):
                           title=title)
 
         cbar = r'$p`$'
-        cbar_levels = np.linspace(0.0, 0.035)
+        cbar_levels = np.linspace(0.0, 0.035,36)
         plot_slicex_stat( zz, yy, p_fluc/p_ref,
                           filename='p_fluc_'+str(i+1),
                           cbar_label=cbar,

@@ -757,6 +757,8 @@ def plot_slicex_stat( zz, yy, v,
     
     cs = ax.contourf( zz, yy, v, cmap=col_map, levels=cbar_levels )
     
+    ax.set_xlim([np.min(zz),np.max(zz)])
+    
     if sonic: 
         with open('soniclines.pkl','rb') as f:
             lines = pickle.load( f )
@@ -781,7 +783,7 @@ def plot_slicex_stat( zz, yy, v,
         if arrow:
             ax.quiver( zz[::6,::5],yy[::6,::5], 
                     vectors[0][::6,::5], vectors[1][::6,::5],
-                    width=0.0015,
+                    width=0.0020,
                     angles='xy',
                     scale_units='xy', 
                     scale = 160,
