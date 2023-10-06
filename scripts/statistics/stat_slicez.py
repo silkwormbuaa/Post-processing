@@ -40,7 +40,7 @@ from   vista.tools       import read_case_parameter
 
 # locs = [ridge location, valley location]
 
-outfoler = '/xz_planes'
+outfoler = '/xy_planes'
 
 # =============================================================================
 
@@ -105,7 +105,7 @@ for i, loc in enumerate( locs ):
             S.compute_vars( block_list, ['mach','RS','p`'] )
             
             S.compute_gradients( block_list, 
-                                ['schlieren','shadowgraph','vorticity'],
+                                ['schlieren','shadowgraph','vorticity','grad_p'],
                                 G)
             
     with timer("Get slice dataframe "):
@@ -125,6 +125,7 @@ for i, loc in enumerate( locs ):
         T_slice = np.array( df_slice['T'] )
         tke_slice = np.array( df_slice['tke'] )
         p_fluc_slice = np.array( df_slice['p`'] )
+        grad_p_slice = np.array( df_slice['grad_p'] )
         
         x = np.linspace(-20,10,301)
         
@@ -155,6 +156,9 @@ for i, loc in enumerate( locs ):
                         (xx,yy), method='linear')
 
         p_fluc = griddata( (x_slice,y_slice), p_fluc_slice,
+                        (xx,yy), method='linear') 
+
+        grad_p = griddata( (x_slice,y_slice), grad_p_slice,
                         (xx,yy), method='linear') 
         
         save_sonic_line( xx,yy, mach )
@@ -201,6 +205,13 @@ for i, loc in enumerate( locs ):
                         cbar_label=cbar,
                         wall=wall)
 
+        cbar = 'pressure gradient'
+        
+        plot_slicez_stat( xx,yy,grad_p*delta/p_ref, 
+                        filename='p_grad_'+str(i+1),
+                        col_map='coolwarm',
+                        cbar_label=cbar,
+                        wall=wall)
     
 
 

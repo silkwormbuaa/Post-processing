@@ -494,7 +494,7 @@ class StatisticData:
         """
         block_list: list of blocks that are going to compute gradients\n
         grads: list of str representing gradients 
-               ['schlieren','shadowgraph','vorticity'] \n
+               ['schlieren','shadowgraph','vorticity','grad_p'] \n
         G: GridData instance of corresponding case\n
         
         return: self.bl[].df['grad_rho'] (...['laplacian']/['w1']/['w2']/['w3])
@@ -577,7 +577,26 @@ class StatisticData:
                 self.bl[num-1].df['w2'] = w2.flatten()
                 self.bl[num-1].df['w3'] = w3.flatten()
                                
-                               
+# ---------- compute pressure gradient
+
+            if "grad_p" in grads:
+                
+                p = np.array( df['p'] )
+                
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
+                
+                p = p.reshape( npz, npy, npx )
+                
+                dp_dx = np.gradient(p, g.gx, axis=2)
+                dp_dy = np.gradient(p, g.gy, axis=1)
+                dp_dz = np.gradient(p, g.gz, axis=0)
+                
+                grad_p = np.sqrt( dp_dx**2 + dp_dy**2 + dp_dz**2 )
+                
+                self.bl[num-1].df['grad_p'] = grad_p.flatten()
+            
 # ----------------------------------------------------------------------
 # >>> compute source term of secondary flow                      (Nr.)
 # ----------------------------------------------------------------------
