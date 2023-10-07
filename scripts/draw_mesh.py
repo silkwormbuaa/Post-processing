@@ -29,7 +29,7 @@ from   vista.tools       import read_case_parameter
 # =============================================================================
 
 workpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
-workpath = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results'
+#workpath = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results'
 
 # =============================================================================
 
@@ -46,11 +46,11 @@ delta    = float( parameters.get('delta_0') )
 
 G = GridData( gridfile )
 G.read_grid()
-bbox = [-10.0,10.0,-5.0,2.0, -11.0,11.0]
+bbox = [-20.0,20.0,-5.0,40.0,-11.0,11.0]
 
-block_list, indx_slic = G.select_sliced_blockgrids( 'X', 0.0, bbox )
+block_list, indx_slic = G.select_sliced_blockgrids( 'X', 0.1, bbox )
 
-fig, ax = plt.subplots( figsize = (20,7) )
+fig, ax = plt.subplots( figsize = (20,24) )
 
 buff = 3
 
@@ -67,19 +67,20 @@ for num in block_list:
     
     # draw horizontal lines
     for y in gy:
-        ax.plot([zmin, zmax],[y,y],'black',linewidth=0.8)
+        ax.plot([zmin, zmax],[y,y],'black',linewidth=2)
     
     # draw vertical lines
     for z in gz:
-        ax.plot([z, z],[ymin,ymax],'black',linewidth=0.8 )
+        ax.plot([z, z],[ymin,ymax],'black',linewidth=2)
     
-    y_wall = define_wall_shape(gz*delta, casecode=casecode, write=False)/delta
-    
-    ax.fill_between(gz,-0.2,y_wall,color='gray',zorder=10,alpha=0.7)
-    
+    if ymin < 0.0:
+        y_wall = define_wall_shape(gz*delta,casecode=casecode,write=False)/delta
+        
+        ax.fill_between(gz,-0.2,y_wall,color='gray',zorder=10,alpha=0.7)
+
     
 ax.set_xlim([0,1])
-ax.set_ylim([-0.2,0.15])
+ax.set_ylim([-0.2,1.0])
 ax.set_aspect('equal', adjustable='box')
 fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 
