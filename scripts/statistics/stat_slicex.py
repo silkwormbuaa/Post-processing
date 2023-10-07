@@ -135,7 +135,7 @@ for i, loc in enumerate(locs):
         
         # generate interpolation grid
         
-        z = np.linspace(-1.0,1.0, 201)
+        z = np.linspace(-1.0,1.0, 320)
         if casecode == 'smooth_wall':
             y = np.linspace(0.02, 1.1, 55)
         else:

@@ -762,6 +762,7 @@ def plot_slicex_stat( zz, yy, v,
     cs = ax.contourf( zz, yy, v, cmap=col_map, levels=cbar_levels )
     
     ax.set_xlim([np.min(zz),np.max(zz)])
+    ax.set_ylim([-0.1,1.1])
     
     if sonic: 
         with open('soniclines.pkl','rb') as f:
@@ -880,14 +881,17 @@ def plot_wall_projection( xx, zz, v,
                           filename=None,
                           col_map=None,
                           cbar_label=None,
-                          cbar_levels=None):
+                          cbar_levels=None,
+                          pure=False):
     
     """
     only applicable to the ridge type smooth wall case setting.
     Range in z is manually set [-2.0,2.0]
     """
 
-    if figsize is None: figsize = (30,10)
+    if figsize is None:
+        if pure: figsize=(30,4) 
+        else:    figsize = (30,10)
 
     fig, ax = plt.subplots( figsize=figsize )
 
@@ -913,35 +917,44 @@ def plot_wall_projection( xx, zz, v,
                 z_sep = line[:,1]
                 ax.plot(x_sep,z_sep,'black',linewidth=0.8)
                 
-    cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7)
-    cbar.ax.set_ylabel(cbar_label,fontsize=30)
-    cbar.ax.tick_params(labelsize=30)
-
-    ax.minorticks_on()
-    ax.tick_params( which='major',
-                    axis='both',
-                    direction='out',
-                    length=15,
-                    width=2)
-    ax.tick_params( which='minor',
-                    axis='both', 
-                    direction='out',
-                    length=10,
-                    width=1)
-
-    ax.tick_params(axis='x',labelsize=30,pad=10)
-    ax.tick_params(axis='y',labelsize=30,pad=10)
-    
     ax.set_ylim([-2.0,2.0])
     ax.set_xlim([-20.0,10.0])
     
-    # set axises stay with contour and x,y unit length equal
+    if not pure:
+        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7)
+        cbar.ax.set_ylabel(cbar_label,fontsize=30)
+        cbar.ax.tick_params(labelsize=30)
+
+        ax.minorticks_on()
+        ax.tick_params( which='major',
+                        axis='both',
+                        direction='out',
+                        length=15,
+                        width=2)
+        ax.tick_params( which='minor',
+                        axis='both', 
+                        direction='out',
+                        length=10,
+                        width=1)
+
+        ax.tick_params(axis='x',labelsize=30,pad=10)
+        ax.tick_params(axis='y',labelsize=30,pad=10)
+        
+        
+        # set axises stay with contour and x,y unit length equal
+        
+        plt.axis('tight')
+        plt.gca().set_aspect('equal', adjustable='box')
     
-    plt.axis('tight')
-    plt.gca().set_aspect('equal', adjustable='box')
+        
 
     if filename:
-        plt.savefig( 'wall_'+filename )
+        
+        if pure:
+            filename +='_pure'
+            fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+            
+        plt.savefig( filename )
         print(f"{filename} is output.\n")
 
     plt.close() 

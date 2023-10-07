@@ -1079,7 +1079,7 @@ class StatisticData:
         cc_df      : cutcell dataframe from cutcells_setup.dat\n
         outfile    : output file name. If None, using 'wall_vars_projection.pkl'
         
-        return     : dataframe of x-z plane data with coordinates and f\n
+        return     : dataframe of x-z plane data with coordinates and vars\n
         
         Need data chunk with <p> <pp> ready.\n
         Only applicable to geometry with homogeneous shape along x
@@ -1163,11 +1163,11 @@ class StatisticData:
             xx,zz = np.meshgrid( g.gx, g.gz )
             
             df_wall = pd.DataFrame(columns=['x','z','p','pp','mu','rho'])
-            df_wall['x']   = xx[buff:-buff,buff:-buff].flatten()
-            df_wall['z']   = zz[buff:-buff,buff:-buff].flatten()
-            df_wall['p']   = p_plane[buff:-buff,buff:-buff].T.flatten()
-            df_wall['pp']  = pp_plane[buff:-buff,buff:-buff].T.flatten()
-            df_wall['mu']  = mu_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall['x']   =        xx[buff:-buff,buff:-buff].flatten()
+            df_wall['z']   =        zz[buff:-buff,buff:-buff].flatten()
+            df_wall['p']   =   p_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall['pp']  =  pp_plane[buff:-buff,buff:-buff].T.flatten()
+            df_wall['mu']  =  mu_plane[buff:-buff,buff:-buff].T.flatten()
             df_wall['rho'] = rho_plane[buff:-buff,buff:-buff].T.flatten()
             
             # compute pressure fluctuation
@@ -1184,7 +1184,7 @@ class StatisticData:
             print(f"block {num} has mean p {p_ave},",end='')
             print(f" p` {p_fluc_ave}, mu {mu_ave}, rho {rho_ave}.\n")
 
-# --------- save friction into StatisticsData.df_fric (a single pd.DataFrame)
+# --------- save wall vars into StatisticsData.df_wall (a single pd.DataFrame)
 
         self.df_wall = pd.concat([self.bl[num-1].df_wall for num in block_list])
         self.df_wall.reset_index( drop=True, inplace=True )
@@ -1197,16 +1197,92 @@ class StatisticData:
 
 
 # ----------------------------------------------------------------------
-# >>> streamwise                                          (Nr.)
+# >>> extract wall varibles of smooth wall                     (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2023/09/26  - created
+# 2023/10/07  - created
 #
 # Desc
 #
 # ----------------------------------------------------------------------
 
+    def extract_wall_vars_sw( self,       block_list:list,
+                              G:GridData, outfile=None,
+                              buff=3):
+        
+        """
+        block_list : list of selected blocks' numbers\n
+        G          : GridData object\n  
+        outfile    : output file name. If None, using 'wall_vars_projection.pkl'      
+        
+        return     : dataframe of x-z plane data with coordinates and vars\n
+        
+        Need data chunk with <p>,<pp>,<u>,<mu> ready.
+        Only applicable to smooth wall case.
+        """
+        
+        for num in block_list:
+
+# --------- get grid of this block
+
+            g = G.g[num-1]
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+# --------- prepare block data chunk
+
+            data_df = self.bl[num-1].df
+            
+            p   = np.array( data_df['p' ] ).reshape( npz, npy, npx )
+            pp  = np.array( data_df['pp'] ).reshape( npz, npy, npx )
+            mu  = np.array( data_df['mu'] ).reshape( npz, npy, npx )
+            rho = np.array( data_df['rho'] ).reshape( npz, npy, npx )
+            u   = np.array( data_df['u'] ).reshape( npz, npy, npx )
+            
+# --------- get slice from those data chunks
+            
+            dy = g.gy[buff]
+            
+            p_plane = p[:,buff,:]
+            pp_plane = pp[:,buff,:]
+            mu_plane = mu[:,buff,:]
+            u_plane  = u[:,buff,:]
+            f_visc = u_plane * mu_plane / dy
+
+            xx,zz = np.meshgrid( g.gx, g.gz)
+            
+            df_wall = pd.DataFrame(columns=['x','z','p','pp','fric'])
+            df_wall['x']    =       xx[buff:-buff,buff:-buff].flatten()
+            df_wall['z']    =       zz[buff:-buff,buff:-buff].flatten()
+            df_wall['p']    =  p_plane[buff:-buff,buff:-buff].flatten()
+            df_wall['pp']   = pp_plane[buff:-buff,buff:-buff].flatten()
+            df_wall['fric'] =   f_visc[buff:-buff,buff:-buff].flatten()
+            
+            # compute pressure fluctuation
+            df_wall['p`'] = np.sqrt( np.array( df_wall['pp']-df_wall['p']**2 ))
+
+            self.bl[num-1].df_wall = df_wall
+
+            p_ave      = np.mean( np.array(df_wall['p'])  )
+            p_fluc_ave = np.mean( np.array(df_wall['p`']) )
+            fric_ave   = np.mean( np.array(df_wall['fric']) )
+            
+            print(f"block {num} has mean p {p_ave},",end='')
+            print(f" p` {p_fluc_ave}, friction {fric_ave}.\n")
+
+# --------- save wall vars into StatisticsData.df_wall (a single pd.DataFrame)
+
+        self.df_wall = pd.concat([self.bl[num-1].df_wall for num in block_list])
+        self.df_wall.reset_index( drop=True, inplace=True )
+        self.df_wall.sort_values( by=['z','x'], inplace=True )
+        
+        if outfile is None: outfile = 'wall_vars_projection.pkl'
+        
+        with open( outfile, 'wb' ) as f:
+            pickle.dump( self.df_wall, f )

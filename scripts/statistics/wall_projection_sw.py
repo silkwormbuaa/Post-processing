@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   get_wd.py
-@Time    :   2023/09/21 
+@File    :   wall_projection_sw.py
+@Time    :   2023/10/07 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   wall projection script for wavy wall cases
+@Desc    :   Wall projection script for smooth wall.
 '''
+
 
 import os
 import sys
@@ -38,7 +39,7 @@ from   vista.plot_style  import plot_wall_projection
 
 # =============================================================================
 
-bbox = [ -60.0, 108.0, -1.3, 0.01, -11.0, 11.0]
+bbox = [ -60.0, 108.0, 0, 1.736953420, -11.0, 11.0]
 
 # =============================================================================
 
@@ -52,9 +53,6 @@ ccfile    = resultspath + '/cutcells_setup.dat'
 
 fric_file = outpath + '/friction_projection.pkl'
 pres_file = outpath + '/wall_vars_projection.pkl'
-
-snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
-                            key='snapshot.bin')[0]
 
 parametersfile = resultspath.split('/results')[0] + '/case_parameters'
 
@@ -90,44 +88,15 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
         
         S.grid3d = G
         
-    # read in wall distance
-    with timer("read wall distance field"):
+    with timer("extract wall variables"):
         
-        wd_snap = Snapshot( snapshotfile )
-        wd_snap.read_snapshot(block_list)
-
-        for num in block_list:
-            S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1][5]['wd']
-            
-        print(S.bl[num-1].df)
-
-
-    # read in cutcell info
-
-    with timer("read cutcell info"):
-        
-        cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
-        cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], 
-                    inplace=True)
-
-
-    with timer("compute friction projection"):
-        
-        S.friction_projection( block_list, G, cc_df )
-
-
-    with timer("compute pressure projection"):
-        
-        S.wall_vars_projection( block_list, G, cc_df )
-
+        S.extract_wall_vars_sw( block_list, G )      
 
 else:
     
     with timer("read projection data"):
-        S = StatisticData( stat_file )
         
-        with open( fric_file, 'rb' ) as f:
-            S.df_fric = pickle.load( f )
+        S = StatisticData( stat_file )
         
         with open( pres_file, 'rb' ) as f:
             S.df_wall = pickle.load( f )
@@ -146,16 +115,14 @@ with timer("plotting"):
     
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
-    S.df_fric = shift_coordinates( S.df_fric, delta, h_ridge, h_md, x_imp)
     S.df_wall = shift_coordinates( S.df_wall, delta, h_ridge, h_md, x_imp)
     
     # drop points that before -20.0 delta or after 10.0 delta
-    S.df_fric = S.df_fric[ (S.df_fric['xs']>=-20.01) &(S.df_fric['xs']<= 10.01)]
     S.df_wall = S.df_wall[ (S.df_wall['xs']>=-20.01) &(S.df_wall['xs']<= 10.01)]
 
-    xx     = np.array( S.df_fric['xs'] )
-    zz     = np.array( S.df_fric['zs'] )
-    fric   = np.array( S.df_fric['fric'] )
+    xx     = np.array( S.df_wall['xs'] )
+    zz     = np.array( S.df_wall['zs'] )
+    fric   = np.array( S.df_wall['fric'] )
     p      = np.array( S.df_wall['p'] )
     p_fluc = np.array( S.df_wall['p`'] )
 
@@ -172,6 +139,7 @@ with timer("plotting"):
 
     save_isolines( xx, zz, fric, 1.0, "separationline_xz.pkl")
     
+    
     cbar_levels = np.linspace(-5.0,10.0,31)
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz.pkl",
@@ -183,22 +151,7 @@ with timer("plotting"):
                           filename='pressure' )
     
     plot_wall_projection( xx, zz, p_fluc/p_ref, filename='pressure_fluc' )
-    
-# --- periodic average results
-    
-    fric = periodic_average( fric, period )
-    
-    save_isolines( xx, zz, fric, 1.0, "separationline_xz_periodic.pkl" )
 
-    cbar_levels = np.linspace(-5.0,10.0,31)
-    plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
-                          separation="separationline_xz_periodic.pkl",
-                          filename='fric_periodic',
-                          cbar_levels=cbar_levels)
-
-    plot_wall_projection( xx, zz, p/p_ref, 
-                          separation="separationline_xz_periodic.pkl",
-                          filename='pressure_periodic' )
 
 # --- output separation area ratio and length ratio distribution
 
@@ -221,6 +174,3 @@ with timer("save spanwise averaged variable distribution along x"):
     with open('streamwise_vars.pkl','wb') as f:
         
         pickle.dump( df_streamwise, f )
-        
-    
-         
