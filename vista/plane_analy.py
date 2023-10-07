@@ -261,6 +261,37 @@ def compute_separation_ratio( array, write=True ):
     
 
 # ----------------------------------------------------------------------
+# >>> compute DS from grad_rho                                     (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/07  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def compute_DS( grad_rho ):
+    """
+    grad_rho : array of density gradient
+    
+    return : same shape array of DS. 
+    Refer to Wu and Martin(2007) and Guo(2022) for more details.
+    """
+    
+    DS = np.zeros_like( grad_rho )
+    
+    min = np.min( grad_rho )
+    max = np.max( grad_rho )
+    
+    DS = 0.8*np.exp( -10.0*(grad_rho-min) / (max-min) )
+    
+    return DS
+
+# ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
 #

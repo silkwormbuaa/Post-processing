@@ -28,6 +28,7 @@ from   vista.timer       import timer
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_separation_line
 from   vista.plane_analy import shift_coordinates
+from   vista.plane_analy import compute_DS
 
 from   vista.tools       import read_case_parameter
 
@@ -39,7 +40,7 @@ from   vista.plot_style  import plot_slicez_stat
 # =============================================================================
 
 slic_type = 'Z'
-loc       = 0.65
+loc       = 1.3
 grads     = ['schlieren']
 # =============================================================================
 # read in grid file and snapshot file, then get slice dataframe
@@ -99,7 +100,10 @@ with timer("Interpolate and plot "):
     grad_rho_slice = np.array( df_slice['grad_rho'] )
     
     x = np.linspace( -17.5, 12.5, 601 )
-    y = np.linspace( -0.1, 8, 325 )
+    if loc == 0:
+        y = np.linspace( 0, 8, 321)
+    else:
+        y = np.linspace( -0.1, 8, 325 )
     
     xx,yy = np.meshgrid( x, y )
     
@@ -108,6 +112,8 @@ with timer("Interpolate and plot "):
 
     grad_rho = griddata( (x_slice,y_slice), grad_rho_slice,
                          (xx,yy), method='linear')
+    
+    DS = compute_DS( grad_rho )
    
     save_separation_line( xx,yy,u )
     
@@ -121,6 +127,18 @@ with timer("Interpolate and plot "):
                       separation=True,
                       sonic=False,
                       cbar_levels=cbar_levels)
+
+    cbar = r'$DS$'
+    cbar_levels = np.linspace( 0.0, 0.8,33)
+    
+    plot_slicez_stat( xx,yy,DS,
+                      filename='DS_schlieren',
+                      col_map='Greys_r',
+                      cbar_label=cbar,
+                      separation=True,
+                      sonic=False,
+                      cbar_levels=cbar_levels)
+    
    
     
     
