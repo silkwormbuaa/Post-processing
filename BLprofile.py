@@ -204,7 +204,8 @@ def GetLine(line_loc,zonegrp,FoldPath,OutPath,wall_opt=1):
     print("u_tau = ",u_tau)
     print("tau   = ",tau)
     print("lv    = ",lv)  
-    print("rho_w = ",rholst[0])   
+    print("rho_w = ",rholst[0])
+    print("mu_w  = ",mulst[0])   
     print("==============")                          
     # plot curve
     os.chdir(OutPath)

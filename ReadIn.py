@@ -16,9 +16,9 @@ import tecplot           as     tp
 
 import numpy             as     np
 
-from   utils.timer       import timer
+from   vista.timer       import timer
 
-from   utils.tools       import get_filelist
+from   vista.tools       import get_filelist
 #%% #  Define a class ZoneGroup, this class stores the names of zones 
     #  sharing the same location.
 class ZoneGroup:

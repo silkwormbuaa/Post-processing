@@ -43,11 +43,11 @@ mode2 = True
 
 if mode1:
 
-    outpath = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/TBL_data_low_Re'
+    outpath = '/home/wencanwu/my_simulation/temp/smooth_wall/TBL_data_low_Re'
 
-    data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-53.6_1storder.dat'
+    data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6_1storder.dat'
 
-    dataL = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/TBL_data_low_Re/uvd_SBLI_B1.dat'
+    dataL = '/home/wencanwu/my_simulation/temp/smooth_wall/TBL_data_low_Re/uvd_SBLI_B1.dat'
 
 
     d0 = PlotDataframe( data0 )
@@ -115,16 +115,16 @@ if mode1:
 
 if mode2:
     
-    outpath = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/Pirozzoli'
+    outpath = '/home/wencanwu/my_simulation/temp/smooth_wall/Pirozzoli'
     
-    data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-53.6_1storder.dat'
-#    data0 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-80.dat'
+    data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6_1storder.dat'
+#    data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-80.dat'
 
-    data1 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-80.dat'
+    data1 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-80.dat'
     
-    data2 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-115.dat'
+    data2 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-115.dat'
     
-    data3 = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/x_-20.dat'
+    data3 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-20.dat'
     
     dataP = '/home/wencanwu/my_simulation/temp/Pirozzoli/M2_Retau_250'
 

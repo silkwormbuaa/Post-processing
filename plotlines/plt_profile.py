@@ -12,16 +12,17 @@ import os
 import sys
 
 import matplotlib
-import matplotlib.pyplot as     plt
-import matplotlib.ticker as     ticker
+import matplotlib.pyplot  as     plt
+import matplotlib.ticker  as     ticker
+import matplotlib.markers as     markers
 
-import numpy             as     np
-import pandas            as     pd
+import numpy              as     np
+import pandas             as     pd
 
 source_dir = os.path.realpath(__file__).split('plotlines')[0]
 sys.path.append( source_dir )
 
-from   vista.line        import ProfileData
+from   vista.line         import ProfileData
 
 
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
@@ -34,6 +35,8 @@ data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/profile'
 
 data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
+dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
+
 datalist = [data1,   data2,   data3,                   data4,        data5]
 dy       = [0.494,   0.468,   0.416,                   0.312,        0.26]
 color    = ['green', 'blue', 'black',                  'red',        'purple']
@@ -43,12 +46,12 @@ width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
 plt_u_vd_lw = True
-plt_u_vd  = True
+plt_u_vd  = False
 plt_u     = False
-plt_RS_uu = True
-plt_RS_vv = True
-plt_RS_ww = True
-plt_RS_uv = True
+plt_RS_uu = False
+plt_RS_vv = False
+plt_RS_ww = False
+plt_RS_uv = False
 plt_rho   = False
 plt_T     = False
 plt_Mt    = False
@@ -94,6 +97,12 @@ line0.color = 'gray'
 line0.width = 4.0
 line0.lstyle = '--'
 
+lineDNS = ProfileData( dataDNS )
+lineDNS.label = "DNS"
+lineDNS.color = 'gray'
+lineDNS.lstyle = 's'
+lineDNS.marker = markers.MarkerStyle(marker='s')
+
 os.chdir( OutPath )
 
 # ----------------------------------------------------------------------
@@ -129,7 +138,12 @@ if plt_u_vd_lw:
              label = line0.label, 
              ls    = line0.lstyle,
              linewidth = line0.width)
-    
+
+    ax.plot( lineDNS.df['y+'][::2], 
+             lineDNS.df['u_vd+'][::2],
+             lineDNS.color, 
+             marker='s',
+             fillstyle='none')
     
     ax.minorticks_on()
     
@@ -174,7 +188,7 @@ if plt_u_vd_lw:
         ax.legend( prop={'size':22,'family':'sans-serif'} ) 
         ax.set_title( r"$u^+_{VD}$ profile", size=20 )
     
-    plt.savefig( figname )
+    plt.savefig( figname+"_DNS" )
     plt.show()    
 
 
