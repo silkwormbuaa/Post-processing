@@ -320,7 +320,7 @@ class GridData:
 
 
 # ----------------------------------------------------------------------
-# >>> select sliced block grids                                                (Nr.)
+# >>> select sliced block grids                                 (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -422,7 +422,128 @@ class GridData:
         return selected_bls, indx_slic
 
 
+# ----------------------------------------------------------------------
+# >>> Select probed block grids                                  (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
+    def select_probed_blockgrids( self, probe_type, loc, bbox=None, buff=3):
+        
+        """
+        probe_type: 'X', 'Y', or 'Z' (parallel direction of probing) \n
+        loc       : [z,y],[x,z], or [x,y] (follow conventional order)\n
+        bbox      : [xmin,xmax,ymin,ymax,zmin,zmax] \n
+        
+        return: a list of blocks and a list of indices tuple
+        """
+        
+        selected_bls = []
+        indx_probe   = []
+
+        if bbox is None: 
+            min = float('-inf')
+            max = float('inf')
+            bbox = [min,max,min,max,min,max]
+        
+        within_bbox_bls = self.select_blockgrids( bbox, mode='within' )
+        
+        
+        for grd in self.g:
+            
+            bl_num = grd.num
+            lx0 = grd.lx0
+            lx1 = grd.lx1
+            ly0 = grd.ly0
+            ly1 = grd.ly1
+            lz0 = grd.lz0
+            lz1 = grd.lz1
+            
+            if probe_type == 'X':
+                
+                if ((lz0 <= loc[0] < lz1) and (ly0 <= loc[1] < ly1) and
+                    (bl_num in within_bbox_bls)):
+                    
+                    selected_bls.append( bl_num )
+                    
+                    for i in range( buff, grd.nz + buff ):
+                        
+                        bnd1 = grd.gz[i] - 0.5*grd.hz[i]
+                        bnd2 = grd.gz[i] + 0.5*grd.hz[i]
+                        if (bnd1 <= loc[0] < bnd2):
+                            break
+
+                    for j in range( buff, grd.ny + buff ):
+                        
+                        bnd1 = grd.gy[j] - 0.5*grd.hy[j]
+                        bnd2 = grd.gy[j] + 0.5*grd.hy[j]
+                        if (bnd1 <= loc[1] < bnd2):
+                            break
+                    
+                    indx_probe.append((i,j))
+            
+            
+            elif probe_type == 'Y':
+                
+                if ((lx0 <= loc[0] < lx1) and (lz0 <= loc[1] < lz1) and
+                    (bl_num in within_bbox_bls)):
+                    
+                    selected_bls.append( bl_num )
+                    
+                    for i in range( buff, grd.nx + buff ):
+                        
+                        bnd1 = grd.gx[i] - 0.5*grd.hx[i]
+                        bnd2 = grd.gx[i] + 0.5*grd.hx[i]
+                        if (bnd1 <= loc[0] < bnd2):
+                            break
+
+                    for j in range( buff, grd.nz + buff ):
+                        
+                        bnd1 = grd.gz[j] - 0.5*grd.hz[j]
+                        bnd2 = grd.gz[j] + 0.5*grd.hz[j]
+                        if (bnd1 <= loc[1] < bnd2):
+                            break
+                    
+                    indx_probe.append((i,j)) 
+                                  
+                    
+            elif probe_type == 'Z':
+                
+                if ((lx0 <= loc[0] < lx1) and (ly0 <= loc[1] < ly1) and 
+                    (bl_num in within_bbox_bls)):
+                    
+                    selected_bls.append( bl_num )
+                    
+                    for i in range( buff, grd.nx + buff ):
+                        
+                        bnd1 = grd.gx[i] - 0.5*grd.hx[i]
+                        bnd2 = grd.gx[i] + 0.5*grd.hx[i]
+                        if (bnd1 <= loc[0] < bnd2):
+                            break
+
+                    for j in range( buff, grd.ny + buff ):
+                        
+                        bnd1 = grd.gy[j] - 0.5*grd.hy[j]
+                        bnd2 = grd.gy[j] + 0.5*grd.hy[j]
+                        if (bnd1 <= loc[1] < bnd2):
+                            break
+                    
+                    indx_probe.append((i,j))
+         
+        if len(indx_probe) != len(selected_bls):
+            raise ValueError("Number of slices index != number of blocks")
+
+        return selected_bls, indx_probe
+            
+        
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
 # ----------------------------------------------------------------------
@@ -622,6 +743,12 @@ class BlockGrid:
 # ----------------------------------------------------------------------
 
     def compute_point( self, buff=3 ):
+        
+        """
+        compute corner points location
+        
+        return self.px,self.py,self.pz with length of nx(ny,nz) + buff*2 + 1
+        """
         
         self.px = np.zeros( self.nx + buff*2 + 1 )
         self.py = np.zeros( self.ny + buff*2 + 1 )

@@ -10,6 +10,7 @@
 
 import numpy             as     np
 import pandas            as     pd
+from   scipy             import fft
 
 
 class LineData():
@@ -27,7 +28,7 @@ class LineData():
 #
 # ----------------------------------------------------------------------
 
-    def __init__( self, filename=None ):
+    def __init__( self, filename=None, df=None ):
         
         """
         filename : file containing header and data
@@ -49,6 +50,11 @@ class LineData():
         if filename is not None:
             
             self.read( filename )
+        
+        if df is not None:
+            
+            self.df = df
+            self.vars = df.columns
     
 # ----------------------------------------------------------------------
 # >>> Read from file                                             (Nr.)
@@ -97,6 +103,44 @@ class LineData():
             self.df = pd.DataFrame( data=row, columns=self.vars )
 
 
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+    
+    def fft( self, x_str:str, y_str:str ):
+        
+        """
+        x_str  : 'x','y','z'
+        y_str : 'u`','v`','w`' or other variable name to be fft-ed
+        
+        return : wavenumber k and y_k
+        """
+        
+        x = np.array( self.df[x_str] )
+        y = np.array( self.df[y_str] )
+        
+        # 1-D fourier transform
+        
+        y_k = fft.fft( y )
+        
+        # wave number 
+        
+        k = 2.0 * np.pi * fft.fftshift(fft.fftfreq( len(x), x[1]-x[0]) )
+
+        self.df['k_'+x_str] = k
+        self.df[y_str+'_k'] = y_k 
+        self.df['E_'+y_str] = np.abs(y_k)**2
+           
 
 class ProfileData( LineData ):
 # ----------------------------------------------------------------------

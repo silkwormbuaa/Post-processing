@@ -886,7 +886,85 @@ class StatisticData:
         df_slice.reset_index( drop=True, inplace=True)
         
         return df_slice
-    
+
+
+# ----------------------------------------------------------------------
+# >>> Get probed data                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def get_probed_df( self, bl_list, G, indx_probed, probe_type, buff=3):
+        
+        """
+        bl_list    : list of probed blocks.\n
+        G          : corresponding GridData instance.\n
+        indx_probed: list of indices tuple for each block.\n
+        probe_type : 'X','Y','Z'\n
+        
+        return     : dataframe of probed results\n 
+        """
+
+# ----- extract probed line data on each bl.df
+
+        for i, bl_num in enumerate( bl_list ):
+            
+            bl    = self.bl[bl_num-1]
+            g     = G.g[bl_num-1]
+            indx  = indx_probed[i]
+            
+            npx   = g.nx + buff*2
+            npy   = g.ny + buff*2
+            npz   = g.nz + buff*2
+            
+            vars = bl.df.columns
+            
+            data_chunk = None
+            
+            for var in vars:
+                
+                data = np.array( bl.df[var] )
+                data = data.reshape( npz, npy, npx )
+                
+                if   probe_type == 'X': data = data[indx[0],indx[1],:]
+                elif probe_type == 'Y': data = data[indx[1],:,indx[0]]
+                elif probe_type == 'Z': data = data[:,indx[1],indx[0]]
+                
+                if data_chunk is None: data_chunk = [data]
+                else: data_chunk.append(data)
+                
+            data_chunk = np.array(data_chunk).T
+            
+            bl.df = pd.DataFrame(data_chunk,columns=vars)
+            
+# ------ match grids with data
+
+            if probe_type == 'X': bl.df['x'] = g.gx
+            if probe_type == 'Y': bl.df['y'] = g.gy
+            if probe_type == 'Z': bl.df['z'] = g.gz
+        
+# ------ drop ghost cells
+
+            bl.df = bl.df.iloc[buff:-buff]
+        
+# ------ concatenate all dataframe in all selected blocks
+
+        df_probe = pd.concat( [self.bl[num-1].df for num in bl_list] )
+        
+        df_probe.sort_values(by=[probe_type.lower()],inplace=True)
+        
+        df_probe.reset_index( drop=True, inplace=True )
+        
+        return df_probe
+        
 
 # ----------------------------------------------------------------------
 # >>> wall variables projection                                        (Nr.)

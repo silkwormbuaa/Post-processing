@@ -40,7 +40,7 @@ from   vista.tools       import read_case_parameter
 
 # locs = [ridge location, valley location]
 
-outfoler = '/xy_planes'
+outfolder = '/xy_planes'
 
 # =============================================================================
 
@@ -49,7 +49,7 @@ datapath = os.getcwd()
 
 datafile = datapath + '/statistics.bin'
 gridfile = datapath + '/inca_grid.bin'
-outpath  = datapath + outfoler
+outpath  = datapath + outfolder
 parametersfile = datapath.split('/results')[0] + '/case_parameters'
 
 # - read in case parameters
