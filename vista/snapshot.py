@@ -1845,7 +1845,7 @@ class Snapshot:
 # ------ drop ghost cells
 
             self.snap_data[bl_indx][5] = bl_df.iloc[buff:-buff]
-        
+            
 # ------ concatenate all dataframe in all selected blocks
 
         df_probe = pd.concat( [self.snap_data[bl_indx][5] 

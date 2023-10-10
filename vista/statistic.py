@@ -943,21 +943,21 @@ class StatisticData:
                 
             data_chunk = np.array(data_chunk).T
             
-            bl.df = pd.DataFrame(data_chunk,columns=vars)
+            bl.df_probe = pd.DataFrame(data_chunk,columns=vars)
             
 # ------ match grids with data
 
-            if probe_type == 'X': bl.df['x'] = g.gx
-            if probe_type == 'Y': bl.df['y'] = g.gy
-            if probe_type == 'Z': bl.df['z'] = g.gz
+            if probe_type == 'X': bl.df_probe['x'] = g.gx
+            if probe_type == 'Y': bl.df_probe['y'] = g.gy
+            if probe_type == 'Z': bl.df_probe['z'] = g.gz
         
 # ------ drop ghost cells
 
-            bl.df = bl.df.iloc[buff:-buff]
+            bl.df_probe = bl.df_probe.iloc[buff:-buff]
         
 # ------ concatenate all dataframe in all selected blocks
 
-        df_probe = pd.concat( [self.bl[num-1].df for num in bl_list] )
+        df_probe = pd.concat( [self.bl[num-1].df_probe for num in bl_list] )
         
         df_probe.sort_values(by=[probe_type.lower()],inplace=True)
         
