@@ -21,12 +21,6 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.statistic   import StatisticData
-
-from   vista.snapshot    import Snapshot
-
-from   vista.grid        import GridData
-
 from   vista.timer       import timer
 
 from   vista.tools       import read_case_parameter
@@ -80,47 +74,48 @@ E_k = E_uu + E_vv + E_ww
 
 print(df['k_z'])
 
+os.chdir( datapath+outfolder )
 
 # -- Euu
-fig,ax = plt.subplots()
+fig,ax = plt.subplots(figsize=(5,10))
 ax.loglog( df['k_z'][1:64]*delta, E_uu[1:64]/(delta*u_ref**2) )
 
 x = np.linspace(10,100,100)
-y = 10*x**(-5/3)
-ax.loglog(x,y)
+y = 0.5*x**(-5/3)
+ax.loglog(x,y,ls='--')
     
-plt.show()
+plt.savefig("Euu")
 plt.close()
 
 # -- Evv
-fig,ax = plt.subplots()
+fig,ax = plt.subplots(figsize=(5,10))
 ax.loglog( df['k_z'][1:64]*delta, E_vv[1:64]/(delta*u_ref**2) )
 
 x = np.linspace(20,100,100)
-y = 3*x**(-5/3)
-ax.loglog(x,y)
+y = 0.3*x**(-5/3)
+ax.loglog(x,y,ls='--')
 
-plt.show()
+plt.savefig("Evv")
 plt.close()
 
 # -- Eww
-fig,ax = plt.subplots()
+fig,ax = plt.subplots(figsize=(5,10))
 ax.loglog( df['k_z'][1:64]*delta, E_ww[1:64]/(delta*u_ref**2) )
 
 x = np.linspace(10,100,100)
-y = 3*x**(-5/3)
-ax.loglog(x,y)
+y = 0.3*x**(-5/3)
+ax.loglog(x,y,ls='--')
 
-plt.show()
+plt.savefig("Eww")
 plt.close()
 
 # -- Ek
-fig,ax = plt.subplots()
+fig,ax = plt.subplots(figsize=(5,10))
 ax.loglog( df['k_z'][1:64]*delta, E_k[1:64]/(delta*u_ref**2) )
 
 x = np.linspace(8,100,100)
-y = 25*x**(-5/3)
-ax.loglog(x,y)
+y = 0.6*x**(-5/3)
+ax.loglog(x,y,ls='--')
 
-plt.show()
+plt.savefig("Ek")
 plt.close()
