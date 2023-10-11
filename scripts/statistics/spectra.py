@@ -122,6 +122,8 @@ with timer(" read selected blocks from snapshot.bin"):
                           index=False,
                           float_format='%15.7f',
                           justify='left')
+        
+        print(f"Finish {snapfile}")
 
     
     

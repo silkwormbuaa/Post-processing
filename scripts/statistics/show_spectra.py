@@ -48,16 +48,20 @@ datapath = os.getcwd()
 datafile = datapath + '/statistics.bin'
 gridfile = datapath + '/inca_grid.bin'
 
-snappath = datapath.split('/results')[0]+'/snapshots'
-snapfiles = get_filelist( snappath, 'snapshot.bin' ) 
+spectrapath = datapath.split('/results')[0]+'/spectra'
+snapfiles = get_filelist( spectrapath, 'snapshot.bin' ) 
 
 outpath  = datapath + outfolder
 parametersfile = datapath.split('/results')[0] + '/case_parameters'
 
+parameters = read_case_parameter( parametersfile )
+delta   = float( parameters.get('delta_0') )
+u_ref   = float( parameters.get('u_ref') )
+
 
 os.chdir(datapath)
 
-spectra_files = get_filelist( snappath, 'spectra.dat' )
+spectra_files = get_filelist( spectrapath, 'spectra.dat' )
 
 df_spectras = []
 for spectra_file in spectra_files:
@@ -66,20 +70,57 @@ for spectra_file in spectra_files:
     
     df_spectras.append( df )
     
-    print(df)
+    print(f"read in spectra of {spectra_file}")
 
 E_uu = np.array([np.array(df['E_uu']) for df in df_spectras]).mean(axis=0)
+E_vv = np.array([np.array(df['E_vv']) for df in df_spectras]).mean(axis=0)
+E_ww = np.array([np.array(df['E_ww']) for df in df_spectras]).mean(axis=0)
 
-print(E_uu)
+E_k = E_uu + E_vv + E_ww
 
+print(df['k_z'])
+
+
+# -- Euu
 fig,ax = plt.subplots()
-ax.loglog(df['k_z'][:64],E_uu[:64])
+ax.loglog( df['k_z'][1:64]*delta, E_uu[1:64]/(delta*u_ref**2) )
 
-# x = np.linspace(1,20)
-# y = 1E6*x**(-5/3)
-
-# ax.loglog(x,y)
-
-
+x = np.linspace(10,100,100)
+y = 10*x**(-5/3)
+ax.loglog(x,y)
     
 plt.show()
+plt.close()
+
+# -- Evv
+fig,ax = plt.subplots()
+ax.loglog( df['k_z'][1:64]*delta, E_vv[1:64]/(delta*u_ref**2) )
+
+x = np.linspace(20,100,100)
+y = 3*x**(-5/3)
+ax.loglog(x,y)
+
+plt.show()
+plt.close()
+
+# -- Eww
+fig,ax = plt.subplots()
+ax.loglog( df['k_z'][1:64]*delta, E_ww[1:64]/(delta*u_ref**2) )
+
+x = np.linspace(10,100,100)
+y = 3*x**(-5/3)
+ax.loglog(x,y)
+
+plt.show()
+plt.close()
+
+# -- Ek
+fig,ax = plt.subplots()
+ax.loglog( df['k_z'][1:64]*delta, E_k[1:64]/(delta*u_ref**2) )
+
+x = np.linspace(8,100,100)
+y = 25*x**(-5/3)
+ax.loglog(x,y)
+
+plt.show()
+plt.close()

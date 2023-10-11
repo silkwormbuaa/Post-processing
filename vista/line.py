@@ -134,9 +134,9 @@ class LineData():
 
         # 1-D fourier transform
         
-        u_k = fft.fft( u_fluc**2 )
-        v_k = fft.fft( v_fluc**2 )
-        w_k = fft.fft( w_fluc**2 )
+        u_k = fft.fft( u_fluc )
+        v_k = fft.fft( v_fluc )
+        w_k = fft.fft( w_fluc )
         E_k = fft.fft( E_fluc )
         
         # wave number 
@@ -148,9 +148,9 @@ class LineData():
 #        self.df['v_k'] = v_k 
 #        self.df['w_k'] = w_k 
  
-        self.df['E_uu'] = np.abs(u_k)
-        self.df['E_vv'] = np.abs(v_k)
-        self.df['E_ww'] = np.abs(w_k)
+        self.df['E_uu'] = np.abs(u_k)*2
+        self.df['E_vv'] = np.abs(v_k)*2
+        self.df['E_ww'] = np.abs(w_k)*2
         self.df['E_k']  = np.abs(E_k)
         
 
