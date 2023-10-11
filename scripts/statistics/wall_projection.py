@@ -221,6 +221,11 @@ with timer("save spanwise averaged variable distribution along x"):
     with open('streamwise_vars.pkl','wb') as f:
         
         pickle.dump( df_streamwise, f )
+    
+    df_streamwise.to_string('streamwise_vars.dat',
+                            index=False,
+                            float_format='%15.7f',
+                            justify='left')
         
     
          

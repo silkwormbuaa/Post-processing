@@ -117,7 +117,7 @@ class LineData():
 #
 # ----------------------------------------------------------------------
     
-    def fft( self, x_str:str, y_str:str ):
+    def fft_kz( self ):
         
         """
         x_str  : 'x','y','z'
@@ -126,21 +126,33 @@ class LineData():
         return : wavenumber k and y_k
         """
         
-        x = np.array( self.df[x_str] )
-        y = np.array( self.df[y_str] )
-        
+        z = np.array( self.df['z'] )
+        u_fluc = np.array( self.df['u`'] )
+        v_fluc = np.array( self.df['v`'] )
+        w_fluc = np.array( self.df['w`'] )
+        E_fluc = u_fluc**2 + v_fluc**2 + w_fluc**2
+
         # 1-D fourier transform
         
-        y_k = fft.fft( y )
+        u_k = fft.fft( u_fluc**2 )
+        v_k = fft.fft( v_fluc**2 )
+        w_k = fft.fft( w_fluc**2 )
+        E_k = fft.fft( E_fluc )
         
         # wave number 
         
-        k = 2.0 * np.pi * fft.fftshift(fft.fftfreq( len(x), x[1]-x[0]) )
+        k_z = 2.0 * np.pi * fft.fftfreq( len(z), z[1]-z[0]) 
 
-        self.df['k_'+x_str] = k
-        self.df[y_str+'_k'] = y_k 
-        self.df['E_'+y_str] = np.abs(y_k)**2
-           
+        self.df['k_z'] = k_z
+#        self.df['u_k'] = u_k
+#        self.df['v_k'] = v_k 
+#        self.df['w_k'] = w_k 
+ 
+        self.df['E_uu'] = np.abs(u_k)
+        self.df['E_vv'] = np.abs(v_k)
+        self.df['E_ww'] = np.abs(w_k)
+        self.df['E_k']  = np.abs(E_k)
+        
 
 class ProfileData( LineData ):
 # ----------------------------------------------------------------------

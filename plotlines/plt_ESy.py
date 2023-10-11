@@ -24,21 +24,21 @@ plt.rcParams['font.family'] = "serif"
 
 plt.rcParams.update({'font.size': 20})
 
-OutPath = "/home/wencanwu/my_simulation/temp/DataPost"
+Datapath = "/home/wencanwu/my_simulation/temp/DataPost/"
 
 DataFile = "statistic_compare"
 
 xvar =  'D/δ' # or 'ESy'
 
-Pure =  True  # if pure, without legend and label
+Pure =  False  # if pure, without legend and label
 
-plt_DU_vd_plus = False
+plt_DU_vd_plus = True
 
 plt_DU   =  False
 
-plt_Cf   =  False
+plt_Cf   =  True
 
-plt_vbar =  False
+plt_vbar =  True
 
 plt_Lsep =  True 
 
@@ -48,9 +48,11 @@ plt_pmax =  True
 
 plt_Hvor =  False 
 
-os.chdir(OutPath)
+os.chdir(Datapath)
 
 data = PlotDataframe(DataFile)
+
+os.chdir('./statistics')
 
 
 # ----------------------------------------------------------------------

@@ -39,7 +39,7 @@ from   vista.line        import LineData
 
 outfolder = '/spectra'
 probe_type = 'Z'
-loc = (-42.25,0.52)
+loc = (-42.5,0.52)
 
 # =============================================================================
 
@@ -49,16 +49,10 @@ datafile = datapath + '/statistics.bin'
 gridfile = datapath + '/inca_grid.bin'
 
 snappath = datapath.split('/results')[0]+'/snapshots'
-snapfile = get_filelist( snappath, 'snapshot.bin' )[0]
+snapfiles = get_filelist( snappath, 'snapshot.bin' ) 
 
 outpath  = datapath + outfolder
 parametersfile = datapath.split('/results')[0] + '/case_parameters'
-
-# - read in case parameters
-
-parameters = read_case_parameter( parametersfile )
-delta   = float( parameters.get('delta_0') )
-casecode =  str( parameters.get('casecode') )
 
 # - read in grid info
 
@@ -92,50 +86,43 @@ with timer(" read selected blocks from statistics.bin"):
         S.read_stat_body( f, block_list, vars )
         S.compute_vars( block_list, ['RS'] )
 
+        df_stat = S.get_probed_df( block_list, G, indx_probe, probe_type )
+
 
 # - read snapshot data file
 
 with timer(" read selected blocks from snapshot.bin"):
     
-    with open(snapfile,'rb') as f:
-        
+    for snapfile in snapfiles:
+ 
         snap3d = Snapshot( snapfile )
         snap3d.read_snapshot( block_list )
         
+    # - get probed dataframe
+        
+        df_snap = snap3d.get_probed_df( block_list, G, indx_probe, probe_type)
+        
+        df_fluc = pd.DataFrame(columns=['z','u`','v`','w`'])
+        
+        df_fluc['z']  = df_stat['z']
+        df_fluc['u`'] = df_snap['u'] - df_stat['u']
+        df_fluc['v`'] = df_snap['v'] - df_stat['v']
+        df_fluc['w`'] = df_snap['w'] - df_stat['w']
 
-# - get probed dataframe
+        
+        line = LineData( df=df_fluc )
+        
+        line.fft_kz( )
+        
+#        print(line.df)
+        
+        os.chdir( snapfile.split('/snapshot.bin')[0] )
 
-with timer("Get probed dataframe "):
-    
-    pd.set_option('display.max_rows', None)
-    
-    df_stat = S.get_probed_df( block_list, G, indx_probe, probe_type )
-    
-    print(df_stat)
-    
-    df_snap = snap3d.get_probed_df( block_list, G, indx_probe, probe_type)
-    
-    print(df_snap)
-    
-    df_fluc = pd.DataFrame(columns=['u`','v`','w`'])
-    
-    df_fluc['z']  = df_stat['z']
-    df_fluc['u`'] = df_snap['u'] - df_stat['u']
-    df_fluc['v`'] = df_snap['v'] - df_stat['v']
-    df_fluc['w`'] = df_snap['w'] - df_stat['w']
+        line.df.to_string("spectra.dat",
+                          index=False,
+                          float_format='%15.7f',
+                          justify='left')
 
-    print(df_fluc)     
-    
-    line = LineData( df=df_fluc )
-    
-    line.fft('z','u`')
-    
-    print(line.df)
-    
-    fig,ax = plt.subplots()
-    ax.loglog(line.df['k_z'],line.df['E_u`'])
-    plt.show()
-    
     
     
     

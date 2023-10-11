@@ -51,7 +51,6 @@ stat_file = resultspath + '/statistics.bin'
 grid_file = resultspath + '/inca_grid.bin'
 ccfile    = resultspath + '/cutcells_setup.dat'
 
-fric_file = outpath + '/friction_projection.pkl'
 pres_file = outpath + '/wall_vars_projection.pkl'
 
 parametersfile = resultspath.split('/results')[0] + '/case_parameters'
@@ -65,7 +64,7 @@ if not os.path.exists(outpath):
 os.chdir(outpath)
 
 
-if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
+if not os.path.exists(pres_file) :
 
     # read in statistics.bin and also grid and cut cell info.
     with timer("read in grid"):
@@ -174,3 +173,8 @@ with timer("save spanwise averaged variable distribution along x"):
     with open('streamwise_vars.pkl','wb') as f:
         
         pickle.dump( df_streamwise, f )
+        
+        df_streamwise.to_string('streamwise_vars.dat',
+                                index=False,
+                                float_format='%15.7f',
+                                justify='left')

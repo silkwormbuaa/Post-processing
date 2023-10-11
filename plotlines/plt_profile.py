@@ -45,7 +45,7 @@ lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
-plt_u_vd_lw = True
+plt_u_vd_lw = False
 plt_u_vd  = False
 plt_u     = False
 plt_RS_uu = False
@@ -85,6 +85,11 @@ for i, datapath in enumerate(datalist):
     line.color = color[i]
     line.width = width[i]
     line.lstyle = lstyle[i]
+    
+    line.df.to_string( "profile_normalized.dat",
+                       index=False, 
+                       float_format='%15.7f',
+                       justify='left' )
     
     lines.append(line)
     

@@ -536,7 +536,7 @@ class GridData:
                         if (bnd1 <= loc[1] < bnd2):
                             break
                     
-                    indx_probe.append((i,j))
+                    indx_probe.append([i,j])
          
         if len(indx_probe) != len(selected_bls):
             raise ValueError("Number of slices index != number of blocks")
