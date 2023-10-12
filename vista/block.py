@@ -13,9 +13,8 @@ import numpy             as     np
 import pandas            as     pd
 
 from   .io_binary        import read_int_bin
-
 from   .io_binary        import read_flt_bin
-
+from   .io_binary        import read_3Dflt_bin
 from   .io_binary        import read_log_bin
 
 
@@ -38,6 +37,16 @@ from   .io_binary        import read_log_bin
 
 class BlockData:
     
+    # if verbose
+    
+    verbose = False
+    
+    # size of type 
+    
+    sin = 4
+    sfl = 8
+    slg = 4
+    
     def __init__( self, file, block_list, n_var, vars, var_indx ):
         
         """
@@ -47,8 +56,6 @@ class BlockData:
         vars       : list of selected variable name strings
         var_indx   : list of indexes of selected variables in data chunk
         """
-        
-        self.verbose = False
         
         # start position of file pointer
         
@@ -62,7 +69,6 @@ class BlockData:
         
         self.size = 0
         self.n_var = n_var
-        self.dim = []
         
         # empty list for future use
         
@@ -72,22 +78,14 @@ class BlockData:
 
         self.df_fric = None
         
-        # size of type 
-        
-        sin = 4
-        sfl = 8
-        slg = 4        
-        
         # read global block number and block dimensions
         
-        self.num = read_int_bin( file.read(sin), sin )
-        self.dim = read_int_bin( file.read(3*sin), sin )
+        self.num = read_int_bin( file.read(self.sin), self.sin )
+        self.npx = read_int_bin( file.read(self.sin), self.sin )
+        self.npy = read_int_bin( file.read(self.sin), self.sin )
+        self.npz = read_int_bin( file.read(self.sin), self.sin )
         
-        npx = self.dim[0]
-        npy = self.dim[1]
-        npz = self.dim[2]
-        
-        self.np  = npx * npy * npz
+        self.np  = self.npx * self.npy * self.npz
         
         # if this block chunk will be read?
         # by default, to_fill is False
@@ -100,20 +98,190 @@ class BlockData:
             
             for i, var in enumerate(vars):
                 
-                pos = pos_start + 4*sin + var_indx[i]*self.np*sfl
+                pos = pos_start + 4*self.sin + var_indx[i]*self.np*self.sfl
                 
                 file.seek( pos )
                 
-                buff = read_flt_bin( file.read(self.np*sfl), sfl )
+                buff = read_flt_bin( file.read(self.np*self.sfl), self.sfl )
 
                 self.df[var] = buff
                 
             
         # calculate the block data size in byte
         
-        self.size = self.np*self.n_var*sfl + 4*sin
+        self.size = self.np*self.n_var*self.sfl + 4*self.sin
         
         # move file pointer to the end of current block
 
         file.seek( pos_start + self.size)
+
+
+# ----------------------------------------------------------------------
+# >>> Define a subclass SnapBlock                                 (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/12  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+class SnapBlock(BlockData):
+    
+    def __init__( self, file, block_list, n_var, vars, snap_with_gx, type, 
+                  kind=4 ):
+
+        """
+        file         : opened file object
+        block_list   : list of blocks's numbers
+        n_var        : number vars in the stored blocks
+        vars         : list of selected variable name strings
+        snap_with_gx : if contain grids
+        type         : snapshot type, 'block' or 'slice'
+        kind         : should be consistent to Snapshot.kind
         
+        ! SnapBlock read in all variables.
+        """
+        
+# ----- Initialize attributes of instance.
+
+        # floating point precision format
+        
+        self.kind = kind
+
+        # start position of file pointer
+        
+        pos_start = file.tell()
+        self.pos_start = pos_start
+        
+        # start position of variable start
+        
+        self.pos_var_start = None
+        
+        # index of block, can be read from blockdata itself
+        
+        self.num = 0
+        
+        # size of this BlockData (in bytes)
+        
+        self.size = 0
+        self.n_var = n_var
+        
+        # empty dataframe for grids and datachunk
+
+        self.df_gx = pd.DataFrame()
+        
+        self.df = pd.DataFrame(columns=vars)
+        
+        # matrix of friction projection on x-z plane
+
+        self.df_fric = None
+        
+# ----- read global block number and block dimensions
+        
+        self.num = read_int_bin( file.read(self.sin), self.sin )
+        
+        if self.num == 0:
+            raise ValueError(f"Found a block with num==0 at {pos_start}.")
+        
+        dim = read_int_bin( file.read(3*self.sin), self.sin )
+        self.npx = dim[0]
+        self.npy = dim[1]
+        self.npz = dim[2]
+        
+        self.np  = self.npx * self.npy * self.npz
+
+        pos = pos_start + 4*kind
+        
+        if self.verbose:
+            print(f"read in block {self.num}, dimension {dim}.")
+        
+# ----- read grid points
+
+        n_grid = 0
+
+        if snap_with_gx and type == 'block':
+            
+            self.df_gx['x'] = read_3Dflt_bin( pos, file, self.npx, 1, 1, kind )
+            pos += self.npx*kind
+            
+            self.df_gx['y'] = read_3Dflt_bin( pos, file, self.npy, 1, 1, kind )
+            pos += self.npy*kind
+            
+            self.df_gx['z'] = read_3Dflt_bin( pos, file, self.npz, 1, 1, kind )
+            pos += self.npz*kind
+            
+            n_grid = self.npx + self.npy + self.npz
+        
+        if snap_with_gx and type == 'slice':
+            
+            # slic_type == 'X'
+            
+            if self.npx == 1: 
+                
+                self.df_gx['y'] = read_3Dflt_bin( pos, file, self.npy,1,1,kind )
+                pos += self.npy*kind
+
+                self.df_gx['z'] = read_3Dflt_bin( pos, file, self.npz,1,1,kind )
+                pos += self.npz*kind
+                
+                n_grid = self.npy + self.npz
+
+            # slic_type == 'Y' or 'W'
+            
+            elif self.npy == 1:
+
+                self.df_gx['x'] = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
+                pos += self.npx*kind
+
+                self.df_gx['z'] = read_3Dflt_bin( pos, file, self.npz,1,1,kind )
+                pos += self.npz*kind
+                
+                n_grid = self.npx + self.npz
+            
+            # slic_type == 'Z'
+            
+            elif self.npz == 1:
+                
+                self.df_gx['x'] = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
+                pos += self.npx*kind
+
+                self.df_gx['y'] = read_3Dflt_bin( pos, file, self.npy,1,1,kind )
+                pos += self.npy*kind
+                
+                n_grid = self.npx + self.npy
+
+# ----- record the starting position of variable chunk
+            
+            self.pos_var_start = pos
+                
+# ----- read variable data chunk
+
+        # if this block chunk will be read?
+        # by default, to_fill is False
+        self.to_fill = False
+        if self.num in block_list: self.to_fill = True
+
+        # primitive variables 'u,v,w,rho,rhoE'
+        # mean variables = primitive variables + 'p T mu'
+        if self.to_fill:
+            
+            for var in enumerate(vars):
+            
+                buff = read_flt_bin( file.read(self.np*kind), kind )
+
+                self.df[var] = buff
+                
+# ----- recording and move file pointer
+    
+        # calculate the block data size in byte
+        
+        self.size = 4*self.sin + n_grid*kind + self.np*n_var*kind
+        
+        # move file pointer to the end of current block
+
+        file.seek( pos_start + self.size )
