@@ -28,6 +28,8 @@ from   .io_binary        import write_log_bin
 
 from   .grid             import GridData
 
+from   .block            import SnapBlock
+
 from   .timer            import timer
 
 class Snapshot:
@@ -531,230 +533,38 @@ class Snapshot:
                 append to self.snap_data 
         """
 
-        # Size of int
-
-        sin = 4
- 
-        # Verbose
- 
-        verbose = self.verbose
- 
-        # New position in file
- 
-        file.seek( self.pos )
- 
-        # Read global block number and block dimensions
- 
-        bl_num = read_int_bin( file.read(   sin ), sin )
+        end_of_file = False
         
-        self.bl_nums.append( bl_num )
+        # new position after reading headers
         
-        bl_dim = read_int_bin( file.read( 3*sin ), sin )
-         
-        # This is a sanity check - related to an old IO bug
- 
-        if bl_num == 0:
- 
-            # Block dimensions
- 
-            N1 = self.snap_data[-1][1]
-            N2 = self.snap_data[-1][2]
-            N3 = self.snap_data[-1][3]
- 
-            # Use previous results
- 
-            N3n = N3
- 
-            if N3 == 1: N3n = 0
- 
-            # Update block size
- 
-            bl_size = N1 + N2 + N3n + (N1*N2*N3)*self.n_vars
- 
-            # Update file pointer
- 
-            self.pos += 4*sin + bl_size * self.kind
- 
-            # Inform user
- 
-            if verbose:
- 
-                str_ = ' Faulty block %5d - %2d x %2d x %2d'%(bl_num,N1,N2,N3)
-                print( str_ )
-                sys.stdout.flush()
-                
-        else:
-            
-            # Corrupted IO flag
- 
-            io_alert = False
- 
-            # Block dimensions
- 
-            N1 = bl_dim[0]
-            N2 = bl_dim[1]
-            N3 = bl_dim[2]
- 
-            # Update file pointer
- 
-            self.pos += 4*sin
-            
-            # Grid buffer
- 
-            GX = []
-            
-            # Read grid vectors
-            # if read in 3D blocks
-    
-            if self.snap_with_gx and self.type=='block':
-                
-                # First direction
-    
-                G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
-
-                self.pos += N1*self.kind
-
-                GX.append( G1 )
-                
-                # Second direction
-    
-                G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
-    
-                self.pos += N2*self.kind
-    
-                GX.append( G2 )
-                
-                # Third direction
-    
-                G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
-
-                self.pos     += N3*self.kind
-
-                GX.append( G3 )
-                
-
-            # if read in slice snapshot
-            
-            elif self.snap_with_gx and self.type == 'slice':
-                
-                # slice normal to X
-                
-                if self.slic_type == 'X':
-                    
-                    G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
-                    
-                    self.pos += N2*self.kind
-                    
-                    GX.append( G2 )
-                    
-                    G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
-                    
-                    self.pos += N3*self.kind
-                    
-                    GX.append( G3 )
-                    
-                    
-                # slice normal to Y
-                
-                elif self.slic_type == 'Y' or self.slic_type == 'W':
-                    
-                    G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
-                    
-                    self.pos += N1*self.kind
-                    
-                    GX.append( G1 )
-
-                    G3  = read_3Dflt_bin( self.pos, file, 1, 1, N3, self.kind )
-                    
-                    self.pos += N3*self.kind
-                    
-                    GX.append( G3 )
-                
-                
-                # slice normal to Z
-                
-                elif self.slic_type == 'Z': 
-
-                    G1  = read_3Dflt_bin( self.pos, file, N1, 1, 1, self.kind )
-                    
-                    self.pos += N1*self.kind
-                    
-                    GX.append( G1 )
-                    
-                    G2  = read_3Dflt_bin( self.pos, file, 1, N2, 1, self.kind )
-                    
-                    self.pos += N2*self.kind
-                    
-                    GX.append( G2 )
- 
- 
-            # Record the starting position of var chunk
-            
-            self.pos_var_start.append( self.pos )
- 
-            # Initialize solution buffer
-            
-            to_fill = False
-            
-            if block_list is None:
-                to_fill = True
-            else: 
-                if bl_num in block_list: to_fill = True; self.filled += 1
-
-            if to_fill:
-                
-                # Read solution fields
-                
-                sol = np.zeros( shape=(self.n_vars,N1*N2*N3), dtype=np.float32 )
-                
-                for v in range( self.n_vars ):
-    
-                    sol[v,:] = read_3Dflt_bin(self.pos,file,N1,N2,N3,self.kind)
-    
-                    self.pos += ( N1*N2*N3 ) * self.kind
-    
-                    # Sanity check on the pressure
-    
-                    if v == 4 and np.all( ( sol[v,:] == 0.0 ) ): io_alert = True
+        file.seek( self.header_size )
         
-                df_sol = pd.DataFrame(sol.T, columns=self.vars_name)
+        pos = self.header_size
+        
+        # total number of variables in the block
+        
+        n_var = self.n_vars
+        
+        while not end_of_file:
             
-            else:
-                
-                self.pos += (N1*N2*N3*self.n_vars) * self.kind
-                df_sol = pd.DataFrame( columns=self.vars_name )
+            # read in block one by one
             
+            self.snap_data.append( SnapBlock(file, 
+                                             block_list, 
+                                             n_var,
+                                             self.vars_name,
+                                             self.snap_with_gx,
+                                             self.type))
+
+            pos += self.snap_data[-1].size
             
-            # Evaluate
- 
-            if io_alert:
+            self.bl_nums.append( self.snap_data[-1].num )
+            
+            if pos >= self.fsize: end_of_file = True
+            
 
-            # Inform user
- 
-                if verbose:
- 
-                    str_ = ' Faulty block %5d - %2d x %2d x %2d' \
-                        %( bl_num, N1, N2, N3 ); print( str_ )
- 
-                    sys.stdout.flush()
- 
-            else:
- 
-                # Inform user that all checks are passed
- 
-                if verbose:
- 
-                    str_ = f' Block {bl_num} has size {N1} x {N2} x {N3}'+ \
-                           f' {to_fill}'
-                    print( str_ )
- 
-                    sys.stdout.flush()
- 
-                # Append to snap_data
- 
-                self.snap_data.append( [ bl_num, N1, N2, N3, GX, df_sol ] )
-
-
+        
+        
 # ----------------------------------------------------------------------
 # >>> compute gradient for 3D snapshot data                       (Nr.)
 # ----------------------------------------------------------------------
