@@ -40,7 +40,7 @@ from   vista.plot_style  import plot_slicez_stat
 # =============================================================================
 
 slic_type = 'Z'
-loc       = 1.3
+loc       = 0.0
 grads     = ['schlieren']
 # =============================================================================
 # read in grid file and snapshot file, then get slice dataframe
@@ -100,7 +100,7 @@ with timer("Interpolate and plot "):
     grad_rho_slice = np.array( df_slice['grad_rho'] )
     
     x = np.linspace( -17.5, 12.5, 601 )
-    if loc == 0:
+    if loc == 0.0:
         y = np.linspace( 0, 8, 321)
     else:
         y = np.linspace( -0.1, 8, 325 )

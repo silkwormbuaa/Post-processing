@@ -43,6 +43,7 @@ class DMDMode:
         St:         Strouhal number of modes
         mu:         eigenvalues from standard DMD
         '''
+        
         self.indx      = None
         self.alpha     = None
         self.alpha_sp  = None
@@ -72,6 +73,10 @@ class DMDMode:
 # ----------------------------------------------------------------------
 
     def read_mode_file( self, filename ):
+        
+        """
+        filename: dmd_modes binary file
+        """
         
         with open( filename, 'rb' ) as f:
             
@@ -108,6 +113,10 @@ class DMDModes:
 
     def __init__( self ):
         
+        """
+        Initialize a void DMDModes
+        """
+        
         self.modes = []
         
         self.grids_interp = None
@@ -135,6 +144,10 @@ class DMDModes:
 
     def add_mode( self, mode ):
         
+        """
+        mode: an instance of DMDMode()
+        """
+        
         self.modes.append( mode )
         
 
@@ -154,6 +167,11 @@ class DMDModes:
 # ----------------------------------------------------------------------
 
     def reconstruct( self, step ):
+        
+        """
+        step: advance how many dt. \n 
+        Set to 1 to reconstruct initial flow field. 
+        """
         
         self.step = step
         

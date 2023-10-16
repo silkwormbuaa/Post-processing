@@ -50,6 +50,10 @@ class Snapshot:
 
     def __init__( self, snap_dir=None ):
         
+        """
+        snap_dir: (optional) if None, generate a void Snapshot
+        """
+        
         # Directory
         
         if snap_dir is not None:
@@ -1787,7 +1791,7 @@ def Testing():
     
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/snapshots/snapshot_01376059/Z_slice'
         
-    snap3d_file = test_dir1 + '/snapshot.bin'
+    snap3d_file = test_dir1 + '/snapshot_Y_003.bin'
     gridfile = test_dir1 + '/inca_grid.bin'
 
     # - read in grid info
@@ -1807,15 +1811,15 @@ def Testing():
     with timer('read one snapshot '):
         
         snapshot1.read_snapshot( block_list )
-        snapshot1.grid3d = G
+#        snapshot1.grid3d = G
     
-    snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
+#        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
     
-    snapshot2d.write_snapshot('snapshot_Y_004.bin')
+#        snapshot2d.write_snapshot('snapshot_Y_004.bin')
     
-    snapshotnew = Snapshot('snapshot_Y_004.bin')
-    snapshotnew.verbose=True
-    snapshotnew.read_snapshot()
+#    snapshotnew = Snapshot('snapshot_Y_004.bin')
+#    snapshotnew.verbose=True
+#    snapshotnew.read_snapshot()
     
         #snapshot1.drop_ghost()
         #snapshot1.assemble_block()

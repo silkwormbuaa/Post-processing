@@ -265,6 +265,8 @@ class SnapBlock(BlockData):
             
             if self.npx == 1: 
                 
+                self.gx = None
+                
                 self.gy = read_3Dflt_bin( pos, file, 1,self.npy,1, kind )
                 pos += self.npy*kind
 
@@ -279,6 +281,8 @@ class SnapBlock(BlockData):
 
                 self.gx = read_3Dflt_bin( pos, file, self.npx,1,1, kind )
                 pos += self.npx*kind
+                
+                self.gy = None
 
                 self.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
                 pos += self.npz*kind
@@ -294,6 +298,8 @@ class SnapBlock(BlockData):
 
                 self.gy = read_3Dflt_bin( pos, file, 1,self.npy,1,kind )
                 pos += self.npy*kind
+                
+                self.gz = None
                 
                 n_grid = self.npx + self.npy
 
@@ -378,9 +384,12 @@ class SnapBlock(BlockData):
             self.gx = GX[0]; self.gy = GX[1]; self.gz = GX[2]
         
         if type == 'slice':
-            if   self.npx == 1: self.gy = GX[0]; self.gz = GX[1]
-            elif self.npy == 1: self.gx = GX[0]; self.gz = GX[1]
-            elif self.npz == 1: self.gx = GX[0]; self.gy = GX[1]
+            if   self.npx == 1: 
+                self.gx = None;  self.gy = GX[0]; self.gz = GX[1]
+            elif self.npy == 1: 
+                self.gx = GX[0]; self.gy = None;  self.gz = GX[1]
+            elif self.npz == 1: 
+                self.gx = GX[0]; self.gy = GX[1]; self.gz = None
         
         # dataframe
         

@@ -17,7 +17,6 @@ import pickle
 import time
 
 import numpy             as     np
-
 import numpy.linalg      as     linalg
 
 import pandas            as     pd
@@ -27,15 +26,11 @@ from   mpi4py            import MPI
 from   .timer            import timer
 
 from   .tools            import get_filelist
-
 from   .tools            import to_dictionary
 
 from   .init_empty       import init_1Dflt_empty
-
 from   .init_empty       import init_1Dcmx_empty
-
 from   .init_empty       import init_2Dflt_empty
-
 from   .init_empty       import init_2Dcmx_empty
 
 from   .colors           import colors   as col
@@ -56,6 +51,10 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def __init__( self, snap_dir ):
+        
+        """
+        snap_dir : directory to '.../snapshots'
+        """
         
         # Initialize MPI environment
         
@@ -151,7 +150,11 @@ class ParaDmd:
 
     def read_info_file( self, info_file=None ):
         
-        # initialize info_file. If not given, use default self.snap_info_file
+        """
+        info_file: If not given, use default self.snap_info_file
+        """
+        
+        # initialize info_file. 
         
         if info_file is None:
             info_file = self.snap_info_file
@@ -225,7 +228,11 @@ class ParaDmd:
 
     def read_struct_file( self, struct_file=None ):
         
-        # initialize info_file. If not given, use default self.snap_info_file
+        """
+        If not given, use default self.snap_info_file
+        """
+        
+        # initialize info_file. 
         
         if struct_file is None:
             struct_file = self.snap_struct_file
@@ -301,6 +308,10 @@ class ParaDmd:
 
     def assign_block( self ):
         
+        """
+        No parameter needed.
+        """
+        
         # algorithm divides number of blocks in a dealing way
         
         n_bl_local = self.n_bl // self.n_procs # floor dividing
@@ -365,6 +376,10 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def para_read_data( self, filename ):
+        
+        """
+        filename: path to snapshot file
+        """
         
         # MPI-IO parallel reading different part of a snapshot
         
@@ -433,6 +448,11 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def drop_ghost( self, buff_data, bl, ghost=3 ):
+        
+        """
+        buff_data: data chunk with ghost cells (n_var*N3*N2*N1 long vector)
+        bl: index of current block
+        """
         
         # Get the shape of current data chunk
         
@@ -535,6 +555,10 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def do_paradmd( self ):
+        
+        """
+        No parameter needed.
+        """
         
         # Check if the snapshots data are available
         
@@ -728,6 +752,11 @@ class ParaDmd:
 
     def save_reconstruct( self ):
         
+        """
+        reconstruct using all dmd modes.\n
+        root process collect and save the reconstructed data
+        """
+        
         # reconstruct on each process
         
         vand = np.vander( self.mu, 1, increasing=True ).astype(np.complex64)
@@ -792,6 +821,10 @@ class ParaDmd:
 
     def save_Pqs( self ):
         
+        """
+        Root save Pqs.
+        """
+        
         # Check if P,q,s,N_t are available
         
         if self.P is None:
@@ -838,6 +871,10 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def read_Pqs( self ):
+        
+        """
+        Root read Pqs
+        """
         
         # Check if Pqs.dat file is available
         
@@ -888,6 +925,11 @@ class ParaDmd:
 
     def compute_spdmd( self, gamma=None, rho=None ):
         
+        """
+        gamma : default 10000. Larger gamma, less sp-mode.\n
+        rho   : default 10000. Comparable to gamma, influence convergence speed.
+        """
+        
         # default parameters
         
         if gamma is None: gamma = 10000.
@@ -913,14 +955,13 @@ class ParaDmd:
         I = np.eye( n )
         
         # Initialize data containers
-        """
+        
         # N_none0    : number of non-zero amplitudes
         # Jsp        : square of F norm(before polish)
         # Jpol       : square of F norm(after polish)
         # Ploss      : optimal performance loss(after)
         # alphas_sp  : vector of amplitudes(before polish)
-        # alphas_pol : vector of amplitudes(after polish)
-        """
+        # alphas_pol : vector of amplitudes(after polish)s
         
         N_none0 = 0     
         
@@ -1067,9 +1108,9 @@ class ParaDmd:
         self.ind_spmode = ind_spmode
 
         # Compute other parameters
-        """ - beta: growth rate
-            - psi: relative amplitudes
-        """
+        
+        # - beta : growth rate
+        # - psi  : relative amplitudes
         
         self.beta = np.log( np.abs( self.mu ) )
         
@@ -1095,6 +1136,11 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def save_spdmd_result( self ):
+        
+        """
+        No parameter needed. \n
+        Save spdmd result into self.spdmd_result_file
+        """
         
         filename = self.spdmd_result_file
         
@@ -1142,6 +1188,11 @@ class ParaDmd:
 # ----------------------------------------------------------------------
 
     def save_ind_spmode( self ):
+        
+        """
+        No parameter needed. \n 
+        Save the index of sparsity-promoting modes to ind_spmode.csv
+        """
         
         if hasattr(self, 'ind_spmode'):
         
@@ -1229,6 +1280,11 @@ class ParaDmd:
     
     def read_spdmd_result( self ):
         
+        """
+        No parameter needed. \n
+        Read spdmd_result from self.spdmd_result_file
+        """
+        
         self.ind_spmode = None
         self.alphas_sp  = None
         self.alphas_pol = None
@@ -1292,6 +1348,11 @@ class ParaDmd:
 # ----------------------------------------------------------------------
     
     def para_write_modes( self ):
+        
+        """
+        No parameter needed. \n
+        Parallel write selected dmd modes into mode_xxxxx.pkl
+        """
         
         # Enter the existing directory or make a new one
         
