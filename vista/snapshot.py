@@ -174,27 +174,31 @@ class Snapshot:
         block_list: (optional) if None, read all blocks.
         """
         
+        # before read in snapshots, clear first.
+        
+        if len(self.bl_nums) != 0: self.__init__(self.dir)
+        
         # End of file marker
 
         end_of_file = False
 
-# --- Read snapshot file
+# ----- Read snapshot file
 
         with open( self.dir, 'rb' ) as fs:
 
             # Start from the beginning of the file
-
+            
             fs.seek( self.pos )
 
-            # Read snapshot header
-
+# --------- Read snapshot header
+            
             self.read_snap_header( fs )
             self.pos += self.header_size
             
             # different format have different length of header
             fs.seek( self.header_size ) 
 
-            # Read body
+# --------- Read body
             
             while not end_of_file:
 
@@ -210,7 +214,7 @@ class Snapshot:
                 
                 # collect the bl_nums and start positions of solution
                 self.bl_nums.append( self.snap_data[-1].num )
-                self.pos_var_start.append(self.snap_data[-1])
+                self.pos_var_start.append(self.snap_data[-1].pos_var_start)
                 
                 # count the number of blocks in the snapshot file
                 self.n_bl += 1
@@ -226,26 +230,26 @@ class Snapshot:
                     print(f"{self.snap_data[-1].npy}x",end='')
                     print(f"{self.snap_data[-1].npz}, ",end='')
                     print(f"filled: {self.snap_data[-1].to_fill}")
-
+                    sys.stdout.flush()
+                    
                 # End of file?
 
                 self.pos = fs.tell()
                 if self.pos >= self.fsize: end_of_file = True
+                
 
 
-        # Inform user
+# ----- Inform user
 
         print( f'\n{self.n_bl} blocks were read ',end='')
-        if block_list is not None:
-            print( f'with { self.filled } blocks filled.' )
+        print( f'with { self.filled } blocks filled.' )
 
-        sys.stdout.flush()
-        
         if self.type == 'block': snap_type = self.type
         if self.type == 'slice': snap_type = self.slic_type
         
         print(f"\nSnapshot {self.itstep} {snap_type} is read.\n")
         
+        sys.stdout.flush()
 
 # ----------------------------------------------------------------------
 # >>> Read snapshot and output snapshot structure/info            ( 0 )
@@ -770,7 +774,6 @@ class Snapshot:
                     
                 
                 # Reshape the matrix ( no matter 2D or 3D) to long vectors
-                
                      
                 sol_buff = sol_buff.reshape(( n_vars, Nx*Ny*Nz ))
                 
@@ -778,7 +781,11 @@ class Snapshot:
                 
                 # Append to snap_data_clean
                 
+                snap_data_bl.npx = Nx
+                snap_data_bl.npy = Ny
+                snap_data_bl.npz = Nz
                 snap_data_bl.df = df
+                
                 
                 self.snap_cleandata.append( snap_data_bl )  
                         
@@ -795,6 +802,8 @@ class Snapshot:
             for snap_bl in self.snap_cleandata:
                 
                 self.n_cells += snap_bl.npx * snap_bl.npy * snap_bl.npz
+            
+            print(f"Snapshot {self.itstep} dropped ghost cells.")
 
 
 # ----------------------------------------------------------------------
@@ -941,8 +950,8 @@ class Snapshot:
         
         # Different ways of assemble blocks with different shapes
 
-        vars = self.snap_cleandata[0][5].columns
-
+        vars = self.snap_cleandata[0].df.columns
+        
         if self.type == 'block':
             
             bl_number = []
@@ -956,11 +965,11 @@ class Snapshot:
             for snap_bl in self.snap_cleandata:
                 
                 
-                bl_number.append( snap_bl[0] )
+                bl_number.append( snap_bl.num )
                 
-                x_bl = snap_bl[4][0]
-                y_bl = snap_bl[4][1]
-                z_bl = snap_bl[4][2]
+                x_bl = snap_bl.gx
+                y_bl = snap_bl.gy
+                z_bl = snap_bl.gz
                 
                 # Notice the order of output X,Y,Z !
                 # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
@@ -990,9 +999,9 @@ class Snapshot:
             
             for snap_bl in self.snap_cleandata:
                 
-                pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                pos_e = pos_s + snap_bl.npx*snap_bl.npy*snap_bl.npz
                 
-                sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
+                sol_bl[:,pos_s:pos_e] = np.array( snap_bl.df.values ).T
                 
                 pos_s = pos_e
                 
@@ -1009,13 +1018,13 @@ class Snapshot:
                 
                 for snap_bl in self.snap_cleandata:
                     
-                    bl_number.append(snap_bl[0])
+                    bl_number.append(snap_bl.num)
                     
                     # GX => snap_bl[4] 
                     # For slice, only two coordinates vectors
                     
-                    y_bl = snap_bl[4][0]
-                    z_bl = snap_bl[4][1]
+                    y_bl = snap_bl.gy
+                    z_bl = snap_bl.gz
                     
                     Y, Z = np.meshgrid( y_bl, z_bl )
                     
@@ -1037,9 +1046,9 @@ class Snapshot:
                 
                 for snap_bl in self.snap_cleandata:
                                         
-                    pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                    pos_e = pos_s + snap_bl.npx*snap_bl.npy*snap_bl.npz
                         
-                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl.df.values ).T
                         
                     pos_s = pos_e
                     
@@ -1057,10 +1066,10 @@ class Snapshot:
                 for snap_bl in self.snap_cleandata:
                     
                     
-                    bl_number.append(snap_bl[0])
+                    bl_number.append(snap_bl.num)
                     
-                    x_bl = snap_bl[4][0]
-                    z_bl = snap_bl[4][1]
+                    x_bl = snap_bl.gx
+                    z_bl = snap_bl.gz
                     
                     X, Z = np.meshgrid( x_bl, z_bl )
                     
@@ -1077,15 +1086,15 @@ class Snapshot:
 
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells ), dtype=np.float32 )
                 
                 pos_s = 0 
                 
                 for snap_bl in self.snap_cleandata:
                                         
-                    pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                    pos_e = pos_s + snap_bl.npx*snap_bl.npy*snap_bl.npz
                         
-                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl.df.values ).T
                         
                     pos_s = pos_e
 
@@ -1102,10 +1111,10 @@ class Snapshot:
                 for snap_bl in self.snap_cleandata:
                     
                     
-                    bl_number.append(snap_bl[0])
+                    bl_number.append(snap_bl.num)
                     
-                    x_bl = snap_bl[4][0]
-                    y_bl = snap_bl[4][1]
+                    x_bl = snap_bl.gx
+                    y_bl = snap_bl.gy
                     
                     X, Y = np.meshgrid( x_bl, y_bl )
                     
@@ -1128,9 +1137,9 @@ class Snapshot:
                 
                 for snap_bl in self.snap_cleandata:
                                         
-                    pos_e = pos_s + snap_bl[1]*snap_bl[2]*snap_bl[3]
+                    pos_e = pos_s + snap_bl.npx*snap_bl.npy*snap_bl.npz
                         
-                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl[5] ).T
+                    sol_bl[:,pos_s:pos_e] = np.array( snap_bl.df.values ).T
                         
                     pos_s = pos_e
             
@@ -1207,9 +1216,9 @@ class Snapshot:
         
             for snap_bl in self.snap_data:
                 
-                x_bl = snap_bl[4][0][buff:-buff]
-                y_bl = snap_bl[4][1][buff:-buff]
-                z_bl = snap_bl[4][2][buff:-buff]
+                x_bl = snap_bl.gx[buff:-buff]
+                y_bl = snap_bl.gy[buff:-buff]
+                z_bl = snap_bl.gz[buff:-buff]
                 
                 # Notice the order of output X,Y,Z !
                 # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
@@ -1238,8 +1247,8 @@ class Snapshot:
                 
                 for snap_bl in self.snap_data:
                     
-                    y_bl = snap_bl[4][0][buff:-buff]
-                    z_bl = snap_bl[4][1][buff:-buff]
+                    y_bl = snap_bl.gy[buff:-buff]
+                    z_bl = snap_bl.gz[buff:-buff]
                     
                     Y,Z = np.meshgrid( y_bl, z_bl )
                     
@@ -1258,8 +1267,8 @@ class Snapshot:
                 
                 for snap_bl in self.snap_data:
                     
-                    x_bl = snap_bl[4][0][buff:-buff]
-                    z_bl = snap_bl[4][1][buff:-buff]
+                    x_bl = snap_bl.gx[buff:-buff]
+                    z_bl = snap_bl.gz[buff:-buff]
                     
                     X,Z = np.meshgrid( x_bl, z_bl )
                     
@@ -1278,8 +1287,8 @@ class Snapshot:
                 
                 for snap_bl in self.snap_data:
                     
-                    x_bl = snap_bl[4][0][buff:-buff]
-                    y_bl = snap_bl[4][1][buff:-buff]
+                    x_bl = snap_bl.gx[buff:-buff]
+                    y_bl = snap_bl.gy[buff:-buff]
                     
                     X,Y = np.meshgrid( x_bl, y_bl )
                     
@@ -1351,8 +1360,8 @@ class Snapshot:
                
         for bl_data in self.snap_data:
             
-            bl_num = bl_data[0]      # block number starts from 1
-            grd = grid3d.g[bl_num-1] # index of grid starts from 0
+            bl_num = bl_data.num      # block number starts from 1
+            grd = grid3d.g[bl_num-1]  # index of grid starts from 0
             
             if slic_type == 'X':
                 
@@ -1435,7 +1444,7 @@ class Snapshot:
         
         for bl_data in self.snap_data:
             
-            bl_num = bl_data[0]
+            bl_num = bl_data.num
             
             if bl_num in bl_intersect:
                 
@@ -1449,31 +1458,34 @@ class Snapshot:
                 G2 = grd.gy
                 G3 = grd.gz
                 
-                df_sol = deepcopy( bl_data[5] )
-                n_vars = len( df_sol.columns )
+                vars = bl_data.df.columns
+                n_vars = len( vars )
+                df_sol = deepcopy( bl_data.df.values )
                 sol = np.array(df_sol).T.reshape(n_vars,N3,N2,N1)
                 
                 if slic_type == 'X':                
                     
+                    dims = [1,N2,N3]
                     GX = [G2,G3]
                     sol = sol[:,:,:,idx].reshape(n_vars,N3*N2)
-                    df_sol = pd.DataFrame(sol.T,columns=df_sol.columns)
-                    snap_2d.snap_data.append( [bl_num, 1, N2, N3, GX, df_sol] )
-                
+                                    
                 if slic_type == 'Y':
                     
+                    dims = [N1,1,N3]
                     GX = [G1,G3]
                     sol = sol[:,:,idx,:].reshape(n_vars,N3*N1)
-                    df_sol = pd.DataFrame(sol.T,columns=df_sol.columns)
-                    snap_2d.snap_data.append( [bl_num, N1, 1, N3, GX, df_sol] )
                     
                 if slic_type == 'Z':
                     
-                    GX = [G1,G2]
-                    sol = sol[:,idx,:,:].reshape(n_vars,N2*N1)
-                    df_sol = pd.DataFrame(sol.T,columns=df_sol.columns)
-                    snap_2d.snap_data.append( [bl_num, N1, N2, 1, GX, df_sol] )
-            
+                    dims = [N1,N2,1]
+                    GX   = [G1,G2]
+                    sol  = sol[:,idx,:,:].reshape(n_vars,N2*N1)
+                
+                df_sol   = pd.DataFrame(sol.T,columns=vars)
+                
+                bl_slice = SnapBlock()
+                bl_slice.fill_with_data( bl_num, dims, GX, df_sol, 'slice' )
+                snap_2d.snap_data.append( bl_slice )            
         
         # fill in headers
         
@@ -1565,7 +1577,7 @@ class Snapshot:
 
         for i, bl_indx in enumerate( indx_in_snap ):
             
-            bl_df = self.snap_data[bl_indx][5]
+            bl_df = self.snap_data[bl_indx].df
             g     = G.g[bl_list[i]-1]
             
             indx  = indx_probed[i]
@@ -1602,11 +1614,11 @@ class Snapshot:
         
 # ------ drop ghost cells
 
-            self.snap_data[bl_indx][5] = bl_df.iloc[buff:-buff]
+            self.snap_data[bl_indx].df = bl_df.iloc[buff:-buff]
             
 # ------ concatenate all dataframe in all selected blocks
 
-        df_probe = pd.concat( [self.snap_data[bl_indx][5] 
+        df_probe = pd.concat( [self.snap_data[bl_indx].df 
                                for bl_indx in indx_in_snap] )
         
         df_probe.sort_values(by=[probe_type.lower()],inplace=True)
@@ -1720,31 +1732,37 @@ class Snapshot:
                 
                 # block number
                 
-                write_int_bin( bl_data[0], f, sin )
+                write_int_bin( bl_data.num, f, sin )
                 
                 # dimensions of grids, N1, N2, N3
                 
-                write_int_bin( bl_data[1], f, sin )
-                write_int_bin( bl_data[2], f, sin )
-                write_int_bin( bl_data[3], f, sin )
+                write_int_bin( bl_data.npx, f, sin )
+                write_int_bin( bl_data.npy, f, sin )
+                write_int_bin( bl_data.npz, f, sin )
                 
                 # GX (G1,G2,G3 different dimension for different cases
                 #  ,thus cannot be transformed into numpy array directly.)
 
                 if self.type == 'block':
                     
-                    write_flt_bin( bl_data[4][0], f, self.kind )
-                    write_flt_bin( bl_data[4][1], f, self.kind )
-                    write_flt_bin( bl_data[4][2], f, self.kind )
+                    write_flt_bin( bl_data.gx, f, self.kind )
+                    write_flt_bin( bl_data.gy, f, self.kind )
+                    write_flt_bin( bl_data.gz, f, self.kind )
                 
                 elif self.type == 'slice':
-                                        
-                    write_flt_bin( bl_data[4][0], f, self.kind )
-                    write_flt_bin( bl_data[4][1], f, self.kind )
+                    if bl_data.npx == 1:
+                        write_flt_bin( bl_data.gy, f, self.kind )
+                        write_flt_bin( bl_data.gz, f, self.kind )
+                    if bl_data.npy == 1:
+                        write_flt_bin( bl_data.gx, f, self.kind )
+                        write_flt_bin( bl_data.gz, f, self.kind )
+                    if bl_data.npz == 1:
+                        write_flt_bin( bl_data.gx, f, self.kind )
+                        write_flt_bin( bl_data.gy, f, self.kind )
 
                 # sol(n_vars, N3, N2, N1)
                 
-                write_flt_bin( np.array(bl_data[5]).T, f, self.kind )
+                write_flt_bin( np.array(bl_data.df.values).T, f, self.kind )
                 
 
 # ----------------------------------------------------------------------
@@ -1778,16 +1796,31 @@ def Testing():
 
     G.read_grid()
 
-    block_list, indx_slic = G.select_sliced_blockgrids( 'X', 0.0 )
+    block_list, indx_slic = G.select_sliced_blockgrids( 'Y', 0.0 )
     
     os.chdir( test_dir1 )
     
     snapshot1 = Snapshot( snap3d_file )    
     
-    snapshot1.verbose = False
+    snapshot1.verbose = True
     
     with timer('read one snapshot '):
-        snapshot1.read_snapshot(block_list )
+        
+        snapshot1.read_snapshot( block_list )
+        snapshot1.grid3d = G
+    
+    snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
+    
+    snapshot2d.write_snapshot('snapshot_Y_004.bin')
+    
+    snapshotnew = Snapshot('snapshot_Y_004.bin')
+    snapshotnew.verbose=True
+    snapshotnew.read_snapshot()
+    
+        #snapshot1.drop_ghost()
+        #snapshot1.assemble_block()
+        
+#        print( snapshot1.get_grid_vectors() )
         
 #        print( snapshot1.snap_data[snapshot1.bl_nums.index(1365)][5])
         
@@ -1799,7 +1832,6 @@ def Testing():
     
 #    with timer("\ndo slice"):
          
-#        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
         
     
 #    snapshot1.verbose = False

@@ -132,9 +132,46 @@ class BlockData:
 
 class SnapBlock(BlockData):
     
-    def __init__( self, file, block_list, n_vars, vars, snap_with_gx, type, 
-                  kind=4 ):
+    def __init__( self, file=None, block_list=None, n_vars=None, vars=None, 
+                        snap_with_gx = None, type=None, kind=4 ):
+        
+        """
+        file         : opened file object
+        block_list   : list of blocks's numbers
+        n_vars       : number vars in the stored blocks
+        vars         : list of selected variable name strings
+        snap_with_gx : if contain grids
+        type         : snapshot type, 'block' or 'slice'
+        kind         : should be consistent to Snapshot.kind
+        
+        ! if nothing is given, build a void SnapBlock(), then fill_with_data()
+        ! SnapBlock read in all variables.
+        """
+        
+        if file is None:
+            pass
+        
+        else:
+            self.init_from_file( file, block_list, n_vars, vars, snap_with_gx,
+                                 type, kind)
+        
+# ----------------------------------------------------------------------
+# >>> initialize SnapBlock from file                              (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/16  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
+    def init_from_file( self, file, block_list, n_vars, vars, snap_with_gx, 
+                        type, kind=4):
+        
         """
         file         : opened file object
         block_list   : list of blocks's numbers
@@ -277,7 +314,7 @@ class SnapBlock(BlockData):
         # mean variables = primitive variables + 'p T mu'
         if self.to_fill:
             
-            for var in enumerate(vars):
+            for var in vars:
             
                 buff = read_flt_bin( file.read(self.np*kind), kind )
 
@@ -292,4 +329,61 @@ class SnapBlock(BlockData):
         # move file pointer to the end of current block(if not fill)
 
         file.seek( pos_start + self.size )
+
+
+# ----------------------------------------------------------------------
+# >>> fill_with_data                                              (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/16  - created
+#
+# Desc
+#
+#   - initialize SnapBlock by filling data directly
+# ----------------------------------------------------------------------
+
+    def fill_with_data( self, num, dims, GX, df, type, kind=4 ):
+        
+        """
+        num:  block number
+        dims: [npx,npy,npz]
+        GX:   [gx,gy,gz] or 2D format
+        df:   dataframe
+        type: snapshot type, 'block' or 'slice'
+        """
+        
+        # matrix of friction projection on x-z plane
+
+        self.df_fric = None
+        
+        # remember the kind
+        
+        self.kind = kind
+        
+# ----- fill in data
+        
+        self.num = num
+        
+        self.npx = dims[0]
+        self.npy = dims[1]
+        self.npz = dims[2]
+        
+        # grid coordinates vectors
+        
+        if type == 'block':
+            self.gx = GX[0]; self.gy = GX[1]; self.gz = GX[2]
+        
+        if type == 'slice':
+            if   self.npx == 1: self.gy = GX[0]; self.gz = GX[1]
+            elif self.npy == 1: self.gx = GX[0]; self.gz = GX[1]
+            elif self.npz == 1: self.gx = GX[0]; self.gy = GX[1]
+        
+        # dataframe
+        
+        self.df = df
+            
         
