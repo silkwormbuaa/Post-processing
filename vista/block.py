@@ -132,13 +132,13 @@ class BlockData:
 
 class SnapBlock(BlockData):
     
-    def __init__( self, file, block_list, n_var, vars, snap_with_gx, type, 
+    def __init__( self, file, block_list, n_vars, vars, snap_with_gx, type, 
                   kind=4 ):
 
         """
         file         : opened file object
         block_list   : list of blocks's numbers
-        n_var        : number vars in the stored blocks
+        n_vars       : number vars in the stored blocks
         vars         : list of selected variable name strings
         snap_with_gx : if contain grids
         type         : snapshot type, 'block' or 'slice'
@@ -156,6 +156,7 @@ class SnapBlock(BlockData):
         # start position of file pointer
         
         pos_start = file.tell()
+        
         self.pos_start = pos_start
         
         # start position of variable start
@@ -169,12 +170,16 @@ class SnapBlock(BlockData):
         # size of this BlockData (in bytes)
         
         self.size = 0
-        self.n_var = n_var
+        self.n_vars = n_vars
         
-        # empty dataframe for grids and datachunk
+        # empty grids points list
+        
+        self.gx = None
+        self.gy = None
+        self.gz = None
+        
+        # empty dataframe for datachunk
 
-        self.df_gx = pd.DataFrame()
-        
         self.df = pd.DataFrame(columns=vars)
         
         # matrix of friction projection on x-z plane
@@ -206,13 +211,13 @@ class SnapBlock(BlockData):
 
         if snap_with_gx and type == 'block':
             
-            self.df_gx['x'] = read_3Dflt_bin( pos, file, self.npx, 1, 1, kind )
+            self.gx = read_3Dflt_bin( pos, file, self.npx, 1, 1, kind )
             pos += self.npx*kind
             
-            self.df_gx['y'] = read_3Dflt_bin( pos, file, self.npy, 1, 1, kind )
+            self.gy = read_3Dflt_bin( pos, file, 1, self.npy, 1, kind )
             pos += self.npy*kind
             
-            self.df_gx['z'] = read_3Dflt_bin( pos, file, self.npz, 1, 1, kind )
+            self.gz = read_3Dflt_bin( pos, file, 1, 1, self.npz, kind )
             pos += self.npz*kind
             
             n_grid = self.npx + self.npy + self.npz
@@ -223,10 +228,10 @@ class SnapBlock(BlockData):
             
             if self.npx == 1: 
                 
-                self.df_gx['y'] = read_3Dflt_bin( pos, file, self.npy,1,1,kind )
+                self.gy = read_3Dflt_bin( pos, file, 1,self.npy,1, kind )
                 pos += self.npy*kind
 
-                self.df_gx['z'] = read_3Dflt_bin( pos, file, self.npz,1,1,kind )
+                self.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
                 pos += self.npz*kind
                 
                 n_grid = self.npy + self.npz
@@ -235,10 +240,10 @@ class SnapBlock(BlockData):
             
             elif self.npy == 1:
 
-                self.df_gx['x'] = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
+                self.gx = read_3Dflt_bin( pos, file, self.npx,1,1, kind )
                 pos += self.npx*kind
 
-                self.df_gx['z'] = read_3Dflt_bin( pos, file, self.npz,1,1,kind )
+                self.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
                 pos += self.npz*kind
                 
                 n_grid = self.npx + self.npz
@@ -247,24 +252,26 @@ class SnapBlock(BlockData):
             
             elif self.npz == 1:
                 
-                self.df_gx['x'] = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
+                self.gx = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
                 pos += self.npx*kind
 
-                self.df_gx['y'] = read_3Dflt_bin( pos, file, self.npy,1,1,kind )
+                self.gy = read_3Dflt_bin( pos, file, 1,self.npy,1,kind )
                 pos += self.npy*kind
                 
                 n_grid = self.npx + self.npy
 
 # ----- record the starting position of variable chunk
             
-            self.pos_var_start = pos
+        self.pos_var_start = pos
                 
 # ----- read variable data chunk
 
         # if this block chunk will be read?
         # by default, to_fill is False
         self.to_fill = False
-        if self.num in block_list: self.to_fill = True
+        
+        if (block_list is None) or (self.num in block_list):
+            self.to_fill = True
 
         # primitive variables 'u,v,w,rho,rhoE'
         # mean variables = primitive variables + 'p T mu'
@@ -280,8 +287,9 @@ class SnapBlock(BlockData):
     
         # calculate the block data size in byte
         
-        self.size = 4*self.sin + n_grid*kind + self.np*n_var*kind
+        self.size = 4*self.sin + n_grid*kind + self.np*n_vars*kind
         
-        # move file pointer to the end of current block
+        # move file pointer to the end of current block(if not fill)
 
         file.seek( pos_start + self.size )
+        

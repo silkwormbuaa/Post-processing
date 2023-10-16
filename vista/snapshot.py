@@ -189,28 +189,53 @@ class Snapshot:
             # Read snapshot header
 
             self.read_snap_header( fs )
-            
             self.pos += self.header_size
+            
+            # different format have different length of header
+            fs.seek( self.header_size ) 
 
             # Read body
-
+            
             while not end_of_file:
 
                 # Read current block 
                 # self.pos is updated inside self.read_snap_block
                  
-                self.read_snap_block( fs, block_list )
+                self.snap_data.append( SnapBlock(fs, 
+                                                 block_list, 
+                                                 self.n_vars,
+                                                 self.vars_name,
+                                                 self.snap_with_gx,
+                                                 self.type) )
                 
+                # collect the bl_nums and start positions of solution
+                self.bl_nums.append( self.snap_data[-1].num )
+                self.pos_var_start.append(self.snap_data[-1])
+                
+                # count the number of blocks in the snapshot file
                 self.n_bl += 1
+                
+                # count the number of filled blocks
+                if self.snap_data[-1].to_fill: self.filled += 1
+                
+                # verbose
+                
+                if self.verbose: 
+                    print(f"Block {self.bl_nums[-1]}, dimension:",end='')
+                    print(f"{self.snap_data[-1].npx}x",end='')
+                    print(f"{self.snap_data[-1].npy}x",end='')
+                    print(f"{self.snap_data[-1].npz}, ",end='')
+                    print(f"filled: {self.snap_data[-1].to_fill}")
 
                 # End of file?
 
+                self.pos = fs.tell()
                 if self.pos >= self.fsize: end_of_file = True
 
 
         # Inform user
 
-        print( f'{self.n_bl} blocks were read ',end='')
+        print( f'\n{self.n_bl} blocks were read ',end='')
         if block_list is not None:
             print( f'with { self.filled } blocks filled.' )
 
@@ -273,12 +298,12 @@ class Snapshot:
             
             # size = N1 * N2 * N3 * n_var * self.kind
             
-            size.append( snap_bl[1] * snap_bl[2] * snap_bl[3]
+            size.append( snap_bl.npx * snap_bl.npy * snap_bl.npz
                         * self.n_vars * self.kind )
             
-            N1.append( snap_bl[1] )
-            N2.append( snap_bl[2] )
-            N3.append( snap_bl[3] )
+            N1.append( snap_bl.npx )
+            N2.append( snap_bl.npy )
+            N3.append( snap_bl.npz )
         
         
         # Output | bl_num | pos_var_start | datachunk_size | N1 | N2 | N3 |
@@ -505,66 +530,8 @@ class Snapshot:
             print( ' - n_vars := %d' %(self.n_vars) )
    
             print( '' ); sys.stdout.flush()
+          
 
-
-# ----------------------------------------------------------------------
-# >>> Read snapshot block                                        ( 3 )
-# ----------------------------------------------------------------------
-#
-# Wencan Wu : w.wu-3@tudelft.nl
-#
-# History
-#
-# 2023/04/23  - created
-#
-# Desc
-#     - read one snapshot block data
-#     - data are stored in self.snap_data list
-#     - [ bl_num, N1, N2, N3, GX, df_sol:pd.DataFrame ]
-# ----------------------------------------------------------------------
-
-    def read_snap_block( self, file, block_list=None ):
-
-        """
-        file: pointer to opened file
-        block_list: list of blocks to be filled
-        
-        return: [ bl_num, N1, N2, N3, GX, df_sol:pd.DataFrame ] 
-                append to self.snap_data 
-        """
-
-        end_of_file = False
-        
-        # new position after reading headers
-        
-        file.seek( self.header_size )
-        
-        pos = self.header_size
-        
-        # total number of variables in the block
-        
-        n_var = self.n_vars
-        
-        while not end_of_file:
-            
-            # read in block one by one
-            
-            self.snap_data.append( SnapBlock(file, 
-                                             block_list, 
-                                             n_var,
-                                             self.vars_name,
-                                             self.snap_with_gx,
-                                             self.type))
-
-            pos += self.snap_data[-1].size
-            
-            self.bl_nums.append( self.snap_data[-1].num )
-            
-            if pos >= self.fsize: end_of_file = True
-            
-
-        
-        
 # ----------------------------------------------------------------------
 # >>> compute gradient for 3D snapshot data                       (Nr.)
 # ----------------------------------------------------------------------
@@ -587,12 +554,12 @@ class Snapshot:
                      ['schlieren','shadowgraph','grad_V']
         G          : GridData instance of corresponding case
         
-        return : self.snap_data[num-1][5]['grad_rho'] (...['laplacian'])        
+        return : self.snap_data[num-1].df['grad_rho'] (...['laplacian'])        
         """
         
         for num in block_list:
             
-            df = self.snap_data[self.bl_nums.index(num)][5]
+            df = self.snap_data[self.bl_nums.index(num)].df
             
             g = grid3d.g[num-1]
             
@@ -700,6 +667,7 @@ class Snapshot:
         
         """
         self.snap_data will be replaced by self.snap_cleandata
+        
         self.n_cells (total number of cell after dropping ghost) will be counted
         """
 
@@ -723,41 +691,42 @@ class Snapshot:
             
             for snap_data_bl in self.snap_data:
                 
-                bl_num = snap_data_bl[0]
-                
                 # N1, N2, N3 are dimensions with ghost cells
                 
-                N1     = snap_data_bl[1]
-                N2     = snap_data_bl[2]
-                N3     = snap_data_bl[3]
+                N1     = snap_data_bl.npx
+                N2     = snap_data_bl.npy
+                N3     = snap_data_bl.npz
                 
-                df     = snap_data_bl[5]
+                df     = snap_data_bl.df
                 n_vars = len( df.columns )
+                
+                # drop ghost cell coordinates
+                
+                if snap_data_bl.gx is not None:
+                    snap_data_bl.gx = snap_data_bl.gx[buff:-buff]
+                
+                if snap_data_bl.gy is not None:
+                    snap_data_bl.gy = snap_data_bl.gy[buff:-buff]
+                
+                if snap_data_bl.gz is not None:
+                    snap_data_bl.gz = snap_data_bl.gz[buff:-buff]
+                
                 
                 # Nx, Ny, Nz are dimensions without ghost cells
                 
                 if self.type == 'block':
                     
-                    Nx     = N1 - buff*2
-                    Ny     = N2 - buff*2
-                    Nz     = N3 - buff*2
-                    
-                    # Grid buffer
-                    
-                    GX = []
-                    
-                    # Loop over gx(:), gy(:), gz(:)
-                    
-                    for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
-                        
+                    Nx = N1 - buff*2
+                    Ny = N2 - buff*2
+                    Nz = N3 - buff*2
                     
                     # Solution buffer to get solution field without ghost cells
                     
                     # Notice the binary data storage order [n_var, Z, Y, X]
                     # Reshape to chunk -> slice -> reshape to vector
 
-                    sol_buff = np.array(snap_data_bl[5]).T.\
-                                  reshape( n_vars, N3, N2, N1 )
+                    sol_buff = (snap_data_bl.df.values).T.\
+                                reshape( n_vars, N3, N2, N1 )
                     
                     sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
                 
@@ -766,19 +735,11 @@ class Snapshot:
                     
                     if self.slic_type == 'X':
                         
-                        Nx     = 1
-                        Ny     = N2 - buff*2
-                        Nz     = N3 - buff*2
+                        Nx = 1
+                        Ny = N2 - buff*2
+                        Nz = N3 - buff*2
                         
-                        # Grid buffer
-                        
-                        GX = []
-                        
-                        # Loop over gy(:), gz(:)
-                        
-                        for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
-
-                        sol_buff = np.array(snap_data_bl[5]).T.\
+                        sol_buff = (snap_data_bl.df.values).T.\
                                     reshape( n_vars, N3, N2 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
@@ -786,19 +747,11 @@ class Snapshot:
                     
                     if self.slic_type == 'Y' or self.slic_type == 'W':
                         
-                        Nx     = N1 - buff*2
-                        Ny     = 1
-                        Nz     = N3 - buff*2
-                        
-                        # Grid buffer
-                        
-                        GX = []
-                        
-                        # Loop over gx(:), gz(:)
-                        
-                        for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
+                        Nx = N1 - buff*2
+                        Ny = 1
+                        Nz = N3 - buff*2
 
-                        sol_buff = np.array(snap_data_bl[5]).T.\
+                        sol_buff = (snap_data_bl.df.values).T.\
                                     reshape( n_vars, N3, N1 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
@@ -806,33 +759,28 @@ class Snapshot:
                     
                     if self.slic_type == 'Z':
                         
-                        Nx     = N1 - buff*2
-                        Ny     = N2 - buff*2
-                        Nz     = 1
-                        
-                        # Grid buffer
-                        
-                        GX = []
-                        
-                        # Loop over gx(:), gy(:)
-                        
-                        for Gi in snap_data_bl[4]: GX.append( Gi[buff:-buff] )
-
-                        sol_buff = np.array(snap_data_bl[5]).T.\
+                        Nx = N1 - buff*2
+                        Ny = N2 - buff*2
+                        Nz = 1
+                    
+                        sol_buff = (snap_data_bl.df.values).T.\
                                     reshape( n_vars, N2, N1 )
                         
                         sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
                     
                 
                 # Reshape the matrix ( no matter 2D or 3D) to long vectors
-                       
+                
+                     
                 sol_buff = sol_buff.reshape(( n_vars, Nx*Ny*Nz ))
                 
                 df = pd.DataFrame(sol_buff.T, columns=df.columns)
                 
                 # Append to snap_data_clean
                 
-                self.snap_cleandata.append([bl_num, Nx, Ny, Nz, GX, df])  
+                snap_data_bl.df = df
+                
+                self.snap_cleandata.append( snap_data_bl )  
                         
             
             # Release memory occupied by snap_data
@@ -846,7 +794,7 @@ class Snapshot:
             
             for snap_bl in self.snap_cleandata:
                 
-                self.n_cells += snap_bl[1] * snap_bl[2] * snap_bl[3]
+                self.n_cells += snap_bl.npx * snap_bl.npy * snap_bl.npz
 
 
 # ----------------------------------------------------------------------
@@ -881,7 +829,7 @@ class Snapshot:
             
             else:
                 
-                all_block_data = self.snap_cleandata
+                all_blocks = self.snap_cleandata
         
         else: 
             
@@ -891,7 +839,7 @@ class Snapshot:
 
             else:
                 
-                all_block_data = self.snap_data
+                all_blocks = self.snap_data
         
         
         # Set original range
@@ -905,14 +853,14 @@ class Snapshot:
         
         if self.type == 'block':
         
-            for bl_data in all_block_data:
+            for bl_data in all_blocks:
                 
-                xmin = min( min(bl_data[4][0]), xmin )
-                xmax = max( max(bl_data[4][0]), xmax )
-                ymin = min( min(bl_data[4][1]), ymin )
-                ymax = max( max(bl_data[4][1]), ymax )
-                zmin = min( min(bl_data[4][2]), zmin )
-                zmax = max( max(bl_data[4][2]), zmax )
+                xmin = min( min(bl_data.npx), xmin )
+                xmax = max( max(bl_data.npx), xmax )
+                ymin = min( min(bl_data.npy), ymin )
+                ymax = max( max(bl_data.npy), ymax )
+                zmin = min( min(bl_data.npz), zmin )
+                zmax = max( max(bl_data.npz), zmax )
                 
             print('snapshot range in three dimensions:')
             
@@ -925,12 +873,12 @@ class Snapshot:
             
             if self.slic_type == 'X':
                 
-                for bl_data in all_block_data:
+                for bl_data in all_blocks:
                     
-                    ymin = min( min(bl_data[4][0]), ymin )
-                    ymax = max( max(bl_data[4][0]), ymax )
-                    zmin = min( min(bl_data[4][1]), zmin )
-                    zmax = max( max(bl_data[4][1]), zmax )
+                    ymin = min( min(bl_data.npy), ymin )
+                    ymax = max( max(bl_data.npy), ymax )
+                    zmin = min( min(bl_data.npz), zmin )
+                    zmax = max( max(bl_data.npz), zmax )
                     
                 print('snapshot range in two dimensions:')
                 
@@ -940,12 +888,12 @@ class Snapshot:
             
             elif self.slic_type == 'Y' or self.slic_type == 'W':
                 
-                for bl_data in all_block_data:
+                for bl_data in all_blocks:
                     
-                    xmin = min( min(bl_data[4][0]), xmin )
-                    xmax = max( max(bl_data[4][0]), xmax )
-                    zmin = min( min(bl_data[4][1]), zmin )
-                    zmax = max( max(bl_data[4][1]), zmax )
+                    xmin = min( min(bl_data.npx), xmin )
+                    xmax = max( max(bl_data.npx), xmax )
+                    zmin = min( min(bl_data.npz), zmin )
+                    zmax = max( max(bl_data.npz), zmax )
                     
                 print('snapshot range in two dimensions:')
                 
@@ -954,12 +902,12 @@ class Snapshot:
             
             elif self.slic_type == 'Z':
 
-                for bl_data in all_block_data:
+                for bl_data in all_blocks:
                     
-                    xmin = min( min(bl_data[4][0]), xmin )
-                    xmax = max( max(bl_data[4][0]), xmax )
-                    ymin = min( min(bl_data[4][1]), ymin )
-                    ymax = max( max(bl_data[4][1]), ymax )
+                    xmin = min( min(bl_data.npx), xmin )
+                    xmax = max( max(bl_data.npx), xmax )
+                    ymin = min( min(bl_data.npz), ymin )
+                    ymax = max( max(bl_data.npz), ymax )
                     
                 print('snapshot range in two dimensions:')
                 
@@ -1839,9 +1787,9 @@ def Testing():
     snapshot1.verbose = False
     
     with timer('read one snapshot '):
-        snapshot1.read_snapshot( block_list )
+        snapshot1.read_snapshot(block_list )
         
-        print( snapshot1.snap_data[snapshot1.bl_nums.index(1365)][5])
+#        print( snapshot1.snap_data[snapshot1.bl_nums.index(1365)][5])
         
 #        print(snapshot1.snap_data[50])
     
