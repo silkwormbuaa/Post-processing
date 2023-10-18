@@ -16,6 +16,8 @@ import shutil
 
 import numpy             as     np
 
+import matplotlib.pyplot as     plt
+
 # ----------------------------------------------------------------------
 # >>> GET FILE LIST                                               ( 0 )
 # ----------------------------------------------------------------------
@@ -628,6 +630,54 @@ def find_indices( arr, target ):
     # return left and right index
     return right, left
 
+
+# ----------------------------------------------------------------------
+# >>> convert image format                                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/18  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def convert_image_format(input_file, 
+                         output_file, 
+                         output_format, 
+                         outputsize=None):
+    """
+    input_file  :  the input image
+    output_file :  the output image
+    output_format : 'jpg','pdf','eps','png','bmp'
+    """
+    try:
+        
+        # open image
+        img = plt.imread( input_file )
+            
+        # resize image
+        if outputsize:
+            img = img.resize(outputsize)
+        
+        # get output path
+        output_dir, output_filename = os.path.split(output_file)
+        output_name, _ = os.path.splitext(output_filename)
+        output_file = os.path.join(output_dir, f"{output_name}.{output_format}")
+
+        plt.imshow(img)
+        plt.axis('off')
+        
+        # convert and save figure
+        plt.savefig( output_file,dpi=300 )
+        print(f"{input_file}Successfully converted as {output_file}")
+
+    except Exception as e:
+        print(f"Convert failed:{e}")
+        
 
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)

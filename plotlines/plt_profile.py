@@ -45,7 +45,7 @@ lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
-plt_u_vd_lw = False
+plt_u_vd_lw = True
 plt_u_vd  = False
 plt_u     = False
 plt_RS_uu = False
@@ -276,7 +276,7 @@ if plt_u_vd :
         ax.legend( prop={'size':22,'family':'sans-serif'} ) 
         ax.set_title( r"$u^+_{VD}$ profile", size=20 )
     
-    plt.savefig( figname )
+    plt.savefig( figname + '.pdf' )
     plt.show()
 
 
@@ -358,7 +358,7 @@ if plt_u :
         ax.set_title( r"$u^+$ profile", size=20 )
 
 
-    plt.savefig( figname )
+    plt.savefig( figname + '.pdf' )
     plt.show()
 
 
@@ -449,7 +449,7 @@ if plt_RS_uu:
         ax.legend( prop={'size':15}, loc='upper right' ) 
         ax.set_title( "Reynolds Stress profile u`u`", size=20 )
 
-    plt.savefig( figname )
+    plt.savefig( figname + '.pdf' )
     plt.show()
 
 
@@ -517,7 +517,7 @@ if plt_RS_vv:
         ax.legend( prop={'size':15}, loc='upper left' ) 
         ax.set_title( "Reynolds Stress profile v`v`", size=20 )
 
-    plt.savefig( figname )
+    plt.savefig( figname + '.pdf' )
     plt.show()
     
 
@@ -585,7 +585,7 @@ if plt_RS_ww:
         ax.legend( prop={'size':15}, loc='upper left' ) 
         ax.set_title( "Reynolds Stress profile w`w`", size=20 )
 
-    plt.savefig( figname )
+    plt.savefig( figname + '.pdf' )
     plt.show()
 
 
@@ -653,7 +653,7 @@ if plt_RS_uv:
         ax.legend( prop={'size':15}, loc='best' ) 
         ax.set_title( "Reynolds Stress profile u`v`", size=20 )
 
-    plt.savefig( figname )
+    plt.savefig( figname + '.pdf' )
     plt.show()
     
 
@@ -712,7 +712,7 @@ if plt_rho :
 
     ax.grid()
     
-    plt.savefig( "rho_shifted" )
+    plt.savefig( "rho_shifted" + '.pdf' )
     plt.show()
 
 
@@ -757,7 +757,7 @@ if plt_T :
 
     ax.grid()
     
-    plt.savefig( "T_shifted_new" )
+    plt.savefig( "T_shifted_new" + '.pdf')
     plt.show()
 
 # ----------------------------------------------------------------------
@@ -801,5 +801,5 @@ if plt_Mt :
 
     ax.grid()
     
-    plt.savefig( "Mxt_profile_shifted" )
+    plt.savefig( "Mxt_profile_shifted" + '.pdf' )
     plt.show()
