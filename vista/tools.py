@@ -653,6 +653,13 @@ def convert_image_format(input_file,
     input_file  :  the input image
     output_file :  the output image
     output_format : 'jpg','pdf','eps','png','bmp'
+    outputsize : (width,height)
+    
+    ! But actually now can only convert from bitmap to vector image, cannot the
+    other way around.
+    
+    ! Suggest generate all format figures at the beginning. When there is really 
+      need to convert figures, use linux command 'convert'
     """
     try:
         
@@ -678,6 +685,59 @@ def convert_image_format(input_file,
     except Exception as e:
         print(f"Convert failed:{e}")
         
+
+# ----------------------------------------------------------------------
+# >>> Linear-growing grid vector                                 (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/19  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def lin_grow(xs,ds,expratio,len=None,upbound=None):
+    
+    """
+    xs       : starting point of array \n
+    ds       : starting spacing of array \n
+    expratio : expansion ratio of spacing \n
+    len      : total length of array \n
+    upbound  : upper bound of array \n
+    
+    return:    an array of linear-growing spacing grid points
+    """
+    # if give the total length of array
+    
+    if len is not None:
+        x = np.zeros(len,dtype='f8')
+        x[0] = xs
+        
+        for i in range(1,len):
+            x[i] = x[i-1] + ds
+            ds = ds*expratio
+    
+    
+    # if give the upper bound of array
+    
+    elif upbound is not None:
+        x = []
+        x.append(xs)
+        
+        while x[-1] < upbound:
+            x.append(ds)
+            ds = ds*expratio
+            
+        x[-1] = upbound
+        
+    
+    else: raise ValueError("Please give 'len' OR 'upbound' target array.")
+    
+    return x
 
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
