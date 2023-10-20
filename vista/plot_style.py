@@ -21,6 +21,9 @@ from   matplotlib.patches import Circle
 
 from   mpl_toolkits.axes_grid1 import make_axes_locatable
 
+plt.rcParams["text.usetex"] = True
+plt.rcParams['text.latex.preamble'] = r'\usepackage{bm}'
+plt.rcParams['font.family'] = 'Times New Roman'
 
 # ----------------------------------------------------------------------
 # >>> Plot eigen values around a unit circle                     (Nr.)
@@ -744,7 +747,7 @@ def plot_slicex_stat( zz, yy, v,
                       cbar_levels=None,
                       title=None,
                       arrow=False,
-                      pure=True):
+                      pure=False):
     
     """
     zz,yy are required to be equally spaced by streamplot
@@ -795,24 +798,24 @@ def plot_slicex_stat( zz, yy, v,
                     headwidth=5,
                     headlength=7)
             
-            rect = matplotlib.patches.Rectangle( (-0.9,0.9), 0.3,0.15, 
+            rect = matplotlib.patches.Rectangle( (-0.85,0.85), 0.40,0.20, 
                                                 facecolor='white',
                                                 alpha=0.9 ) # transpanrency
             ax.add_patch(rect)
             
-            ax.quiver(-0.89,0.975,
+            ax.quiver(-0.84,0.95,
                     15.21,0.0, 
-                    width=0.0015,
+                    width=0.0020,
                     angles='xy',
                     scale_units='xy',
                     scale = 160,
                     headwidth=5,
                     headlength=7)
             
-            ax.text( -0.78,0.975,
-                    r"$3\%u_{\infty}$",
-                    va='center',
-                    fontsize=30)
+            ax.text( -0.72,0.95,
+                     r"$\bm{3\%u_{\infty}}$",
+                     va='center',
+                     fontsize=50)
         else:   # streamline
 #            speed = np.sqrt( vectors[0]**2+ vectors[1]**2 )
 #            lw = speed/speed.max()
@@ -835,7 +838,7 @@ def plot_slicex_stat( zz, yy, v,
            
         if title is not None:
             ax.text(0.5,1.1,title,fontsize=20,transform=ax.transAxes)
-        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.8)
+        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.6)
         cbar.ax.set_ylabel(cbar_label,fontsize=20)
         cbar.ax.tick_params(labelsize=20)
 

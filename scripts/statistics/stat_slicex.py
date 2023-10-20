@@ -203,13 +203,22 @@ for i, loc in enumerate(locs):
         
         cbar = r'$Mach$'
         cbar_levels = np.linspace(0.0,2.0,21)
-        plot_slicex_stat( zz, yy, mach,
-                          vectors=[w,v],
-                          filename='Mach_'+str(i+1),
-                          cbar_label=cbar,
-                          cbar_levels=cbar_levels,
-                          col_map='coolwarm',
-                          title=title)
+        
+        if casecode == 'smooth_wall':
+            plot_slicex_stat( zz, yy, mach,
+                              filename='Mach_'+str(i+1),
+                              cbar_label=cbar,
+                              cbar_levels=cbar_levels,
+                              col_map='coolwarm',
+                              title=title)
+        else:
+            plot_slicex_stat( zz, yy, mach,
+                              vectors=[w,v],
+                              filename='Mach_'+str(i+1),
+                              cbar_label=cbar,
+                              cbar_levels=cbar_levels,
+                              col_map='coolwarm',
+                              title=title)
 
 #        cbar = r'$S$'
 #        cbar_levels=np.linspace(-20000.0,20000.,51)
@@ -220,10 +229,14 @@ for i, loc in enumerate(locs):
 #                          title=title)
         
         cbar = r'$\omega_x$'
-        plot_slicex_stat( zz, yy, w1,
+        cbar_levels=np.linspace(-1.0,1.0,21)
+        plot_slicex_stat( zz, yy, w1*delta/u_ref,
+                          vectors=[w,v],
+                          arrow=True,
                           filename='vorticity_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
+                          cbar_levels=cbar_levels,
                           title=title)
 
         cbar = r'$u/u_{\infty}$'

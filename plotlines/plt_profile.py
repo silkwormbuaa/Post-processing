@@ -15,7 +15,6 @@ import matplotlib
 import matplotlib.pyplot  as     plt
 import matplotlib.ticker  as     ticker
 import matplotlib.markers as     markers
-
 import numpy              as     np
 import pandas             as     pd
 
@@ -23,6 +22,11 @@ source_dir = os.path.realpath(__file__).split('plotlines')[0]
 sys.path.append( source_dir )
 
 from   vista.line         import ProfileData
+
+
+plt.rcParams["text.usetex"] = True
+#plt.rcParams['text.latex.preamble'] = r'\usepackage{Times New Roman}'
+plt.rcParams['font.family'] = 'Times New Roman'
 
 
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
@@ -56,7 +60,7 @@ plt_rho   = False
 plt_T     = False
 plt_Mt    = False
 
-pure = True
+pure = False
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -81,7 +85,7 @@ for i, datapath in enumerate(datalist):
     line.inner_normalize('wall_statistics.dat')
     line.vd_transform()
     
-    line.label = r'$\mathrm{D/\delta_0=}$' + label[i]
+    line.label = r'$D/\delta_0=$' + label[i]
     line.color = color[i]
     line.width = width[i]
     line.lstyle = lstyle[i]
@@ -186,14 +190,14 @@ if plt_u_vd_lw:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
+        ax.set_xlabel(  r"$y_s^+$", fontdict={'size':24} )  
         ax.tick_params( axis='x', labelsize=15 )
         ax.set_ylabel( r'$u^+_{VD}$', fontdict={'size':24} )
         ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':22,'family':'sans-serif'} ) 
+        ax.legend( prop={'size':22} ) 
         ax.set_title( r"$u^+_{VD}$ profile", size=20 )
     
-    plt.savefig( figname+"_DNS" )
+    plt.savefig( "law_wall_DNS" )
     plt.show()    
 
 

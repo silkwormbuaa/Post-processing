@@ -6,7 +6,12 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :       
+    Now can only convert from bitmap to vector image, cannot the
+    other way around.
+    
+    ! Suggest generate all format figures at the beginning. When there is really 
+      need to convert figures, use linux command 'convert'
 '''
 
 

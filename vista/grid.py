@@ -848,6 +848,18 @@ def Testing():
     
     grd.read_grid()
     
+    gy = grd.g[0].gy
+    hy = grd.g[0].hy
+    dy = grd.g[0].dy
+    wy = grd.g[0].wy
+    print(gy)
+    
+    print(hy)
+    
+    print(dy)
+    
+    print(wy)
+    
     
 
 
