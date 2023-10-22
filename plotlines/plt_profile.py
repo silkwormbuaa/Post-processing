@@ -49,13 +49,14 @@ lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
-plt_u_vd_lw = True
+plt_u_vd_lw = False
 plt_u_vd  = False
 plt_u     = False
 plt_RS_uu = False
 plt_RS_vv = False
 plt_RS_ww = False
 plt_RS_uv = False
+plt_RS_DNS = True
 plt_rho   = False
 plt_T     = False
 plt_Mt    = False
@@ -199,7 +200,6 @@ if plt_u_vd_lw:
     
     plt.savefig( "law_wall_DNS" )
     plt.show()    
-
 
 
 
@@ -593,6 +593,21 @@ if plt_RS_ww:
     plt.show()
 
 
+# ----------------------------------------------------------------------
+# >>> plot Reynolds stress                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+
 if plt_RS_uv:
 
     fig, ax = plt.subplots( figsize=[8,8] )
@@ -660,6 +675,127 @@ if plt_RS_uv:
     plt.savefig( figname + '.pdf' )
     plt.show()
     
+
+# ----------------------------------------------------------------------
+# >>> plot RS comparison between DNS and smooth wall             (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_RS_DNS:
+    
+    fig, ax = plt.subplots( figsize=[8,8] )
+
+    ax.plot( lineDNS.df['y+'], 
+             lineDNS.df['urms+']**2*lineDNS.df['sqrt(rho/rho_w)']**2,
+             'black',
+             marker='s',
+             fillstyle='none',
+             linestyle='None')
+
+    ax.plot( lineDNS.df['y+'], 
+             lineDNS.df['vrms+']**2*lineDNS.df['sqrt(rho/rho_w)']**2,
+             'black', 
+             marker='s',
+             fillstyle='none',
+             linestyle='None')
+    
+    ax.plot( lineDNS.df['y+'], 
+             (lineDNS.df['wrms+'])**2*lineDNS.df['sqrt(rho/rho_w)']**2,
+             'black', 
+             marker='s',
+             fillstyle='none',
+             linestyle='None')
+    
+    ax.plot( lineDNS.df['y+'], 
+             (lineDNS.df['uv+'])*lineDNS.df['sqrt(rho/rho_w)']**2,
+             'black', 
+             marker='s',
+             fillstyle='none',
+             linestyle='None')
+    
+    ax.plot( line0.df['y+'], 
+             line0.df['u`u`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+
+    ax.plot( line0.df['y+'], 
+             line0.df['v`v`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+
+    ax.plot( line0.df['y+'], 
+             line0.df['w`w`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+
+    ax.plot( line0.df['y+'], 
+             line0.df['u`v`+'],
+             line0.color, 
+             label = line0.label, 
+             ls    = line0.lstyle,
+             linewidth = line0.width)
+        
+    ax.minorticks_on()
+    
+    ax.set_xscale( "symlog", linthresh = 1 )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
+    
+    ax.set_xlim( [1,1000] )
+    ax.set_ylim( [-1.5,8.5] )
+    
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base=10.0, subs = np.arange(1.0,10.0) )
+    
+    ax.xaxis.set_minor_locator( x_minor )
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'DNS_RS'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel(  r"$y_s^+$", fontdict={'size':24} )  
+        ax.tick_params( axis='x', labelsize=15 )
+        ax.set_ylabel( r"$\xi <u_i'u_j'>^+$", fontdict={'size':24} )
+        ax.tick_params( axis='y', labelsize=15 )
+        ax.legend( prop={'size':22} ) 
+        ax.set_title( r"$\xi <u_i'u_j'>^+$ profile", size=20 )
+    
+    plt.savefig( figname )
+    plt.show()    
+
 
 # ----------------------------------------------------------------------
 # >>> Plot rho profile                                           ( 4 )

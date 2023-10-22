@@ -221,7 +221,7 @@ class ProfileData( LineData ):
         """
         filename : 'wall_statistics.dat' file
         
-        return : y+,ys+,u+,u`u`+,...,u`v`+ in self.df
+        return : y+,ys+,u+,u`u`+(density scaled),...,u`v`+ in self.df
         """
         
         with open( filename, 'r' ) as f:
