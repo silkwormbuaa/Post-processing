@@ -49,19 +49,19 @@ lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
-plt_u_vd_lw = False
+plt_u_vd_lw = True
 plt_u_vd  = False
 plt_u     = False
 plt_RS_uu = False
 plt_RS_vv = False
 plt_RS_ww = False
 plt_RS_uv = False
-plt_RS_DNS = True
+plt_RS_DNS = False
 plt_rho   = False
 plt_T     = False
 plt_Mt    = False
 
-pure = False
+pure = True
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -109,7 +109,7 @@ line0.lstyle = '--'
 
 lineDNS = ProfileData( dataDNS )
 lineDNS.label = "DNS"
-lineDNS.color = 'gray'
+lineDNS.color = 'black'
 lineDNS.lstyle = 's'
 lineDNS.marker = markers.MarkerStyle(marker='s')
 

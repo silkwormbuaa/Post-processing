@@ -745,9 +745,10 @@ def plot_slicex_stat( zz, yy, v,
                       col_map=None,
                       cbar_label=None,
                       cbar_levels=None,
+                      cbar_ticks=None,
                       title=None,
                       arrow=False,
-                      pure=False):
+                      pure=True):
     
     """
     zz,yy are required to be equally spaced by streamplot
@@ -762,7 +763,8 @@ def plot_slicex_stat( zz, yy, v,
     
     if cbar_levels is None: cbar_levels=51
     
-    cs = ax.contourf( zz, yy, v, cmap=col_map, levels=cbar_levels )
+    # extend : fill the region where value exceed min and max
+    cs = ax.contourf(zz, yy, v, cmap=col_map, levels=cbar_levels, extend='both')
     
     ax.set_xlim([np.min(zz),np.max(zz)])
     ax.set_ylim([-0.1,1.1])
@@ -838,12 +840,32 @@ def plot_slicex_stat( zz, yy, v,
            
         if title is not None:
             ax.text(0.5,1.1,title,fontsize=20,transform=ax.transAxes)
-        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.6)
-        cbar.ax.set_ylabel(cbar_label,fontsize=20)
-        cbar.ax.tick_params(labelsize=20)
+        
+        # set colorbar
+        
+        cbar = plt.colorbar(cs,
+                            orientation='vertical', 
+                            shrink=0.8,
+                            location='right',
+                            aspect=10,
+                            ticks=cbar_ticks)
+        
+        cbar.outline.set_linewidth(2)
+        
+        cbar.ax.set_xlabel( cbar_label,
+                            fontsize=50,
+                            labelpad=25,
+                            loc='left')
+        
+        cbar.ax.tick_params( labelsize=50, 
+                             direction='in',
+                             length=20.0,
+                             width=2.0)
 
-        ax.tick_params(axis='x',labelsize=20,pad=10)
-        ax.tick_params(axis='y',labelsize=20,pad=10)
+        # set ticks on the main xy axises
+        
+        ax.tick_params(axis='x',labelsize=30,pad=10)
+        ax.tick_params(axis='y',labelsize=30,pad=10)
 
         plt.gca().set_aspect('equal', adjustable='box')
 

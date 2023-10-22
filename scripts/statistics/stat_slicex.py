@@ -40,7 +40,7 @@ from   vista.plot_style  import plot_slicex_stat
 
 # =============================================================================
 
-locs_delta = np.linspace(-20,-6,8)
+locs_delta = np.linspace(-20,-20,1)
 outfolder  = '/yz_planes'
 
 # =============================================================================
@@ -197,27 +197,36 @@ for i, loc in enumerate(locs):
         
         define_wall_shape( z*5.2, casecode=casecode, yshift=(h_ridge-h_md) )
         
+        # Do periodic average for smallest ridge spacing case
+        
         if casecode == "1221":  # otherwise streamline looks too messy
             w = periodic_average(w,16,axis=1)
             v = periodic_average(v,16,axis=1)
+            mach   = periodic_average(mach,16,axis=1)
+            tke    = periodic_average(tke,16,axis=1)
+            RS     = periodic_average(RS,16,axis=1)
+            w1     = periodic_average(w1,16,axis=1)
+            p_fluc = periodic_average(p_fluc,16,axis=1)
         
-        cbar = r'$Mach$'
+        cbar = r'$\langle Mach \rangle$'
         cbar_levels = np.linspace(0.0,2.0,21)
-        
+        cbar_ticks  = np.linspace(0.0,2.0,5)
         if casecode == 'smooth_wall':
             plot_slicex_stat( zz, yy, mach,
                               filename='Mach_'+str(i+1),
+                              col_map='coolwarm',
                               cbar_label=cbar,
                               cbar_levels=cbar_levels,
-                              col_map='coolwarm',
+                              cbar_ticks=cbar_ticks,
                               title=title)
         else:
             plot_slicex_stat( zz, yy, mach,
                               vectors=[w,v],
                               filename='Mach_'+str(i+1),
+                              col_map='coolwarm',
                               cbar_label=cbar,
                               cbar_levels=cbar_levels,
-                              col_map='coolwarm',
+                              cbar_ticks=cbar_ticks,
                               title=title)
 
 #        cbar = r'$S$'
@@ -228,60 +237,70 @@ for i, loc in enumerate(locs):
 #                          cbar_levels=cbar_levels,
 #                          title=title)
         
-        cbar = r'$\omega_x$'
-        cbar_levels=np.linspace(-1.0,1.0,21)
+        cbar = r'$\frac{\langle \omega_x \rangle \delta_0}{u_\infty}$ '
+        cbar_levels = np.linspace(-1.0,1.0,21)
+        cbar_ticks  = np.linspace(-1.0,1.0,5)
         plot_slicex_stat( zz, yy, w1*delta/u_ref,
                           vectors=[w,v],
                           arrow=True,
                           filename='vorticity_'+str(i+1),
-                          cbar_label=cbar,
                           col_map='coolwarm',
+                          cbar_label=cbar,
                           cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           title=title)
 
-        cbar = r'$u/u_{\infty}$'
-        cbar_levels=np.linspace(-0.2,1.1,14)
+        cbar = r'$\langle u \rangle /u_{\infty}$'
+        cbar_levels = np.linspace(0.0,1.0,21)
+        cbar_ticks  = np.linspace(0.0,1.0,5)
         plot_slicex_stat( zz, yy, u/u_ref,
                           filename='u_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
                           cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           title=title)
 
-        cbar = r'$v$'
+        cbar = r'$\langle v \rangle$'
         cbar_levels = np.linspace(-3.0,3.0,31)
+        cbar_ticks  = np.linspace(-3.0,3.0,5)
         plot_slicex_stat( zz, yy, v/u_ref*100,
                           vectors=[w,v],
                           arrow=True,
                           filename='v_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           col_map='coolwarm',
                           title=title)
         
-        cbar = r'$tke$'
-        cbar_levels = np.linspace(0.0,2.6,27)
+        cbar = r'$\langle tke ^+ \rangle \cdot 100$'
+        cbar_levels = np.linspace(0.0,2.5,26)
+        cbar_ticks  = np.linspace(0.0,2.5,6)
         plot_slicex_stat( zz, yy, tke/(u_ref**2)*100,
                           filename='tke_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           col_map='coolwarm',
                           title=title)
 
-        cbar = r'$-<u`v`>$'
+        cbar = r"$-\langle u^{'} v^{'} \rangle$"
         plot_slicex_stat( zz, yy, -RS/(u_ref**2),
                           filename='RS_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
                           title=title)
 
-        cbar = r'$p`$'
-        cbar_levels = np.linspace(0.0, 0.035,36)
-        plot_slicex_stat( zz, yy, p_fluc/p_ref,
+        cbar = r"$\sqrt{\langle p^{'}p^{'}\rangle}\cdot 100$"
+        cbar_levels = np.linspace(0.0, 3.2,33)
+        cbar_ticks  = np.linspace(0.0,3.2,5)
+        plot_slicex_stat( zz, yy, p_fluc/p_ref*100,
                           filename='p_fluc_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
                           col_map='coolwarm',
+                          cbar_ticks=cbar_ticks,
                           title=title)
         
     print(f"Finished doing slicing at x = {loc_delta:10.2f}.",end='') 
