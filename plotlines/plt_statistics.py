@@ -10,19 +10,19 @@
 
 import os
 
-import numpy             as     np
+import matplotlib.pyplot  as     plt
+import matplotlib.ticker  as     ticker
+import matplotlib.patches as     patches
 
-import matplotlib        as     mpl
+from   plt_tools          import PlotDataframe
 
-import matplotlib.pyplot as     plt
-
-import matplotlib.ticker as     ticker
-
-from   plt_tools         import PlotDataframe
-
-plt.rcParams['font.family'] = "serif"
-
+plt.rcParams["text.usetex"] = True
+plt.rcParams['text.latex.preamble'] = r'\usepackage{bm}'
+plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams.update({'font.size': 20})
+
+
+# =============================================================================
 
 Datapath = "/home/wencanwu/my_simulation/temp/DataPost/"
 
@@ -30,23 +30,23 @@ DataFile = "statistic_compare"
 
 xvar =  'D/δ' # or 'ESy'
 
-Pure =  False  # if pure, without legend and label
+pure =  False  # if pure, without legend and label
 
-plt_DU_vd_plus = True
+plt_DU_vd_plus = True  # roughness function based on vd transformed velocity
 
-plt_DU   =  False
+plt_DU   =  False    # roughness function
 
-plt_Cf   =  True
+plt_Cf   =  False     # skin friction coefficient
 
-plt_vbar =  True
+plt_vbar =  False     # normalized vertical velocity
 
-plt_Lsep =  True 
+plt_Lsep =  False     # length of separation
 
-plt_Pmax =  True 
+plt_Pmax =  False     # maximum wall pressure
 
-plt_pmax =  True 
+plt_pmax =  False     # maximum pressure fluctuation
 
-plt_Hvor =  False 
+plt_Hvor =  False    # height of vortex
 
 os.chdir(Datapath)
 
@@ -74,67 +74,63 @@ if plt_DU_vd_plus :
     fig, ax = plt.subplots( figsize=[8,8], 
                             constrained_layout=True )
 
-    ax.scatter( data.df[xvar].iloc[1], 
-                data.df['DU_vd+'].iloc[1],
-                label=r'$\mathrm{D/\delta_0=2.0}$', 
+    ax.scatter( data.df[xvar].iloc[1:], 
+                data.df['DU_vd+'].iloc[1:],
                 color='blue',
                 marker='s',
-                s = 100)
-
-    ax.scatter( data.df[xvar].iloc[2], 
-                data.df['DU_vd+'].iloc[2],
-                label=r'$\mathrm{D/\delta_0=1.0}$', 
-                color='blue',
-                marker='s',
-                s = 100)
-
-    ax.scatter( data.df[xvar].iloc[3], 
-                data.df['DU_vd+'].iloc[3],
-                label=r'$\mathrm{D/\delta_0=0.5}$', 
-                color='blue',
-                marker='s',
-                s = 100)
-
-    ax.scatter( data.df[xvar].iloc[4], 
-                data.df['DU_vd+'].iloc[4],
-                label=r'$\mathrm{D/\delta_0=0.25}$', 
-                color='blue',
-                marker='s',
-                s = 100)
+                s = 200 )
+    
+    ax.plot( [0.1,3.0],[0.0,0.0],
+             color='gray',
+             linestyle='--',
+             linewidth=4.0)
     
     ax.minorticks_on()
     
     ax.tick_params(which='major',
                    axis='both',
                    direction='in',
-                   length=10,
-                   width=2.0)
+                   length=20,
+                   width=3.0)
+    
     ax.tick_params(which='minor',
                    axis='both', 
                    direction='in',
-                   length=5,
-                   width=1.0)
+                   length=10,
+                   width=2.0)
+    
     ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1.0))
     
 #    ax.set_xscale( "log" )
 #    ax.set_xlabel( r'$\mathrm{D/delta_0}$', fontdict={'size':24} )
     
-    ax.set_xlim( [0.00,2.1] )
-    ax.set_ylim( [0.80,2.4] )
-        
-#    ax.set_ylabel( r'$\mathrm{\Delta U_{vd}^+}$', fontdict={'size':24} )
+    ax.set_xlim( [0.0,2.1] )
+    ax.set_ylim( [-0.5,2.5] )
     
     ax.grid(visible=True, which='major',axis='both',color='gray',
             linestyle='--',linewidth=0.5)
     
-    ax.set_axisbelow(True)
         
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    figname = "DU_vd_plus"
     
-#    ax.legend(loc='best')
+    if pure:
+        figname = figname + '_pure'
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        
+    else:
+        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
+        ax.set_ylabel( r'$\Delta U_{vd}^+$', fontsize=30, labelpad=0 )
+        ax.tick_params( axis='x', labelsize=30, pad=15 )
+        ax.tick_params( axis='y', labelsize=30, pad=10 )
+
+    ax.set_axisbelow(False)  # set axis order at bottom
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
     
-    plt.savefig("DU_vd_plus_pure.png")
+    plt.savefig( figname+'.pdf' )
     plt.show()
 
 
@@ -334,7 +330,7 @@ if plt_vbar :
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     
 #    ax.set_xscale( "log" )
-    if not Pure:
+    if not pure:
         ax.set_xlabel( r'$\mathrm{%s}$'%xvar, fontdict={'size':24} )
         ax.set_ylabel( r"$\mathrm{ v_{max}/u_{\infty}\times 10^2}$", 
                       fontdict={'size':24} )
@@ -355,9 +351,9 @@ if plt_vbar :
     ax.set_axisbelow(True)   # the grid lines will below the plot element.
     
     
-    if not Pure:
+    if not pure:
         ax.legend(loc='best')
-    if Pure:
+    if pure:
         plt.savefig("%s_v_pure.png"%xvar[0])
     else:
         plt.savefig("%s_v_.png"%xvar[0])
