@@ -276,7 +276,7 @@ if plt_vbar :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$\langle v_{max} \rangle /u_{ref} \cdot 100$', 
+        ax.set_ylabel( r'$\langle v_{max} \rangle /u_{\infty} \cdot 100$', 
                        fontsize=30, labelpad=0 )
         ax.tick_params( axis='x', labelsize=30, pad=15 )
         ax.tick_params( axis='y', labelsize=30, pad=10 )
@@ -524,7 +524,7 @@ if plt_Pmax :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$\langle p \rangle_{max}/p_{ref}$', 
+        ax.set_ylabel( r'$\langle p \rangle_{max}/p_{\infty}$', 
                        fontsize=30, labelpad=0 )
         ax.tick_params( axis='x', labelsize=30, pad=15 )
         ax.tick_params( axis='y', labelsize=30, pad=10 )
@@ -607,7 +607,7 @@ if plt_pmax :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r"$\sqrt{\langle p^{'}p^{'} \rangle_{max}}/p_{ref}$", 
+        ax.set_ylabel( r"$\sqrt{\langle p^{'}p^{'} \rangle_{max}}/p_{\infty}$", 
                        fontsize=30, labelpad=0 )
         ax.tick_params( axis='x', labelsize=30, pad=15 )
         ax.tick_params( axis='y', labelsize=30, pad=10 )

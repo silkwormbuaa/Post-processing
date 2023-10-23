@@ -48,18 +48,18 @@ width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
 plt_u_vd_lw = True
-plt_u_vd  = True
-plt_u     = True
-plt_RS_uu = True
-plt_RS_vv = True
-plt_RS_ww = True
-plt_RS_uv = True
-plt_RS_DNS = True
-plt_rho   = True
-plt_T     = True
-plt_Mt    = True
+plt_u_vd    = False
+plt_u       = False
+plt_RS_uu   = False
+plt_RS_vv   = False
+plt_RS_ww   = False
+plt_RS_uv   = False
+plt_RS_DNS  = True
+plt_rho     = False
+plt_T       = False
+plt_Mt      = False
 
-pure = False
+pure = True
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -114,7 +114,7 @@ lineDNS.marker = markers.MarkerStyle(marker='s')
 os.chdir( OutPath )
 
 # ----------------------------------------------------------------------
-# >>> plot comparison between smooth wall and law of wall                                                (Nr.)
+# >>> plot comparison between smooth wall and law of wall        (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -140,18 +140,20 @@ if plt_u_vd_lw:
     ax.plot( x1,y1,'black',ls=':')
     ax.plot( x2,y2,'black',ls=':')
        
+    ax.plot( lineDNS.df['y+'][::2], 
+             lineDNS.df['u_vd+'][::2],
+             lineDNS.color, 
+             marker='s',
+             markersize=10,
+             fillstyle='none',
+             linestyle='None')
+
     ax.plot( line0.df['y+'], 
              line0.df['u+_vd'],
              line0.color, 
              label = line0.label, 
              ls    = line0.lstyle,
              linewidth = line0.width)
-
-    ax.plot( lineDNS.df['y+'][::2], 
-             lineDNS.df['u_vd+'][::2],
-             lineDNS.color, 
-             marker='s',
-             fillstyle='none')
     
     ax.minorticks_on()
     
@@ -196,7 +198,7 @@ if plt_u_vd_lw:
         ax.legend( prop={'size':30} ) 
         ax.set_title( r"$u^+_{VD}$ profile", size=30 )
     
-    plt.savefig( "law_wall_DNS" )
+    plt.savefig( figname )
     plt.show()    
 
 
@@ -696,6 +698,7 @@ if plt_RS_DNS:
              lineDNS.df['urms+']**2*lineDNS.df['sqrt(rho/rho_w)']**2,
              'black',
              marker='s',
+             markersize=10,
              fillstyle='none',
              linestyle='None')
 
@@ -703,6 +706,7 @@ if plt_RS_DNS:
              lineDNS.df['vrms+']**2*lineDNS.df['sqrt(rho/rho_w)']**2,
              'black', 
              marker='s',
+             markersize=10,
              fillstyle='none',
              linestyle='None')
     
@@ -710,6 +714,7 @@ if plt_RS_DNS:
              (lineDNS.df['wrms+'])**2*lineDNS.df['sqrt(rho/rho_w)']**2,
              'black', 
              marker='s',
+             markersize=10,
              fillstyle='none',
              linestyle='None')
     
@@ -717,6 +722,7 @@ if plt_RS_DNS:
              (lineDNS.df['uv+'])*lineDNS.df['sqrt(rho/rho_w)']**2,
              'black', 
              marker='s',
+             markersize=10,
              fillstyle='none',
              linestyle='None')
     
@@ -786,10 +792,10 @@ if plt_RS_DNS:
     else:
         ax.set_xlabel(  r"$y_s^+$", fontdict={'size':24} )  
         ax.tick_params( axis='x', labelsize=15 )
-        ax.set_ylabel( r"$\xi <u_i'u_j'>$", fontdict={'size':24} )
+        ax.set_ylabel( r"$\xi \langle u_i'u_j'\rangle $", fontdict={'size':24} )
         ax.tick_params( axis='y', labelsize=15 )
         ax.legend( prop={'size':22} ) 
-        ax.set_title( r"$\xi <u_i'u_j'>$ profile", size=20 )
+        ax.set_title( r"$\xi \langle u_i'u_j'\rangle $ profile", size=20 )
     
     plt.savefig( figname )
     plt.show()    

@@ -736,6 +736,7 @@ def plot_slicez_stat( xx, yy, v,
 # ----------------------------------------------------------------------
 
 def plot_slicex_stat( zz, yy, v,
+                      tag=None,
                       wall=True, 
                       sonic=True,
                       separation=False,
@@ -748,7 +749,7 @@ def plot_slicex_stat( zz, yy, v,
                       cbar_ticks=None,
                       title=None,
                       arrow=False,
-                      pure=True):
+                      pure=False):
     
     """
     zz,yy are required to be equally spaced by streamplot
@@ -769,6 +770,11 @@ def plot_slicex_stat( zz, yy, v,
     ax.set_xlim([np.min(zz),np.max(zz)])
     ax.set_ylim([-0.1,1.1])
     
+    if pure:
+        textfontsize = 80
+    else:
+        textfontsize = 50
+
     if sonic: 
         with open('soniclines.pkl','rb') as f:
             lines = pickle.load( f )
@@ -800,9 +806,9 @@ def plot_slicex_stat( zz, yy, v,
                     headwidth=5,
                     headlength=7)
             
-            rect = matplotlib.patches.Rectangle( (-0.85,0.85), 0.40,0.20, 
+            rect = matplotlib.patches.Rectangle( (-0.85,0.875), 0.50,0.15, 
                                                 facecolor='white',
-                                                alpha=0.9 ) # transpanrency
+                                                alpha=0.8 ) # transpanrency
             ax.add_patch(rect)
             
             ax.quiver(-0.84,0.95,
@@ -817,7 +823,7 @@ def plot_slicex_stat( zz, yy, v,
             ax.text( -0.72,0.95,
                      r"$3\%u_{\infty}$",
                      va='center',
-                     fontsize=50)
+                     fontsize=textfontsize)
         else:   # streamline
 #            speed = np.sqrt( vectors[0]**2+ vectors[1]**2 )
 #            lw = speed/speed.max()
@@ -834,7 +840,20 @@ def plot_slicex_stat( zz, yy, v,
         y_wall = np.array(df_wall['y'])
 #        ax.plot(z_wall,y_wall,'black')
         ax.fill_between(z_wall,-0.1,y_wall,color='grey',zorder=10)
-    
+
+    if tag:
+#        rect2 = matplotlib.patches.Rectangle( (0.20,0.85), 0.7,0.20, 
+#                                              facecolor='white',
+#                                              alpha=0.8,
+#                                              zorder=100 ) # transpanrency
+#        ax.add_patch( rect2 )
+        
+        ax.text( 0.1, 0.95,
+                 tag,
+                 va='center',
+                 fontsize=textfontsize,
+                 zorder=101,
+                 bbox={"fc":"white","alpha":0.8,"ec":"None"})    
     
     if not pure: 
            

@@ -440,7 +440,9 @@ def read_case_parameter( filename ):
             
             if line.strip() and not line.startswith("#"):
                 
-                key, value = line.strip().split("=")
+                # split from the first '='
+                
+                key, value = line.strip().split("=",1)
                 
                 # remove extra space and comma
                 
