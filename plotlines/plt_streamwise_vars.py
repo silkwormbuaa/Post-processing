@@ -20,7 +20,9 @@ sys.path.append( source_dir )
 
 from   vista.line        import LineData
 
-plt.rcParams.update({'font.size': 18})
+plt.rcParams["text.usetex"] = True
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+plt.rcParams['font.family'] = "Times New Roman"
 
 
 OutPath  = "/home/wencanwu/my_simulation/temp/DataPost/streamwise_lines"

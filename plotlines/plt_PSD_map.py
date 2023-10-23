@@ -31,7 +31,9 @@ from   vista.tools       import get_filelist
 
 from   vista.timer       import timer
 
-plt.rcParams.update({'font.size': 25})
+plt.rcParams["text.usetex"] = True
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+plt.rcParams['font.family'] = "Times New Roman"
 
 # Option zone
 # =============================================================================

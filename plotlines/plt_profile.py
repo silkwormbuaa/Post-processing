@@ -23,11 +23,9 @@ sys.path.append( source_dir )
 
 from   vista.line         import ProfileData
 
-
 plt.rcParams["text.usetex"] = True
-#plt.rcParams['text.latex.preamble'] = r'\usepackage{Times New Roman}'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
-
 
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
 
@@ -50,18 +48,18 @@ width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
 plt_u_vd_lw = True
-plt_u_vd  = False
-plt_u     = False
-plt_RS_uu = False
-plt_RS_vv = False
-plt_RS_ww = False
-plt_RS_uv = False
-plt_RS_DNS = False
-plt_rho   = False
-plt_T     = False
-plt_Mt    = False
+plt_u_vd  = True
+plt_u     = True
+plt_RS_uu = True
+plt_RS_vv = True
+plt_RS_ww = True
+plt_RS_uv = True
+plt_RS_DNS = True
+plt_rho   = True
+plt_T     = True
+plt_Mt    = True
 
-pure = True
+pure = False
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -137,7 +135,7 @@ if plt_u_vd_lw:
     x2 = np.linspace(8,400,300)
     y2  = np.log(x2)/0.41 + 5.1    
 
-    fig, ax = plt.subplots(figsize=[10,8])
+    fig, ax = plt.subplots(figsize=[10,8], constrained_layout=True)
     
     ax.plot( x1,y1,'black',ls=':')
     ax.plot( x2,y2,'black',ls=':')
@@ -191,12 +189,12 @@ if plt_u_vd_lw:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel(  r"$y_s^+$", fontdict={'size':24} )  
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.set_ylabel( r'$u^+_{VD}$', fontdict={'size':24} )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':22} ) 
-        ax.set_title( r"$u^+_{VD}$ profile", size=20 )
+        ax.set_xlabel(  r"$y_s^+$", fontsize=30 )  
+        ax.tick_params( axis='x', labelsize=30, pad=10 )
+        ax.set_ylabel( r'$u^+_{VD}$', fontsize=30 )
+        ax.tick_params( axis='y', labelsize=30, pad=10 )
+        ax.legend( prop={'size':30} ) 
+        ax.set_title( r"$u^+_{VD}$ profile", size=30 )
     
     plt.savefig( "law_wall_DNS" )
     plt.show()    
@@ -387,7 +385,7 @@ if plt_RS_uu:
     #ax.plot(dP.df['y+'],
     #        dP.df['urms+']*dP.df['urms+'],
     #        'gray',
-    #        label = r'$u^\prime u^\prime$ pirozzoli',
+    #        label = r'$u^{'} u^{'}$ pirozzoli',
     #        ls    = "",
     #        marker='+',
     #        \linewidth=4)
@@ -446,12 +444,12 @@ if plt_RS_uu:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r'$\xi u^\prime u^\prime$',
+        ax.set_ylabel( r"$\xi \langle u^{'} u^{'} \rangle $",
                         fontdict={'size':24} )
         ax.tick_params( axis='x', labelsize=15 )
         ax.tick_params( axis='y', labelsize=15 )
         ax.legend( prop={'size':15}, loc='upper right' ) 
-        ax.set_title( "Reynolds Stress profile u`u`", size=20 )
+        ax.set_title( "Reynolds Stress profile u'u'", size=20 )
 
     plt.savefig( figname + '.pdf' )
     plt.show()
@@ -514,12 +512,12 @@ if plt_RS_vv:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r'$\xi v^\prime v^\prime$',
+        ax.set_ylabel( r"$\xi \langle v^{'} v^{'} \rangle$",
                         fontdict={'size':24} )
         ax.tick_params( axis='x', labelsize=15 )
         ax.tick_params( axis='y', labelsize=15 )
         ax.legend( prop={'size':15}, loc='upper left' ) 
-        ax.set_title( "Reynolds Stress profile v`v`", size=20 )
+        ax.set_title( "Reynolds Stress profile v'v'", size=20 )
 
     plt.savefig( figname + '.pdf' )
     plt.show()
@@ -582,12 +580,12 @@ if plt_RS_ww:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r'$\xi w^\prime w^\prime$',
+        ax.set_ylabel( r"$\xi \langle w^{'} w^{'} \rangle$",
                         fontdict={'size':24} )
         ax.tick_params( axis='x', labelsize=15 )
         ax.tick_params( axis='y', labelsize=15 )
         ax.legend( prop={'size':15}, loc='upper left' ) 
-        ax.set_title( "Reynolds Stress profile w`w`", size=20 )
+        ax.set_title( "Reynolds Stress profile w'w'", size=20 )
 
     plt.savefig( figname + '.pdf' )
     plt.show()
@@ -665,12 +663,12 @@ if plt_RS_uv:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r'$\xi u^\prime v^\prime$',
+        ax.set_ylabel( r"$\xi \angle u^{'} v^{'} \rangle$",
                         fontdict={'size':24} )
         ax.tick_params( axis='x', labelsize=15 )
         ax.tick_params( axis='y', labelsize=15 )
         ax.legend( prop={'size':15}, loc='best' ) 
-        ax.set_title( "Reynolds Stress profile u`v`", size=20 )
+        ax.set_title( "Reynolds Stress profile u'v'", size=20 )
 
     plt.savefig( figname + '.pdf' )
     plt.show()
@@ -788,10 +786,10 @@ if plt_RS_DNS:
     else:
         ax.set_xlabel(  r"$y_s^+$", fontdict={'size':24} )  
         ax.tick_params( axis='x', labelsize=15 )
-        ax.set_ylabel( r"$\xi <u_i'u_j'>^+$", fontdict={'size':24} )
+        ax.set_ylabel( r"$\xi <u_i'u_j'>$", fontdict={'size':24} )
         ax.tick_params( axis='y', labelsize=15 )
         ax.legend( prop={'size':22} ) 
-        ax.set_title( r"$\xi <u_i'u_j'>^+$ profile", size=20 )
+        ax.set_title( r"$\xi <u_i'u_j'>$ profile", size=20 )
     
     plt.savefig( figname )
     plt.show()    
@@ -837,7 +835,7 @@ if plt_rho :
     ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
     ax.tick_params( axis='x', labelsize=15 )
     
-    ax.set_ylabel( r'$rho$', fontdict={'size':24} )
+    ax.set_ylabel( r"$\rho$", fontdict={'size':24} )
     ax.tick_params( axis='y', labelsize=15 )
     
     ax.set_xlim( [1,1000] )
@@ -848,7 +846,7 @@ if plt_rho :
     ax.xaxis.set_minor_locator( x_minor )
 
     ax.legend( prop={'size':20} ) 
-    ax.set_title( r"$rho$ profile", size=20 )
+    ax.set_title( r"$\rho$ profile", size=20 )
 
     ax.grid()
     

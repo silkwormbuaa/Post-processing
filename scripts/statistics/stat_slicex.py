@@ -42,6 +42,7 @@ from   vista.plot_style  import plot_slicex_stat
 
 locs_delta = np.linspace(-20,-20,1)
 outfolder  = '/yz_planes'
+periodic_ave = False
 
 # =============================================================================
 
@@ -62,6 +63,7 @@ x_imp   = float( parameters.get('x_imp') )
 p_ref   = float( parameters.get('p_ref') )
 u_ref   = float( parameters.get('u_ref') )
 casecode =  str( parameters.get('casecode') )
+n_period = int( parameters.get('period') )
 
 locs = locs_delta*delta + 50.4
 
@@ -199,14 +201,15 @@ for i, loc in enumerate(locs):
         
         # Do periodic average for smallest ridge spacing case
         
-        if casecode == "1221":  # otherwise streamline looks too messy
-            w = periodic_average(w,16,axis=1)
-            v = periodic_average(v,16,axis=1)
-            mach   = periodic_average(mach,16,axis=1)
-            tke    = periodic_average(tke,16,axis=1)
-            RS     = periodic_average(RS,16,axis=1)
-            w1     = periodic_average(w1,16,axis=1)
-            p_fluc = periodic_average(p_fluc,16,axis=1)
+        if periodic_ave:  # otherwise streamline looks too messy
+            n_period = int(n_period/2)
+            w = periodic_average(w,n_period,axis=1)
+            v = periodic_average(v,n_period,axis=1)
+            mach   = periodic_average(mach,n_period,axis=1)
+            tke    = periodic_average(tke,n_period,axis=1)
+            RS     = periodic_average(RS,n_period,axis=1)
+            w1     = periodic_average(w1,n_period,axis=1)
+            p_fluc = periodic_average(p_fluc,n_period,axis=1)
         
         cbar = r'$\langle Mach \rangle$'
         cbar_levels = np.linspace(0.0,2.0,21)
@@ -303,6 +306,6 @@ for i, loc in enumerate(locs):
                           cbar_ticks=cbar_ticks,
                           title=title)
         
-    print(f"Finished doing slicing at x = {loc_delta:10.2f}.",end='') 
+    print(f"Finished doing slicing at x = {loc_delta:10.2f} delta.",end='') 
     print(f" Progress {(i+1)/len(locs)*100:5.2f} %.")
     print(f"=====================================\n")

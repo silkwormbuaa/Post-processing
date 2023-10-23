@@ -16,10 +16,8 @@ import matplotlib.ticker  as     ticker
 from   plt_tools          import PlotDataframe
 
 plt.rcParams["text.usetex"] = True
-plt.rcParams['text.latex.preamble'] = r'\usepackage{bm}'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
-plt.rcParams.update({'font.size': 20})
-
 
 # =============================================================================
 
@@ -29,7 +27,7 @@ DataFile = "statistic_compare"
 
 xvar =  'D/δ' # or 'ESy'
 
-pure =  True  # if pure, without legend and label
+pure =  False  # if pure, without legend and label
 
 plt_DU_vd_plus = True  # roughness function based on vd transformed velocity
 
@@ -121,7 +119,7 @@ if plt_DU_vd_plus :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$\Delta U_{vd}^+$', fontsize=30, labelpad=0 )
+        ax.set_ylabel( r'$\Delta U_{VD}^+$', fontsize=30, labelpad=0 )
         ax.tick_params( axis='x', labelsize=30, pad=15 )
         ax.tick_params( axis='y', labelsize=30, pad=10 )
 

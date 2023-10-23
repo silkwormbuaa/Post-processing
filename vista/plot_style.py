@@ -22,8 +22,8 @@ from   matplotlib.patches import Circle
 from   mpl_toolkits.axes_grid1 import make_axes_locatable
 
 plt.rcParams["text.usetex"] = True
-plt.rcParams['text.latex.preamble'] = r'\usepackage{bm}'
-plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+plt.rcParams['font.family'] = "Times New Roman"
 
 # ----------------------------------------------------------------------
 # >>> Plot eigen values around a unit circle                     (Nr.)
@@ -815,7 +815,7 @@ def plot_slicex_stat( zz, yy, v,
                     headlength=7)
             
             ax.text( -0.72,0.95,
-                     r"$\bm{3\%u_{\infty}}$",
+                     r"$3\%u_{\infty}$",
                      va='center',
                      fontsize=50)
         else:   # streamline
