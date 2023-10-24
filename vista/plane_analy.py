@@ -33,11 +33,11 @@ import pickle
 def save_sonic_line( xx, yy, mach ):
     
     """
-    xx,yy: 2d numpy array storing coordinates
-    mach : 2d numpy array 
+    lines: list of sonic lines(each line is a 2D array of coordinates )
     """
     
     lines = []
+    mean_heights = []
     
     fig, ax = plt.subplots(figsize=(10, 4))
 
@@ -49,9 +49,18 @@ def save_sonic_line( xx, yy, mach ):
         
     plt.close()
     
+    # compute the average height of sonic line
+    
+    for i, line in enumerate(lines):
+        
+        mean_height = np.array( line[:,1] ).mean()
+        print(f"Mean height of sonic line [{i}] is {mean_height}.")
+        mean_heights.append(mean_height)
+    
     with open('soniclines.pkl','wb') as f:
         
         pickle.dump( lines, f )
+        pickle.dump( mean_heights, f )
         
 
 # ----------------------------------------------------------------------

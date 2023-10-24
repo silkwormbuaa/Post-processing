@@ -29,21 +29,16 @@ xvar =  'D/δ' # or 'ESy'
 
 pure =  False  # if pure, without legend and label
 
-plt_DU_vd_plus = True  # roughness function based on vd transformed velocity
+plt_DU_vd_plus =  False     # roughness function based on vd transformed velocity
+plt_Cf         =  False     # skin friction coefficient
+plt_vbar       =  False     # normalized vertical velocity
+plt_Lsep       =  False     # length of separation
+plt_Asep       =  False     # area of separation
+plt_Pmax       =  False     # maximum wall pressure
+plt_pmax       =  False     # maximum pressure fluctuation
+plt_Hvor       =  False     # height of vortex
+plt_Hson       =  True      # height of sonic line
 
-plt_Cf   =  True     # skin friction coefficient
-
-plt_vbar =  True     # normalized vertical velocity
-
-plt_Lsep =  True     # length of separation
-
-plt_Asep =  True      # area of separation
-
-plt_Pmax =  True     # maximum wall pressure
-
-plt_pmax =  True     # maximum pressure fluctuation
-
-plt_Hvor =  True     # height of vortex
 
 os.chdir(Datapath)
 
@@ -683,6 +678,89 @@ if plt_Hvor :
     else:
         ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
         ax.set_ylabel( r"$H_{vortice}/\delta_{0}$", 
+                       fontsize=30, labelpad=0 )
+        ax.tick_params( axis='x', labelsize=30, pad=15 )
+        ax.tick_params( axis='y', labelsize=30, pad=10 )
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname+'.pdf' )
+    plt.show()
+    
+
+# ----------------------------------------------------------------------
+# >>> plot Hson (height of sonic line)                                  (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/24  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_Hson :
+    
+    fig, ax = plt.subplots( figsize=[8,8], 
+                            constrained_layout=True )
+
+    ax.scatter( data.df[xvar].iloc[1:], 
+                data.df['H_sonic'].iloc[1:]*10, 
+                color='blue',
+                marker='s' ,
+                s = 200,
+                zorder=10)
+
+    Hson_smooth = data.df['H_sonic'].iloc[0]*10
+    ax.plot( [0,2.5],
+             [Hson_smooth,Hson_smooth],
+              'gray',
+              ls = '--',
+              linewidth=4,
+              zorder=0)
+
+    ax.minorticks_on()
+    
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=3.0)
+    
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+    
+#    ax.set_xscale( "log" )
+#    ax.set_xlabel( r'$\mathrm{D/delta_0}$', fontdict={'size':24} )
+    
+    ax.set_xlim( [0.0,2.1] )
+    ax.set_ylim( [0.90,1.5] )
+    
+    ax.grid(visible=True, which='major',axis='both',color='gray',
+            linestyle='--',linewidth=0.5)
+    
+    figname = "Hson"
+    
+    if pure:
+        figname = figname + '_pure'
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        
+    else:
+        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
+        ax.set_ylabel( r"$H_{sonic}/\delta_{0}\cdot 10$", 
                        fontsize=30, labelpad=0 )
         ax.tick_params( axis='x', labelsize=30, pad=15 )
         ax.tick_params( axis='y', labelsize=30, pad=10 )
