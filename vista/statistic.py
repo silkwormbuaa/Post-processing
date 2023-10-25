@@ -676,15 +676,15 @@ class StatisticData:
 # ----------------------------------------------------------------------
 
     def compute_profile( self, block_list, bbox, vars:list, 
-                         RS=True, outfile=False ):
+                         RS=True, outfile=False, roughwall=True ):
         
         """
         block list: selected block list (within bounding box)\n
         bbox: bounding box coordinates [xmin,xmax,ymin,ymax,zmin,zmax]\n
         vars: variable names list\n
         RS: set True to compute Reynolds Stresses, otherwise drop them\n
-        
         outfile: assign outfile name or use default 'profile_spanwisemean.dat'
+        roughwall: bool value, if True, set all values at wall to zero
         """
         
 # ----- collect data frame from all filled blocks
@@ -723,6 +723,11 @@ class StatisticData:
             print(df)
             
 # ----- do averaging in x-z plane
+
+        # check if 'vol_frac' is in df.columns (so that smooth wall case
+        # can be handled )
+        if 'vol_frac' not in df.columns:
+            df['vol_frac'] = 1.0
         
         ys = np.sort( np.unique( np.array( df['y'] )))
         
@@ -752,17 +757,18 @@ class StatisticData:
         
         pd.set_option('display.max_rows', None)  # 显示所有行
         
-        print( df_profile )
-        
 # ----- drop points below wall and set values(except p,rho,T) at wall manually
         
         df_profile.drop( df_profile[ df_profile['p']==0.0 ].index, inplace=True)
         
         df_profile.reset_index( drop=True, inplace=True )
         
-        for var in vars:
-            if var not in ['p','rho','T']:
-                df_profile.loc[0,var] = 0.0
+        if roughwall:
+            for var in vars:
+                if var not in ['p','rho','T']:
+                    df_profile.loc[0,var] = 0.0
+                
+        print( df_profile )
         
 # ----- output profile into txt
 
@@ -1298,8 +1304,9 @@ class StatisticData:
         outfile    : output file name. If None, using 'wall_vars_projection.pkl'      
         
         return     : dataframe of x-z plane data with coordinates and vars\n
+        vars      : ['x','z','p','pp','mu','rho','fric','p`']\n
         
-        Need data chunk with <p>,<pp>,<u>,<mu> ready.
+        Need data chunk with <p>,<pp>,<u>,<mu>,<rho> ready.
         Only applicable to smooth wall case.
         """
         
@@ -1327,11 +1334,12 @@ class StatisticData:
             
             dy = g.gy[buff]
             
-            p_plane = p[:,buff,:]
-            pp_plane = pp[:,buff,:]
-            mu_plane = mu[:,buff,:]
-            u_plane  = u[:,buff,:]
-            f_visc = u_plane * mu_plane / dy
+            p_plane   = p[:,buff,:]
+            pp_plane  = pp[:,buff,:]
+            mu_plane  = mu[:,buff,:]
+            rho_plane = rho[:,buff,:]
+            u_plane   = u[:,buff,:]
+            f_visc    = u_plane * mu_plane / dy
 
             xx,zz = np.meshgrid( g.gx, g.gz)
             
@@ -1340,6 +1348,8 @@ class StatisticData:
             df_wall['z']    =       zz[buff:-buff,buff:-buff].flatten()
             df_wall['p']    =  p_plane[buff:-buff,buff:-buff].flatten()
             df_wall['pp']   = pp_plane[buff:-buff,buff:-buff].flatten()
+            df_wall['mu']   =  mu_plane[buff:-buff,buff:-buff].flatten()
+            df_wall['rho']  = rho_plane[buff:-buff,buff:-buff].flatten()
             df_wall['fric'] =   f_visc[buff:-buff,buff:-buff].flatten()
             
             # compute pressure fluctuation

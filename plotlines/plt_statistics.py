@@ -18,6 +18,7 @@ from   plt_tools          import PlotDataframe
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
+plt.rcParams['font.size'] = 40
 
 # =============================================================================
 
@@ -29,14 +30,16 @@ xvar =  'D/δ' # or 'ESy'
 
 pure =  False  # if pure, without legend and label
 
-plt_DU_vd_plus =  False     # roughness function based on vd transformed velocity
-plt_Cf         =  False     # skin friction coefficient
-plt_vbar       =  False     # normalized vertical velocity
-plt_Lsep       =  False     # length of separation
-plt_Asep       =  False     # area of separation
-plt_Pmax       =  False     # maximum wall pressure
-plt_pmax       =  False     # maximum pressure fluctuation
-plt_Hvor       =  False     # height of vortex
+show = False
+
+plt_DU_vd_plus =  True      # roughness function based on vd transformed velocity
+plt_Cf         =  True      # skin friction coefficient
+plt_vbar       =  True      # normalized vertical velocity
+plt_Lsep       =  True      # length of separation
+plt_Asep       =  True      # area of separation
+plt_Pmax       =  True      # maximum wall pressure
+plt_pmax       =  True      # maximum pressure fluctuation
+plt_Hvor       =  True      # height of vortex
 plt_Hson       =  True      # height of sonic line
 
 
@@ -113,10 +116,10 @@ if plt_DU_vd_plus :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$\Delta U_{VD}^+$', fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r'$\Delta U_{VD}^+$', labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     ax.set_axisbelow(False)  # set axis order at bottom
 
@@ -125,7 +128,8 @@ if plt_DU_vd_plus :
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
+    
+    if show: plt.show()
 
 
 # ----------------------------------------------------------------------
@@ -197,18 +201,18 @@ if plt_Cf :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$C_f\cdot 1000$', fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r'$C_f\cdot 1000$', labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
-    
+
+    if show: plt.show()    
 
 # ----------------------------------------------------------------------
 # >>> Plot v_max/u_infin                                         (Nr.)
@@ -270,19 +274,19 @@ if plt_vbar :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
         ax.set_ylabel( r'$\langle v_{max} \rangle /u_{\infty} \cdot 100$', 
-                       fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
     
+    if show: plt.show()    
 
 # ----------------------------------------------------------------------
 # >>> Plot Lsep                                                (Nr.)
@@ -353,18 +357,18 @@ if plt_Lsep :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$L_{sep}/\delta_0$', fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r'$L_{sep}/\delta_0$', labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
-    
+
+    if show: plt.show()    
 
 # ----------------------------------------------------------------------
 # >>> Plot Separation Area                                       (Nr.)
@@ -435,17 +439,18 @@ if plt_Asep :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r'$A_{sep}/A_{sep_{smooth}}$', fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r'$A_{sep}/A_{sep_{smooth}}$', labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
+
+    if show: plt.show()
 
 
 # ----------------------------------------------------------------------
@@ -518,19 +523,19 @@ if plt_Pmax :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
         ax.set_ylabel( r'$\langle p \rangle_{max}/p_{\infty}$', 
-                       fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
 
+    if show: plt.show()
 
 # ----------------------------------------------------------------------
 # >>> Plot pmax ( maximum pressure fluctuation )                 (Nr.)
@@ -601,19 +606,19 @@ if plt_pmax :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
         ax.set_ylabel( r"$\sqrt{\langle p^{'}p^{'} \rangle_{max}}/p_{\infty}$", 
-                       fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
 
+    if show: plt.show()
 
 # ----------------------------------------------------------------------
 # >>> Plot Hvor ( height or size of secondary vortices )          (Nr.)
@@ -676,19 +681,19 @@ if plt_Hvor :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
-        ax.set_ylabel( r"$H_{vortice}/\delta_{0}$", 
-                       fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r"$H_{vortex}/\delta_{0}$", 
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
-    
+
+    if show: plt.show()    
 
 # ----------------------------------------------------------------------
 # >>> plot Hson (height of sonic line)                                  (Nr.)
@@ -759,15 +764,16 @@ if plt_Hson :
         ax.yaxis.set_ticklabels([])
         
     else:
-        ax.set_xlabel( r"$D/\delta_0$", fontsize=30, labelpad=0 )
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
         ax.set_ylabel( r"$H_{sonic}/\delta_{0}\cdot 10$", 
-                       fontsize=30, labelpad=0 )
-        ax.tick_params( axis='x', labelsize=30, pad=15 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
     plt.savefig( figname+'.pdf' )
-    plt.show()
+
+    if show: plt.show()

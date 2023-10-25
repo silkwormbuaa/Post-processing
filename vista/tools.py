@@ -38,21 +38,27 @@ def get_filelist( FoldPath, key=None ):
     
     FileList = []
     
-    for home, dirs, files in os.walk( FoldPath ):
+    # check if FoldPath exists
+    if os.path.exists( FoldPath ):
         
-        for filename in files:
+        for home, dirs, files in os.walk( FoldPath ):
             
-            # Filelist need to contain the whole path
-            if key is not None:
+            for filename in files:
                 
-                if key in filename:
+                # Filelist need to contain the whole path
+                if key is not None:
+                    
+                    if key in filename:
+                        
+                        FileList.append( os.path.join(home,filename) )
+                else:
                     
                     FileList.append( os.path.join(home,filename) )
-            else:
-                
-                FileList.append( os.path.join(home,filename) )
+        
+        FileList.sort()
     
-    FileList.sort()
+    else:
+        print(f"Folder {FoldPath} does not exist!")
             
     return FileList
 

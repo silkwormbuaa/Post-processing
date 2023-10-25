@@ -781,7 +781,7 @@ class BlockGrid:
 # - 2. for cells, which is above wall and is not cut cell, vol_fra = 1.0
 # ----------------------------------------------------------------------
 
-    def assign_vol_fra( self, df, wall_dist ):
+    def assign_vol_fra( self, df=None, wall_dist=None ):
         
         """
         df        : cutcell info dataframe\n
@@ -790,7 +790,7 @@ class BlockGrid:
         return: self.vol_fra
         """
         
-        if len(df) > 0:
+        if (df is not None) and len(df) > 0:
                 
             # check block number
             if df['block_number'].iloc[0] != self.num :
@@ -818,9 +818,8 @@ class BlockGrid:
             
             print("Block %d cut cell volume fractions are assigned."%self.num)
 
-
-        elif len(df) == 0:
-            
+        # df is None: smooth wall ; len(df) ==0 : no cut cell
+        elif (df is None) or len(df) == 0:
             self.vol_fra = np.ones( shape=(self.nx+6,self.ny+6,self.nz+6) )
 
 

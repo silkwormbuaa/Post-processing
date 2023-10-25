@@ -29,22 +29,23 @@ plt.rcParams['font.family'] = 'Times New Roman'
 
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
 
+data0 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall/results/profile'
 data1 = '/media/wencanwu/Seagate Expansion Drive/temp/221014/results/profile'
 data2 = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/profile'
 data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results/profile'
 data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/profile'
 data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/profile'
 
-data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
+#data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
 dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
-datalist = [data1,   data2,   data3,                   data4,        data5]
-dy       = [0.494,   0.468,   0.416,                   0.312,        0.26]
-color    = ['green', 'blue', 'black',                  'red',        'purple']
-label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
-width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
+datalist = [data0, data1,   data2,   data3,                   data4,        data5]
+dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26]
+color    = ['gray','green', 'blue', 'black',                  'red',        'purple']
+label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
+lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
+width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
 plt_u_vd_lw = True
@@ -59,7 +60,7 @@ plt_rho     = False
 plt_T       = False
 plt_Mt      = False
 
-pure = True
+pure = False
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -96,14 +97,8 @@ for i, datapath in enumerate(datalist):
     
     lines.append(line)
     
+lines[0].label = 'smooth'
 
-line0 = ProfileData(data0)
-line0.rho_ave = line0.df['rho'][0]
-line0.vd_transform()
-line0.label = 'smooth'
-line0.color = 'gray'
-line0.width = 4.0
-line0.lstyle = '--'
 
 lineDNS = ProfileData( dataDNS )
 lineDNS.df = lineDNS.sparse_log('y+', 0.05)
@@ -149,12 +144,12 @@ if plt_u_vd_lw:
              fillstyle='none',
              linestyle='None')
 
-    ax.plot( line0.df['y+'], 
-             line0.df['u+_vd'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
+    ax.plot( lines[0].df['y+'], 
+             lines[0].df['u+_vd'],
+             lines[0].color, 
+             label = lines[0].label, 
+             ls    = lines[0].lstyle,
+             linewidth = lines[0].width)
     
     ax.minorticks_on()
     
@@ -230,13 +225,6 @@ if plt_u_vd :
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['u+_vd'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
 
     ax.minorticks_on()
     
@@ -311,13 +299,6 @@ if plt_u :
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['u+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
 
     ax.minorticks_on()
     
@@ -401,13 +382,6 @@ if plt_RS_uu:
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['u`u`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
 
     ax.set_xscale( "symlog", linthresh=1 )
 
@@ -470,13 +444,6 @@ if plt_RS_vv:
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['v`v`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
     
     ax.set_xscale( "symlog", linthresh=1 )
 
@@ -538,13 +505,6 @@ if plt_RS_ww:
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['w`w`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
     
     ax.set_xscale( "symlog", linthresh=1 )
 
@@ -621,13 +581,6 @@ if plt_RS_uv:
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['u`v`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
     
     ax.set_xscale( "symlog", linthresh=1 )
 
@@ -727,33 +680,33 @@ if plt_RS_DNS:
              fillstyle='none',
              linestyle='None')
     
-    ax.plot( line0.df['y+'], 
-             line0.df['u`u`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
+    ax.plot( lines[0].df['y+'], 
+             lines[0].df['u`u`+'],
+             lines[0].color, 
+             label = lines[0].label, 
+             ls    = lines[0].lstyle,
+             linewidth = lines[0].width)
 
-    ax.plot( line0.df['y+'], 
-             line0.df['v`v`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
+    ax.plot( lines[0].df['y+'], 
+             lines[0].df['v`v`+'],
+             lines[0].color, 
+             label = lines[0].label, 
+             ls    = lines[0].lstyle,
+             linewidth = lines[0].width)
 
-    ax.plot( line0.df['y+'], 
-             line0.df['w`w`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
+    ax.plot( lines[0].df['y+'], 
+             lines[0].df['w`w`+'],
+             lines[0].color, 
+             label = lines[0].label, 
+             ls    = lines[0].lstyle,
+             linewidth = lines[0].width)
 
-    ax.plot( line0.df['y+'], 
-             line0.df['u`v`+'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
+    ax.plot( lines[0].df['y+'], 
+             lines[0].df['u`v`+'],
+             lines[0].color, 
+             label = lines[0].label, 
+             ls    = lines[0].lstyle,
+             linewidth = lines[0].width)
         
     ax.minorticks_on()
     
@@ -828,13 +781,6 @@ if plt_rho :
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
-    ax.plot( line0.df['y+'], 
-             line0.df['rho'],
-             line0.color, 
-             label = line0.label, 
-             ls    = line0.lstyle,
-             linewidth = line0.width)
 
     ax.minorticks_on()
     
