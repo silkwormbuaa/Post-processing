@@ -56,6 +56,7 @@ class LineData:
             self.df = df
             self.vars = df.columns
     
+    
 # ----------------------------------------------------------------------
 # >>> Read from file                                             (Nr.)
 # ----------------------------------------------------------------------
@@ -153,6 +154,53 @@ class LineData:
         self.df['E_ww'] = np.abs(w_k)*2
         self.df['E_k']  = np.abs(E_k)
         
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def sparse_log( self, col, spacing, base=10):
+        
+        """
+        df: input pd.DataFrame
+        col: col name
+        spacing: spacing for sparsed results
+        base: base of log, default is 10.
+        
+        return: sparsed dataframe
+        """
+
+        index = []
+        
+        x = np.array( self.df[col] )
+        
+        # check if x is monotonic increasing
+        
+        if np.all( np.diff(x) > 0 ):
+            
+            # find the first element of x
+            
+            index += [0,1]
+            
+            # find the rest elements of x
+            
+            for i in range(2,len(x)):
+                if np.emath.logn( base, x[i]/x[index[-1]] ) >= spacing:
+                    index.append(i)
+        
+        
+        return self.df.iloc[index]
+
 
 class ProfileData( LineData ):
 # ----------------------------------------------------------------------

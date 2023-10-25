@@ -106,6 +106,7 @@ line0.width = 4.0
 line0.lstyle = '--'
 
 lineDNS = ProfileData( dataDNS )
+lineDNS.df = lineDNS.sparse_log('y+', 0.05)
 lineDNS.label = "DNS"
 lineDNS.color = 'black'
 lineDNS.lstyle = 's'
@@ -140,8 +141,8 @@ if plt_u_vd_lw:
     ax.plot( x1,y1,'black',ls=':')
     ax.plot( x2,y2,'black',ls=':')
        
-    ax.plot( lineDNS.df['y+'][::2], 
-             lineDNS.df['u_vd+'][::2],
+    ax.plot( lineDNS.df['y+'], 
+             lineDNS.df['u_vd+'],
              lineDNS.color, 
              marker='s',
              markersize=10,
