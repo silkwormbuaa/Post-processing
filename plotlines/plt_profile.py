@@ -30,7 +30,7 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = False
+plt_u_vd_lw = True
 plt_u_vd    = False
 plt_u       = False
 plt_RS_uu   = False
@@ -157,6 +157,9 @@ if plt_u_vd_lw:
              label = lines[0].label, 
              ls    = lines[0].lstyle,
              linewidth = lines[0].width)
+    
+    ax.text( 1.8, 8, r'$u^+=y^+$', fontsize=35 )
+    ax.text( 1.7, 17,r"$u^+=\frac{1}{0.41}ln(y^+)+5.1$",fontsize=35 )
     
     ax.minorticks_on()
     
