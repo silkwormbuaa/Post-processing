@@ -14,6 +14,8 @@ import os
 
 import sys
 
+import time
+
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
@@ -218,8 +220,8 @@ for i, loc in enumerate(locs):
         if casecode == 'smooth_wall':
             plot_slicex_stat( zz, yy, mach,
                               tag=tag,
-                              filename='Mach_'+str(i+1),
-                              col_map='coolwarm',
+                              filename=casecode+'_Mach_'+str(i+1),
+                              col_map='RdBu_r',
                               cbar_label=cbar,
                               cbar_levels=cbar_levels,
                               cbar_ticks=cbar_ticks,
@@ -228,8 +230,8 @@ for i, loc in enumerate(locs):
             plot_slicex_stat( zz, yy, mach,
                               vectors=[w,v],
                               tag=tag,
-                              filename='Mach_'+str(i+1),
-                              col_map='coolwarm',
+                              filename=casecode+'_Mach_'+str(i+1),
+                              col_map='RdBu_r',
                               cbar_label=cbar,
                               cbar_levels=cbar_levels,
                               cbar_ticks=cbar_ticks,
@@ -245,14 +247,14 @@ for i, loc in enumerate(locs):
 #                          title=title)
         
         cbar = r'$\frac{\langle \omega_x \rangle \delta_0}{u_\infty}$ '
-        cbar_levels = np.linspace(-1.0,1.0,21)
+        cbar_levels = np.linspace(-1.0,1.0,26)
         cbar_ticks  = np.linspace(-1.0,1.0,5)
         plot_slicex_stat( zz, yy, w1*delta/u_ref,
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
-                          filename='vorticity_'+str(i+1),
-                          col_map='coolwarm',
+                          filename=casecode+'_vorticity_'+str(i+1),
+                          col_map='RdBu_r',
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
@@ -263,9 +265,9 @@ for i, loc in enumerate(locs):
         cbar_ticks  = np.linspace(0.0,1.0,5)
         plot_slicex_stat( zz, yy, u/u_ref,
                           tag=tag,
-                          filename='u_'+str(i+1),
+                          filename=casecode+'_u_'+str(i+1),
                           cbar_label=cbar,
-                          col_map='coolwarm',
+                          col_map='RdBu_r',
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           title=title)
@@ -277,11 +279,11 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
-                          filename='v_'+str(i+1),
+                          filename=casecode+'_v_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
-                          col_map='coolwarm',
+                          col_map='RdBu_r',
                           title=title)
         
         cbar = r'$\langle tke ^+ \rangle \cdot 100$'
@@ -289,19 +291,19 @@ for i, loc in enumerate(locs):
         cbar_ticks  = np.linspace(0.0,2.5,6)
         plot_slicex_stat( zz, yy, tke/(u_ref**2)*100,
                           tag=tag,
-                          filename='tke_'+str(i+1),
+                          filename=casecode+'_tke_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
-                          col_map='coolwarm',
+                          col_map='RdBu_r',
                           title=title)
 
         cbar = r"$-\langle u^{'} v^{'} \rangle$"
         plot_slicex_stat( zz, yy, -RS/(u_ref**2),
                           tag=tag,
-                          filename='RS_'+str(i+1),
+                          filename=casecode+'_RS_'+str(i+1),
                           cbar_label=cbar,
-                          col_map='coolwarm',
+                          col_map='RdBu_r',
                           title=title)
 
         cbar = r"$\sqrt{\langle p^{'}p^{'}\rangle}\cdot 100$"
@@ -309,13 +311,17 @@ for i, loc in enumerate(locs):
         cbar_ticks  = np.linspace(0.0,3.2,5)
         plot_slicex_stat( zz, yy, p_fluc/p_ref*100,
                           tag=tag,
-                          filename='p_fluc_'+str(i+1),
+                          filename=casecode+'_p_fluc_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
-                          col_map='coolwarm',
+                          col_map='RdBu_r',
                           cbar_ticks=cbar_ticks,
                           title=title)
         
     print(f"Finished doing slicing at x = {loc_delta:10.2f} delta.",end='') 
     print(f" Progress {(i+1)/len(locs)*100:5.2f} %.")
     print(f"=====================================\n")
+
+# print out the time finishing the job
+    
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")

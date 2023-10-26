@@ -26,6 +26,27 @@ from   vista.line         import ProfileData
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['font.size']   = 40
+
+# =============================================================================
+
+plt_u_vd_lw = False
+plt_u_vd    = False
+plt_u       = False
+plt_RS_uu   = False
+plt_RS_vv   = False
+plt_RS_ww   = False
+plt_RS_uv   = False
+plt_RS_DNS  = False
+plt_rho     = False
+plt_T       = False
+plt_Mt      = False
+
+pure = False
+
+fmt = '.pdf'
+
+# =============================================================================
 
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
 
@@ -47,20 +68,6 @@ label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.1
 lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
-
-plt_u_vd_lw = True
-plt_u_vd    = False
-plt_u       = False
-plt_RS_uu   = False
-plt_RS_vv   = False
-plt_RS_ww   = False
-plt_RS_uv   = False
-plt_RS_DNS  = True
-plt_rho     = False
-plt_T       = False
-plt_Mt      = False
-
-pure = False
 
 # ----------------------------------------------------------------------
 # >>> Initialize data                                            ( 1 )
@@ -101,7 +108,7 @@ lines[0].label = 'smooth'
 
 
 lineDNS = ProfileData( dataDNS )
-lineDNS.df = lineDNS.sparse_log('y+', 0.05)
+lineDNS.df = lineDNS.sparse_log('y+', 0.04)
 lineDNS.label = "DNS"
 lineDNS.color = 'black'
 lineDNS.lstyle = 's'
@@ -125,13 +132,13 @@ os.chdir( OutPath )
 
 if plt_u_vd_lw:
     
+    fig, ax = plt.subplots(figsize=[9,8], constrained_layout=True)
+
     x1 = np.linspace(1,12,50)
     y1 = np.linspace(1,12,50)
     
     x2 = np.linspace(8,400,300)
     y2  = np.log(x2)/0.41 + 5.1    
-
-    fig, ax = plt.subplots(figsize=[10,8], constrained_layout=True)
     
     ax.plot( x1,y1,'black',ls=':')
     ax.plot( x2,y2,'black',ls=':')
@@ -178,23 +185,25 @@ if plt_u_vd_lw:
     ax.grid(visible=True, which='both',axis='both',color='gray',
             linestyle='--',linewidth=0.2)
 
-    # Adjust the spacing around the plot to remove the white margin
     
-    figname = 'law_wall'
+    figname = 'Uvd_DNS'
     if pure:
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
         ax.xaxis.set_ticklabels([])
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel(  r"$y_s^+$", fontsize=30 )  
-        ax.tick_params( axis='x', labelsize=30, pad=10 )
-        ax.set_ylabel( r'$u^+_{VD}$', fontsize=30 )
-        ax.tick_params( axis='y', labelsize=30, pad=10 )
-        ax.legend( prop={'size':30} ) 
-        ax.set_title( r"$u^+_{VD}$ profile", size=30 )
-    
-    plt.savefig( figname )
+        ax.set_xlabel(  r"$y_s^+$",labelpad=-5 )  
+        ax.tick_params( axis='x', pad=15 )
+        ax.set_ylabel( r'$\langle u \rangle ^+_{VD}$' )
+        ax.tick_params( axis='y', pad=10 )
+#        ax.legend( prop={'size':30} ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+
+    plt.savefig( figname + fmt )
     plt.show()    
 
 
@@ -215,7 +224,7 @@ if plt_u_vd_lw:
 
 if plt_u_vd :
     
-    fig, ax = plt.subplots(figsize=[10,8])
+    fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
     
     for line in lines:
         
@@ -262,14 +271,17 @@ if plt_u_vd :
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.set_ylabel( r'$u^+_{VD}$', fontdict={'size':24} )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':22,'family':'sans-serif'} ) 
-        ax.set_title( r"$u^+_{VD}$ profile", size=20 )
-    
-    plt.savefig( figname + '.pdf' )
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.tick_params( axis='x', pad=15 )
+        ax.set_ylabel( r'$\langle u \rangle ^+_{VD}$' )
+        ax.tick_params( axis='y', pad=10 )
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+
+    plt.savefig( figname + fmt )
     plt.show()
 
 
@@ -289,7 +301,7 @@ if plt_u_vd :
 
 if plt_u :
     
-    fig, ax = plt.subplots(figsize=[10,8])
+    fig, ax = plt.subplots(figsize=[8,8])
     
     for line in lines:
         
@@ -336,15 +348,17 @@ if plt_u :
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.set_ylabel( r'$u^+$', fontdict={'size':24} )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':22,'family':'sans-serif'} ) 
-        ax.set_title( r"$u^+$ profile", size=20 )
+        ax.set_xlabel( "$y_s^+$" )  
+        ax.tick_params( axis='x' )
+        ax.set_ylabel( r'$u^+$' )
+        ax.tick_params( axis='y' )
+#        ax.legend( ) 
 
-
-    plt.savefig( figname + '.pdf' )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
 
 
@@ -420,15 +434,17 @@ if plt_RS_uu:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r"$\xi \langle u^{'} u^{'} \rangle $",
-                        fontdict={'size':24} )
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':15}, loc='upper right' ) 
-        ax.set_title( "Reynolds Stress profile u'u'", size=20 )
+        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_ylabel( r"$\xi \langle u^{'} u^{'} \rangle $" )
+        ax.tick_params( axis='x' )
+        ax.tick_params( axis='y' )
+#        ax.legend( ) 
 
-    plt.savefig( figname + '.pdf' )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
 
 
@@ -481,15 +497,17 @@ if plt_RS_vv:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r"$\xi \langle v^{'} v^{'} \rangle$",
-                        fontdict={'size':24} )
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':15}, loc='upper left' ) 
-        ax.set_title( "Reynolds Stress profile v'v'", size=20 )
+        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_ylabel( r"$\xi \langle v^{'} v^{'} \rangle$" )
+        ax.tick_params( axis='x' )
+        ax.tick_params( axis='y' )
+#        ax.legend( ) 
 
-    plt.savefig( figname + '.pdf' )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
     
 
@@ -542,15 +560,17 @@ if plt_RS_ww:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r"$\xi \langle w^{'} w^{'} \rangle$",
-                        fontdict={'size':24} )
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':15}, loc='upper left' ) 
-        ax.set_title( "Reynolds Stress profile w'w'", size=20 )
+        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_ylabel( r"$\xi \langle w^{'} w^{'} \rangle$")
+        ax.tick_params( axis='x' )
+        ax.tick_params( axis='y' )
+#        ax.legend( ) 
 
-    plt.savefig( figname + '.pdf' )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
 
 
@@ -618,15 +638,17 @@ if plt_RS_uv:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-        ax.set_ylabel( r"$\xi \angle u^{'} v^{'} \rangle$",
-                        fontdict={'size':24} )
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':15}, loc='best' ) 
-        ax.set_title( "Reynolds Stress profile u'v'", size=20 )
+        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_ylabel( r"$\xi \angle u^{'} v^{'} \rangle$" )
+        ax.tick_params( axis='x' )
+        ax.tick_params( axis='y' )
+#        ax.legend( ) 
 
-    plt.savefig( figname + '.pdf' )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
     
 
@@ -646,7 +668,7 @@ if plt_RS_uv:
 
 if plt_RS_DNS:
     
-    fig, ax = plt.subplots( figsize=[8,8] )
+    fig, ax = plt.subplots( figsize=[9,8],constrained_layout=True )
 
     ax.plot( lineDNS.df['y+'], 
              lineDNS.df['urms+']**2*lineDNS.df['sqrt(rho/rho_w)']**2,
@@ -737,22 +759,25 @@ if plt_RS_DNS:
 
     # Adjust the spacing around the plot to remove the white margin
     
-    figname = 'DNS_RS'
+    figname = 'RS_DNS'
     if pure:
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
         ax.xaxis.set_ticklabels([])
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel(  r"$y_s^+$", fontdict={'size':24} )  
-        ax.tick_params( axis='x', labelsize=15 )
-        ax.set_ylabel( r"$\xi \langle u_i'u_j'\rangle $", fontdict={'size':24} )
-        ax.tick_params( axis='y', labelsize=15 )
-        ax.legend( prop={'size':22} ) 
-        ax.set_title( r"$\xi \langle u_i'u_j'\rangle $ profile", size=20 )
-    
-    plt.savefig( figname )
-    plt.show()    
+        ax.set_xlabel(  r"$y_s^+$",labelpad=-5 )  
+        ax.tick_params( axis='x', pad=15 )
+        ax.set_ylabel( r"$\xi \langle u_i'u_j'\rangle $" )
+        ax.tick_params( axis='y', pad=10 )
+#        ax.legend( prop={'size':22} ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+
+    plt.savefig( figname + fmt )
+    plt.show()
 
 
 # ----------------------------------------------------------------------
@@ -771,7 +796,7 @@ if plt_RS_DNS:
 
 if plt_rho :
     
-    fig, ax = plt.subplots(figsize=[10,8])
+    fig, ax = plt.subplots(figsize=[8,8])
     
     for line in lines:
         
@@ -785,11 +810,11 @@ if plt_rho :
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-    ax.tick_params( axis='x', labelsize=15 )
+    ax.set_xlabel( "$y_s^+$" )  
+    ax.tick_params( axis='x' )
     
-    ax.set_ylabel( r"$\rho$", fontdict={'size':24} )
-    ax.tick_params( axis='y', labelsize=15 )
+    ax.set_ylabel( r"$\rho$" )
+    ax.tick_params( axis='y' )
     
     ax.set_xlim( [1,1000] )
     
@@ -798,12 +823,12 @@ if plt_rho :
     
     ax.xaxis.set_minor_locator( x_minor )
 
-    ax.legend( prop={'size':20} ) 
-    ax.set_title( r"$\rho$ profile", size=20 )
+#    ax.legend( ) 
+    ax.set_title( r"$\rho$ profile" )
 
     ax.grid()
     
-    plt.savefig( "rho_shifted" + '.pdf' )
+    plt.savefig( "rho_shifted" + fmt )
     plt.show()
 
 
@@ -823,18 +848,16 @@ if plt_rho :
 
 if plt_T :
     
-    fig, ax = plt.subplots(figsize=[10,8])
+    fig, ax = plt.subplots(figsize=[8,8])
     
-
-
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-    ax.tick_params( axis='x', labelsize=15 )
+    ax.set_xlabel( "$y_s^+$" )  
+    ax.tick_params( axis='x' )
     
-    ax.set_ylabel( r'$T/T_{\infty}$', fontdict={'size':24} )
-    ax.tick_params( axis='y', labelsize=15 )
+    ax.set_ylabel( r'$T/T_{\infty}$' )
+    ax.tick_params( axis='y' )
     
     ax.set_xlim( [1,1000] )
     
@@ -843,12 +866,12 @@ if plt_T :
     
     ax.xaxis.set_minor_locator( x_minor )
 
-    ax.legend( prop={'size':20} ) 
+#    ax.legend( ) 
 #    ax.set_title( r"$u^+_{VD}$ profile", size=20 )
 
     ax.grid()
     
-    plt.savefig( "T_shifted_new" + '.pdf')
+    plt.savefig( "T_shifted_new" + fmt)
     plt.show()
 
 # ----------------------------------------------------------------------
@@ -867,18 +890,16 @@ if plt_T :
 
 if plt_Mt :
     
-    fig, ax = plt.subplots(figsize=[10,8])
-    
-
+    fig, ax = plt.subplots(figsize=[8,8])
 
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$", fontdict={'size':24} )  
-    ax.tick_params( axis='x', labelsize=15 )
+    ax.set_xlabel( "$y_s^+$" )  
+    ax.tick_params( axis='x' )
     
-    ax.set_ylabel( r'$M_t$', fontdict={'size':24} )
-    ax.tick_params( axis='y', labelsize=15 )
+    ax.set_ylabel( r'$M_t$' )
+    ax.tick_params( axis='y' )
     
     ax.set_xlim( [1,1000] )
     
@@ -887,10 +908,10 @@ if plt_Mt :
     
     ax.xaxis.set_minor_locator( x_minor )
 
-    ax.legend( prop={'size':20} ) 
-#    ax.set_title( r"$M_t$ profile", size=20 )
+#    ax.legend( ) 
+#    ax.set_title( r"$M_t$ profile" )
 
     ax.grid()
     
-    plt.savefig( "Mxt_profile_shifted" + '.pdf' )
+    plt.savefig( "Mxt_profile_shifted" + fmt )
     plt.show()

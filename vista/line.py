@@ -185,7 +185,7 @@ class LineData:
         x = np.array( self.df[col] )
         
         # check if x is monotonic increasing
-        
+
         if np.all( np.diff(x) > 0 ):
             
             # find the first element of x

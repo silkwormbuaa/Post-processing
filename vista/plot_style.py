@@ -749,7 +749,7 @@ def plot_slicex_stat( zz, yy, v,
                       cbar_ticks=None,
                       title=None,
                       arrow=False,
-                      pure=False):
+                      pure=True):
     
     """
     zz,yy are required to be equally spaced by streamplot
@@ -802,7 +802,7 @@ def plot_slicex_stat( zz, yy, v,
                     width=0.0020,
                     angles='xy',
                     scale_units='xy', 
-                    scale = 160,
+                    scale = 120,
                     headwidth=5,
                     headlength=7)
             
@@ -812,15 +812,15 @@ def plot_slicex_stat( zz, yy, v,
             ax.add_patch(rect)
             
             ax.quiver(-0.84,0.95,
-                    15.21,0.0, 
+                    15.21,0.0,    # 3% of u_infty
                     width=0.0020,
                     angles='xy',
                     scale_units='xy',
-                    scale = 160,
+                    scale = 120,
                     headwidth=5,
                     headlength=7)
             
-            ax.text( -0.72,0.95,
+            ax.text( -0.70,0.95,
                      r"$3\%u_{\infty}$",
                      va='center',
                      fontsize=textfontsize)
@@ -865,19 +865,21 @@ def plot_slicex_stat( zz, yy, v,
         cbar = plt.colorbar(cs,
                             orientation='vertical', 
                             shrink=0.8,
-                            location='right',
+                            location='left',
                             aspect=10,
                             ticks=cbar_ticks)
         
         cbar.outline.set_linewidth(2)
         
-        cbar.ax.set_xlabel( cbar_label,
-                            fontsize=50,
-                            labelpad=25,
-                            loc='left')
+#        cbar.ax.set_xlabel( cbar_label,
+#                            fontsize=50,
+#                            labelpad=25,
+#                            loc='left')
         
         cbar.ax.tick_params( labelsize=50, 
                              direction='in',
+                             left=True,right=False,
+                             labelleft=True,labelright=False,
                              length=20.0,
                              width=2.0)
 

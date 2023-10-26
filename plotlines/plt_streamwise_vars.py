@@ -23,7 +23,7 @@ from   vista.line        import LineData
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
-
+plt.rcParams['font.size']   = 40
 
 OutPath  = "/home/wencanwu/my_simulation/temp/DataPost/streamwise_lines"
 
@@ -46,11 +46,13 @@ lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
 lines = []
 
-plt_pwfluc = False
-plt_pw     = False
+plt_pwfluc = True
+plt_pw     = True
 plt_Cf     = True
 
-pure = True
+pure = False
+
+fmt =  '.pdf' # or '.png'
 
 # - read in data files
 
@@ -90,16 +92,16 @@ os.chdir(OutPath)
 
 if plt_pwfluc:
 
-    fig, ax = plt.subplots( figsize=[15,10] )
+    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
         ax.plot( line.df['x'], 
-                line.df['p_fluc'],
-                line.color,
-                ls = line.lstyle,
-                label = line.label,
-                linewidth = line.width)
+                 line.df['p_fluc'],
+                 line.color,
+                 ls = line.lstyle,
+                 label = line.label,
+                 linewidth = line.width)
 
     ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
             d0_pwfluc.df['<p`>_'],
@@ -107,6 +109,8 @@ if plt_pwfluc:
             label=r'$smooth$', 
             ls   ='--',
             linewidth=4)
+
+    # separation locations
 
     #ax.plot( [-10.6786859,-10.6786859],
     #         [0.0,0.1],
@@ -170,16 +174,19 @@ if plt_pwfluc:
         
     else:
         
-        ax.set_xlabel("$(x-x_{imp})/δ_0$",fontdict={'size':40})  
-        ax.tick_params(axis='x',labelsize=32)
+        ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
+        ax.tick_params(axis='x', pad=15)
 
-        ax.set_ylabel(r"$\sqrt{<p'p'>}/p_{\infty}$", fontdict={'size':40})
-        ax.tick_params(axis='y',labelsize=32)
+        ax.set_ylabel(r"$\sqrt{<p'p'>}/p_{\infty}$" )
+        ax.tick_params(axis='y', pad=10)
 
-        ax.legend(prop={'size':20}) 
+#        ax.legend( ) 
         
-        
-    plt.savefig( figname )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
     
 # ----------------------------------------------------------------------
@@ -198,7 +205,7 @@ if plt_pwfluc:
 
 if plt_pw:
 
-    fig, ax = plt.subplots( figsize=[15,10] )
+    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -217,7 +224,7 @@ if plt_pw:
             linewidth=4)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
 
     ax.minorticks_on()
     ax.tick_params(which='major',
@@ -232,7 +239,7 @@ if plt_pw:
                     width=1)
 
     ax.set_xlim([-20.0,10.0])
-    ax.set_ylim([0.8,2.3])
+    ax.set_ylim([0.8,2.5])
     ax.grid(visible=True, which='both',axis='both',color='gray',
                 linestyle='--',linewidth=0.2)
 
@@ -247,16 +254,19 @@ if plt_pw:
         
     else:
         
-        ax.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40})
-        ax.tick_params(axis='x',labelsize=32)
+        ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5 )
+        ax.tick_params(axis='x', pad=15)
         
-        ax.set_ylabel("$<p_w>/p_{\infty}$",fontdict={'size':40})
-        ax.tick_params(axis='y',labelsize=32)
+        ax.set_ylabel("$<p_w>/p_{\infty}$")
+        ax.tick_params(axis='y', pad=10)
 
-        ax.legend(prop={'size':20}) 
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)        
         
-        
-    plt.savefig( figname )
+    plt.savefig( figname + fmt )
     plt.show()
     
 # ----------------------------------------------------------------------
@@ -275,7 +285,7 @@ if plt_pw:
 
 if plt_Cf:
     
-    fig, ax = plt.subplots( figsize=[15,10] )
+    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -331,14 +341,17 @@ if plt_Cf:
         
     else:
         
-        ax.set_xlabel("$(x-x_{imp})/\delta_0$",fontdict={'size':40}) 
-        ax.tick_params(axis='x',labelsize=32)
+        ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5) 
+        ax.tick_params(axis='x', pad=15)
         
-        ax.set_ylabel("$C_fx10^3$",fontdict={'size':40})
-        ax.tick_params(axis='y',labelsize=32)
+        ax.set_ylabel("$C_fx10^3$")
+        ax.tick_params(axis='y', pad=10)
 
-        ax.legend(prop={'size':20}) 
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
         
-        
-    plt.savefig( figname )
+    plt.savefig( figname + fmt )
     plt.show()
