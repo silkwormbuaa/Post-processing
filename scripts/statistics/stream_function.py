@@ -21,8 +21,6 @@ import numpy             as     np
 
 import pandas            as     pd
 
-import matplotlib.pyplot as     plt
-
 from   scipy.interpolate import griddata
 
 from   vista.statistic   import StatisticData
@@ -36,7 +34,6 @@ from   vista.timer       import timer
 from   vista.tools       import define_wall_shape
 from   vista.tools       import read_case_parameter
 from   vista.tools       import get_filelist
-from   vista.tools       import lin_grow
 
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
