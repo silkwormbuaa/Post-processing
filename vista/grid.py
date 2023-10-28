@@ -96,7 +96,7 @@ class GridData:
             
             self.read_grid_body( f )
         
-        print( f"finish read grid file ...{self.grid_file[-50:]}" )
+        print( f"finish read grid file ...{self.grid_file[-50:]} \n" )
 
 
 
@@ -816,7 +816,7 @@ class BlockGrid:
                 
                 self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
             
-            print("Block %d cut cell volume fractions are assigned."%self.num)
+            print(f"Block {self.num} cut cell volume fractions are assigned.")
 
         # df is None: smooth wall ; len(df) ==0 : no cut cell
         elif (df is None) or len(df) == 0:

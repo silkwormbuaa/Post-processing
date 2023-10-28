@@ -749,21 +749,22 @@ def plot_slicex_stat( zz, yy, v,
                       cbar_ticks=None,
                       title=None,
                       arrow=False,
-                      pure=True):
+                      extreme_loc=None,
+                      pure=False):
     
     """
     zz,yy are required to be equally spaced by streamplot
     """
-    
+
     if figsize is None:
         figsize = (15,9)
     
     fig, ax = plt.subplots( figsize=figsize )
-    
+
     if col_map is None: col_map='viridis'
     
     if cbar_levels is None: cbar_levels=51
-    
+
     # extend : fill the region where value exceed min and max
     cs = ax.contourf(zz, yy, v, cmap=col_map, levels=cbar_levels, extend='both')
     
@@ -854,6 +855,13 @@ def plot_slicex_stat( zz, yy, v,
                  fontsize=textfontsize,
                  zorder=101,
                  bbox={"fc":"white","alpha":0.8,"ec":"None"})    
+    
+    # plot a cross at extreme_loc
+    if extreme_loc:
+        for loc in extreme_loc:
+            ax.plot( loc[0],loc[1], 'x', color='black', 
+                     markersize=20, markeredgewidth=4.0)
+        
     
     if not pure: 
            

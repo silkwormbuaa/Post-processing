@@ -11,10 +11,9 @@
 
 
 import os
-
 import sys
-
 import time
+import pickle
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -40,11 +39,13 @@ from   vista.plane_analy import periodic_average
 
 from   vista.plot_style  import plot_slicex_stat
 
+from   vista.log         import Logger
+sys.stdout = Logger()
 # =============================================================================
 
 locs_delta = np.linspace(-20,-20,1)
 outfolder  = '/yz_planes'
-periodic_ave = False
+periodic_ave = True
 
 # =============================================================================
 
@@ -70,6 +71,7 @@ tag      = str( parameters.get('tag'))
 
 locs = locs_delta*delta + 50.4
 
+
 # - read in grid info
 
 G = GridData( gridfile )
@@ -84,42 +86,60 @@ if not os.path.exists(outpath):
 
 os.chdir(outpath)
 
-# do slicing and output slices
+
+# - do slicing and output slices
 
 for i, loc in enumerate(locs):
 
     loc_delta = locs_delta[i]
+    df_slice_file = f"df_slice_{i:02d}.pkl"
     title = 'x= '+str(loc_delta)
     
-    print(f"Start doing slicing at x = {loc_delta:10.2f}.\n")
-
-    block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
-
-    print(f"Selected {len(block_list)} blocks.\n")
-
-    # - read statistics data file
-
-    S = StatisticData( datafile )
-
-    with timer("read selected blocks "):
+    # check if the slice is already done
+    
+    if not os.path.exists(df_slice_file):
         
-        with open(datafile,'br') as f:
+        print(f"Start doing slicing at x = {loc_delta:10.2f}.\n")
+
+        block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
+
+        print(f"Selected {len(block_list)} blocks.\n")
+
+        # - read statistics data file
+
+        S = StatisticData( datafile )
+
+        with timer("read selected blocks "):
             
-            S.read_stat_header( f )
+            with open(datafile,'br') as f:
+                
+                S.read_stat_header( f )
+                
+                vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp']
+                
+                S.read_stat_body( f, block_list, vars )
+                
+                S.compute_vars( block_list, ['mach','RS','p`'])
+                
+                S.compute_gradients( block_list, ['vorticity'], G)
+                
+                S.compute_source_terms( block_list, G )
+                
+        with timer("Get slice dataframe and match grids"):
             
-            vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp']
+            df_slice = S.get_slice_df( block_list, G, indx_slic, 'X' )
             
-            S.read_stat_body( f, block_list, vars )
-            
-            S.compute_vars( block_list, ['mach','RS','p`'] )
-            
-            S.compute_gradients( block_list, ['vorticity'], G)
-            
-            S.compute_source_terms( block_list, G )
-            
-    with timer("Get slice dataframe and match grids"):
-        
-        df_slice = S.get_slice_df( block_list, G, indx_slic, 'X' )
+            with open(df_slice_file,'wb') as f:
+                pickle.dump( df_slice, f )
+    
+    # - read in slice dataframe
+    
+    else: 
+        print(f"{df_slice_file} already exists, read in directly...\n")
+        df_slice = pickle.load( open(df_slice_file,'rb') )
+    
+    
+# ----- interpolate and plot    
         
     with timer("Interpolate and plot "):
                
@@ -140,7 +160,7 @@ for i, loc in enumerate(locs):
         
         # generate interpolation grid
         
-        z = np.linspace(-1.0,1.0, 320)
+        z = np.linspace(-1.0,1.0, 320)  # must be muliple of 16 for periodic average
         if casecode == 'smooth_wall':
             y = np.linspace(0.02, 1.1, 55)
         else:
@@ -176,6 +196,7 @@ for i, loc in enumerate(locs):
 
         p_fluc = griddata( (z_slice,y_slice), p_fluc_slice,
                            (zz,yy), method='linear')   
+                
         
 # ------ extending corner grid for smooth wall
 
@@ -194,10 +215,7 @@ for i, loc in enumerate(locs):
             w  = np.concatenate(([np.zeros(len_ext)],w),axis=0)
             p_fluc = np.concatenate(([p_fluc[0,:]],p_fluc),axis=0)
         
-        fig, ax = plt.subplots()
         
-    #    ax.contourf( zz, yy, mach, levels=51, cmap='bwr' )
-
         save_sonic_line( zz, yy, mach )
         
         define_wall_shape( z*5.2, casecode=casecode, yshift=(h_ridge-h_md) )
@@ -273,7 +291,7 @@ for i, loc in enumerate(locs):
                           title=title)
 
         cbar = r'$\frac{\langle v \rangle  \cdot 100}{u_{\infty}}$'
-        cbar_levels = np.linspace(-3.0,3.0,31)
+        cbar_levels = np.linspace(-3.0,3.0,26)
         cbar_ticks  = np.linspace(-3.0,3.0,5)
         plot_slicex_stat( zz, yy, v/u_ref*100,
                           tag=tag,

@@ -54,7 +54,7 @@ def save_sonic_line( xx, yy, mach ):
     for i, line in enumerate(lines):
         
         mean_height = np.array( line[:,1] ).mean()
-        print(f"Mean height of sonic line [{i}] is {mean_height}.")
+        print(f"Mean height of sonic line [{i}] is {mean_height}.\n")
         mean_heights.append(mean_height)
     
     with open('soniclines.pkl','wb') as f:
@@ -202,7 +202,7 @@ def shift_coordinates( df:pd.DataFrame, delta, H, H_md, x_imp ):
 #
 # ----------------------------------------------------------------------
 
-def periodic_average( array, N:int, axis=0 ):
+def periodic_average( array, N:int, axis=0, sym=False, antisym=False ):
     
     """
     array    : target array
@@ -218,6 +218,20 @@ def periodic_average( array, N:int, axis=0 ):
     n0, n1 = np.array( array ).shape
     array = np.array( array ).reshape( N, int(n0/N), n1 )
     array = np.mean( array, axis=0 )
+    
+    # symmetrize or anti-symmetrize the array
+    
+    if sym:
+        for i in range( int(n0/N/2) ):
+            sym_mean = 0.5*( array[i,:] + array[-i-1,:] )
+            array[i,:] = sym_mean
+            array[-i-1,:] = sym_mean
+    if antisym:
+        for i in range( int(n0/N/2) ):
+            sym_mean = 0.5*( array[i,:] - array[-i-1,:] )
+            array[i,:] = sym_mean
+            array[-i-1,:] = -sym_mean
+    
     array = np.array( [array]*N ).reshape( n0, n1 )
     
     if axis==1:
@@ -284,6 +298,7 @@ def compute_separation_ratio( array, write=True ):
 # ----------------------------------------------------------------------
 
 def compute_DS( grad_rho ):
+    
     """
     grad_rho : array of density gradient
     
@@ -299,6 +314,63 @@ def compute_DS( grad_rho ):
     DS = 0.8*np.exp( -10.0*(grad_rho-min) / (max-min) )
     
     return DS
+
+
+# ----------------------------------------------------------------------
+# >>> Compute compressible stream function                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/27  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
+    
+    """
+    integrate stream function 
+    
+    rho: 2D array of density, shape(ny,nz)
+    rho_w: reference density at wall
+    w_favre: 2D array of favre averaged horizontal velocity
+    v_favre: 2D array of favre averaged vertical velocity
+    
+    zz: z coordinate
+    yy: y coordinate
+    
+    """
+    
+    psi = np.zeros_like( rho )
+    
+    # integrate -v in z direction
+    
+    dz = np.diff(z)
+    
+    psi[:,0] = 0.0
+    
+    for i in range(1,len(z)):
+        psi[:,i] = psi[:,i-1] - (dz[i-1] * 0.5*(v_favre[:,i]+v_favre[:,i-1]) 
+                                 * rho[:,i])
+    
+    # integrate w in y direction
+    
+    dy = np.diff(y)
+    
+    for i in range(1,len(y)):
+        psi[i,:] = psi[i-1,:] + (dy[i-1] * 0.5*(w_favre[i,:]+w_favre[i-1,:])
+                                 * rho[i,:])
+        
+    # normalize
+    
+    psi = psi / rho_w
+    
+    return psi 
+
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )

@@ -329,7 +329,7 @@ class StatisticData:
         G          : GridData object \n
         block_list : list of selected blocks' numbers \n
         
-        return : x,y,z and vol_frac are added to self.bl[].df \n
+        return : x,y,z and vol_fra are added to self.bl[].df \n
         """
         
         for num in block_list:
@@ -345,7 +345,7 @@ class StatisticData:
             # adding vol_fra !! original vol_fra has i,j,k order, 
             # should be transpose as k,j,i
             
-            self.bl[num-1].df['vol_frac'] = np.ravel( G.g[num-1].vol_fra.T )
+            self.bl[num-1].df['vol_fra'] = np.ravel( G.g[num-1].vol_fra.T )
             
 
 # ----------------------------------------------------------------------
@@ -415,7 +415,7 @@ class StatisticData:
         """
         block_list : list of blocks that are going to compute new variables\n
         vars_new   : list of str representing new vars 
-                     ['mach','RS','p`','mu']\n
+                     ['mach','RS','p`','mu','favre_velocity']\n
         
         return : corresponding variables are added to self.bl[].df
         """
@@ -473,6 +473,17 @@ class StatisticData:
                 
                 self.bl[num-1].df['mu'] = mu
 
+# ---------- compute favre average velocity
+
+            if "favre_velocity" in vars_new:
+                
+                rho  = np.array( df['rho'] )
+                self.bl[num-1].df['rho'] = np.array( df['rho'] )
+                self.bl[num-1].df['u_favre'] = np.array( df['urho'] ) / rho
+                self.bl[num-1].df['v_favre'] = np.array( df['vrho'] ) / rho
+                self.bl[num-1].df['w_favre'] = np.array( df['wrho'] ) / rho
+                
+                
 
 # ----------------------------------------------------------------------
 # >>> compute gradients of variables                              (Nr.)
@@ -724,10 +735,10 @@ class StatisticData:
             
 # ----- do averaging in x-z plane
 
-        # check if 'vol_frac' is in df.columns (so that smooth wall case
+        # check if 'vol_fra' is in df.columns (so that smooth wall case
         # can be handled )
-        if 'vol_frac' not in df.columns:
-            df['vol_frac'] = 1.0
+        if 'vol_fra' not in df.columns:
+            df['vol_fra'] = 1.0
         
         ys = np.sort( np.unique( np.array( df['y'] )))
         
@@ -737,14 +748,14 @@ class StatisticData:
             
             df_temp = df[ df['y']==y ]
             
-            vol_frac = np.array( df_temp['vol_frac'] )
-            vol_total = np.sum( vol_frac )
+            vol_fra = np.array( df_temp['vol_fra'] )
+            vol_total = np.sum( vol_fra )
             if vol_total < 0.0000001: vol_total = float('inf')
             
             buff = [y]
             
             for var in vars:
-                v = np.sum( np.array(df_temp[var])*vol_frac ) / vol_total
+                v = np.sum( np.array(df_temp[var])*vol_fra ) / vol_total
                 buff.append(v)
                 
             if data_chunk is None: data_chunk = [buff]
