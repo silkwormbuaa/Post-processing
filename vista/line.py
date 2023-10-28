@@ -12,6 +12,8 @@ import numpy             as     np
 import pandas            as     pd
 from   scipy             import fft
 
+from   .tools            import find_indices
+
 
 class LineData:
 # ----------------------------------------------------------------------
@@ -341,6 +343,47 @@ class ProfileData( LineData ):
         
         self.df['u+_vd'] = u_plus_vd    
 
+
+# ----------------------------------------------------------------------
+# >>> Compute displacement thickness                             (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/10/28  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_boundary_layer_property( self, u_ref ):
+        
+        """
+        u_ref : reference velocity
+        
+        return : delta_99, delta_star(displacement), theta(momentum)
+        """
+        
+        u = np.array(self.df['u'])
+        y = np.array(self.df['ys'])
+        rho = np.array(self.df['rho'])
+        
+        il,ir = find_indices( u, u_ref*0.99, mode='sequential' )
+        
+        rho_e = rho[il]
+        
+        # compute displacement thickness
+        
+        delta_star = np.trapz( ( 1.0 - u[:il]*rho[:il]/u_ref/rho_e ), y[:il] )
+        
+        theta = np.trapz( ( 1.0 - u[:il]/u_ref ) * rho[:il]*u[il]/rho_e/u_ref,
+                          y[:il] )
+        
+        return y[il], delta_star, theta
+        
+  
         
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )

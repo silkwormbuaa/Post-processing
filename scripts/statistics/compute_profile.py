@@ -206,9 +206,15 @@ with timer("compute profile"):
     S.drop_ghost( G, block_list )
     S.compute_profile( block_list, bbox, vars, 
                        outfile=outfile, roughwall=roughwall )
-    
+
+# - remind to modify the profile
+
 if not roughwall:
-    
     print(clr.bg.red,
-          "Please modify the profile at the wall manually!",
+          "Please add the values at the wall(y=0) manually!",
           clr.reset)
+else:
+    print(clr.bg.red,
+          "Please modify the wall coordinate(y=-0.52) manually!",
+          clr.reset)
+    

@@ -614,30 +614,42 @@ def bilin_interp(x1,x2,y1,y2,f,x,y):
 #
 # ----------------------------------------------------------------------
 
-def find_indices( arr, target ):
+def find_indices( arr, target, mode='bisection' ):
     
     """
     arr    : 1D list or numpy array
     target : target value
+    mode   : 'bisection' or 'sequential'  
     
     return : left and right indices 
     """
     
-    left, right = 0, len(arr) - 1
+    if mode == 'bisection':
+    
+        left, right = 0, len(arr) - 1
 
-    while left <= right:
-        mid = left + (right - left) // 2  # avoid integer overflow
+        while left <= right:
+            mid = left + (right - left) // 2  # avoid integer overflow
 
-        if arr[mid] == target:
-            return mid, mid + 1  # find target value
-        elif arr[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
+            if arr[mid] == target:
+                return mid, mid + 1  # find target value
+            elif arr[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
 
-    # return left and right index
-    return right, left
+        # return left and right index
+        return right, left
 
+    if mode == 'sequential':
+        
+        left = 0
+        
+        while arr[left] < target:
+            
+            left += 1
+        
+        return left -1 , left
 
 # ----------------------------------------------------------------------
 # >>> convert image format                                       (Nr.)
@@ -763,9 +775,9 @@ def lin_grow(xs,ds,expratio,len=None,upbound=None):
 
 if __name__ == "__main__":
     
-    filename = "/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapshot_test_z/case_parameters"
+    arr = np.array([1,2,3,4,5,6,7,8,9,10])
     
-    parameters = read_case_parameter(filename)
+    target = 5.5
     
-    for key, value in parameters.items():
-        print(f"key is {key}, value is {value}")
+    print(find_indices(arr,target,mode='sequential'))
+    print(find_indices(arr,target,mode='bisection'))
