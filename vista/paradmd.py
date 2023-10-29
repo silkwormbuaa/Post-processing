@@ -1150,6 +1150,8 @@ class ParaDmd:
                 
                 pickle.dump( self.ind_spmode, f )
                 
+                pickle.dump( self.alphas, f )
+                
                 pickle.dump( self.alphas_sp, f )
                 
                 pickle.dump( self.alphas_pol, f )
@@ -1167,6 +1169,8 @@ class ParaDmd:
                 pickle.dump( self.psi, f )
                 
                 pickle.dump( self.St, f )
+                
+                pickle.dump( self.mu, f )
                 
         else: raise ValueError("Please compute spdmd first!")
 
@@ -1297,6 +1301,8 @@ class ParaDmd:
             
                 self.ind_spmode = pickle.load( f )
                 
+                self.alphas     = pickle.load( f )
+                
                 self.alphas_sp  = pickle.load( f )
                 
                 self.alphas_pol = pickle.load( f )
@@ -1314,6 +1320,8 @@ class ParaDmd:
                 self.psi        = pickle.load( f )
                 
                 self.St         = pickle.load( f )
+                
+                self.mu         = pickle.load( f )
                 
             print(col.fg.green,"Finish reading in spdmd results.",
                   col.reset,end='\n')
