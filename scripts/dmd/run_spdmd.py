@@ -12,8 +12,8 @@
 '''
 
 import os
-
 import sys
+import pickle
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
@@ -27,9 +27,7 @@ from   vista.paradmd     import ParaDmd
 from   vista.colors      import colors  as col
 
 from   vista.plot_style  import plot_eigens
-
 from   vista.plot_style  import plot_amp_st
-
 from   vista.plot_style  import plot_psi_st
 
 from   vista.tools       import read_case_parameter
@@ -75,33 +73,44 @@ velocity = float( case_parameters.get('u_ref') )
 snap_dir = os.getcwd()
 
 
-# Set the instance and read in Pqs
+# check if paradmd.pkl exists
 
-paradmd = ParaDmd( snap_dir )
+if not os.path.exists( 'spdmd_result.pkl' ):
 
-with timer('Read in Pqs file '):
-    
-    paradmd.read_Pqs()
-    
+    # Set the instance and read in Pqs
 
-# Compute spdmd
+    paradmd = ParaDmd( snap_dir )
 
-with timer('Compute sparsity promoting dmd '):
-    
-    
-    paradmd.compute_spdmd( gamma, rho )
-    
-    print(f"\nThe performance loss of SPDMD is :",col.fg.green, end='')
-    print(f" {paradmd.Ploss:8.3f} %.", col.reset, "\n")
+    with timer('Read in Pqs file '):
+        
+        paradmd.read_Pqs()
+        
+
+    # Compute spdmd
+
+    with timer('Compute sparsity promoting dmd '):
+        
+        
+        paradmd.compute_spdmd( gamma, rho )
+        
+        print(f"\nThe performance loss of SPDMD is :",col.fg.green, end='')
+        print(f" {paradmd.Ploss:8.3f} %.", col.reset, "\n")
+        sys.stdout.flush()
+
+    paradmd.St = paradmd.freq * Lsep / velocity
+
+    paradmd.save_spdmd_result()
+
+    paradmd.save_ind_spmode()
+
     sys.stdout.flush()
+    
+else: 
+    
+    paradmd = ParaDmd( snap_dir )
+    
+    paradmd.read_spdmd_result()
 
-paradmd.St = paradmd.freq * Lsep / velocity
-
-paradmd.save_spdmd_result()
-
-paradmd.save_ind_spmode()
-
-sys.stdout.flush()
 
 # =============================================================================
 # plot eigen values and amplitudes
@@ -115,35 +124,41 @@ b. ([2,3],[1]) will look for the elements array[2,1] and array[3,1].
 c. ([1,2,3]) will look for the elements in a 1-D array arr[1:3].
 '''
 
+fmt = '.pdf'
+
+eigen_dir = snap_dir + '/eigen_plots'
+
+if not os.path.exists( eigen_dir ):
+    os.mkdir( eigen_dir )
+    print(f"Created directory {eigen_dir}.\n")
+    
+os.chdir( eigen_dir )
+
 plot_eigens( paradmd.mu, 
              paradmd.mu[ tuple([paradmd.ind_spmode]) ],
-             filename='a-eigens-.png')
+             filename='a-eigens-' + fmt)
 
 plot_amp_st( paradmd.St, 
              np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
-             filename='a-amplitude.png',
+             filename='a-amplitude'+fmt,
              hidesmall=False)
 
 plot_amp_st( paradmd.St, 
              np.abs(paradmd.alphas),
              amp2 = np.abs(paradmd.alphas_pol),
-             filename='a-amplitude-hidesmall.png')
+             filename='a-amplitude-hidesmall'+fmt)
 
 plot_psi_st( paradmd.St,
              np.abs(paradmd.psi),
              psi2 = np.abs(paradmd.psi_pol),
-             figsize=(10,7),
-             filename='a-psi.png',
-             pure=False)
+             filename='a-psi'+fmt)
 
 plot_psi_st( paradmd.St,
              np.abs(paradmd.psi),
              psi2 = np.abs(paradmd.psi_pol),
-             figsize=(10,7),
-             filename='a-psi-log.png',
-             xlim=[0.001,6.0],
-             pure=False)
+             filename='a-psi-log'+fmt,
+             xlim=[0.001,6.0])
 
 growth = paradmd.beta
 gmax = np.max(growth)
@@ -154,8 +169,6 @@ gray_scale = (growth - gmin)/( gmax - gmin )
 plot_psi_st( paradmd.St,
              np.abs(paradmd.psi),
              psi2 = np.abs(paradmd.psi_pol),
-             figsize=(10,7),
-             filename='a-psi-log-gray.png',
+             filename='a-psi-log-gray'+fmt,
              xlim=[0.001,6.0],
-             pure=False,
              gray=gray_scale)

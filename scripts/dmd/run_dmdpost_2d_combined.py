@@ -11,21 +11,14 @@
 
 
 import os
-
 import sys
-
 import cmath
-
 import time
-
 import pickle
-
 import copy
 
 import numpy             as     np
-
 import pandas            as     pd
-
 import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
@@ -38,11 +31,9 @@ from   vista.snapshot    import Snapshot
 from   vista.dmdmodes    import DMDMode, DMDModes
 
 from   vista.tools       import get_filelist
-
 from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_dmd_mode 
-
 from   vista.plot_style  import plot_combined_dmd_mode
 
 t_0 = time.time()

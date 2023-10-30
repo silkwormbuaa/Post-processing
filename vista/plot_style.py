@@ -23,7 +23,9 @@ from   mpl_toolkits.axes_grid1 import make_axes_locatable
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
 plt.rcParams['font.family'] = "Times New Roman"
+plt.rcParams['font.size']   = 40
 
 # ----------------------------------------------------------------------
 # >>> Plot eigen values around a unit circle                     (Nr.)
@@ -44,8 +46,7 @@ def plot_eigens( eigens,
                  figsize=None, 
                  filename=None, 
                  show_circle=True,
-                 set_view=False,
-                 pure=False):
+                 set_view=False):
     
     if eigens is None:
         
@@ -56,8 +57,7 @@ def plot_eigens( eigens,
         
         # Set default figure size
         
-        figsize = (10,10) 
-        
+        figsize = (10.8,9) 
         
     
     fig, ax = plt.subplots( figsize=figsize )
@@ -83,7 +83,8 @@ def plot_eigens( eigens,
                 marker='o',
                 edgecolors='gray',
                 facecolors='none',
-                label='Eigenvalues')
+                label='Eigenvalues',
+                s=40)
     
     
     # Plot the compared eigen values set if they are given
@@ -93,8 +94,10 @@ def plot_eigens( eigens,
         ax.scatter( eigens2.real, 
                     eigens2.imag, 
                     marker='x',
-                    c='blue',
-                    label='Eigenvalues2')
+                    c='red',
+                    label='Eigenvalues2',
+                    s=150,
+                    linewidth=2)
     
     # Set_view
     
@@ -122,8 +125,8 @@ def plot_eigens( eigens,
     ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     
-    ax.tick_params(axis='x',labelsize=15)
-    ax.tick_params(axis='y',labelsize=15)
+    ax.tick_params(axis='x')
+    ax.tick_params(axis='y')
     
     # Grids
     
@@ -132,12 +135,16 @@ def plot_eigens( eigens,
     
     # Labels
     
-    ax.set_xlabel( "Real part",fontdict={'size':20})
-    ax.set_ylabel( "Imaginary part",fontdict={'size':20})
+    ax.set_xlabel( r"$\mathfrak{R}(\mu_i)$")
+    ax.set_ylabel( r"$\mathfrak{I}(\mu_i)$")
     
-    # With default labels or get pure figure
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
     
-    if pure: fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    # adjust the content region
+    
+    fig.subplots_adjust(left=0.25, right=0.91667, bottom=0.15, top=0.95)
     
     # Save figure
     
@@ -177,10 +184,10 @@ def plot_amp_st( st, amp1, amp2=None,
         
         # Set default figure size
         
-        figsize = (10,10) 
+        figsize = (10,8) 
         
     
-    fig, ax = plt.subplots( figsize=figsize )      
+    fig, ax = plt.subplots( figsize=figsize,constrained_layout=True )      
         
     # Plot the first amplitudes
     
@@ -232,9 +239,6 @@ def plot_amp_st( st, amp1, amp2=None,
     ax.xaxis.set_major_locator(ticker.MultipleLocator(5.0))
 #    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     
-    ax.tick_params(axis='x',labelsize=15)
-    ax.tick_params(axis='y',labelsize=15)
-    
     # Grids
     
     ax.grid(which='major', ls=':', linewidth=1)
@@ -242,12 +246,16 @@ def plot_amp_st( st, amp1, amp2=None,
     
     # Labels
     
-    ax.set_xlabel( r"$St_{L_{sep}}$",fontdict={'size':20})
-    ax.set_ylabel( "amplitude",fontdict={'size':20})
+    ax.set_xlabel( r"$St_{L_{sep}}$")
+    ax.set_ylabel( "amplitude")
     
     # With default labels or get pure figure
     
     if pure: fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
     
     # Save figure
     
@@ -276,7 +284,6 @@ def plot_amp_st( st, amp1, amp2=None,
 def plot_psi_st( st, psi1, psi2=None, 
                  figsize=None, 
                  filename=None, 
-                 pure=False, 
                  hidesmall=True,
                  xlim=None,
                  gray=None):
@@ -290,9 +297,8 @@ def plot_psi_st( st, psi1, psi2=None,
         
         # Set default figure size
         
-        figsize = (10,10) 
+        figsize = (15,9) 
         
-    
     fig, ax = plt.subplots( figsize=figsize )      
         
     # Plot the first amplitudes
@@ -309,7 +315,7 @@ def plot_psi_st( st, psi1, psi2=None,
 
     # Ticks
 
-#    ax.minorticks_on()
+    ax.minorticks_on()
     
     ax.tick_params( which='major',
                     axis='both',
@@ -321,14 +327,14 @@ def plot_psi_st( st, psi1, psi2=None,
                     axis='both', 
                     direction='out',
                     length=5,
-                    width=1)
-    
-    
+                    width=1.5)
+
+    # set major tick on y axis is 0.0001,0.001,0.01,0.1,1.0
+    ax.yaxis.set_major_locator(ticker.LogLocator(base=10.0, numticks=5))
+
 #    ax.xaxis.set_major_locator(ticker.MultipleLocator(1.0))
 #    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     ax.yaxis.set_tick_params( which='both', zorder=-1 )
-    ax.tick_params( axis='x', labelsize=15 )
-    ax.tick_params( axis='y', labelsize=15 )
     
     # axis limit
     
@@ -348,8 +354,8 @@ def plot_psi_st( st, psi1, psi2=None,
     
     # Labels
     
-    ax.set_xlabel( r"$St_{L_{sep}}$",fontdict={'size':20})
-    ax.set_ylabel( r"$|\psi_{k}|$",fontdict={'size':20})
+    ax.set_xlabel( r"$St_{L_{sep}}$")
+    ax.set_ylabel( r"$|\psi_{i}|$")
     
     # Plot line
     
@@ -387,7 +393,7 @@ def plot_psi_st( st, psi1, psi2=None,
         plt.vlines( np.array( df2['st'] ),
                     0.0, 
                     np.array( df2['psi2'] ), 
-                    linewidth=1.5,
+                    linewidth=3,
                     colors='red',
                     alpha=1.0,
                     label='Sparsity-promoting' )
@@ -396,21 +402,21 @@ def plot_psi_st( st, psi1, psi2=None,
                   np.array( df2['psi2']),
                   'o',
                   color='red',
-                  markersize=4)
+                  markersize=8)
+        
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+
     # Save figure
     
     if filename: 
         
+        fig.subplots_adjust(left=0.125, right=0.9375, bottom=0.1667, top=0.9167)
         plt.savefig( filename )
         print(f"{filename} is saved.\n")
         
-    # With default labels or get pure figure
-    
-    if pure: 
-        
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
-        plt.savefig( 'apure'+filename )
-        print(f"{'apure'+filename} is saved.\n")
+
     
     plt.close()
         
