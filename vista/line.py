@@ -367,21 +367,31 @@ class ProfileData( LineData ):
         """
         
         u = np.array(self.df['u'])
-        y = np.array(self.df['ys'])
+        y = np.array(self.df['y'])
         rho = np.array(self.df['rho'])
         
         il,ir = find_indices( u, u_ref*0.99, mode='sequential' )
         
-        rho_e = rho[il]
+        rho_e = rho[ir]
+        
+        # linear interpolate between left and right points
+        
+        delta = (u_ref*0.99 - u[il]) / (u[ir] - u[il]) * (y[ir] - y[il]) + y[il]
+        
+        rho_e = (rho[ir]-rho[il]) / (y[ir]-y[il]) * (delta - y[il]) + rho[il]
+        
+        u[ir] = u_ref*0.99
+        y[ir] = delta
+        rho[ir] = rho_e
         
         # compute displacement thickness
         
-        delta_star = np.trapz( ( 1.0 - u[:il]*rho[:il]/u_ref/rho_e ), y[:il] )
+        delta_star = np.trapz( ( 1.0 - u[:ir]*rho[:ir]/u_ref/rho_e ), y[:ir] )
         
-        theta = np.trapz( ( 1.0 - u[:il]/u_ref ) * rho[:il]*u[il]/rho_e/u_ref,
-                          y[:il] )
+        theta = np.trapz( ( 1.0 - u[:ir]/u_ref ) * rho[:ir]*u[ir]/rho_e/u_ref,
+                          y[:ir] )
         
-        return y[il], delta_star, theta
+        return delta, delta_star, theta
         
   
         
