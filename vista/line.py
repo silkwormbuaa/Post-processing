@@ -384,7 +384,7 @@ class ProfileData( LineData ):
         y[ir] = delta
         rho[ir] = rho_e
         
-        # compute displacement thickness
+        # compute displacement thickness and momentum thickness
         
         delta_star = np.trapz( ( 1.0 - u[:ir]*rho[:ir]/u_ref/rho_e ), y[:ir] )
         

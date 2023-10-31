@@ -280,8 +280,9 @@ with timer("Interpolate and plot "):
     define_wall_shape( z*5.2, casecode=casecode, yshift=(h_ridge-h_md) )
     
     cbar = r'$\Psi$'
-#    cbar_levels = np.linspace(-0.40,0.40,26)
-#    cbar_ticks  = np.linspace(-0.4,0.4,5)
+    
+    cbar_levels = np.linspace(-1.5,1.5,76)
+    cbar_ticks  = np.linspace(-1.5,1.5,7)
 
     for pure_stat in [True,False]:
         plot_slicex_stat( zz, yy, psi,
@@ -291,8 +292,8 @@ with timer("Interpolate and plot "):
                         wall=True,
                         col_map='RdBu_r',
                         cbar_label=cbar,
-    #                      cbar_levels=cbar_levels,
-    #                      cbar_ticks=cbar_ticks,
+                        cbar_levels=cbar_levels,
+                        cbar_ticks=cbar_ticks,
                         title=title,
                         extreme_loc=extreme_loc,
                         pure=pure_stat)
