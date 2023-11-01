@@ -37,9 +37,7 @@ from   .io_binary        import read_log_bin
 
 class BlockData:
     
-    # if verbose
-    
-    verbose = False
+    verbose = True
     
     # size of type 
     
@@ -91,6 +89,10 @@ class BlockData:
         # by default, to_fill is False
         self.to_fill = False
         if self.num in block_list: self.to_fill = True
+        
+        if self.verbose:
+            print(f"read in block {self.num},",end='')
+            print(f"dimension {self.npx} {self.npy} {self.npz}. {self.to_fill}")
 
         # primitive variables 'u,v,w,rho,rhoE'
         # mean variables = primitive variables + 'p T mu'

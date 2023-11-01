@@ -1789,9 +1789,9 @@ def Testing():
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936/Z_slice'
     
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/snapshots/snapshot_01376059/Z_slice'
+    test_dir1 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/snapshots/snapshot_00628554'
         
-    snap3d_file = test_dir1 + '/snapshot_Y_003.bin'
+    snap3d_file = test_dir1 + '/snapshot.bin'
     gridfile = test_dir1 + '/inca_grid.bin'
 
     # - read in grid info

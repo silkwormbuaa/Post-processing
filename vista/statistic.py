@@ -169,30 +169,85 @@ class StatisticData:
             self.thermo           = buf_log[10]
             self.visc_diff        = buf_log[11]
             
-            # if want to see header, set verbose True.            
-            if (self.verbose is True) : 
-                print('format '          + str(self.format)           + '\n')
-                print('n_samples '       + str(self.n_samples)        + '\n')
-                print('start_step '      + str(self.start_step)       + '\n')
-                print('sample_step '     + str(self.sample_step)      + '\n')
-                print('sample_time '     + str(self.sample_time)      + '\n')
-                print('start_time '      + str(self.start_time)       + '\n')
-                print('meanvalues '      + str(self.meanvalues)       + '\n')
-                print('doublecorr '      + str(self.doublecorr)       + '\n')
-                print('triplecorr '      + str(self.triplecorr)       + '\n')
-                print('quadruplecorr '   + str(self.quadruplecorr)    + '\n')
-                print('autocorr '        + str(self.autocorr)         + '\n')
-                print('mean_invar '      + str(self.mean_invar)       + '\n')
-                print('schlieren '       + str(self.schlieren)        + '\n')
-                print('cavitation_stats '+ str(self.cavitation_stats) + '\n')
-                print('vapor_gas_stats ' + str(self.vapor_gas_stats)  + '\n')
-                print('rste '            + str(self.rste)             + '\n')
-                print('thermo '          + str(self.thermo)           + '\n')
-                print('visc_diff '       + str(self.visc_diff)        + '\n')
-                print('header_size '     + str(self.header_size)      + '\n')
+        
+        elif self.format == 2:
+
+            # Read number of samples, sample step & start step
+
+            self.n_samples = read_int_bin(file.read(sin),sin)
+            self.sample_step = read_int_bin(file.read(sin),sin)
+            self.start_step  = read_int_bin(file.read(sin),sin)
+
+            self.pos += int(3*sin)
+            
+            # Read number of transported variables
+            
+            self.npv      = read_int_bin(file.read(sin),sin) 
+            self.nscalars = read_int_bin(file.read(sin),sin)
+            self.nspecies = read_int_bin(file.read(sin),sin)
+            
+            self.pos += int(3*sin)
+
+            # Read sample time & start time
+
+            self.sample_time = read_flt_bin(file.read(sfl),sfl)
+            self.start_time  = read_flt_bin(file.read(sfl),sfl)
+            
+            self.pos += int(2*sfl)
+            
+            # Read settings; slg - size of logical
+
+            buf_log = read_log_bin(file.read(12*slg),slg)
+
+            self.pos += int(12*slg)
+
+            # Header size
+
+            self.header_size = self.pos
+            
+            # Store settings
+            
+            self.meanvalues       = buf_log[ 0]
+            if self.meanvalues: self.n_var += 8
+
+            self.doublecorr       = buf_log[ 1]
+            if self.doublecorr: self.n_var += 36
+
+            self.triplecorr       = buf_log[ 2]
+            self.quadruplecorr    = buf_log[ 3]
+            self.autocorr         = buf_log[ 4]
+            self.mean_invar       = buf_log[ 5]
+            self.schlieren        = buf_log[ 6]
+            self.cavitation_stats = buf_log[ 7]
+            self.vapor_gas_stats  = buf_log[ 8]
+            self.rste             = buf_log[ 9]
+            self.thermo           = buf_log[10]
+            self.visc_diff        = buf_log[11]
 
         else:
             raise ValueError('Header format in statistics.bin not supported')
+
+        # if want to see header, set verbose True.            
+        if (self.verbose is True) : 
+            print('format           '+ str(self.format)           + '\n')
+            print('n_samples        '+ str(self.n_samples)        + '\n')
+            print('start_step       '+ str(self.start_step)       + '\n')
+            print('sample_step      '+ str(self.sample_step)      + '\n')
+            print('sample_time      '+ str(self.sample_time)      + '\n')
+            print('start_time       '+ str(self.start_time)       + '\n')
+            print('meanvalues       '+ str(self.meanvalues)       + '\n')
+            print('doublecorr       '+ str(self.doublecorr)       + '\n')
+            print('triplecorr       '+ str(self.triplecorr)       + '\n')
+            print('quadruplecorr    '+ str(self.quadruplecorr)    + '\n')
+            print('autocorr         '+ str(self.autocorr)         + '\n')
+            print('mean_invar       '+ str(self.mean_invar)       + '\n')
+            print('schlieren        '+ str(self.schlieren)        + '\n')
+            print('cavitation_stats '+ str(self.cavitation_stats) + '\n')
+            print('vapor_gas_stats  '+ str(self.vapor_gas_stats)  + '\n')
+            print('rste             '+ str(self.rste)             + '\n')
+            print('thermo           '+ str(self.thermo)           + '\n')
+            print('visc_diff        '+ str(self.visc_diff)        + '\n')
+            print('header_size      '+ str(self.header_size)      + '\n')
 
 
 # ----------------------------------------------------------------------
@@ -1385,3 +1440,37 @@ class StatisticData:
         
         with open( outfile, 'wb' ) as f:
             pickle.dump( self.df_wall, f )
+            
+
+# ----------------------------------------------------------------------
+# >>> Main: for test and debugging                              ( -1 )
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/11/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if __name__ == "__main__":
+    
+    file = "/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/initial/statistics.bin"
+    
+    S = StatisticData( file )
+    
+    with open( file, 'rb') as f:
+        
+        S.verbose = True
+        
+        S.read_stat_header( f )
+        
+        bl_list = [1,2,3,4,5,6,7,8,9,10,11,12]
+        vars = ['u','v','w']
+        
+        S.read_stat_body( f, bl_list, vars)
+        
+        

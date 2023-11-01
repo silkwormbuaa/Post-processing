@@ -570,6 +570,7 @@ class BlockGrid:
         sin = 4
         sfl = 8
         slg = 4
+        len_specname = 15
         
         # index of BlockGrid, like first block's grid, second ...
         self.num = num
@@ -604,6 +605,10 @@ class BlockGrid:
         self.lz1 = read_flt_bin( file.read(sfl), sfl )
         
         self.size += 6*sfl
+        if self.verbose:
+            print( f'lx0 =  {self.lx0:10.5f} lx1 = {self.lx1:10.5f}' )
+            print( f'ly0 =  {self.ly0:10.5f} ly1 = {self.ly1:10.5f}' )
+            print( f'lz0 =  {self.lz0:10.5f} lz1 = {self.lz1:10.5f}' )
         
         # read parameters of grid: 3 components in each direction
         self.paramx = read_flt_bin( file.read(3*sfl), sfl )
@@ -672,14 +677,15 @@ class BlockGrid:
         if self.verbose: print( 'transx1 = ', self.transx1 )
         
         # read fluid names: char(len=15) for each one
-        self.fluidx1 = read_char_bin( file.read(15) )
-        self.fluidx2 = read_char_bin( file.read(15) )
-        self.fluidy1 = read_char_bin( file.read(15) )
-        self.fluidy2 = read_char_bin( file.read(15) )
-        self.fluidz1 = read_char_bin( file.read(15) )
-        self.fluidz2 = read_char_bin( file.read(15) )
+        # after INCA 5b66ccd, 7th Feb 2023, fluid names are 19 characters
+        self.fluidx1 = read_char_bin( file.read(len_specname) )
+        self.fluidx2 = read_char_bin( file.read(len_specname) )
+        self.fluidy1 = read_char_bin( file.read(len_specname) )
+        self.fluidy2 = read_char_bin( file.read(len_specname) )
+        self.fluidz1 = read_char_bin( file.read(len_specname) )
+        self.fluidz2 = read_char_bin( file.read(len_specname) )
         
-        self.size += 90
+        self.size += len_specname*6
         if self.verbose: print( 'fluidx1 = ', self.fluidx1 )
         
         # read extra space after 'write'
@@ -720,7 +726,10 @@ class BlockGrid:
         self.wz = read_flt_bin( file.read( (self.nz+6)*sfl ), sfl )
         
         self.size += ( self.nx+self.ny+self.nz + 18 ) * sfl * 4
-        if self.verbose: print( 'self.gy = ', self.gy )
+        if self.verbose: 
+            print( 'self.gx = ', self.gx )
+            print( 'self.gy = ', self.gy )
+            print( 'self.gz = ', self.gz )
         
         # read extra spaces after 'write'
         file.read(4)
@@ -839,7 +848,7 @@ class BlockGrid:
 
 def Testing():
 
-    filename = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
+    filename = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/initial/inca_grid.bin'
     
     grd = GridData( filename )
     
