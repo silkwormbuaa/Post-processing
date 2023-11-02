@@ -33,7 +33,7 @@ from   vista.plot_style  import plot_psi_st
 from   vista.tools       import read_case_parameter
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 # Take gamma, rho from command line | read case parameters

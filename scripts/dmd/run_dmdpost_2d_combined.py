@@ -37,7 +37,7 @@ from   vista.plot_style  import plot_dmd_mode
 from   vista.plot_style  import plot_combined_dmd_mode
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger(filename=os.path.basename(__file__))
 
 
 # =============================================================================

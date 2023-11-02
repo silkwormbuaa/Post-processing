@@ -30,7 +30,7 @@ from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger( os.path.basename(__file__) )
 
 
 # =============================================================================

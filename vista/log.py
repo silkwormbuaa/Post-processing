@@ -8,12 +8,19 @@
 @Desc    :   None
 '''
 
+import os
 import sys
 
-class Logger(object):
-    def __init__(self):
+class Logger:
+    
+    def __init__( self, filename=None ):
+        
+        if filename is None:
+            filename = "logfile.log"
+            
         self.terminal = sys.stdout
-        self.log = open("logfile.log", "a")
+        name, _ = os.path.splitext( filename )
+        self.log = open(f"{name}.log", "a")
    
     def write(self, message):
         self.terminal.write(message)
@@ -62,19 +69,3 @@ def Testing():
 if __name__ == "__main__":
 
     Testing()
-import sys
-
-class Logger(object):
-    def __init__(self):
-        self.terminal = sys.stdout
-        self.log = open("logfile.log", "a")
-   
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)  
-
-    def flush(self):
-        # this flush method is needed for python 3 compatibility.
-        # this handles the flush command by doing nothing.
-        # you might want to specify some extra behavior here.
-        pass    

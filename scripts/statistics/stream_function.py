@@ -42,7 +42,10 @@ from   vista.plane_analy import compute_stream_function
 from   vista.plot_style  import plot_slicex_stat
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+
+sys.stdout = Logger( os.path.basename(__file__) )
+
+
 # =============================================================================
 
 loc_delta = -20.0

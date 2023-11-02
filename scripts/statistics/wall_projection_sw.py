@@ -40,7 +40,7 @@ from   vista.tools       import read_case_parameter
 from   vista.plot_style  import plot_wall_projection
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 

@@ -34,7 +34,7 @@ from   vista.snapshot    import Snapshot
 from   vista.colors      import colors    as col
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 

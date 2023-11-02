@@ -37,7 +37,7 @@ from   vista.colors      import colors    as col
 from   scipy.interpolate import griddata
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger( os.path.basename(__file__) )
 
 t_0 = time.time()
 # =============================================================================

@@ -37,7 +37,7 @@ from   .io_binary        import read_log_bin
 
 class BlockData:
     
-    verbose = True
+    verbose = False
     
     # size of type 
     

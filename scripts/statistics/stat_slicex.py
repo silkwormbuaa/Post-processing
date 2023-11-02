@@ -9,7 +9,6 @@
 @Desc    :   None
 '''
 
-
 import os
 import sys
 import time
@@ -40,7 +39,7 @@ from   vista.plane_analy import periodic_average
 from   vista.plot_style  import plot_slicex_stat
 
 from   vista.log         import Logger
-sys.stdout = Logger()
+sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
