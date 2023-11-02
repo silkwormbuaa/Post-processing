@@ -41,6 +41,7 @@ from   vista.plot_style  import plot_slicex_stat
 
 from   vista.log         import Logger
 sys.stdout = Logger()
+
 # =============================================================================
 
 locs_delta = np.linspace(-20,-20,1)

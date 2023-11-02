@@ -10,8 +10,8 @@
 '''
 
 import os
-
 import sys
+import time
 
 import numpy             as     np
 
@@ -34,7 +34,8 @@ from   vista.plot_style  import plot_slicez_stat
 
 from   vista.tools       import read_case_parameter
 
-
+from   vista.log         import Logger
+sys.stdout = Logger()
 
 # =============================================================================
 
@@ -213,5 +214,10 @@ for i, loc in enumerate( locs ):
                         cbar_label=cbar,
                         wall=wall)
     
+# print out the time finishing the job
 
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()       
+    
 

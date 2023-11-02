@@ -36,7 +36,9 @@ from   vista.tools       import read_case_parameter
 from   vista.plot_style  import plot_dmd_mode 
 from   vista.plot_style  import plot_combined_dmd_mode
 
-t_0 = time.time()
+from   vista.log         import Logger
+sys.stdout = Logger()
+
 
 # =============================================================================
 # read in one snapshot file to get grid vectors
@@ -45,6 +47,8 @@ t_0 = time.time()
 snap_dir = os.getcwd()
 
 step = 1
+
+t_0 = time.time()
 
 with timer('\n - Get snapshots file and grid vector'):
 
@@ -353,9 +357,12 @@ with timer("\n - Interpolate and output figures "):
 t_end = time.time()
 
 print(f"\n - dmdpost totally took {t_end-t_0:8.2f}s.")
-sys.stdout.flush()
-    
-    
+
+
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+sys.stdout.flush()       
     
 
 

@@ -12,10 +12,12 @@
 
 import os
 import sys
-import numpy             as     np
+import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
+
+import numpy             as     np
 
 from   scipy.interpolate import griddata
 
@@ -33,6 +35,9 @@ from   vista.plane_analy import compute_DS
 from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_slicez_stat
+
+from   vista.log         import Logger
+sys.stdout = Logger()
 
 
 # =============================================================================
@@ -138,6 +143,12 @@ with timer("Interpolate and plot "):
                       separation=True,
                       sonic=False,
                       cbar_levels=cbar_levels)
+    
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()       
     
    
     

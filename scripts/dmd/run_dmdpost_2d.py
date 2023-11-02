@@ -11,21 +11,17 @@
 
 
 import os
-
 import sys
-
 import cmath
-
 import time
-
 import pickle
+
+source_dir = os.path.realpath(__file__).split('scripts')[0] 
+sys.path.append( source_dir )
 
 import numpy             as     np
 
 import pandas            as     pd
-
-source_dir = os.path.realpath(__file__).split('scripts')[0] 
-sys.path.append( source_dir )
 
 from   vista.timer       import timer
 
@@ -34,12 +30,12 @@ from   vista.snapshot    import Snapshot
 from   vista.dmdmodes    import DMDMode, DMDModes
 
 from   vista.tools       import get_filelist
-
 from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_dmd_mode 
 
-t_0 = time.time()
+from   vista.log         import Logger
+sys.stdout = Logger()
 # =============================================================================
 # read in one snapshot file to get grid vectors
 # =============================================================================
@@ -47,6 +43,8 @@ t_0 = time.time()
 snap_dir = os.getcwd()
 
 step = 1
+
+t_0 = time.time()
 
 with timer('\n - Get snapshots file and grid vector'):
     
@@ -272,4 +270,9 @@ with timer("\n - Interpolate and output figures "):
 t_end = time.time()
 
 print(f"\n - dmdpost totally took {t_end-t_0:8.2f}s.")
-sys.stdout.flush()
+
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()       

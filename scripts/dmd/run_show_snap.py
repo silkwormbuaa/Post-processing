@@ -11,17 +11,15 @@
 
 
 import os
-
 import sys
-
 import time
+
+source_dir = os.path.realpath(__file__).split('scripts')[0]
+sys.path.append( source_dir )
 
 import numpy             as     np
 
 import pandas            as     pd
-
-source_dir = os.path.realpath(__file__).split('scripts')[0]
-sys.path.append( source_dir )
 
 from   vista.timer       import timer
 
@@ -30,7 +28,6 @@ from   vista.snapshot    import Snapshot
 from   vista.paradmd     import ParaDmd
 
 from   vista.tools       import get_filelist
-
 from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_dmd_mode 
@@ -38,6 +35,9 @@ from   vista.plot_style  import plot_dmd_mode
 from   vista.colors      import colors    as col
 
 from   scipy.interpolate import griddata
+
+from   vista.log         import Logger
+sys.stdout = Logger()
 
 t_0 = time.time()
 # =============================================================================
@@ -184,7 +184,11 @@ plot_dmd_mode(meshgrid,v,
               filename='debug2.png',
               colorbar=True)
 
+# print out the time finishing the job
 
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()    
 
 
 

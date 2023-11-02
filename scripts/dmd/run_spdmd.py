@@ -13,7 +13,7 @@
 
 import os
 import sys
-import pickle
+import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
@@ -32,6 +32,8 @@ from   vista.plot_style  import plot_psi_st
 
 from   vista.tools       import read_case_parameter
 
+from   vista.log         import Logger
+sys.stdout = Logger()
 
 # =============================================================================
 # Take gamma, rho from command line | read case parameters
@@ -172,3 +174,9 @@ plot_psi_st( paradmd.St,
              filename='a-psi-log-gray'+fmt,
              xlim=[0.001,6.0],
              gray=gray_scale)
+
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()      

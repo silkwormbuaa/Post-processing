@@ -12,11 +12,13 @@
 import os
 import sys
 import pickle
-import numpy             as     np
-import pandas            as     pd
+import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
+
+import numpy             as     np
+import pandas            as     pd
 
 from   vista.statistic   import StatisticData
 
@@ -35,6 +37,9 @@ from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 
 from   vista.plot_style  import plot_wall_projection
+
+from   vista.log         import Logger
+sys.stdout = Logger()
 
 # =============================================================================
 
@@ -226,6 +231,12 @@ with timer("save spanwise averaged variable distribution along x"):
                             index=False,
                             float_format='%15.7f',
                             justify='left')
-        
+
+
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()      
     
          

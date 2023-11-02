@@ -11,8 +11,8 @@
 
 
 import os
-
 import sys
+import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -21,12 +21,9 @@ import pickle
 
 import numpy             as     np
 
-import pandas            as     pd
-
 from   vista.timer       import timer
 
 from   vista.tools       import get_filelist
-
 from   vista.tools       import read_case_parameter
 
 from   vista.paradmd     import ParaDmd
@@ -34,6 +31,11 @@ from   vista.paradmd     import ParaDmd
 from   vista.snapshot    import Snapshot
 
 from   vista.colors      import colors    as col
+
+from   vista.log         import Logger
+sys.stdout = Logger()
+
+# =============================================================================
 
 snap_dir = os.getcwd()
 
@@ -216,8 +218,11 @@ with timer(f'Rank {paradmd.rank} paradmd '):
             
         if paradmd.rank == 0: paradmd.save_Pqs()
 
-sys.stdout.flush()
+# print out the time finishing the job
 
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()       
 
 
 

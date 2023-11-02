@@ -11,14 +11,9 @@
 
 
 import os
-
 import sys
-
 import gc
-
-import numpy             as     np
-
-import matplotlib.pyplot as     plt
+import time
 
 from   mpi4py            import MPI
 
@@ -32,9 +27,13 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 
 from   vista.tools       import get_filelist
-
 from   vista.tools       import distribute_mpi_work
 
+from   vista.log         import Logger
+sys.stdout = Logger()
+
+
+# =============================================================================
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -157,8 +156,12 @@ for snapshot_file in filelist:
     print(f"Rank {rank } progress: {i/len(filelist)*100:10.2f}%.",end='')
     print(f"  Finish file {snapshot_file[-30:]}")
         
-    sys.stdout.flush()
 
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    
+sys.stdout.flush()     
 
 
 # get a slice from a known folder
