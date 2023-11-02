@@ -653,6 +653,8 @@ def plot_slicez_stat( xx, yy, v,
                       sonic=True, 
                       separation=True,
                       boundary=None,
+                      shockshape=None,
+                      DS=None,
                       figsize=None, 
                       filename=None,
                       col_map=None,
@@ -699,6 +701,25 @@ def plot_slicez_stat( xx, yy, v,
             x_bou = line[:,0]
             y_bou = line[:,1]
             ax.plot(x_bou,y_bou,'black',linewidth=0.8)
+            
+    if shockshape is not None:
+        with open('mean_shock_shape.pkl', 'rb') as f:
+            lines = pickle.load( f )
+        
+        for line in lines:
+            x_shock = line[:,0]
+            y_shock = line[:,1]
+            ax.plot(x_shock,y_shock,'black',linewidth=0.8)
+            
+    if DS is not None:
+        with open('mean_shock_DS.pkl', 'rb') as f:
+            lines = pickle.load( f )
+        
+        for line in lines:
+            x_DS = line[:,0]
+            y_DS = line[:,1]
+            ax.plot(x_DS,y_DS,'black',linewidth=0.8)
+            
     
     if wall:
         x_wall = np.array([np.min(xx),np.max(xx)])

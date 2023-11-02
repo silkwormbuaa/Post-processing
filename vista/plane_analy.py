@@ -117,7 +117,7 @@ def save_separation_line( xx, yy, u ):
 #
 # ----------------------------------------------------------------------
 
-def save_isolines( xx, yy, v, value:float, file ):
+def save_isolines( xx, yy, v, value:float, file, clip=False ):
 
     """
     xx,yy: 2d numpy array storing coordinates
@@ -134,7 +134,14 @@ def save_isolines( xx, yy, v, value:float, file ):
     
     for isoline in cs.collections[0].get_paths():
         line = isoline.vertices
-        lines.append( line )
+        
+        if clip:
+            if all( line[:,1] < 0.5 ):
+                continue
+            else: lines.append( line )
+        
+        else:
+            lines.append( line )
         
     plt.close()
     

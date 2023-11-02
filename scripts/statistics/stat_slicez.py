@@ -28,7 +28,9 @@ from   vista.timer       import timer
 
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_separation_line
+from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
+from   vista.plane_analy import compute_DS
 
 from   vista.plot_style  import plot_slicez_stat
 
@@ -166,6 +168,12 @@ for i, loc in enumerate( locs ):
         
         save_separation_line( xx, yy, u )
         
+        save_isolines( xx, yy, gradrho, 0.15, "mean_shock_shape.pkl",clip=True)
+        
+        DS = compute_DS( gradrho )
+        
+        save_isolines( xx, yy, DS, 0.2, "mean_shock_DS.pkl", clip=True)
+        
         cbar = r'$Mach$'
         
         plot_slicez_stat( xx,yy,mach, 
@@ -189,6 +197,21 @@ for i, loc in enumerate( locs ):
                         col_map='Greys',
                         cbar_label=cbar,
                         wall=wall)
+
+        plot_slicez_stat( xx,yy,gradrho, 
+                        shockshape="mean_shock_shape.pkl",
+                        filename='mean_shock_shape_'+str(i+1),
+                        col_map='Greys',
+                        cbar_label=cbar,
+                        wall=wall)
+
+        plot_slicez_stat( xx,yy,gradrho, 
+                         DS='mean_shock_DS.pkl',
+                        filename='mean_shock_DS_'+str(i+1),
+                        col_map='Greys',
+                        cbar_label=cbar,
+                        wall=wall)
+
 
         cbar = r'$tke$'
         
