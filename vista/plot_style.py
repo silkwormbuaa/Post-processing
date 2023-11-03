@@ -525,7 +525,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
                             grids2, v2, dir2,
                             figsize=None,
                             filename=None,
-                            pure=None,
+                            shock_shape=None,
                             colorbar=False,
                             clevel=None,
                             title=None):
@@ -533,7 +533,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
     if figsize is None:
         
         # set default figure size
-        figsize = (30,20)
+        figsize = (20,15)
   
     fig = plt.figure(figsize=figsize)
     ax  = fig.add_subplot( 111, projection='3d' )
@@ -544,7 +544,7 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
         
         clevel = np.linspace( min( np.min(v1), np.min(v2) ),
                               max( np.max(v1), np.max(v2) ),
-                              51 )
+                              36 )
            
     # plane direction to determine passing value
     # since ax.view_init() only support two axes to adjust view,
@@ -553,9 +553,9 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
     if dir1 == 'x':
         X = v1;        Y = grids1[0]; Z = grids1[1]
     elif dir1 == 'y':
-        X = grids1[0]; Y = grids1[1]; Z = v1 ; dir1 = 'z'
+        X = grids1[0]; Y = v1;        Z = grids1[1]
     elif dir1 == 'z':
-        X = grids1[0]; Y = v1; Z = grids1[1] ; dir1 = 'y'
+        X = grids1[0]; Y = grids1[1]; Z = v1
     
     # intersection line between Y,Z planes
         
@@ -569,66 +569,103 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
                              alpha=1.0,
                              levels=clevel, 
                              offset=0,
-                             cmap='bwr' )
+                             cmap='RdBu_r',
+                             extend='both')
+    
+    if shock_shape is not None:
+        lines = pickle.load( open(shock_shape,'rb') )
+        for line in lines:
+            x_shock = line[:,0]
+            y_shock = line[:,1]
+            ax.plot(x_shock,np.zeros_like(x_shock),y_shock,zdir=dir1,
+                    color='black',linewidth=1.0,zorder=101)
 
     if dir2 == 'x':
         X = v2;        Y = grids2[0]; Z = grids2[1]
     elif dir2 == 'y':
-        X = grids2[0]; Y = grids2[1]; Z = v2; dir2='z'
+        X = grids2[0]; Y = v2;        Z = grids2[1]
     elif dir2 == 'z':
-        X = grids2[0]; Y = v2; Z = grids2[1]; dir2='y'
+        X = grids2[0]; Y = grids2[1]; Z = v2
         
     ax.contourf( X,Y,Z, 
                  zdir = dir2, 
                  alpha = 0.9,
                  offset = 0,
                  levels=clevel, 
-                 cmap='bwr' )
+                 cmap='RdBu_r',
+                 extend='both')
     
     # view angle    
-    ax.view_init( elev=30.0, azim=-120.0 )
+    ax.view_init( elev=25, azim=-32, vertical_axis='y' )
+    ax.set_proj_type('ortho')
     
     # parameters for axes
     
-    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$',fontsize=40)
-    ax.set_zlabel(r'$y_s/{\delta}_0$',fontsize=40)
-    ax.set_ylabel(r'$z/{\delta}_0$',fontsize=40)
+    ax.set_xlabel(r'$(x-x_{imp})/{\delta}_0$', labelpad=100)
+    ax.set_ylabel(r'$y_s/{\delta}_0$', labelpad=20 )
+    ax.set_zlabel(r'$z/{\delta}_0$', labelpad=30 )
     
     ax.xaxis.set_major_locator(ticker.MultipleLocator(5.0))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
     ax.zaxis.set_major_locator(ticker.MultipleLocator(2.0))
     
-    ax.tick_params(axis='x',labelsize=30,pad=20)
-    ax.tick_params(axis='y',labelsize=30,pad=10)
-    ax.tick_params(axis='z',labelsize=30,pad=10)
+    ax.tick_params( which='major',
+                    axis='x',
+                    direction='out',
+                    length=15,
+                    width=2)
+    
+    ax.tick_params(axis='x',pad=10)
+    ax.tick_params(axis='y',pad=5)
+    ax.tick_params(axis='z',pad=8)
 
-    ax.xaxis.labelpad=70
-    ax.yaxis.labelpad=20
-    ax.zaxis.labelpad=20
-
-    ax.set_zlim(0,7)
-    ax.set_ylim(-2,2)
+    ax.set_zlim(-2,2)
+    ax.set_ylim(0,8)
+    
+    # add 3D axes to show the view angle
+    
+    ax.quiver(-20, -5, 0, 1, 0, 0, color='r', label='X-axis')
+    ax.quiver(-20, -5, 0, 0, 1, 0, color='g', label='Y-axis')
+    ax.quiver(-20, -5, 0, 0, 0, 1, color='b', label='Z-axis')
     
     # colorbar
     
     if colorbar is True: 
         cbar = plt.colorbar(contourf1, 
-                            cax=ax.inset_axes([1.05,0.3,0.03,0.5]))
-        cbar.ax.set_ylabel(r'$\Re({\phi}_p)$',fontsize=40)
-        cbar.ax.tick_params(labelsize=30)
+ #                           cax=ax.inset_axes([0.0,0.3,0.03,0.3]),
+                            orientation='vertical', 
+                            shrink=0.3,
+                            location='left',
+                            aspect=10)
+        
+        cbar.outline.set_linewidth(2)
+        
+        cbar.ax.set_xlabel( r"$\mathfrak{R}(\phi_p)$",
+                            fontsize=40,
+                            labelpad=25,
+                            loc='center')
+        
+        cbar.ax.tick_params( direction='in',
+                             left=True,right=False,
+                             labelleft=True,labelright=False,
+                             length=20.0,
+                             width=2.0)
 
     # title        
     if title is not None: 
-        ax.text(0.0,8.0,5.0, title, fontsize=40, ha='center')
+        ax.text(0.0,15.0,0.0, title, ha='center')
         
     # set aspect of bounding box
-    ax.set_box_aspect([150,40,50])
+    ax.set_box_aspect([6,50,12])
+    fig.patch.set_facecolor('white')
 
-    plt.tight_layout()  # tried to remove rounding blank
+#    plt.tight_layout()  # tried to remove rounding blank
+    fig.subplots_adjust(left=0.0, right=1.0, bottom=0.1, top=0.9)
+    fig.tight_layout()
 
     if filename:
         
-        plt.savefig( filename, bbox_inches='tight' ) # tight bouding box
+        plt.savefig( filename ) # tight bouding box
         print(f"{filename} is output.\n")
     
     plt.close()
@@ -667,7 +704,7 @@ def plot_slicez_stat( xx, yy, v,
     
     fig, ax = plt.subplots( figsize=figsize )
     
-    if col_map is None: col_map='viridis'
+    if col_map is None: col_map='RdBu_r'
     
     if cbar_levels is None: cbar_levels=51
     
@@ -703,7 +740,7 @@ def plot_slicez_stat( xx, yy, v,
             ax.plot(x_bou,y_bou,'black',linewidth=0.8)
             
     if shockshape is not None:
-        with open('mean_shock_shape.pkl', 'rb') as f:
+        with open(shockshape, 'rb') as f:
             lines = pickle.load( f )
         
         for line in lines:
@@ -712,7 +749,7 @@ def plot_slicez_stat( xx, yy, v,
             ax.plot(x_shock,y_shock,'black',linewidth=0.8)
             
     if DS is not None:
-        with open('mean_shock_DS.pkl', 'rb') as f:
+        with open(DS, 'rb') as f:
             lines = pickle.load( f )
         
         for line in lines:
@@ -788,7 +825,7 @@ def plot_slicex_stat( zz, yy, v,
     
     fig, ax = plt.subplots( figsize=figsize )
 
-    if col_map is None: col_map='viridis'
+    if col_map is None: col_map='RdBu_r',
     
     if cbar_levels is None: cbar_levels=51
 

@@ -205,10 +205,11 @@ for i, loc in enumerate( locs ):
                         cbar_label=cbar,
                         wall=wall)
 
-        plot_slicez_stat( xx,yy,gradrho, 
+        cbar = 'DS'
+        plot_slicez_stat( xx,yy,DS, 
                          DS='mean_shock_DS.pkl',
                         filename='mean_shock_DS_'+str(i+1),
-                        col_map='Greys',
+                        col_map='Greys_r',
                         cbar_label=cbar,
                         wall=wall)
 

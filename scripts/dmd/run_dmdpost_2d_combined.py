@@ -19,7 +19,6 @@ import copy
 
 import numpy             as     np
 import pandas            as     pd
-import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -33,7 +32,6 @@ from   vista.dmdmodes    import DMDMode, DMDModes
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 
-from   vista.plot_style  import plot_dmd_mode 
 from   vista.plot_style  import plot_combined_dmd_mode
 
 from   vista.log         import Logger
@@ -49,6 +47,8 @@ snap_dir = os.getcwd()
 step = 1
 
 t_0 = time.time()
+
+shock_shape_file = snap_dir + '/mean_shock_shape.pkl'
 
 with timer('\n - Get snapshots file and grid vector'):
 
@@ -235,7 +235,7 @@ with timer("\n - Generate the interpolation grid "):
     
     ymin = 0.040
 #    ymin = 0.0
-    ymax = 44.04
+    ymax = 41.6
 #    ymax = modes_Z.df_modes['y'].max()
     
     zmin = modes_Y.df_modes['z'].min()
@@ -326,7 +326,7 @@ with timer("\n - Interpolate and output figures "):
         
             cmax = max(cmax, cmax_new)
         
-        clevel = np.linspace( -cmax, cmax, 51 )
+        clevel = np.linspace( -0.8*cmax, 0.8*cmax, 51 )
         
         for i, phase in enumerate(phases):
             
@@ -339,6 +339,7 @@ with timer("\n - Interpolate and output figures "):
             
             plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                                     (xx2,yy2), v2, 'z',
+                                    shock_shape=shock_shape_file,
                                     filename=filename+'.png',
                                     colorbar=True,
                                     clevel=clevel,
