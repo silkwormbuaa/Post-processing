@@ -34,7 +34,7 @@ plt.rcParams['font.size']   = 30
 # =============================================================================
 
 output_nr = 5              # 1,2,3,4,5
-loc       = 'pf_max'       # 'sep' or 'pf_max'
+loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
 # =============================================================================
@@ -173,7 +173,8 @@ with timer('psd'):
     ax.set_xlim( [0.01,100] )
     ax.set_ylim( [0.0,1.0] )
     
-    ax.set_xlabel( r'$St_{sep}$' )
+#    ax.set_xlabel( r'$St_{sep}$' )
+    ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
     ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
 
     if not pure:
