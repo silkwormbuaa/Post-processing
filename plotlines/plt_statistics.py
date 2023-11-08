@@ -32,15 +32,15 @@ pure =  False  # if pure, without legend and label
 
 show = True
 
-plt_DU_vd_plus =  False      # roughness function based on vd transformed velocity
-plt_Cf         =  False      # skin friction coefficient
-plt_vbar       =  False      # normalized vertical velocity
-plt_Lsep       =  False      # length of separation
-plt_Asep       =  False      # area of separation
-plt_Pmax       =  False      # maximum wall pressure
-plt_pmax       =  False      # maximum pressure fluctuation
-plt_Hvor       =  True      # height of vortex
-plt_Hson       =  False      # height of sonic line
+plt_DU_vd_plus =  True       # roughness function based on vd transformed velocity
+plt_Cf         =  True       # skin friction coefficient
+plt_vbar       =  True       # normalized vertical velocity
+plt_Lsep       =  True       # length of separation
+plt_Asep       =  True       # area of separation
+plt_Pmax       =  True       # maximum wall pressure
+plt_pmax       =  True       # maximum pressure fluctuation
+plt_Hvor       =  True       # height of vortex
+plt_Hson       =  True       # height of sonic line
 plt_Hstream    =  True       # height of stream function extreme value
 
 
@@ -104,8 +104,8 @@ if plt_DU_vd_plus :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [-0.5,2.5] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
         
     figname = "DU_vd_plus"
@@ -189,8 +189,8 @@ if plt_Cf :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [2.7,3.5] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
         
     figname = "Cf"
@@ -263,8 +263,8 @@ if plt_vbar :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [0.0,3.5] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "v_max"
     
@@ -346,8 +346,8 @@ if plt_Lsep :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [8.0,14.0] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "Lsep"
     
@@ -428,8 +428,8 @@ if plt_Asep :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [0.8,1.6] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "Asep"
     
@@ -511,8 +511,8 @@ if plt_Pmax :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [2.15,2.3] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
         
     figname = "Pmax"
@@ -595,8 +595,8 @@ if plt_pmax :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [0.07,0.10] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "pfluc_max"
     
@@ -670,8 +670,8 @@ if plt_Hvor :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [0.0,0.7] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "Hvor"
     
@@ -753,8 +753,8 @@ if plt_Hson :
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [0.90,1.5] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "Hson"
     
@@ -829,8 +829,8 @@ if plt_Hstream:
     ax.set_xlim( [0.0,2.1] )
     ax.set_ylim( [0.0,0.25] )
     
-    ax.grid(visible=True, which='major',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
     
     figname = "Hpsi"
     

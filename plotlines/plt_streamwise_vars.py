@@ -50,7 +50,7 @@ plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
-pure = False
+pure = True
 
 fmt =  '.pdf' # or '.png'
 
@@ -160,8 +160,8 @@ if plt_pwfluc:
 
     ax.set_xlim([-20,10])
     ax.set_ylim([0.02,0.1])
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-                linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#                linestyle='--',linewidth=0.2)
 
     figname = "pressure_fluctuation"
 
@@ -240,8 +240,8 @@ if plt_pw:
 
     ax.set_xlim([-20.0,10.0])
     ax.set_ylim([0.8,2.5])
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-                linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#                linestyle='--',linewidth=0.2)
 
     figname = "wall_pressure"
 
@@ -307,7 +307,7 @@ if plt_Cf:
              [0,0],
              'black',
              ls = '--',
-             linewidth=1 )
+             linewidth=2 )
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
@@ -327,8 +327,8 @@ if plt_Cf:
     ax.set_xlim([-20.0,10.0])
     ax.set_ylim([-2.5,4.5])
     
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-                linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#                linestyle='--',linewidth=0.2)
 
     figname = "friction_coefficient"
 

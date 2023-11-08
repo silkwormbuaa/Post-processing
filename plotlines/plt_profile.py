@@ -30,21 +30,21 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = True
+plt_u_vd_lw = False
 plt_u_vd    = False
 plt_u       = False
-plt_RS_uu   = False
-plt_RS_vv   = False
-plt_RS_ww   = False
-plt_RS_uv   = False
-plt_RS_DNS  = False
+plt_RS_uu   = True
+plt_RS_vv   = True
+plt_RS_ww   = True
+plt_RS_uv   = True
+plt_RS_DNS  = True
 plt_rho     = False
 plt_T       = False
 plt_Mt      = False
 
-pure = False
+pure = True
 
-fmt = '.pdf'
+fmt = '.png'
 
 # =============================================================================
 
@@ -168,12 +168,12 @@ if plt_u_vd_lw:
     ax.tick_params(which='major',
                    axis='both',
                    direction='in',
-                   length=10,
+                   length=20,
                    width=2.0)
     ax.tick_params(which='minor',
                    axis='both', 
                    direction='in',
-                   length=5,
+                   length=10,
                    width=1.5)
     
     ax.set_xlim( [1,1000] )
@@ -184,10 +184,8 @@ if plt_u_vd_lw:
     
     ax.xaxis.set_minor_locator( x_minor )
 
-
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
-
+#    ax.grid(visible=False, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
     
     figname = 'Uvd_DNS'
     if pure:
@@ -245,12 +243,12 @@ if plt_u_vd :
     ax.tick_params(which='major',
                    axis='both',
                    direction='in',
-                   length=10,
+                   length=20,
                    width=2.0)
     ax.tick_params(which='minor',
                    axis='both', 
                    direction='in',
-                   length=5,
+                   length=10,
                    width=1.5)
     
     ax.set_xlim( [1,1000] )
@@ -262,8 +260,8 @@ if plt_u_vd :
     ax.xaxis.set_minor_locator( x_minor )
 
 
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
@@ -383,14 +381,6 @@ if plt_RS_uu:
 
     fig, ax = plt.subplots( figsize=[8,8] )
 
-    #ax.plot(dP.df['y+'],
-    #        dP.df['urms+']*dP.df['urms+'],
-    #        'gray',
-    #        label = r'$u^{'} u^{'}$ pirozzoli',
-    #        ls    = "",
-    #        marker='+',
-    #        \linewidth=4)
-
     for line in lines:
         
         ax.plot( line.df['ys+'], 
@@ -410,13 +400,13 @@ if plt_RS_uu:
     ax.tick_params(which='major',
                     axis='both',
                     direction='in',
-                    length=10,
+                    length=20,
                     width=2)
     ax.tick_params(which='minor',
                     axis='both', 
                     direction='in',
-                    length=5,
-                    width=1)
+                    length=10,
+                    width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
                         base = 10.0, subs = np.arange(1.0,10.0) )
     ax.xaxis.set_minor_locator( x_minor )
@@ -424,8 +414,8 @@ if plt_RS_uu:
     # set spacing between major tickers.
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
 
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
@@ -474,21 +464,21 @@ if plt_RS_vv:
     ax.tick_params(which='major',
                     axis='both',
                     direction='in',
-                    length=10,
+                    length=20,
                     width=2)
     ax.tick_params(which='minor',
                     axis='both', 
                     direction='in',
-                    length=5,
-                    width=1)
+                    length=10,
+                    width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
                         base = 10.0, subs = np.arange(1.0,10.0) )
     ax.xaxis.set_minor_locator( x_minor )
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
 
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
@@ -537,21 +527,21 @@ if plt_RS_ww:
     ax.tick_params(which='major',
                     axis='both',
                     direction='in',
-                    length=10,
+                    length=20,
                     width=2)
     ax.tick_params(which='minor',
                     axis='both', 
                     direction='in',
-                    length=5,
-                    width=1)
+                    length=10,
+                    width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
                         base = 10.0, subs = np.arange(1.0,10.0) )
     ax.xaxis.set_minor_locator( x_minor )
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
 
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
@@ -615,21 +605,21 @@ if plt_RS_uv:
     ax.tick_params(which='major',
                     axis='both',
                     direction='in',
-                    length=10,
+                    length=20,
                     width=2)
     ax.tick_params(which='minor',
                     axis='both', 
                     direction='in',
-                    length=5,
-                    width=1)
+                    length=10,
+                    width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
                         base = 10.0, subs = np.arange(1.0,10.0) )
     ax.xaxis.set_minor_locator( x_minor )
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
 
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
@@ -740,12 +730,12 @@ if plt_RS_DNS:
     ax.tick_params(which='major',
                    axis='both',
                    direction='in',
-                   length=10,
+                   length=20,
                    width=2.0)
     ax.tick_params(which='minor',
                    axis='both', 
                    direction='in',
-                   length=5,
+                   length=10,
                    width=1.5)
     
     ax.set_xlim( [1,1000] )
@@ -757,8 +747,8 @@ if plt_RS_DNS:
     ax.xaxis.set_minor_locator( x_minor )
 
 
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.2)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
