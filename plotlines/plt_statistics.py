@@ -640,8 +640,10 @@ if plt_Hvor :
     fig, ax = plt.subplots( figsize=[8,8], 
                             constrained_layout=True )
 
+    # use local boundary layer thickness as reference
+    
     ax.scatter( data.df[xvar].iloc[1:], 
-                data.df['Hvor'].iloc[1:], 
+                data.df['Hvor'].iloc[1:]/5.2*6.02925,  
                 color='blue',
                 marker='s' ,
                 s = 200,
@@ -683,7 +685,7 @@ if plt_Hvor :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r"$H_{vortex}/\delta_{0}$", 
+        ax.set_ylabel( r"$H_{vortex}/\delta_{99}$", 
                        labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
@@ -716,13 +718,13 @@ if plt_Hson :
                             constrained_layout=True )
 
     ax.scatter( data.df[xvar].iloc[1:], 
-                data.df['H_sonic'].iloc[1:]*10, 
+                data.df['H_sonic'].iloc[1:] /5.2*6.02925, 
                 color='blue',
                 marker='s' ,
                 s = 200,
                 zorder=10)
 
-    Hson_smooth = data.df['H_sonic'].iloc[0]*10
+    Hson_smooth = data.df['H_sonic'].iloc[0] /5.2*6.02925
     ax.plot( [0,2.5],
              [Hson_smooth,Hson_smooth],
               'gray',
@@ -745,13 +747,13 @@ if plt_Hson :
                    width=2.0)
     
     ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
     
 #    ax.set_xscale( "log" )
 #    ax.set_xlabel( r'$\mathrm{D/delta_0}$', fontdict={'size':24} )
     
     ax.set_xlim( [0.0,2.1] )
-    ax.set_ylim( [0.90,1.5] )
+    ax.set_ylim( [0.090,0.16] )
     
 #    ax.grid(visible=True, which='major',axis='both',color='gray',
 #            linestyle='--',linewidth=0.5)
@@ -766,7 +768,7 @@ if plt_Hson :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r"$H_{sonic}/\delta_{0}\cdot 10$", 
+        ax.set_ylabel( r"$H_{sonic}/\delta_{99}$", 
                        labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
@@ -800,7 +802,7 @@ if plt_Hstream:
                             constrained_layout=True )
 
     ax.scatter( data.df[xvar].iloc[1:], 
-                data.df['H_psi'].iloc[1:], 
+                data.df['H_psi'].iloc[1:]/5.2*6.02925, 
                 color='blue',
                 marker='s' ,
                 s = 200,
@@ -842,7 +844,7 @@ if plt_Hstream:
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r"$H_{\Psi}/\delta_{0}$", 
+        ax.set_ylabel( r"$H_{\Psi}/\delta_{99}$", 
                        labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )

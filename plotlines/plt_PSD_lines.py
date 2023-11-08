@@ -33,7 +33,7 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 5              # 1,2,3,4,5
+output_nr = 1              # 1,2,3,4,5
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
@@ -180,8 +180,8 @@ with timer('psd'):
     if not pure:
         ax.legend() 
     
-    ax.grid(visible=True, which='both',axis='both',color='gray',
-            linestyle='--',linewidth=0.5)
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
         
     if pure:
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
