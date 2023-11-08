@@ -980,6 +980,105 @@ def plot_slicex_stat( zz, yy, v,
 
 
 # ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/11/08  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_stream_function( zz, yy, v,
+                          tag=None,
+                          wall=True,
+                          figsize=None,
+                          filename=None,
+                          clevels=None,
+                          title=None,
+                          extreme_loc=None,
+                          pure=False):
+    """
+    zz,yy  are required to be equally spaced by streamplot
+    """
+    
+    if figsize is None:
+        figsize = (15,9)
+    
+    fig, ax = plt.subplots( figsize=figsize )
+    
+    if clevels is None: clevels=21
+    
+    else:
+        clevels_pos = clevels[ clevels>0 ]
+        clevels_neg = clevels[ clevels<0 ]
+    
+    cs_pos = ax.contour( zz, yy, v, 
+                         colors='black', 
+                         levels=clevels_pos, linestyles='-')
+    cs_neg = ax.contour( zz, yy, v, 
+                         colors='black', 
+                         levels=clevels_neg, linestyles='--' )
+
+    ax.set_xlim([np.min(zz),np.max(zz)])
+    ax.set_ylim([-0.1,1.1])
+    
+    if pure:
+        textfontsize = 80
+    else:
+        textfontsize = 50
+    
+    if wall:
+        df_wall = pd.read_csv( 'wall_X.dat', delimiter=r'\s+' )
+        z_wall = np.array(df_wall['x'])
+        y_wall = np.array(df_wall['y'])
+        ax.fill_between(z_wall,-0.1,y_wall,color='grey',zorder=10)
+    
+    if tag:
+        ax.text( 0.1, 0.95,
+                 tag,
+                 va='center',
+                 fontsize=textfontsize,
+                 zorder=101,
+                 bbox={"fc":"white","alpha":0.8,"ec":"None"})
+    
+    # plot a cross at extreme_loc
+    if extreme_loc:
+        for loc in extreme_loc:
+            ax.plot( loc[0],loc[1], 'x', color='black', 
+                     markersize=20, markeredgewidth=4.0)
+    
+    if not pure:
+        
+        if title is not None:
+            ax.text(0.5,1.1,title,fontsize=20,transform=ax.transAxes)
+        
+        # set ticks on the main xy axises
+        
+        ax.tick_params(axis='x',labelsize=30,pad=10)
+        ax.tick_params(axis='y',labelsize=30,pad=10)
+        
+        plt.gca().set_aspect('equal', adjustable='box')
+        
+    
+    if filename:
+        if pure:
+            filename+='_pure'
+            fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        
+        plt.savefig( 'figx_'+filename )
+        
+        print(f"{filename} is output.\n")
+    
+    plt.close()
+
+
+
+# ----------------------------------------------------------------------
 # >>> plot friction projection                                    (Nr.)
 # ----------------------------------------------------------------------
 #

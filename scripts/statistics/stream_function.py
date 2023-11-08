@@ -40,6 +40,7 @@ from   vista.plane_analy import periodic_average
 from   vista.plane_analy import compute_stream_function
 
 from   vista.plot_style  import plot_slicex_stat
+from   vista.plot_style  import plot_stream_function
 
 from   vista.log         import Logger
 
@@ -284,7 +285,7 @@ with timer("Interpolate and plot "):
     
     cbar = r'$\Psi$'
     
-    cbar_levels = np.linspace(-1.5,1.5,76)
+    cbar_levels = np.linspace(-1.5,1.5,24)
     cbar_ticks  = np.linspace(-1.5,1.5,7)
 
     for pure_stat in [True,False]:
@@ -300,7 +301,25 @@ with timer("Interpolate and plot "):
                         title=title,
                         extreme_loc=extreme_loc,
                         pure=pure_stat)
+        
+        plot_stream_function( zz, yy, psi,
+                              tag=tag,
+                              filename=casecode+'_stream_function_cross',
+                              wall=True,
+                              clevels=cbar_levels,
+                              title=title,
+                              extreme_loc=extreme_loc,
+                              pure=pure_stat)
 
+        plot_stream_function( zz, yy, psi,
+                              tag=tag,
+                              filename=casecode+'_stream_function',
+                              wall=True,
+                              clevels=cbar_levels,
+                              title=title,
+                       #       extreme_loc=extreme_loc,
+                              pure=pure_stat)
+        
         plot_slicex_stat( zz, yy, w_favre,
                         tag=tag,
                         filename=casecode+'_w_favre',
