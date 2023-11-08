@@ -392,10 +392,13 @@ class StatisticData:
             g = G.g[num-1]
             
             X,Y,Z = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
+            hx,hy,hz = np.meshgrid( g.hx, g.hy, g.hz, indexing='ij' )
             
             self.bl[num-1].df['x'] = X.T.flatten()
             self.bl[num-1].df['y'] = Y.T.flatten()
             self.bl[num-1].df['z'] = Z.T.flatten()
+            self.bl[num-1].df['hy'] = hy.T.flatten()
+            
             
             # adding vol_fra !! original vol_fra has i,j,k order, 
             # should be transpose as k,j,i
@@ -799,6 +802,7 @@ class StatisticData:
         
         data_chunk = None
         
+        vars = ['hy'] + vars
         for y in ys:
             
             df_temp = df[ df['y']==y ]

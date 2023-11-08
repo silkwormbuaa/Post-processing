@@ -378,17 +378,13 @@ class ProfileData( LineData ):
         
         delta = (u_ref*0.99 - u[il]) / (u[ir] - u[il]) * (y[ir] - y[il]) + y[il]
         
-        rho_e = (rho[ir]-rho[il]) / (y[ir]-y[il]) * (delta - y[il]) + rho[il]
-        
-        u[ir] = u_ref*0.99
         y[ir] = delta
-        rho[ir] = rho_e
         
         # compute displacement thickness and momentum thickness
         
         delta_star = np.trapz( ( 1.0 - u[:ir]*rho[:ir]/u_ref/rho_e ), y[:ir] )
         
-        theta = np.trapz( ( 1.0 - u[:ir]/u_ref ) * rho[:ir]*u[ir]/rho_e/u_ref,
+        theta = np.trapz( ( 1.0 - u[:ir]/u_ref ) * u[:ir]*rho[:ir]/u_ref/rho_e,
                           y[:ir] )
         
         return delta, delta_star, theta
