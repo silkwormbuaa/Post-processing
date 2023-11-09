@@ -130,8 +130,8 @@ def plot_eigens( eigens,
     
     # Grids
     
-    ax.grid(which='major', ls=':', linewidth=1)
-    ax.grid(which='minor', ls=':', linewidth=0.5)
+#    ax.grid(which='major', ls=':', linewidth=1)
+#    ax.grid(which='minor', ls=':', linewidth=0.5)
     
     # Labels
     
@@ -241,8 +241,8 @@ def plot_amp_st( st, amp1, amp2=None,
     
     # Grids
     
-    ax.grid(which='major', ls=':', linewidth=1)
-    ax.grid(which='minor', ls=':', linewidth=0.5)
+#    ax.grid(which='major', ls=':', linewidth=1)
+#    ax.grid(which='minor', ls=':', linewidth=0.5)
     
     # Labels
     
@@ -349,8 +349,8 @@ def plot_psi_st( st, psi1, psi2=None,
     
     # Grids
     
-    ax.grid(which='major', ls=':', linewidth=1)
-    ax.grid(which='minor', ls=':', linewidth=0.5)
+#    ax.grid(which='major', ls=':', linewidth=1)
+#    ax.grid(which='minor', ls=':', linewidth=0.5)
     
     # Labels
     
@@ -1001,6 +1001,7 @@ def plot_stream_function( zz, yy, v,
                           clevels=None,
                           title=None,
                           extreme_loc=None,
+                          fmt='.png',
                           pure=False):
     """
     zz,yy  are required to be equally spaced by streamplot
@@ -1019,10 +1020,14 @@ def plot_stream_function( zz, yy, v,
     
     cs_pos = ax.contour( zz, yy, v, 
                          colors='black', 
-                         levels=clevels_pos, linestyles='-')
+                         levels=clevels_pos, 
+                         linestyles='-',
+                         linewidths=4.0)
     cs_neg = ax.contour( zz, yy, v, 
                          colors='black', 
-                         levels=clevels_neg, linestyles='--' )
+                         levels=clevels_neg, 
+                         linestyles='--',
+                         linewidths=4.0)
 
     ax.set_xlim([np.min(zz),np.max(zz)])
     ax.set_ylim([-0.1,1.1])
@@ -1070,6 +1075,7 @@ def plot_stream_function( zz, yy, v,
             filename+='_pure'
             fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
         
+        filename += fmt
         plt.savefig( 'figx_'+filename )
         
         print(f"{filename} is output.\n")

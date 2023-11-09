@@ -51,7 +51,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 loc_delta = -20.0
 outfolder  = '/stream_function'
-periodic_ave = True
+periodic_ave = False
 
 # =============================================================================
 
@@ -285,40 +285,43 @@ with timer("Interpolate and plot "):
     
     cbar = r'$\Psi$'
     
-    cbar_levels = np.linspace(-1.5,1.5,24)
-    cbar_ticks  = np.linspace(-1.5,1.5,7)
 
     for pure_stat in [True,False]:
+        
+        cbar_levels = np.linspace(-7.5,7.5,16)
+        cbar_ticks  = np.linspace(-7.5,7.5,7)
         plot_slicex_stat( zz, yy, psi,
+                         vectors=[rho*w_favre,rho*v_favre],
                         tag=tag,
                         filename=casecode+'_psi',
                         sonic=False,
                         wall=True,
                         col_map='RdBu_r',
                         cbar_label=cbar,
-                        cbar_levels=cbar_levels,
-                        cbar_ticks=cbar_ticks,
+#                        cbar_levels=cbar_levels,
+#                        cbar_ticks=cbar_ticks,
                         title=title,
                         extreme_loc=extreme_loc,
                         pure=pure_stat)
         
-        plot_stream_function( zz, yy, psi,
-                              tag=tag,
-                              filename=casecode+'_stream_function_cross',
-                              wall=True,
-                              clevels=cbar_levels,
-                              title=title,
-                              extreme_loc=extreme_loc,
-                              pure=pure_stat)
+#        plot_stream_function( zz, yy, psi,
+#                              tag=tag,
+#                              filename=casecode+'_stream_function_cross',
+#                              wall=True,
+#                              clevels=cbar_levels,
+#                              title=title,
+#                              extreme_loc=extreme_loc,
+#                              pure=pure_stat)
 
-        plot_stream_function( zz, yy, psi,
-                              tag=tag,
-                              filename=casecode+'_stream_function',
-                              wall=True,
-                              clevels=cbar_levels,
-                              title=title,
-                       #       extreme_loc=extreme_loc,
-                              pure=pure_stat)
+#        plot_stream_function( zz, yy, psi,
+#                              tag=tag,
+#                              filename=casecode+'_stream_function',
+#                              wall=True,
+#                              clevels=cbar_levels,
+#                              title=title,
+#                        #      extreme_loc=extreme_loc,
+#                              fmt = '.png',
+#                              pure=pure_stat)
         
         plot_slicex_stat( zz, yy, w_favre,
                         tag=tag,
@@ -332,7 +335,7 @@ with timer("Interpolate and plot "):
                         title=title,
                         extreme_loc=extreme_loc,
                         pure=pure_stat)
-        
+        cbar_levels = np.linspace(-13,13,27)
         plot_slicex_stat( zz, yy, v_favre,
                         tag=tag,
                         filename=casecode+'_v_favre',
@@ -340,7 +343,7 @@ with timer("Interpolate and plot "):
                         wall=True,
                         col_map='RdBu_r',
                         cbar_label=cbar,
-    #                      cbar_levels=cbar_levels,
+                        cbar_levels=cbar_levels,
     #                      cbar_ticks=cbar_ticks,
                         title=title,
                         extreme_loc=extreme_loc,

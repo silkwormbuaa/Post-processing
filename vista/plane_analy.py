@@ -352,30 +352,26 @@ def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
     
     """
     
-    psi = np.zeros_like( rho )
+    psi1 = np.zeros_like( rho )
+    psi2 = np.zeros_like( rho )
     
-# - integrate -v in z direction
+# - integrate -v in -z direction
     
-    dz =  -np.diff(z)
+    dz = -np.diff(z)
     
     for i in range(len(z)-1,0,-1):
-        psi[:,i-1] = psi[:,i] - (dz[i-1] * 0.5*(v_favre[:,i]+v_favre[:,i-1]) 
-                                 * rho[:,i])
-    
-# - integrate w in y direction
-    
-    # set psi at the boundary to be zero
-    
-    psi[-1,:] = 0.0
+        psi1[:,i-1] = psi1[:,i] - (dz[i-1] * 0.5*(v_favre[:,i]*rho[:,i]+v_favre[:,i-1]*rho[:,i-1])) 
+   
+# - integrate w in -y direction
     
     dy = -np.diff(y)
     
     for i in range(len(y)-1,0,-1):
-        psi[i-1,:] = psi[i,:] + (dy[i-1] * 0.5*(w_favre[i,:]+w_favre[i-1,:])
-                                 * rho[i,:])
-        
+        psi2[i-1,:] = psi2[i,:] + (dy[i-1] * 0.5*(w_favre[i,:]*rho[i,:]+w_favre[i-1,:]*rho[i-1,:]))
+
 # - normalize
-    psi = psi / rho_w
+
+    psi = (psi1+psi2) / rho_w
     
     return psi 
 
