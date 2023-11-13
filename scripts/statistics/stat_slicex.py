@@ -115,13 +115,13 @@ for i, loc in enumerate(locs):
                 
                 S.read_stat_header( f )
                 
-                vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp']
+                vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp','rho']
                 
                 S.read_stat_body( f, block_list, vars )
                 
                 S.compute_vars( block_list, ['mach','RS','p`'])
                 
-                S.compute_gradients( block_list, ['vorticity'], G)
+                S.compute_gradients( block_list, ['vorticity','Q_cr'], G)
                 
                 S.compute_source_terms( block_list, G )
                 
@@ -157,6 +157,8 @@ for i, loc in enumerate(locs):
         v_slice = np.array( df_slice['v'] )
         w_slice = np.array( df_slice['w'] )
         p_fluc_slice = np.array( df_slice['p`'] )
+        rho_slice = np.array( df_slice['rho'] )
+        Q_cr_slice = np.array( df_slice['Q_cr'] )
         
         # generate interpolation grid
         
@@ -164,7 +166,7 @@ for i, loc in enumerate(locs):
         if casecode == 'smooth_wall':
             y = np.linspace(0.02, 1.1, 55)
         else:
-            y = np.linspace(-0.1, 1.1, 121)
+            y = np.linspace(-0.1, 1.1, 241)
         
         zz,yy = np.meshgrid(z,y)
         
@@ -196,7 +198,12 @@ for i, loc in enumerate(locs):
 
         p_fluc = griddata( (z_slice,y_slice), p_fluc_slice,
                            (zz,yy), method='linear')   
-                
+
+        rho = griddata( (z_slice,y_slice), rho_slice,
+                        (zz,yy), method='linear')  
+        
+        Q_cr = griddata( (z_slice,y_slice), Q_cr_slice,
+                         (zz,yy), method='linear')
         
 # ------ extending corner grid for smooth wall
 
@@ -231,7 +238,11 @@ for i, loc in enumerate(locs):
             RS     = periodic_average(RS,n_period,axis=1)
             w1     = periodic_average(w1,n_period,axis=1)
             p_fluc = periodic_average(p_fluc,n_period,axis=1)
-        
+            rho    = periodic_average(rho,n_period,axis=1)
+            Q_cr   = periodic_average(Q_cr,n_period,axis=1)
+
+# ------ Mach number and streamlines
+
         cbar = r'$\langle Mach \rangle$'
         cbar_levels = np.linspace(0.0,2.0,21)
         cbar_ticks  = np.linspace(0.0,2.0,5)
@@ -246,7 +257,7 @@ for i, loc in enumerate(locs):
                               title=title)
         else:
             plot_slicex_stat( zz, yy, mach,
-                              vectors=[w,v],
+                              vectors=[rho*w,rho*v],
                               tag=tag,
                               filename=casecode+'_Mach_'+str(i+1),
                               col_map='RdBu_r',
@@ -254,6 +265,8 @@ for i, loc in enumerate(locs):
                               cbar_levels=cbar_levels,
                               cbar_ticks=cbar_ticks,
                               title=title)
+
+# ------ source term
 
 #        cbar = r'$S$'
 #        cbar_levels=np.linspace(-20000.0,20000.,51)
@@ -263,7 +276,9 @@ for i, loc in enumerate(locs):
 #                          cbar_label=cbar,
 #                          cbar_levels=cbar_levels,
 #                          title=title)
-        
+
+# ------ vorticity
+  
         cbar = r'$\frac{\langle \omega_x \rangle \delta_0}{u_\infty}$ '
         cbar_levels = np.linspace(-1.0,1.0,26)
         cbar_ticks  = np.linspace(-1.0,1.0,5)
@@ -278,6 +293,8 @@ for i, loc in enumerate(locs):
                           cbar_ticks=cbar_ticks,
                           title=title)
 
+# ------ streamwise velocity u
+
         cbar = r'$\langle u \rangle /u_{\infty}$'
         cbar_levels = np.linspace(0.0,1.0,21)
         cbar_ticks  = np.linspace(0.0,1.0,5)
@@ -289,6 +306,8 @@ for i, loc in enumerate(locs):
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           title=title)
+
+# ------ vertical velocity v
 
         cbar = r'$\frac{\langle v \rangle  \cdot 100}{u_{\infty}}$'
         cbar_levels = np.linspace(-3.0,3.0,26)
@@ -303,7 +322,9 @@ for i, loc in enumerate(locs):
                           cbar_ticks=cbar_ticks,
                           col_map='RdBu_r',
                           title=title)
-        
+
+# ------ turbulent kinetic energy
+
         cbar = r'$\langle tke ^+ \rangle \cdot 100$'
         cbar_levels = np.linspace(0.0,2.5,26)
         cbar_ticks  = np.linspace(0.0,2.5,6)
@@ -316,6 +337,8 @@ for i, loc in enumerate(locs):
                           col_map='RdBu_r',
                           title=title)
 
+# ------ Reynolds stresses
+
         cbar = r"$-\langle u^{'} v^{'} \rangle$"
         plot_slicex_stat( zz, yy, -RS/(u_ref**2),
                           tag=tag,
@@ -323,6 +346,8 @@ for i, loc in enumerate(locs):
                           cbar_label=cbar,
                           col_map='RdBu_r',
                           title=title)
+        
+# ----- pressure fluctuation
 
         cbar = r"$\sqrt{\langle p^{'}p^{'}\rangle}\cdot 100$"
         cbar_levels = np.linspace(0.0, 3.2,33)
@@ -335,6 +360,25 @@ for i, loc in enumerate(locs):
                           col_map='RdBu_r',
                           cbar_ticks=cbar_ticks,
                           title=title)
+
+# ------ Q_cr
+  
+        cbar = r'$Q$'
+        Q_max = np.max(Q_cr)
+        cbar_levels = np.linspace(0,500,26)
+#        cbar_ticks  = np.linspace(-1.0,1.0,5)
+        plot_slicex_stat( zz, yy, Q_cr,
+                          tag=tag,
+                          vectors=[w,v],
+                          arrow=True,
+                          filename=casecode+'_Q_'+str(i+1),
+                          col_map='RdBu_r',
+                          cbar_label=cbar,
+                          wall=True,
+                          cbar_levels=cbar_levels,
+#                          cbar_ticks=cbar_ticks,
+                          title=title)
+        
         
     print(f"Finished doing slicing at x = {loc_delta:10.2f} delta.",end='') 
     print(f" Progress {(i+1)/len(locs)*100:5.2f} %.")

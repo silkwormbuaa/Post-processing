@@ -563,7 +563,7 @@ class StatisticData:
         """
         block_list: list of blocks that are going to compute gradients\n
         grads: list of str representing gradients 
-               ['schlieren','shadowgraph','vorticity','grad_p'] \n
+               ['schlieren','shadowgraph','vorticity','grad_p','Q_cr'] \n
         G: GridData instance of corresponding case\n
         
         return: self.bl[].df['grad_rho'] (...['laplacian']/['w1']/['w2']/['w3])
@@ -574,17 +574,15 @@ class StatisticData:
             df = self.bl[num-1].df
             g  = G.g[num-1]
             
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
 # --------- compute magnitude of density gradient
 
             if 'schlieren' in grads:
                 
-                rho = np.array( df['rho'] )
-                
-                npx = g.nx + buff*2
-                npy = g.ny + buff*2
-                npz = g.nz + buff*2
-                
-                rho = rho.reshape( npz, npy, npx )
+                rho = np.array( df['rho'] ).reshape( npz, npy, npx )
                 
                 drho_dx = np.gradient(rho, g.gx, axis=2)
                 drho_dy = np.gradient(rho, g.gy, axis=1)
@@ -608,13 +606,7 @@ class StatisticData:
             
                 else:
                     
-                    rho = np.array( df['rho'] )
-                    
-                    npx = g.nx + buff*2
-                    npy = g.ny + buff*2
-                    npz = g.nz + buff*2
-                    
-                    rho = rho.reshape( npz, npy, npx )
+                    rho = np.array( df['rho'] ).reshape( npz, npy, npx )
                     
                     drho_dx = np.gradient(rho, g.gx, axis=2)
                     drho_dy = np.gradient(rho, g.gy, axis=1)
@@ -628,12 +620,8 @@ class StatisticData:
                     
 # ---------- compute vorticity
 
-            if "vorticity" in grads:
+            if 'vorticity' in grads:
 
-                npx = g.nx + buff*2
-                npy = g.ny + buff*2
-                npz = g.nz + buff*2
-                
                 u = np.array( df['u'] ).reshape( npz, npy, npx )
                 v = np.array( df['v'] ).reshape( npz, npy, npx )
                 w = np.array( df['w'] ).reshape( npz, npy, npx )
@@ -648,15 +636,9 @@ class StatisticData:
                                
 # ---------- compute pressure gradient
 
-            if "grad_p" in grads:
+            if 'grad_p' in grads:
                 
-                p = np.array( df['p'] )
-                
-                npx = g.nx + buff*2
-                npy = g.ny + buff*2
-                npz = g.nz + buff*2
-                
-                p = p.reshape( npz, npy, npx )
+                p = np.array( df['p'] ).reshape( npz, npy, npx )
                 
                 dp_dx = np.gradient(p, g.gx, axis=2)
                 dp_dy = np.gradient(p, g.gy, axis=1)
@@ -665,7 +647,30 @@ class StatisticData:
                 grad_p = np.sqrt( dp_dx**2 + dp_dy**2 + dp_dz**2 )
                 
                 self.bl[num-1].df['grad_p'] = grad_p.flatten()
-            
+
+# ---------- compute Q criterion
+
+            if 'Q_cr' in grads:
+
+                u = np.array( df['u'] ).reshape( npz, npy, npx )
+                v = np.array( df['v'] ).reshape( npz, npy, npx )
+                w = np.array( df['w'] ).reshape( npz, npy, npx )
+                
+                du_dx = np.gradient( u, g.gx, axis=2 )
+                du_dy = np.gradient( u, g.gy, axis=1 )
+                du_dz = np.gradient( u, g.gz, axis=0 )
+                dv_dx = np.gradient( v, g.gx, axis=2 )
+                dv_dy = np.gradient( v, g.gy, axis=1 )
+                dv_dz = np.gradient( v, g.gz, axis=0 )
+                dw_dx = np.gradient( w, g.gx, axis=2 )
+                dw_dy = np.gradient( w, g.gy, axis=1 )
+                dw_dz = np.gradient( w, g.gz, axis=0 )
+                
+                Q_cr = -0.5*( du_dx**2 + dv_dy**2 + dw_dz**2 ) \
+                       - du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
+                
+                self.bl[num-1].df['Q_cr'] = Q_cr.flatten()
+                
 # ----------------------------------------------------------------------
 # >>> compute source term of secondary flow                      (Nr.)
 # ----------------------------------------------------------------------
