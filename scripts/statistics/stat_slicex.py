@@ -45,7 +45,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 locs_delta = np.linspace(-20,-20,1)
 outfolder  = '/yz_planes'
-periodic_ave = True
+periodic_ave = False
 
 # =============================================================================
 
@@ -121,7 +121,7 @@ for i, loc in enumerate(locs):
                 
                 S.compute_vars( block_list, ['mach','RS','p`'])
                 
-                S.compute_gradients( block_list, ['vorticity','Q_cr'], G)
+                S.compute_gradients( block_list, ['vorticity','Q_cr','lambda2'], G)
                 
                 S.compute_source_terms( block_list, G )
                 
@@ -159,6 +159,7 @@ for i, loc in enumerate(locs):
         p_fluc_slice = np.array( df_slice['p`'] )
         rho_slice = np.array( df_slice['rho'] )
         Q_cr_slice = np.array( df_slice['Q_cr'] )
+        l2_slice   = np.array( df_slice['lambda2'] )
         
         # generate interpolation grid
         
@@ -204,6 +205,9 @@ for i, loc in enumerate(locs):
         
         Q_cr = griddata( (z_slice,y_slice), Q_cr_slice,
                          (zz,yy), method='linear')
+    
+        l2 = griddata( (z_slice,y_slice), l2_slice,
+                       (zz,yy), method='linear')
         
 # ------ extending corner grid for smooth wall
 
@@ -240,6 +244,7 @@ for i, loc in enumerate(locs):
             p_fluc = periodic_average(p_fluc,n_period,axis=1)
             rho    = periodic_average(rho,n_period,axis=1)
             Q_cr   = periodic_average(Q_cr,n_period,axis=1)
+            l2     = periodic_average(l2,n_period,axis=1)
 
 # ------ Mach number and streamlines
 
@@ -365,7 +370,7 @@ for i, loc in enumerate(locs):
   
         cbar = r'$Q$'
         Q_max = np.max(Q_cr)
-        cbar_levels = np.linspace(0,500,26)
+        cbar_levels = np.linspace(0,800,25)
 #        cbar_ticks  = np.linspace(-1.0,1.0,5)
         plot_slicex_stat( zz, yy, Q_cr,
                           tag=tag,
@@ -378,7 +383,24 @@ for i, loc in enumerate(locs):
                           cbar_levels=cbar_levels,
 #                          cbar_ticks=cbar_ticks,
                           title=title)
-        
+
+# ------ lambda2
+  
+        cbar = r'$Q$'
+        l2_max = np.max(l2)
+        cbar_levels = np.linspace(-500,0,25)
+#        cbar_ticks  = np.linspace(-1.0,1.0,5)
+        plot_slicex_stat( zz, yy, l2,
+                          tag=tag,
+                          vectors=[w,v],
+                          arrow=True,
+                          filename=casecode+'_l2_'+str(i+1),
+                          col_map='RdBu_r',
+                          cbar_label=cbar,
+                          wall=True,
+                          cbar_levels=cbar_levels,
+#                          cbar_ticks=cbar_ticks,
+                          title=title)    
         
     print(f"Finished doing slicing at x = {loc_delta:10.2f} delta.",end='') 
     print(f" Progress {(i+1)/len(locs)*100:5.2f} %.")

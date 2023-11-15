@@ -578,6 +578,8 @@ class StatisticData:
             npy = g.ny + buff*2
             npz = g.nz + buff*2
             
+            print(npx,npy,npz)
+            
 # --------- compute magnitude of density gradient
 
             if 'schlieren' in grads:
@@ -665,12 +667,51 @@ class StatisticData:
                 dw_dx = np.gradient( w, g.gx, axis=2 )
                 dw_dy = np.gradient( w, g.gy, axis=1 )
                 dw_dz = np.gradient( w, g.gz, axis=0 )
+                t_comp= 1/3*(du_dx + dv_dy + dw_dz)
                 
-                Q_cr = -0.5*( du_dx**2 + dv_dy**2 + dw_dz**2 ) \
+                Q_cr = -0.5*( (du_dx-t_comp)**2 
+                            + (dv_dy-t_comp)**2 
+                            + (dw_dz-t_comp)**2 ) \
                        - du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
                 
                 self.bl[num-1].df['Q_cr'] = Q_cr.flatten()
+
+# ---------- compute lambda2 criterion 
+            # there is some difference compared with tecplot
+
+            if 'lambda2' in grads:
+
+                u = np.array( df['u'] ).reshape( npz, npy, npx )
+                v = np.array( df['v'] ).reshape( npz, npy, npx )
+                w = np.array( df['w'] ).reshape( npz, npy, npx )
                 
+                du_dx = np.gradient( u, g.gx, axis=2 )
+                du_dy = np.gradient( u, g.gy, axis=1 )
+                du_dz = np.gradient( u, g.gz, axis=0 )
+                dv_dx = np.gradient( v, g.gx, axis=2 )
+                dv_dy = np.gradient( v, g.gy, axis=1 )
+                dv_dz = np.gradient( v, g.gz, axis=0 )
+                dw_dx = np.gradient( w, g.gx, axis=2 )
+                dw_dy = np.gradient( w, g.gy, axis=1 )
+                dw_dz = np.gradient( w, g.gz, axis=0 )
+
+                J = np.array([[du_dx,du_dy,du_dz],
+                              [dv_dx,dv_dy,dv_dz],
+                              [dw_dx,dw_dy,dw_dz]])
+                
+                S     = 0.5 * ( J + np.transpose(J,(1,0,2,3,4)) )
+                Omega = 0.5 * ( J - np.transpose(J,(1,0,2,3,4)) )
+                
+                eigs = np.zeros( (3,npz,npy,npx) )
+
+                for i in range(npz):
+                    for j in range(npy):
+                        for k in range(npx):
+                            eigs_unsorted = np.linalg.eigvals(S[:,:,i,j,k]**2+Omega[:,:,i,j,k]**2)
+                            eigs[:,i,j,k] = np.sort(eigs_unsorted)[::-1]
+                            
+                self.bl[num-1].df['lambda2'] = eigs[1,:,:,:].flatten() 
+                    
 # ----------------------------------------------------------------------
 # >>> compute source term of secondary flow                      (Nr.)
 # ----------------------------------------------------------------------
