@@ -6,7 +6,7 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   Stream function only applicable to 2D (even incompressible flows)
 '''
 
 import os
@@ -288,21 +288,21 @@ with timer("Interpolate and plot "):
 
     for pure_stat in [True,False]:
         
-        cbar_levels = np.linspace(-7.5,7.5,16)
+        cbar_levels = np.linspace(-2,2,16)
         cbar_ticks  = np.linspace(-7.5,7.5,7)
         plot_slicex_stat( zz, yy, psi,
-                         vectors=[rho*w_favre,rho*v_favre],
-                        tag=tag,
-                        filename=casecode+'_psi',
-                        sonic=False,
-                        wall=True,
-                        col_map='RdBu_r',
-                        cbar_label=cbar,
-#                        cbar_levels=cbar_levels,
+                          vectors=[rho*w_favre,rho*v_favre],
+                          tag=tag,
+                          filename=casecode+'_psi_new',
+                          sonic=False,
+                          wall=False,
+                          col_map='RdBu_r',
+                          cbar_label=cbar,
+                          cbar_levels=cbar_levels,
 #                        cbar_ticks=cbar_ticks,
-                        title=title,
-                        extreme_loc=extreme_loc,
-                        pure=pure_stat)
+                          title=title,
+                          extreme_loc=extreme_loc,
+                          pure=pure_stat)
         
 #        plot_stream_function( zz, yy, psi,
 #                              tag=tag,

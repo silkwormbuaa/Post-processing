@@ -340,7 +340,7 @@ def compute_DS( grad_rho ):
 def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
     
     """
-    integrate stream function 
+    integrate stream function (should only be applied to 2D flows or 3D axisymmetric flows)
     
     rho: 2D array of density, shape(ny,nz)
     rho_w: reference density at wall
@@ -352,30 +352,25 @@ def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
     
     """
     
-    psi1 = np.zeros_like( rho )
-    psi2 = np.zeros_like( rho )
+    psi = np.zeros_like( rho )
     
-# - integrate -v in -z direction
-    
-    dz = -np.diff(z)
-    
-    print(psi1.shape)
-    
-    for i in range(len(z)-1,0,-1):
-        psi1[-1,i-1] = psi1[-1,i] - (dz[i-1] * 0.5*(v_favre[-1,i]*rho[-1,i]+v_favre[-1,i-1]*rho[-1,i-1])) 
-    
-    print(psi1[-1,:])
 # - integrate w in -y direction
     
     dy = -np.diff(y)
     
     for j in range(len(y)-1,0,-1):
-        psi1[j-1,:] = psi1[j,:] + (dy[j-1] * 0.5*(w_favre[j,:]*rho[j,:]+w_favre[j-1,:]*rho[j-1,:]))
+        psi[j-1,-1] = psi[j,-1] + (dy[j-1] * 0.5*(w_favre[j,-1]*rho[j,-1]+w_favre[j-1,-1]*rho[j-1,-1]))
 
-    print(psi1[-2,:])
+# - integrate -v in -z direction
+    
+    dz = -np.diff(z)
+    
+    for i in range(len(z)-1,0,-1):
+        psi[:,i-1] = psi[:,i] - (dz[i-1] * 0.5*(v_favre[:,i]*rho[:,i]+v_favre[:,i-1]*rho[:,i-1])) 
+    
 # - normalize
 
-    psi = (psi1+psi2) / rho_w
+    psi = psi / rho_w
     
     return psi 
 

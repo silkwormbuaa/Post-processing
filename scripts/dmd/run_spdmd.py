@@ -138,7 +138,7 @@ os.chdir( eigen_dir )
 
 plot_eigens( paradmd.mu, 
              paradmd.mu[ tuple([paradmd.ind_spmode]) ],
-             filename='a-eigens-' + fmt)
+             filename='a-eigens' + fmt)
 
 plot_amp_st( paradmd.St, 
              np.abs(paradmd.alphas),
