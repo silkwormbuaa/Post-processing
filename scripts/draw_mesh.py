@@ -25,59 +25,107 @@ from   vista.grid        import GridData
 
 from   vista.tools       import define_wall_shape
 from   vista.tools       import read_case_parameter
+from   vista.tools       import lin_grow
 
 # =============================================================================
 
-workpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
+From_File = False
+
+# if From_file, give workpath to inca_grid.bin
+
+#workpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
 #workpath = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results'
+workpath = '/home/wencanwu/my_simulation/STBLI_mid_Re'
 
 # =============================================================================
 
 os.chdir( workpath )
 
-gridfile = workpath + '/inca_grid.bin'
-parametersfile = workpath.split('/results')[0] + '/case_parameters'
+# plot from reading inca_grid.bin
 
-parameters = read_case_parameter( parametersfile )
-casecode = str( parameters.get('casecode') )
-delta    = float( parameters.get('delta_0') )
+if From_File:
 
-# - read in grid info
+    gridfile = workpath + '/inca_grid.bin'
+    parametersfile = workpath.split('/results')[0] + '/case_parameters'
 
-G = GridData( gridfile )
-G.read_grid()
-bbox = [-20.0,20.0,-5.0,40.0,-11.0,11.0]
+    parameters = read_case_parameter( parametersfile )
+    casecode = str( parameters.get('casecode') )
+    delta    = float( parameters.get('delta_0') )
 
-block_list, indx_slic = G.select_sliced_blockgrids( 'X', 0.1, bbox )
+    # - read in grid info
 
-fig, ax = plt.subplots( figsize = (20,24) )
+    G = GridData( gridfile )
+    G.read_grid()
+    bbox = [-20.0,20.0,-5.0,40.0,-11.0,11.0]
 
-buff = 3
+    block_list, indx_slic = G.select_sliced_blockgrids( 'X', 0.1, bbox )
 
-for num in block_list:
+    fig, ax = plt.subplots( figsize = (20,24) )
+
+    buff = 3
+
+    for num in block_list:
+        
+        g = G.g[num-1]
+        
+        gz = (g.gz[buff:-buff+1] - 0.5*g.hz[buff:-buff+1])/delta
+        gy = (g.gy[buff:-buff+1] - 0.5*g.hy[buff:-buff+1])/delta
+        
+        zmin = np.min( gz ) ; zmax = np.max( gz )
+        ymin = np.min( gy ) ; ymax = np.max( gy )
+        
+        # draw horizontal lines
+        for y in gy:
+            ax.plot([zmin, zmax],[y,y],'black',linewidth=2)
+        
+        # draw vertical lines
+        for z in gz:
+            ax.plot([z, z],[ymin,ymax],'black',linewidth=2)
+        
+        if ymin < 0.0:
+            y_wall = define_wall_shape(gz*delta,casecode=casecode,write=False)/delta
+            
+            ax.fill_between(gz,-0.2,y_wall,color='gray',zorder=10,alpha=0.7)
+
+# plot from defining grid directly
+else:
     
-    g = G.g[num-1]
+    delta = 5.2
+    casecode = '0927'
+
+    gy = np.arange(-0.7488, 0.0, 0.0104)
+    gy = np.concatenate( (gy,lin_grow(0.0, 0.01045516681, 1.0219,len=73)) )
     
-    gz = (g.gz[buff:-buff+1] - 0.5*g.hz[buff:-buff+1])/delta
-    gy = (g.gy[buff:-buff+1] - 0.5*g.hy[buff:-buff+1])/delta
-    
+    gz = np.linspace(0,5.2,97)
     
     zmin = np.min( gz ) ; zmax = np.max( gz )
     ymin = np.min( gy ) ; ymax = np.max( gy )
     
+    fig, ax = plt.subplots( figsize = (20,24) )
+    
     # draw horizontal lines
     for y in gy:
-        ax.plot([zmin, zmax],[y,y],'black',linewidth=2)
+        
+        ax.plot([zmin/delta, zmax/delta],[y/delta,y/delta],'black',linewidth=1)
     
     # draw vertical lines
     for z in gz:
-        ax.plot([z, z],[ymin,ymax],'black',linewidth=2)
-    
-    if ymin < 0.0:
-        y_wall = define_wall_shape(gz*delta,casecode=casecode,write=False)/delta
         
-        ax.fill_between(gz,-0.2,y_wall,color='gray',zorder=10,alpha=0.7)
-
+        ax.plot([z/delta, z/delta],[ymin/delta,ymax/delta],'black',linewidth=1)
+    
+    # block edges
+    
+    for y in [-0.7488,-0.4992,-0.2496,0.0,0.325544991,0.873080888,1.7939845]:
+        ax.plot([zmin/delta, zmax/delta],[y/delta,y/delta],'red',linewidth=1)
+    
+    for z in [0.0,1.3,2.6,3.9,5.2]:
+        ax.plot([z/delta, z/delta],[ymin/delta,ymax/delta],'red',linewidth=1)
+    
+    # draw wall
+    if ymin < 0.0:
+        y_wall = define_wall_shape(gz,casecode=casecode,write=False)/delta
+        
+        ax.fill_between(gz/delta,-0.2,y_wall,color='gray',zorder=10,alpha=0.7)
     
 ax.set_xlim([0,1])
 ax.set_ylim([-0.2,1.0])
@@ -86,7 +134,7 @@ fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 
 #plt.show()
 
-plt.savefig("mesh_"+casecode)
+plt.savefig("mesh.pdf")
 
 plt.close()
     
