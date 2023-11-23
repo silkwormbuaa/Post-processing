@@ -14,9 +14,10 @@ from   .tools            import get_filelist
 
 class Grid_bloxx:
     def __init__(self, file_path):
-        self.variables = self._parse_inca_file(file_path)
+        self.variables = self._read_grid_file(file_path)
+        self.filename  = file_path.split('/')[-1]
 
-    def _parse_inca_file(self, file_path):
+    def _read_grid_file(self, file_path):
         variables = {}
 
         with open(file_path, 'r') as file:
@@ -36,9 +37,31 @@ class Grid_bloxx:
                     variables[key] = value
 
         return variables
-    
 
-    def write_to_file(self, output_file_path):
+
+# ----------------------------------------------------------------------
+# >>> Write Grid_bloxx file                                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/11/23  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_to_file(self, output_file_path=None):
+        
+        """
+        output_file_path: output file path
+        Write the grid to a file.
+        """
+
+        output_file_path = output_file_path or self.filename
+        
         with open(output_file_path, 'w') as file:
             file.write("! Automatically generated INCA grid file.\n\n")
             file.write("&GRID\n")
@@ -50,8 +73,72 @@ class Grid_bloxx:
             file.write(" /\n")
 
 
+# ----------------------------------------------------------------------
+# >>> Define attributes                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2023/11/23  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
+    
+    @property
+    def LX(self):
+        LX_str = self.variables['LX']
+        numbers = LX_str.split(',')
+        return tuple( float(number) for number in numbers if number.strip() )
 
+    @property
+    def LY(self):
+        LY_str = self.variables['LY']
+        numbers = LY_str.split(',')
+        return tuple( float(number) for number in numbers if number.strip() )
+    
+    @property
+    def LZ(self):
+        LZ_str = self.variables['LZ']
+        numbers = LZ_str.split(',')
+        return tuple( float(number) for number in numbers if number.strip() )
+    
+    @property
+    def NX(self):
+        NX_str = self.variables['NX']
+        return int( NX_str.strip(',').strip() )
+    
+    @property
+    def NY(self):
+        NY_str = self.variables['NY']
+        return int( NY_str.strip(',').strip() )
+    
+    @property
+    def NZ(self):
+        NZ_str = self.variables['NZ']
+        return int( NZ_str.strip(',').strip() )
+    
+    @property
+    def BX(self):
+        BX1_str = self.variables['BX1'].strip(',').strip('"').strip()
+        BX2_str = self.variables['BX2'].strip(',').strip('"').strip()
+        return (BX1_str, BX2_str)
+    
+    @property
+    def BY(self):
+        BY1_str = self.variables['BY1'].strip(',').strip('"').strip()
+        BY2_str = self.variables['BY2'].strip(',').strip('"').strip()
+        return (BY1_str, BY2_str)
+    
+    @property
+    def BZ(self):
+        BZ1_str = self.variables['BZ1'].strip(',').strip('"').strip()
+        BZ2_str = self.variables['BZ2'].strip(',').strip('"').strip()
+        return (BZ1_str, BZ2_str)
+    
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -72,19 +159,15 @@ def Testing():
     file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_ascii/'
     files = get_filelist(file_path)
     
-    os.chdir(file_path)
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/grid_new')
     for i, file in enumerate(files):
         
-        inca_instance = Grid_bloxx(file)
-        print(i,len(inca_instance.variables))
+        grid = Grid_bloxx(file)
+        print(i,len(grid.variables), grid.LX, grid.NX, grid.NY, grid.NZ, grid.BX)
+        
+        if not grid.LY[0] == 0.0:
+            grid.write_to_file()
 
-
-    # Modify the instance as needed
-    # ...
-
-    # Write the modified instance to a new file
-#    output_file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_test.inp'
-#    inca_instance.write_to_file(output_file_path)
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
