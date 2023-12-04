@@ -156,17 +156,19 @@ class Grid_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_ascii/'
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/meta/grid_simple_layer/'
     files = get_filelist(file_path)
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/grid_new')
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/meta/grid_simple_layer/')
     for i, file in enumerate(files):
         
         grid = Grid_bloxx(file)
         print(i,len(grid.variables), grid.LX, grid.NX, grid.NY, grid.NZ, grid.BX)
         
-        if not grid.LY[0] == 0.0:
-            grid.write_to_file()
+        if grid.LY[0] == 0.0:
+            grid.variables['BY1'] = '"DUMMY" ,'
+        
+        grid.write_to_file()
 
 
 # ----------------------------------------------------------------------

@@ -697,10 +697,11 @@ def plot_slicez_stat( xx, yy, v,
                       col_map=None,
                       cbar_label=None,
                       cbar_levels=None,
-                      wall=None):
+                      wall=None,
+                      pure=False):
     
     if figsize is None:
-        figsize = (15,8)
+        figsize = (30,16)
     
     fig, ax = plt.subplots( figsize=figsize )
     
@@ -765,20 +766,26 @@ def plot_slicez_stat( xx, yy, v,
         ax.fill_between(x_wall,-0.2,y_wall,color='grey')
         ax.plot(x_wall,np.array([0.0,0.0]),'--',linewidth=0.2)
 
-    cbar = plt.colorbar(cs)
-    cbar.ax.set_ylabel(cbar_label,fontsize=15)
-    cbar.ax.tick_params(labelsize=15)
+    if not pure:
+        cbar = plt.colorbar(cs)
+        cbar.ax.set_ylabel(cbar_label,fontsize=15)
+        cbar.ax.tick_params(labelsize=15)
 
-    ax.tick_params(axis='x',labelsize=15,pad=10)
-    ax.tick_params(axis='y',labelsize=15,pad=10)
+        ax.tick_params(axis='x',labelsize=15,pad=10)
+        ax.tick_params(axis='y',labelsize=15,pad=10)
 
 
-    # set axises stay with contour and x,y unit length equal
-    
+        # set axises stay with contour and x,y unit length equal
+        
     plt.axis('tight')
     plt.gca().set_aspect('equal', adjustable='box')
 
     if filename:
+        
+        if pure: 
+            filename+='_pure'
+            fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+            
         plt.savefig( 'figz_'+filename )
         print(f"{filename} is output.\n")
 

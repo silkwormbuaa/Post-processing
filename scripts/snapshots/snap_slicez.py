@@ -104,9 +104,9 @@ with timer("Interpolate and plot "):
     u_slice = np.array( df_slice['u'] )
     grad_rho_slice = np.array( df_slice['grad_rho'] )
     
-    x = np.linspace( -17.5, 12.5, 601 )
+    x = np.linspace( -17.5, 12.5, 1801 )
     if loc == 0.0:
-        y = np.linspace( 0, 8, 321)
+        y = np.linspace( 0, 8, 961)
     else:
         y = np.linspace( -0.1, 8, 325 )
     
@@ -142,7 +142,8 @@ with timer("Interpolate and plot "):
                       cbar_label=cbar,
                       separation=True,
                       sonic=False,
-                      cbar_levels=cbar_levels)
+                      cbar_levels=cbar_levels,
+                      pure=True)
     
 # print out the time finishing the job
 
