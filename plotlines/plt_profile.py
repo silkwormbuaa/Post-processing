@@ -30,21 +30,21 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = False
-plt_u_vd    = False
+plt_u_vd_lw = True
+plt_u_vd    = True
 plt_u       = False
-plt_RS_uu   = True
-plt_RS_vv   = True
-plt_RS_ww   = True
-plt_RS_uv   = True
-plt_RS_DNS  = True
+plt_RS_uu   = False
+plt_RS_vv   = False
+plt_RS_ww   = False
+plt_RS_uv   = False
+plt_RS_DNS  = False
 plt_rho     = False
 plt_T       = False
 plt_Mt      = False
 
-pure = True
+pure = False
 
-fmt = '.png'
+fmt = '.pdf'
 
 # =============================================================================
 
@@ -196,7 +196,7 @@ if plt_u_vd_lw:
     else:
         ax.set_xlabel(  r"$y_s^+$",labelpad=-5 )  
         ax.tick_params( axis='x', pad=15 )
-        ax.set_ylabel( r'$\langle u \rangle ^+_{VD}$' )
+        ax.set_ylabel( r'$\langle u \rangle ^+_{vd}$' )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( prop={'size':30} ) 
 
@@ -274,7 +274,7 @@ if plt_u_vd :
     else:
         ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
         ax.tick_params( axis='x', pad=15 )
-        ax.set_ylabel( r'$\langle u \rangle ^+_{VD}$' )
+        ax.set_ylabel( r'$\langle u \rangle ^+_{vd}$' )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
@@ -428,7 +428,7 @@ if plt_RS_uu:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$" )  
-        ax.set_ylabel( r"$\xi \langle u^{'} u^{'} \rangle $" )
+        ax.set_ylabel( r"$\rho \langle u^{'} u^{'} \rangle / \tau_w$" )
         ax.tick_params( axis='x' )
         ax.tick_params( axis='y' )
 #        ax.legend( ) 
@@ -491,7 +491,7 @@ if plt_RS_vv:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$" )  
-        ax.set_ylabel( r"$\xi \langle v^{'} v^{'} \rangle$" )
+        ax.set_ylabel( r"$\rho \langle v^{'} v^{'} \rangle / \tau_w$" )
         ax.tick_params( axis='x' )
         ax.tick_params( axis='y' )
 #        ax.legend( ) 
@@ -554,7 +554,7 @@ if plt_RS_ww:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$" )  
-        ax.set_ylabel( r"$\xi \langle w^{'} w^{'} \rangle$")
+        ax.set_ylabel( r"$\rho \langle w^{'} w^{'} \rangle / \tau_w$")
         ax.tick_params( axis='x' )
         ax.tick_params( axis='y' )
 #        ax.legend( ) 
@@ -632,7 +632,7 @@ if plt_RS_uv:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$" )  
-        ax.set_ylabel( r"$\xi \angle u^{'} v^{'} \rangle$" )
+        ax.set_ylabel( r"$\rho \angle u^{'} v^{'} \rangle / \tau_w$" )
         ax.tick_params( axis='x' )
         ax.tick_params( axis='y' )
 #        ax.legend( ) 
@@ -761,7 +761,7 @@ if plt_RS_DNS:
     else:
         ax.set_xlabel(  r"$y_s^+$",labelpad=-5 )  
         ax.tick_params( axis='x', pad=15 )
-        ax.set_ylabel( r"$\xi \langle u_i'u_j'\rangle $" )
+        ax.set_ylabel( r"$\rho \langle u_i'u_j'\rangle /\tau_w$" )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( prop={'size':22} ) 
 

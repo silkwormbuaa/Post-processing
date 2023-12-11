@@ -32,16 +32,16 @@ pure =  False  # if pure, without legend and label
 
 show = True
 
-plt_DU_vd_plus =  False       # roughness function based on vd transformed velocity
+plt_DU_vd_plus =  True        # roughness function based on vd transformed velocity
 plt_Cf         =  False       # skin friction coefficient
 plt_vbar       =  False       # normalized vertical velocity
 plt_Lsep       =  False       # length of separation
 plt_Asep       =  False       # area of separation
 plt_Pmax       =  False       # maximum wall pressure
 plt_pmax       =  False       # maximum pressure fluctuation
-plt_Hvor       =  True        # height of vortex
-plt_Hson       =  True        # height of sonic line
-plt_Hstream    =  True        # height of stream function extreme value
+plt_Hvor       =  False       # height of vortex
+plt_Hson       =  False       # height of sonic line
+plt_Hstream    =  False       # height of stream function extreme value
 
 
 os.chdir(Datapath)
@@ -118,7 +118,7 @@ if plt_DU_vd_plus :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r'$\Delta U_{VD}^+$', labelpad=0 )
+        ax.set_ylabel( r'$\Delta \langle u \rangle_{vd}^+$', labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
 
