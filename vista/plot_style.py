@@ -832,7 +832,7 @@ def plot_slicex_stat( zz, yy, v,
     
     fig, ax = plt.subplots( figsize=figsize )
 
-    if col_map is None: col_map='RdBu_r',
+    if col_map is None: col_map='RdBu_r'
     
     if cbar_levels is None: cbar_levels=51
 

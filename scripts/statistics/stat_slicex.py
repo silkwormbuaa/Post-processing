@@ -160,6 +160,7 @@ for i, loc in enumerate(locs):
         rho_slice = np.array( df_slice['rho'] )
         Q_cr_slice = np.array( df_slice['Q_cr'] )
         l2_slice   = np.array( df_slice['lambda2'] )
+        ke_slice   = 0.5*(v_slice**2 + w_slice**2)
         
         # generate interpolation grid
         
@@ -209,6 +210,9 @@ for i, loc in enumerate(locs):
         l2 = griddata( (z_slice,y_slice), l2_slice,
                        (zz,yy), method='linear')
         
+        ke = griddata( (z_slice,y_slice), ke_slice,
+                       (zz,yy), method='linear')
+        
 # ------ extending corner grid for smooth wall
 
         if casecode == 'smooth_wall':
@@ -225,6 +229,7 @@ for i, loc in enumerate(locs):
             v  = np.concatenate(([np.zeros(len_ext)],v),axis=0)
             w  = np.concatenate(([np.zeros(len_ext)],w),axis=0)
             p_fluc = np.concatenate(([p_fluc[0,:]],p_fluc),axis=0)
+            ke = np.concatenate(([np.zeros(len_ext)],ke),axis=0)
         
         
         save_sonic_line( zz, yy, mach )
@@ -245,6 +250,7 @@ for i, loc in enumerate(locs):
             rho    = periodic_average(rho,n_period,axis=1)
             Q_cr   = periodic_average(Q_cr,n_period,axis=1)
             l2     = periodic_average(l2,n_period,axis=1)
+            ke     = periodic_average(ke,n_period,axis=1)
 
 # ------ Mach number and streamlines
 
@@ -402,6 +408,24 @@ for i, loc in enumerate(locs):
 #                          cbar_ticks=cbar_ticks,
                           title=title)    
         
+# ------ kinetic energy
+  
+        cbar = r'$\langle k \rangle$'
+        ke_max = np.max(ke)
+        cbar_levels = np.linspace(0,0.5,26)
+        
+        plot_slicex_stat( zz, yy, ke,
+                          tag=tag,
+                          vectors=[w,v],
+                          arrow=True,
+                          filename=casecode+'_ke_'+str(i+1),
+                          cbar_label=cbar,
+                    #      cbar_levels=cbar_levels,
+                    #      cbar_ticks=cbar_ticks,
+                          col_map='plasma',
+                          title=title)
+        
+
     print(f"Finished doing slicing at x = {loc_delta:10.2f} delta.",end='') 
     print(f" Progress {(i+1)/len(locs)*100:5.2f} %.")
     print(f"=====================================\n")

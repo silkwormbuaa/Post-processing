@@ -1784,23 +1784,23 @@ class Snapshot:
 # ----------------------------------------------------------------------
 def Testing():
     
-    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
+#    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936/Z_slice'
+    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936'
     
-    test_dir1 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/snapshots/snapshot_00628554'
+#    test_dir1 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/snapshots/snapshot_00628554'
         
     snap3d_file = test_dir1 + '/snapshot.bin'
     gridfile = test_dir1 + '/inca_grid.bin'
 
     # - read in grid info
 
-    G = GridData( gridfile )
+#    G = GridData( gridfile )
 
-    G.read_grid()
+#    G.read_grid()
 
-    block_list, indx_slic = G.select_sliced_blockgrids( 'Y', 0.0 )
+#    block_list, indx_slic = G.select_sliced_blockgrids( 'Y', 0.0 )
     
     os.chdir( test_dir1 )
     
@@ -1810,7 +1810,7 @@ def Testing():
     
     with timer('read one snapshot '):
         
-        snapshot1.read_snapshot( block_list )
+        snapshot1.read_snapshot( )
 #        snapshot1.grid3d = G
     
 #        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )

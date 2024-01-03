@@ -32,9 +32,9 @@ pure =  False  # if pure, without legend and label
 
 show = True
 
-plt_DU_vd_plus =  True        # roughness function based on vd transformed velocity
+plt_DU_vd_plus =  False       # roughness function based on vd transformed velocity
 plt_Cf         =  False       # skin friction coefficient
-plt_vbar       =  False       # normalized vertical velocity
+plt_vbar       =  True        # normalized vertical velocity
 plt_Lsep       =  False       # length of separation
 plt_Asep       =  False       # area of separation
 plt_Pmax       =  False       # maximum wall pressure
@@ -276,7 +276,7 @@ if plt_vbar :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r'$\langle v_{max} \rangle /u_{\infty} \cdot 100$', 
+        ax.set_ylabel( r'$\langle v  \rangle _{max} /u_{\infty} \cdot 100$', 
                        labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
