@@ -62,7 +62,7 @@ gridfile = datapath.split('/snapshots')[0] + '/results/inca_grid.bin'
 grid3d = GridData( gridfile )
 grid3d.read_grid()
 
-bbox = [-50.00, 125.0, -1.30, 50.0, -11.0, 11.0]
+bbox = [-30.00, 125.0, -1.30, 50.0, -11.0, 11.0]
 block_list, indx_slic = grid3d.select_sliced_blockgrids( slic_type, loc, bbox)
 
 # - read in 3D snapshot file
@@ -104,9 +104,9 @@ with timer("Interpolate and plot "):
     u_slice = np.array( df_slice['u'] )
     grad_rho_slice = np.array( df_slice['grad_rho'] )
     
-    x = np.linspace( -17.5, 12.5, 1801 )
+    x = np.linspace( -14, 12.5, 1801 )
     if loc == 0.0:
-        y = np.linspace( 0, 8, 961)
+        y = np.linspace( 0.01, 8, 961)
     else:
         y = np.linspace( -0.1, 8, 325 )
     
@@ -143,7 +143,22 @@ with timer("Interpolate and plot "):
                       separation=True,
                       sonic=False,
                       cbar_levels=cbar_levels,
-                      pure=True)
+                      pure=False)
+    
+    cbar = r'$u/u_{\infty}$'
+    cbar_levels = np.linspace( -0.2, 1, 37)
+    cbar_ticks  = np.linspace( -0.2, 1, 7)
+    
+    plot_slicez_stat( xx,yy,u/507,
+                      filename='streamwise_velocity.pdf',
+                      col_map='coolwarm',
+                      cbar_label=cbar,
+                      separation=True,
+                      sonic=False,
+                      cbar_levels=cbar_levels,
+                      cbar_ticks=cbar_ticks,
+                      y_lim=[0,8],
+                      pure=False)
     
 # print out the time finishing the job
 

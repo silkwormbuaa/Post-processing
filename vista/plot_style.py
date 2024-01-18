@@ -697,6 +697,9 @@ def plot_slicez_stat( xx, yy, v,
                       col_map=None,
                       cbar_label=None,
                       cbar_levels=None,
+                      cbar_ticks=None,
+                      x_lim=None,
+                      y_lim=None,
                       wall=None,
                       pure=False):
     
@@ -709,7 +712,7 @@ def plot_slicez_stat( xx, yy, v,
     
     if cbar_levels is None: cbar_levels=51
     
-    cs = ax.contourf( xx, yy, v, cmap=col_map, levels=cbar_levels )
+    cs = ax.contourf( xx, yy, v, cmap=col_map, levels=cbar_levels, extend='both')
     
     if sonic: 
         with open('soniclines.pkl','rb') as f:
@@ -728,7 +731,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sep = line[:,0]
             y_sep = line[:,1]
-            ax.plot(x_sep,y_sep,'red',linewidth=0.8)
+            ax.plot(x_sep,y_sep,'red',linewidth=1.0)
 
 
     if boundary is not None:
@@ -765,19 +768,34 @@ def plot_slicez_stat( xx, yy, v,
 #        ax.plot(z_wall,y_wall,'black')
         ax.fill_between(x_wall,-0.2,y_wall,color='grey')
         ax.plot(x_wall,np.array([0.0,0.0]),'--',linewidth=0.2)
-
+    
+    if x_lim is not None: ax.set_xlim(x_lim)
+    if y_lim is not None: ax.set_ylim(y_lim)   
+    
     if not pure:
-        cbar = plt.colorbar(cs)
-        cbar.ax.set_ylabel(cbar_label,fontsize=15)
-        cbar.ax.tick_params(labelsize=15)
-
-        ax.tick_params(axis='x',labelsize=15,pad=10)
-        ax.tick_params(axis='y',labelsize=15,pad=10)
-
-
-        # set axises stay with contour and x,y unit length equal
+        cbar = plt.colorbar(cs,
+                            orientation='vertical', 
+                            shrink=0.5,
+                            location='right',
+                            aspect=10,
+                            ticks=cbar_ticks)
         
-    plt.axis('tight')
+        cbar.outline.set_linewidth(2)
+        cbar.ax.set_ylabel(cbar_label)
+        cbar.ax.tick_params( direction='in',
+                             left=True,right=False,
+                             labelleft=True,labelright=False,
+                             length=20.0,
+                             width=2.0)
+        
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(2)
+        ax.tick_params(axis='x', pad=10)
+        ax.tick_params(axis='y', pad=10)
+
+#    plt.axis('tight')  #set axises stay with contour 
+
+    # set x,y unit length equal
     plt.gca().set_aspect('equal', adjustable='box')
 
     if filename:
@@ -821,6 +839,8 @@ def plot_slicex_stat( zz, yy, v,
                       title=None,
                       arrow=False,
                       extreme_loc=None,
+                      x_lim=None,
+                      y_lim=None,
                       pure=False):
     
     """
@@ -931,8 +951,7 @@ def plot_slicex_stat( zz, yy, v,
     if extreme_loc:
         for loc in extreme_loc:
             ax.plot( loc[0],loc[1], 'x', color='black', 
-                     markersize=20, markeredgewidth=4.0)
-        
+                     markersize=20, markeredgewidth=4.0) 
     
     if not pure: 
            
