@@ -193,7 +193,8 @@ class ProbeData:
         self.freq, self.pprime_psd = signal.welch(
             pprime,                fs=self.freq_sample,  
             window='hann',         nperseg=self.nperseg, 
-            noverlap=self.noverlap,scaling='density')
+            noverlap=self.noverlap,scaling='density',
+            nfft=len(pprime))
         
         self.mean_power = np.sum(self.pprime_psd * self.freq[1])
         

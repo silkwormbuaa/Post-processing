@@ -137,7 +137,7 @@ with timer('psd'):
     probe_s.psd( 8, 0.5 )
     probe_r.psd( 8, 0.5 )
     
-    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=[9,4], constrained_layout=True )
     
     St_Lsep_s = probe_s.St * Lsep_s
     St_Lsep_r = probe_r.St * Lsep_r
@@ -170,12 +170,12 @@ with timer('psd'):
                 linewidth=1,
                 label=label_r)
     
-    ax.set_xlim( [0.01,100] )
-    ax.set_ylim( [0.0,1.0] )
+    ax.set_xlim( [0.01,1] )
+    ax.set_ylim( [0.0,0.3] )
     
 #    ax.set_xlabel( r'$St_{sep}$' )
     ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
-    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
+#    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
 
     if not pure:
         ax.legend() 
@@ -191,7 +191,7 @@ with timer('psd'):
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(2)
 
-    plt.savefig( fig_name )
+    plt.savefig( fig_name+'zoomed_padded' )
     
     plt.show()
   
