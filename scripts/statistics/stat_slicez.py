@@ -12,6 +12,7 @@
 import os
 import sys
 import time
+import pickle
 
 import numpy             as     np
 
@@ -86,34 +87,46 @@ os.chdir(outpath)
 # - do slicing and output slices
 
 for i, loc in enumerate( locs ):
+    
+    # check if the slice is already there
+    
+    df_slice_file = f"df_slice_{i:02d}.pkl"
+    
+    if os.path.exists( df_slice_file ):
+        print(f"File {df_slice_file} already exists, read in directly...\n")
+        df_slice = pickle.load( open( df_slice_file, 'rb' ) )
+    
+    else: # if not, do slicing
+        block_list, indx_slic = G.select_sliced_blockgrids( 'Z', loc )
 
-    block_list, indx_slic = G.select_sliced_blockgrids( 'Z', loc )
+        print(f"Selected {len(block_list)} blocks.\n")
 
-    print(f"Selected {len(block_list)} blocks.\n")
+        # - read statistics data file
 
-    # - read statistics data file
+        S = StatisticData( datafile )
 
-    S = StatisticData( datafile )
-
-    with timer("read selected blocks "):
-        
-        with open(datafile,'br') as f:
+        with timer("read selected blocks "):
             
-            S.read_stat_header( f )
+            with open(datafile,'br') as f:
+                
+                S.read_stat_header( f )
+                
+                vars = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
+                
+                S.read_stat_body( f, block_list, vars )
+                
+                S.compute_vars( block_list, ['mach','RS','p`'] )
+                
+                S.compute_gradients( block_list, 
+                                    ['schlieren','shadowgraph','vorticity','grad_p'],
+                                    G)
+                
+        with timer("Get slice dataframe "):
             
-            vars = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
+            df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
             
-            S.read_stat_body( f, block_list, vars )
-            
-            S.compute_vars( block_list, ['mach','RS','p`'] )
-            
-            S.compute_gradients( block_list, 
-                                ['schlieren','shadowgraph','vorticity','grad_p'],
-                                G)
-            
-    with timer("Get slice dataframe "):
-        
-        df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
+            with open( df_slice_file, 'wb' ) as f:
+                pickle.dump( df_slice, f )
 
     with timer("Interpolate and plot "):
         
@@ -122,47 +135,47 @@ for i, loc in enumerate( locs ):
         x_slice = np.array( df_slice['xs'] )
         y_slice = np.array( df_slice['y_scale'] )
         
-        u_slice = np.array( df_slice['u'] )
-        mach_slice = np.array( df_slice['mach'] )
+        u_slice       = np.array( df_slice['u'] )
+        mach_slice    = np.array( df_slice['mach'] )
         gradrho_slice = np.array( df_slice['grad_rho'] )
-        T_slice = np.array( df_slice['T'] )
-        tke_slice = np.array( df_slice['tke'] )
-        p_fluc_slice = np.array( df_slice['p`'] )
-        grad_p_slice = np.array( df_slice['grad_p'] )
+        T_slice       = np.array( df_slice['T'] )
+        tke_slice     = np.array( df_slice['tke'] )
+        p_fluc_slice  = np.array( df_slice['p`'] )
+        grad_p_slice  = np.array( df_slice['grad_p'] )
         
         x = np.linspace(-20,10,301)
         
         if i == 0:
-            y = np.linspace(0.0, 8, 201)
+            y = np.linspace(0.01, 8, 201)
             wall = False
         
         if i == 1:
-            if casecode == 'smooth_wall':  y = np.linspace(0.0, 8, 201)
+            if casecode == 'smooth_wall':  y = np.linspace(0.01, 8, 201)
             else:                          y = np.linspace(-0.1,8, 405)
             wall=False
         
         xx,yy = np.meshgrid(x,y)
         
-        mach = griddata( (x_slice,y_slice), mach_slice,
-                        (xx,yy), method='linear')
+        mach    = griddata( (x_slice,y_slice), mach_slice,
+                            (xx,yy), method='linear')
         
-        u    = griddata( (x_slice,y_slice), u_slice,
-                        (xx,yy), method='linear')
+        u       = griddata( (x_slice,y_slice), u_slice,
+                            (xx,yy), method='linear')
         
         gradrho = griddata( (x_slice,y_slice), gradrho_slice,
                             (xx,yy), method='linear')
 
-        T    = griddata( (x_slice,y_slice), T_slice,
-                        (xx,yy), method='linear')
+        T       = griddata( (x_slice,y_slice), T_slice,
+                            (xx,yy), method='linear')
 
-        tke   = griddata( (x_slice,y_slice), tke_slice,
-                        (xx,yy), method='linear')
+        tke     = griddata( (x_slice,y_slice), tke_slice,
+                            (xx,yy), method='linear')
 
-        p_fluc = griddata( (x_slice,y_slice), p_fluc_slice,
-                        (xx,yy), method='linear') 
+        p_fluc  = griddata( (x_slice,y_slice), p_fluc_slice,
+                            (xx,yy), method='linear') 
 
-        grad_p = griddata( (x_slice,y_slice), grad_p_slice,
-                        (xx,yy), method='linear') 
+        grad_p  = griddata( (x_slice,y_slice), grad_p_slice,
+                            (xx,yy), method='linear') 
         
         save_sonic_line( xx,yy, mach )
         
@@ -177,7 +190,7 @@ for i, loc in enumerate( locs ):
         cbar = r'$Mach$'
         
         plot_slicez_stat( xx,yy,mach, 
-                          filename='MachZ_'+str(i+1),
+                          filename=casecode+'_MachZ_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
                           wall=wall)
@@ -185,7 +198,7 @@ for i, loc in enumerate( locs ):
         cbar = r'$<T>/T_{\infty}$'
         
         plot_slicez_stat( xx,yy,T/160.15, 
-                          filename='TemperatureZ_'+str(i+1),
+                          filename=casecode+'_TemperatureZ_'+str(i+1),
                           col_map='plasma',
                           cbar_label=cbar,
                           wall=wall)
@@ -193,50 +206,59 @@ for i, loc in enumerate( locs ):
         cbar = r'$\nabla{\rho}$'
         
         plot_slicez_stat( xx,yy,gradrho, 
-                        filename='grad_rho_'+str(i+1),
-                        col_map='Greys',
-                        cbar_label=cbar,
-                        wall=wall)
+                          filename=casecode+'_grad_rho_'+str(i+1),
+                          col_map='Greys',
+                          cbar_label=cbar,
+                          wall=wall)
 
         plot_slicez_stat( xx,yy,gradrho, 
-                        shockshape="mean_shock_shape.pkl",
-                        filename='mean_shock_shape_'+str(i+1),
-                        col_map='Greys',
-                        cbar_label=cbar,
-                        wall=wall)
+                          shockshape="mean_shock_shape.pkl",
+                          filename=casecode+'_mean_shock_shape_'+str(i+1),
+                          col_map='Greys',
+                          cbar_label=cbar,
+                          wall=wall)
 
         cbar = 'DS'
         plot_slicez_stat( xx,yy,DS, 
-                         DS='mean_shock_DS.pkl',
-                        filename='mean_shock_DS_'+str(i+1),
-                        col_map='Greys_r',
-                        cbar_label=cbar,
-                        wall=wall)
+                          DS='mean_shock_DS.pkl',
+                          filename=casecode+'_mean_shock_DS_'+str(i+1),
+                          col_map='Greys_r',
+                          cbar_label=cbar,
+                          wall=wall)
 
 
         cbar = r'$tke$'
         
         plot_slicez_stat( xx,yy,tke, 
-                        filename='tke_'+str(i+1),
-                        col_map='coolwarm',
-                        cbar_label=cbar,
-                        wall=wall)
+                          filename=casecode+'_tke_'+str(i+1),
+                          col_map='coolwarm',
+                          cbar_label=cbar,
+                          wall=wall,
+                          shockshape="mean_shock_shape.pkl")
         
-        cbar = 'pressure fluctuation'
+        cbar = r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$"
+        cbar_levels = np.linspace(0,0.5,51)
+        cbar_ticks  = np.linspace(0,0.5,6)
         
-        plot_slicez_stat( xx,yy,p_fluc, 
-                        filename='pressure_fluc_'+str(i+1),
-                        col_map='coolwarm',
-                        cbar_label=cbar,
-                        wall=wall)
+        plot_slicez_stat( xx,yy,p_fluc/p_ref, 
+                          filename=casecode+'_pressure_fluc_'+str(i+1),
+                          col_map='coolwarm',
+                          cbar_label=cbar,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
+                          wall=wall,
+                          shockshape="mean_shock_shape.pkl",
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
 
         cbar = 'pressure gradient'
         
         plot_slicez_stat( xx,yy,grad_p*delta/p_ref, 
-                        filename='p_grad_'+str(i+1),
-                        col_map='coolwarm',
-                        cbar_label=cbar,
-                        wall=wall)
+                          filename=casecode+'_p_grad_'+str(i+1),
+                          col_map='coolwarm',
+                          cbar_label=cbar,
+                          wall=wall)
+        
     
 # print out the time finishing the job
 

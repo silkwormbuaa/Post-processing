@@ -46,7 +46,9 @@ def plot_eigens( eigens,
                  figsize=None, 
                  filename=None, 
                  show_circle=True,
-                 set_view=False):
+                 set_view=False,
+                 xlim=None,
+                 ylim=None):
     
     if eigens is None:
         
@@ -57,7 +59,7 @@ def plot_eigens( eigens,
         
         # Set default figure size
         
-        figsize = (10.8,9) 
+        figsize = (7,5.5) 
         
     
     fig, ax = plt.subplots( figsize=figsize )
@@ -105,6 +107,9 @@ def plot_eigens( eigens,
         
         ax.set_xlim([ -1.2, 1.2 ])
         ax.set_ylim([ -1.2, 1.2 ])
+        
+    if xlim is not None: ax.set_xlim( xlim )
+    if ylim is not None: ax.set_ylim( ylim )
      
     # Ticks
 
@@ -113,17 +118,17 @@ def plot_eigens( eigens,
     ax.tick_params( which='major',
                     axis='both',
                     direction='in',
-                    length=10,
+                    length=20,
                     width=2)
     
     ax.tick_params( which='minor',
                     axis='both', 
                     direction='in',
-                    length=5,
-                    width=1)
+                    length=10,
+                    width=1.5)
     
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.04))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.05))
     
     ax.tick_params(axis='x')
     ax.tick_params(axis='y')
@@ -144,7 +149,11 @@ def plot_eigens( eigens,
     
     # adjust the content region
     
-    fig.subplots_adjust(left=0.25, right=0.91667, bottom=0.15, top=0.95)
+    fig.subplots_adjust(left=0.32, right=0.95, bottom=0.25, top=0.95)
+    
+    # set background transparent
+    
+    fig.patch.set_alpha(0.0)
     
     # Save figure
     
@@ -320,13 +329,13 @@ def plot_psi_st( st, psi1, psi2=None,
     ax.tick_params( which='major',
                     axis='both',
                     direction='out',
-                    length=10,
+                    length=20,
                     width=2)
     
     ax.tick_params( which='minor',
                     axis='both', 
                     direction='out',
-                    length=5,
+                    length=10,
                     width=1.5)
 
     # set major tick on y axis is 0.0001,0.001,0.01,0.1,1.0
@@ -354,8 +363,11 @@ def plot_psi_st( st, psi1, psi2=None,
     
     # Labels
     
-    ax.set_xlabel( r"$St_{L_{sep}}$")
+#    ax.set_xlabel( r"$St_{L_{sep}}$")
     ax.set_ylabel( r"$|\psi_{i}|$")
+    
+    # hide x axis label and tick number
+    ax.xaxis.set_tick_params( which='both', labelbottom=False )
     
     # Plot line
     
@@ -704,7 +716,7 @@ def plot_slicez_stat( xx, yy, v,
                       pure=False):
     
     if figsize is None:
-        figsize = (30,16)
+        figsize = (20,10)
     
     fig, ax = plt.subplots( figsize=figsize )
     
@@ -721,7 +733,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'magenta',linewidth=0.8)
+            ax.plot(x_sonic,y_sonic,'magenta',linewidth=1.5)
 
 
     if separation:
@@ -731,7 +743,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sep = line[:,0]
             y_sep = line[:,1]
-            ax.plot(x_sep,y_sep,'red',linewidth=1.0)
+            ax.plot(x_sep,y_sep,'red',linewidth=1.5)
 
 
     if boundary is not None:
@@ -741,7 +753,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_bou = line[:,0]
             y_bou = line[:,1]
-            ax.plot(x_bou,y_bou,'black',linewidth=0.8)
+            ax.plot(x_bou,y_bou,'black',linewidth=1.5)
             
     if shockshape is not None:
         with open(shockshape, 'rb') as f:
@@ -750,7 +762,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_shock = line[:,0]
             y_shock = line[:,1]
-            ax.plot(x_shock,y_shock,'black',linewidth=0.8)
+            ax.plot(x_shock,y_shock,'black',linewidth=1.5)
             
     if DS is not None:
         with open(DS, 'rb') as f:
@@ -774,26 +786,30 @@ def plot_slicez_stat( xx, yy, v,
     
     if not pure:
         cbar = plt.colorbar(cs,
-                            orientation='vertical', 
+                            orientation='horizontal', 
                             shrink=0.5,
-                            location='right',
-                            aspect=10,
-                            ticks=cbar_ticks)
+                            location='top',
+                            aspect=15,
+                            ticks=cbar_ticks,
+                            pad=0.1)
         
         cbar.outline.set_linewidth(2)
-        cbar.ax.set_ylabel(cbar_label)
-        cbar.ax.tick_params( direction='in',
-                             left=True,right=False,
-                             labelleft=True,labelright=False,
+        cbar.ax.set_xlabel(cbar_label,
+                           rotation='horizontal',
+                           labelpad=20)
+        cbar.ax.tick_params( axis='x',
+                             direction='in',
+                             bottom = True, top=False,
+                             labeltop=False,labelbottom=True,
                              length=20.0,
                              width=2.0)
         
+        
         ax.spines[:].set_color('black')
         ax.spines[:].set_linewidth(2)
-        ax.tick_params(axis='x', pad=10)
-        ax.tick_params(axis='y', pad=10)
-
-#    plt.axis('tight')  #set axises stay with contour 
+        ax.tick_params(axis='both', length=15, width=1.5, pad=10)
+        ax.set_xlabel( r"$(x-x_{imp})/\delta_0$")
+        ax.set_ylabel( r"$y/\delta_0$" )
 
     # set x,y unit length equal
     plt.gca().set_aspect('equal', adjustable='box')
