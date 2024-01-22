@@ -126,7 +126,7 @@ b. ([2,3],[1]) will look for the elements array[2,1] and array[3,1].
 c. ([1,2,3]) will look for the elements in a 1-D array arr[1:3].
 '''
 
-fmt = '.pdf'
+fmt = '.png'
 
 eigen_dir = snap_dir + '/eigen_plots'
 
@@ -138,7 +138,9 @@ os.chdir( eigen_dir )
 
 plot_eigens( paradmd.mu, 
              paradmd.mu[ tuple([paradmd.ind_spmode]) ],
-             filename='a-eigens' + fmt)
+             filename='a-eigens_enlarged' + fmt,
+             xlim = [0.95,1.05],
+             ylim = [-0.1,0.1])
 
 plot_amp_st( paradmd.St, 
              np.abs(paradmd.alphas),

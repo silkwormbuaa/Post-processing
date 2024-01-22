@@ -177,7 +177,7 @@ if plt_pwfluc:
         ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
         ax.tick_params(axis='x', pad=15)
 
-        ax.set_ylabel(r"$\sqrt{<p'p'>}/p_{\infty}$" )
+        ax.set_ylabel(r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$" )
         ax.tick_params(axis='y', pad=10)
 
 #        ax.legend( ) 
