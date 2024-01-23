@@ -726,20 +726,23 @@ def lin_grow(xs,ds,expratio,len=None,upbound=None):
     xs       : starting point of array \n
     ds       : starting spacing of array \n
     expratio : expansion ratio of spacing \n
-    len      : total length of array \n
-    upbound  : upper bound of array \n
+    len      : total length of cells ( nr. of grid points - 1) \n
+    upbound  : upper bound of grid point \n
     
-    return:    an array of linear-growing spacing grid points
+    return:    an array of linear-growing spacing grid x and dx array
     """
     # if give the total length of array
     
     if len is not None:
-        x = np.zeros(len,dtype='f8')
+        x = np.zeros(len+1,dtype='f8')
         x[0] = xs
+        x[1] = xs+ds
         
-        for i in range(1,len):
-            x[i] = x[i-1] + ds
+        for i in range(2,len+1):
             ds = ds*expratio
+            x[i] = x[i-1] + ds
+        
+        d = np.diff(x)
     
     
     # if give the upper bound of array
@@ -747,17 +750,19 @@ def lin_grow(xs,ds,expratio,len=None,upbound=None):
     elif upbound is not None:
         x = []
         x.append(xs)
+        x.append(xs+ds)
         
         while x[-1] < upbound:
-            x.append(ds)
             ds = ds*expratio
+            x.append(x[-1]+ds)
             
         x[-1] = upbound
         
+        d = np.diff(x)
     
     else: raise ValueError("Please give 'len' OR 'upbound' target array.")
     
-    return x
+    return x, d
 
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
@@ -775,9 +780,8 @@ def lin_grow(xs,ds,expratio,len=None,upbound=None):
 
 if __name__ == "__main__":
     
-    arr = np.array([1,2,3,4,5,6,7,8,9,10])
+    x,d = lin_grow(0.0,0.01045,1.0219,len=240)
     
-    target = 5.5
+    print(x)
     
-    print(find_indices(arr,target,mode='sequential'))
-    print(find_indices(arr,target,mode='bisection'))
+    print(len(x))
