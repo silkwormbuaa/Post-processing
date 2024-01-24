@@ -90,40 +90,42 @@ def assess_performance( data ):
 
    # Retrieve data of interest
 
-   count   = -1
+   count   = -1    # counter for the number of tasks
    results = []
 
    for i, entry in enumerate( data ):
 
       task = entry[0].strip( ' ' )
+      freq = int  ( entry[1] )
       mint = float( entry[2] )
       maxt = float( entry[4] )
 
-      if i == 0 or task != results[count][0]:
+      if i == 0 or task != results[count][0]: # data are sorted alphabetically
 
-         results.append( [ task, mint, maxt, maxt/mint ] ); count += 1
+         results.append( [ task, freq, mint, maxt, maxt/mint ] ); count += 1
 
       else:
 
-         results[count][1] = min( results[count][1], mint )
-         results[count][2] = max( results[count][2], maxt )
-         results[count][3] = results[count][2]/results[count][1]
+         results[count][2] = min( results[count][2], mint )
+         results[count][3] = max( results[count][3], maxt )
+         results[count][4] = results[count][3]/results[count][2]
 
-   # Reorder list alphabetically
-   results.sort( key = lambda x: x[3], reverse = True )
+   # Reorder list by decreasing execution time ratio
+   results.sort( key = lambda x: x[4], reverse = True )
 
    # Output results
    print( '\n\033[92m Performance assessment of target inca_*.out files \033[0m\n' )
-   print( ' Task name'.ljust(25) + 't_min [s]'.rjust(15) + 't_max [s]'.rjust(15) + 't_max/t_min'.rjust(15) )
-   print( '----------------------------------------------------------------------' )
+   print( ' Task_name'.ljust(25) + 'freq'.rjust(15) + 'min(t_min)'.rjust(15) + 'max(t_min)'.rjust(15) + 'time_ratio'.rjust(15) )
+   print( '------------------------------------------------------------------------------------' )
 
    for i, result in enumerate( results ):
 
       # Build output
       string  = ' ' + result[0].ljust(24)
-      string += '%15.4E' %( result[1] )
+      string += '%15d'   %( result[1] )
       string += '%15.4E' %( result[2] )
-      string += '%15.2f' %( result[3] )
+      string += '%15.4E' %( result[3] )
+      string += '%15.2f' %( result[4] )
       print( string )
    print( '' )
 

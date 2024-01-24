@@ -6,7 +6,8 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   script of reading inca_performance.out and analyze the performance
+@Desc    :   script of reading outputfile of inspect_inca_out_files.py
+             and do analysis
 '''
 
 
@@ -33,41 +34,49 @@ sys.path.append( source_dir )
 
 def main():
     
-    file1 = '/home/wencanwu/Downloads/performance_compare/inca_performance1.out'
-    file2 = '/home/wencanwu/Downloads/performance_compare/inca_performance2.out'
+    os.chdir('/home/wencanwu/Downloads/performance_compare/')
     
-    df1 = read_inca_performance( file1 )
-    df2 = read_inca_performance( file2 )
+    file1 = '/home/wencanwu/Downloads/performance_compare/inca_out1/output1.out'
+    file2 = '/home/wencanwu/Downloads/performance_compare/inca_out2/output2.out'
     
-    # compare the 't_avg' of these two dataframes and get the iloc
-
-
-#    index = [i for i in range(len(df1)) if (df1['t_avg'][i] < df2['t_avg'][i])]
+    df1 = read_inspect_output( file1 )
+    df2 = read_inspect_output( file2 )
     
-    index = range(len(df1))
+    # sort dataframe by name 
     
-    names   = df1['Name'][index].tolist()
-    t_avg1  = df1['t_avg'][index].tolist()
-    t_freq1 = df1['Frequency'][index].tolist()
-    t_avg2  = df2['t_avg'][index].tolist() 
-    t_freq2 = df2['Frequency'][index].tolist()
-    ratio   = [t_avg2[i]/t_avg1[i] for i in range(len(index))]
-    time1   = [t_avg1[i]*t_freq1[i] for i in range(len(index))]
-    time2   = [t_avg2[i]*t_freq2[i] for i in range(len(index))]
+    df1.sort_values(by=['Name'], inplace=True)
+    df2.sort_values(by=['Name'], inplace=True)
     
-    data = {'Name': names, 't_avg1': t_avg1, 't_freq1': t_freq1, 't_avg2': t_avg2, 
-            't_freq2': t_freq2, 'ratio': ratio, 'time': time1, 'time2': time2}
+    pd.set_option('display.max_rows', None)
+    
+    # get data lists
+    
+    names = df1['Name'].tolist()
+    
+    freq1 = df1['Freq'].tolist()
+    tmin1 = df1['t_min'].tolist()
+    tmax1 = df1['t_max'].tolist()
+    
+    freq2 = df2['Freq'].tolist()
+    tmin2 = df2['t_min'].tolist()
+    tmax2 = df2['t_max'].tolist()
+    
+    r_tmax_21 = [tmax2[i]/tmax1[i] for i in range(len(df1))]
+    
+    data = {'Name': names, 'freq1':freq1, 'tmin1':tmin1, 'tmax1':tmax1, 
+            'freq2':freq2, 'tmin2':tmin2, 'tmax2':tmax2, 'r_tmax_21':r_tmax_21}
     
     df = pd.DataFrame(data)
     
-    print(df)
+    # sort values and drop index
     
-    df.sort_values(by=['ratio'], inplace=True, ascending=False)
+    df.sort_values(by=['r_tmax_21'], inplace=True, ascending=False, ignore_index=True)
     
     # display all rows
-    pd.set_option('display.max_rows', None)
     
     print(df)
+    
+    df.to_string('inca_performance_compare.txt', index=False)
 
 # ----------------------------------------------------------------------
 # >>> read in inca_performance.out
@@ -83,53 +92,28 @@ def main():
 #
 # ----------------------------------------------------------------------
 
-def read_inca_performance( filename ):
+def read_inspect_output( filename ):
     
-    data_lines = []
+    with open(filename, 'r') as f:  lines = f.readlines()[5:]
+        
+    # read lines
     
-    with open(filename, 'r') as f:
-        
-        lines = f.readlines()
-        
-        # if there are two blank lines, stop reading
-        
-        blank_line_count = 0
-    
-        # read lines
-        
-        for line in lines:
-            
-            line = line.strip().strip('\n')
-            
-            if line=='':
-                blank_line_count += 1
-                if blank_line_count == 2:
-                    break
-                
-            else:
-                
-                # skip separator line
-                if '-+-' not in line and 'Name' not in line:
-                    data_lines.append( line )
-                blank_line_count = 0
-                
-                
-    # convert the list of lines to a string
-    
-    header = ['Name', 'Frequency', 't_min', 't_avg', 't_max', 't_tot', 't_tot_percent']
+    header = ['Name', 'Freq', 't_min', 't_max', 'time_ratio']
     
     df = pd.DataFrame(columns = header)
     
-    for line in data_lines:
-        line_content = [item.strip() for item in line.split('|')]
-        df.loc[len(df.index)] = line_content
-    
+    for line in lines:
+        
+        data = line.strip().strip('\n').split()
+        
+        if data:  df.loc[len(df.index)] = data
+                
     # convert data type
     
-    df['Frequency'] = df['Frequency'].astype(int)
+    df['Freq'] = df['Freq'].astype(int)
     df['t_min']     = df['t_min'].astype(float)
-    df['t_avg']     = df['t_avg'].astype(float)
     df['t_max']     = df['t_max'].astype(float)
+    df['time_ratio']= df['time_ratio'].astype(float)
     
     return df
 

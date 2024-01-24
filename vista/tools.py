@@ -780,7 +780,7 @@ def lin_grow(xs,ds,expratio,len=None,upbound=None):
 
 if __name__ == "__main__":
     
-    x,d = lin_grow(0.0,0.01045,1.0219,len=240)
+    x,d = lin_grow(0.0,0.01045,1.04,upbound=86)
     
     print(x)
     
