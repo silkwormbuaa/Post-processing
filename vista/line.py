@@ -179,7 +179,7 @@ class LineData:
         spacing: spacing for sparsed results
         base: base of log, default is 10.
         
-        return: sparsed dataframe
+        return: sparsed dataframe with equal spacing in log scale
         """
 
         index = []
@@ -202,6 +202,55 @@ class LineData:
         
         
         return self.df.iloc[index]
+
+
+# ----------------------------------------------------------------------
+# >>> data binnning                                              (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/01/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def data_bin_avg( df , col , bin_edges ):
+    
+    """
+    df: input pd.DataFrame
+    col: col name of the column to be binned
+    bin_edges: bin edges, a list or array. Number should 
+    
+    return: pd.DataFrame with new column
+    """
+
+    # compute the midpoints of the bins
+    
+    bin_edges = np.array(bin_edges)                # in case bins is a list
+    bin_mid = (bin_edges[1:]+bin_edges[:-1])/2
+    
+    # check if data is within the range of bins
+    
+    if (df[col].min() < bin_edges[0]) or (df[col].max() > bin_edges[-1]):
+        print('\033[93m Warning : some data is out of the range of bins \033[0m')
+    
+    df[col+'_mid'] = pd.cut( df[col] , bins=bin_edges, labels=bin_mid, include_lowest=True )
+
+    # create a new dataframe with the binned data
+    
+    dfbinned = df.groupby(col+'_mid').mean().reset_index()
+    
+    # check if dfbinned contain Nan values, if so, fill with 0
+    
+    if dfbinned.isnull().values.any():
+        print('\033[93m Warning : some bins have no data \033[0m')
+    
+    return dfbinned
+
 
 
 class ProfileData( LineData ):

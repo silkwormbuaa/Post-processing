@@ -11,6 +11,9 @@
 
 import os
 import sys
+import pandas            as     pd
+import numpy             as     np
+from   scipy.interpolate import make_interp_spline
 
 source_dir = os.path.realpath(__file__).split('plotlines')[0] 
 sys.path.append( source_dir )
@@ -25,6 +28,8 @@ from   vista.timer       import timer
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 
+from   vista.line        import data_bin_avg
+
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
@@ -33,7 +38,7 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 1              # 1,2,3,4,5
+output_nr = 5              # 1,2,3,4,5
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
@@ -143,13 +148,13 @@ with timer('psd'):
     St_Lsep_r = probe_r.St * Lsep_r
     
     ax.minorticks_on()
-    ax.tick_params(which='major',
+    ax.tick_params( which='major',
                     axis='both',
                     direction='in',
                     length=15,
                     width=2,
                     pad=15)
-    ax.tick_params(which='minor',
+    ax.tick_params( which='minor',
                     axis='both', 
                     direction='in',
                     length=10,
@@ -192,11 +197,75 @@ with timer('psd'):
     ax.spines[:].set_linewidth(2)
 
     plt.savefig( fig_name+'zoomed_padded' )
-    
-    plt.show()
-  
-#    print(probe_r.nperseg)
-    
-#    print(probe_r.df['pprime'])
+#    plt.show()
+    plt.close()
 
-#    probe_r.write_psd()
+# =============================================================================
+# plotting bin chart
+# =============================================================================
+
+with timer('bin chart'):
+    
+    dfs = pd.DataFrame( { 'St_Lsep_s':St_Lsep_s,
+                          'psd': probe_s.nd_pprime_fwpsd } )
+    
+    dfr = pd.DataFrame( { 'St_Lsep_r':St_Lsep_r,
+                          'psd': probe_r.nd_pprime_fwpsd } )
+    
+    bin_edges = np.logspace( -2, 2, 41, endpoint=True )
+    
+    dfsbin = data_bin_avg( dfs, 'St_Lsep_s', bin_edges )
+    dfrbin = data_bin_avg( dfr, 'St_Lsep_r', bin_edges )
+    
+    # clear data
+    
+    dfsbin.dropna( inplace=True )
+    dfrbin.dropna( inplace=True )
+    
+    # plot
+    
+    fig, ax = plt.subplots( figsize=[9,5], constrained_layout=True )
+    
+    barwidth = np.diff( bin_edges )
+    
+#    ax.bar( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], width=barwidth, alpha=0.5, color='gray', label='smooth' )
+#    ax.bar( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], width=barwidth, alpha=0.5, color='blue', label=label_r )
+
+    spl = make_interp_spline( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], k=3 )
+    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace(-2,2,100 )), color='red', linewidth=2, label='smooth' )
+
+    spl = make_interp_spline( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], k=3 )
+    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace( -2,2,100 )), color='blue', linewidth=2, label=label_r )
+    
+    ax.set_xscale( 'log' )
+    ax.set_xlim( [0.01,100] )
+    ax.set_ylim( [0.0, 0.4] )
+
+    ax.minorticks_on()
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='in',
+                    length=15,
+                    width=2,
+                    pad=15)
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1)
+    
+    ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
+    
+    if not pure: ax.legend()
+    
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(2)
+    
+    plt.savefig( fig_name+'_bin_line' )
+    plt.show()
+    plt.close()    
+    
+    
+    
+    
