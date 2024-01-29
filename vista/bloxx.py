@@ -156,17 +156,33 @@ class Grid_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/meta/grid_simple_layer/'
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/plusrough'
     files = get_filelist(file_path)
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/meta/grid_simple_layer/')
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/grid')
     for i, file in enumerate(files):
         
         grid = Grid_bloxx(file)
         print(i,len(grid.variables), grid.LX, grid.NX, grid.NY, grid.NZ, grid.BX)
         
-        if grid.LY[0] == 0.0:
-            grid.variables['BY1'] = '"DUMMY" ,'
+        if grid.LY[1] == 86.0:
+            grid.variables['BY2'] = '"RI_INFLOW" ,'
+        
+        if grid.LZ[0] == -10.4:
+            grid.variables['BZ1'] = '"CYC" ,'
+        
+        if grid.LZ[1] == 10.4:
+            grid.variables['BZ2'] = '"CYC" ,'
+            
+        if grid.LX[0] == -118.0:
+            if grid.LY[0] > 10.0 or grid.LY[1] < 0.001:
+                grid.variables['BX1'] = '"RI_INFLOW" ,'
+            else:
+                grid.variables['BX1'] = '"DF_INFLOW" ,'
+        
+        if grid.LX[1] == 120:
+            if grid.LY[1] > 0.01: 
+                grid.variables['BX2'] = '"OUTFLOW" ,'
         
         grid.write_to_file()
 
