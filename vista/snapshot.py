@@ -15,6 +15,8 @@ import sys
 
 import numpy             as     np
 import pandas            as     pd
+import tecplot           as     tp
+from   tecplot.constant  import FieldDataType
 from   copy              import deepcopy
 
 from   .io_binary        import read_int_bin
@@ -85,6 +87,7 @@ class Snapshot:
         # Snapshot data (per block)
   
         self.snap_data = []
+        self.snap_cleandata = []
   
         # Position pointers
   
@@ -1770,6 +1773,65 @@ class Snapshot:
                 
 
 # ----------------------------------------------------------------------
+# >>> Write snapshot into tecplot szplt format                   (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/01/29  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_snapshot_szplt( self, filename ):
+        
+        """
+        filename : filename of output snapshot
+        
+        tbd: output wall distance as well
+        """
+        
+        # check if self.snap_cleandata is ready
+        
+        if len(self.snap_cleandata) == 0:
+            raise ValueError("Please clean data first!")
+        
+        # setupt tecplot file
+        
+        tp.new_layout()
+        frame = tp.active_frame()
+        dataset = frame.create_dataset('snapshot',['x','y','z']+self.vars_name)
+        
+        for i in range( self.n_bl ):
+            
+            bl_data = self.snap_cleandata[i]
+            
+            npx = int(bl_data.npx)
+            npy = int(bl_data.npy)
+            npz = int(bl_data.npz)
+            
+            zone = dataset.add_ordered_zone( f'bl_{bl_data.num:05d}',
+                                             (npz, npy, npx),
+                                             dtypes=FieldDataType.Float )
+
+            xx,yy,zz = np.meshgrid( bl_data.gx, bl_data.gy, bl_data.gz, indexing='ij' )
+
+            # tecplot needs x,y,z in C order
+            
+            zone.values('x')[:] = xx.ravel()
+            zone.values('y')[:] = yy.ravel()
+            zone.values('z')[:] = zz.ravel()
+            
+            for var in bl_data.df.columns:
+                zone.values(var)[:] = np.array(bl_data.df[var]).reshape(npz,npy,npx).T.ravel()
+            
+        tp.data.save_tecplot_szl( filename )
+        
+
+# ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
 #
@@ -1787,12 +1849,11 @@ def Testing():
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
-    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936'
+    test_dir1 = '/home/wencanwu/my_simulation/temp/240129'
     
 #    test_dir1 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/snapshots/snapshot_00628554'
         
     snap3d_file = test_dir1 + '/snapshot.bin'
-    gridfile = test_dir1 + '/inca_grid.bin'
 
     # - read in grid info
 
@@ -1810,7 +1871,19 @@ def Testing():
     
     with timer('read one snapshot '):
         
-        snapshot1.read_snapshot( )
+        snapshot1.read_snapshot()
+        
+        snapshot1.drop_ghost( buff=3 )
+        
+        print(snapshot1.snap_cleandata[0].df)
+        print(snapshot1.snap_cleandata[1].gx)
+        
+        print(snapshot1.vars_name)
+    
+    with timer('write snapshot'):
+        
+        snapshot1.write_snapshot_szplt('snapshot.szplt')
+        
 #        snapshot1.grid3d = G
     
 #        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
@@ -1918,29 +1991,6 @@ def Testing():
         ax.set_title('Contour Plot')
         plt.show()
 '''         
-        
-'''        
-
-        
-#        for l in u_slice:  print(l)
-
-        X,Y = np.meshgrid( x, y )
-
-        mesh = pv.StructuredGrid(X,Y,u_slice).elevation()
-        
-        contour = mesh.contour()
-        
-        plotter = pv.Plotter()
-        
-        plotter.add_mesh(contour, line_width=1, color='white')
-        
-        plotter.show()
-
-        
-        print(type(X),type(Y))
-        print(X.shape,Y.shape)
-        
-'''
 
 
 # ----------------------------------------------------------------------

@@ -570,7 +570,7 @@ class BlockGrid:
         sin = 4
         sfl = 8
         slg = 4
-        len_specname = 15
+        len_specname = 15      # should be 19, after INCA 5b66ccd, 7th Feb 2023
         
         # index of BlockGrid, like first block's grid, second ...
         self.num = num
