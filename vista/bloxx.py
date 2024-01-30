@@ -9,6 +9,7 @@
 '''
 
 import os
+import pandas            as     pd
 
 from   .tools            import get_filelist
 
@@ -87,7 +88,6 @@ class Grid_bloxx:
 #
 # ----------------------------------------------------------------------
 
-    
     @property
     def LX(self):
         LX_str = self.variables['LX']
@@ -123,22 +123,143 @@ class Grid_bloxx:
     
     @property
     def BX(self):
-        BX1_str = self.variables['BX1'].strip(',').strip('"').strip()
-        BX2_str = self.variables['BX2'].strip(',').strip('"').strip()
+        BX1_str = self.variables['BX1'].strip(',').strip().strip('"')
+        BX2_str = self.variables['BX2'].strip(',').strip().strip('"')
         return (BX1_str, BX2_str)
     
     @property
     def BY(self):
-        BY1_str = self.variables['BY1'].strip(',').strip('"').strip()
-        BY2_str = self.variables['BY2'].strip(',').strip('"').strip()
+        BY1_str = self.variables['BY1'].strip(',').strip().strip('"')
+        BY2_str = self.variables['BY2'].strip(',').strip().strip('"')
         return (BY1_str, BY2_str)
     
     @property
     def BZ(self):
-        BZ1_str = self.variables['BZ1'].strip(',').strip('"').strip()
-        BZ2_str = self.variables['BZ2'].strip(',').strip('"').strip()
+        BZ1_str = self.variables['BZ1'].strip(',').strip().strip('"')
+        BZ2_str = self.variables['BZ2'].strip(',').strip().strip('"')
         return (BZ1_str, BZ2_str)
+
+    @property
+    def BC(self):
+        return self.BX + self.BY + self.BZ
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/01/30  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+class Mesh_bloxx:
     
+    def __init__(self, folder):
+        
+        self.folder =  folder
+        self.grid_files = get_filelist(folder, 'inca_grid')
+        
+        self.grids = []
+        for file in self.grid_files:
+            grid = Grid_bloxx(file)
+            self.grids.append(grid)
+        
+        
+# ----------------------------------------------------------------------
+# >>> check_boundary_conditions                                  (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/01/30  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def check_boundary_conditions( self ):
+        
+        """
+        check how many times which boundary conditions are used
+        """
+        
+        # Initialize a dictionary to count boundary conditions
+        boundary_conditions = {
+            'CYC': 0,
+            'DF_INFLOW': 0,
+            'RI_INFLOW': 0,
+            'OUTFLOW': 0,
+            'DUMMY':0
+        }
+        
+        for grid in self.grids:
+            
+            # count boundary conditions
+            
+            for condition in boundary_conditions.keys():
+                
+                boundary_conditions[condition] += grid.BC.count(condition)
+            
+        print(boundary_conditions)
+    
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/01/30  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def sort_grids(self, output_folder):
+        
+        """
+        output_folder: output folder path
+        resort grids in the output folder
+        """
+        
+        # create output folder if not exist
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        
+        lx1 = [grid.LX[1] for grid in self.grids]
+        ly1 = [grid.LY[1] for grid in self.grids]
+        lz1 = [grid.LZ[1] for grid in self.grids]
+        old_filename = [grid.filename for grid in self.grids]
+        
+        df = pd.DataFrame({'lx1': lx1, 'ly1': ly1, 'lz1': lz1, 
+                           'old_filename': old_filename})
+        
+        # sort grids and reset index
+        df = df.sort_values(by=['lx1', 'ly1', 'lz1'])
+        df = df.reset_index(drop=True)
+        
+        print(df)
+        
+        # generate a dict between filename and index
+        new_index = {filename: index for filename, index in zip(df['old_filename'], df.index+1)}
+        
+        # change grid filename and write to file
+        for grid in self.grids:
+            
+            grid.filename = f"inca_grid_{new_index[grid.filename]:06d}.inp"
+            grid.write_to_file(output_folder + '/' + grid.filename)
+        
+        print(f"sorted grids are output to {output_folder}")
+            
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -156,35 +277,13 @@ class Grid_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/plusrough'
-    files = get_filelist(file_path)
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/sorted_grids/'
     
     os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/grid')
-    for i, file in enumerate(files):
-        
-        grid = Grid_bloxx(file)
-        print(i,len(grid.variables), grid.LX, grid.NX, grid.NY, grid.NZ, grid.BX)
-        
-        if grid.LY[1] == 86.0:
-            grid.variables['BY2'] = '"RI_INFLOW" ,'
-        
-        if grid.LZ[0] == -10.4:
-            grid.variables['BZ1'] = '"CYC" ,'
-        
-        if grid.LZ[1] == 10.4:
-            grid.variables['BZ2'] = '"CYC" ,'
-            
-        if grid.LX[0] == -118.0:
-            if grid.LY[0] > 10.0 or grid.LY[1] < 0.001:
-                grid.variables['BX1'] = '"RI_INFLOW" ,'
-            else:
-                grid.variables['BX1'] = '"DF_INFLOW" ,'
-        
-        if grid.LX[1] == 120:
-            if grid.LY[1] > 0.01: 
-                grid.variables['BX2'] = '"OUTFLOW" ,'
-        
-        grid.write_to_file()
+    
+    mesh = Mesh_bloxx(file_path)
+    
+    mesh.sort_grids('../sorted_grids/')
 
 
 # ----------------------------------------------------------------------
