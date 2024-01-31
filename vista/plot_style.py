@@ -699,8 +699,8 @@ def plot_combined_dmd_mode( grids1, v1, dir1,
 # ----------------------------------------------------------------------
 
 def plot_slicez_stat( xx, yy, v, 
-                      sonic=True, 
-                      separation=True,
+                      sonic=None, 
+                      separation=None,
                       boundary=None,
                       shockshape=None,
                       DS=None,
@@ -727,7 +727,7 @@ def plot_slicez_stat( xx, yy, v,
     cs = ax.contourf( xx, yy, v, cmap=col_map, levels=cbar_levels, extend='both')
     
     if sonic: 
-        with open('soniclines.pkl','rb') as f:
+        with open(sonic,'rb') as f:
             lines = pickle.load( f )
         
         for line in lines:
@@ -737,7 +737,7 @@ def plot_slicez_stat( xx, yy, v,
 
 
     if separation:
-        with open('separationlines.pkl','rb') as f:
+        with open(separation,'rb') as f:
             lines = pickle.load( f )
             
         for line in lines:

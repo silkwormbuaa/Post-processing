@@ -15,7 +15,7 @@ import pandas            as     pd
 import numpy             as     np
 from   scipy.interpolate import make_interp_spline
 
-source_dir = os.path.realpath(__file__).split('plotlines')[0] 
+source_dir = os.path.realpath(__file__).split('plot')[0] 
 sys.path.append( source_dir )
 
 import matplotlib.pyplot as     plt

@@ -578,8 +578,6 @@ class StatisticData:
             npy = g.ny + buff*2
             npz = g.nz + buff*2
             
-            print(npx,npy,npz)
-            
 # --------- compute magnitude of density gradient
 
             if 'schlieren' in grads:

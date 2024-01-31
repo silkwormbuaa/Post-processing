@@ -18,7 +18,7 @@ import matplotlib.markers as     markers
 import numpy              as     np
 import pandas             as     pd
 
-source_dir = os.path.realpath(__file__).split('plotlines')[0]
+source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line         import ProfileData

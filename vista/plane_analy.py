@@ -30,10 +30,16 @@ import pickle
 #
 # ----------------------------------------------------------------------
 
-def save_sonic_line( xx, yy, mach ):
+def save_sonic_line( xx, yy, mach, out_file='soniclines.pkl' ):
     
     """
-    lines: list of sonic lines(each line is a 2D array of coordinates )
+    xx,yy : 2d numpy array storing coordinates
+    mach  : 2d numpy array of mach number field
+    out_file : output file name
+    
+    content of out_file: 
+    1. list of sonic lines(each line is a 2D array of coordinates )
+    2. list of mean height of sonic lines
     """
     
     lines = []
@@ -57,7 +63,7 @@ def save_sonic_line( xx, yy, mach ):
         print(f"Mean height of sonic line [{i}] is {mean_height}.\n")
         mean_heights.append(mean_height)
     
-    with open('soniclines.pkl','wb') as f:
+    with open(out_file,'wb') as f:
         
         pickle.dump( lines, f )
         pickle.dump( mean_heights, f )
@@ -133,15 +139,13 @@ def save_isolines( xx, yy, v, value:float, file, clip=False ):
     cs = ax.contour(xx, yy, v, levels=[value] )
     
     for isoline in cs.collections[0].get_paths():
+        
         line = isoline.vertices
         
-        if clip:
-            if all( line[:,1] < 0.5 ):
-                continue
-            else: lines.append( line )
+        if clip and all( line[:,1] < 0.5 ):
+            continue
         
-        else:
-            lines.append( line )
+        lines.append( line )
         
     plt.close()
     

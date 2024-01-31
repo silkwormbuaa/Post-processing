@@ -7,6 +7,7 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   get a slice from statistics.bin (only applicable to 3D)
+             df_slice_00 is at the ridge top, df_slice_01 is at the valley
 '''
 
 import os
@@ -66,7 +67,7 @@ x_imp   = float( parameters.get('x_imp') )
 p_ref   = float( parameters.get('p_ref') )
 u_ref   = float( parameters.get('u_ref') )
 casecode =  str( parameters.get('casecode') )
-
+target_dir = '/home/wencanwu/my_simulation/temp/DataPost/contour/'+casecode+'/'
 
 locs = [ 0.0, 0.5*float( parameters.get('D')) ]
 
@@ -125,12 +126,16 @@ for i, loc in enumerate( locs ):
             
             df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
             
+            df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
+            
             with open( df_slice_file, 'wb' ) as f:
                 pickle.dump( df_slice, f )
+                
+            os.system(f"cp {df_slice_file} {target_dir}")
 
     with timer("Interpolate and plot "):
         
-        df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
+# ----- interpolate
         
         x_slice = np.array( df_slice['xs'] )
         y_slice = np.array( df_slice['y_scale'] )
@@ -150,8 +155,8 @@ for i, loc in enumerate( locs ):
             wall = False
         
         if i == 1:
-            if casecode == 'smooth_wall':  y = np.linspace(0.01, 8, 201)
-            else:                          y = np.linspace(-0.1,8, 405)
+            if casecode == 'smooth':  y = np.linspace(0.01, 8, 201)
+            else:                     y = np.linspace(-0.1,8, 405)
             wall=False
         
         xx,yy = np.meshgrid(x,y)
@@ -176,20 +181,36 @@ for i, loc in enumerate( locs ):
 
         grad_p  = griddata( (x_slice,y_slice), grad_p_slice,
                             (xx,yy), method='linear') 
+
+
+# ----- save sonic line, separation line, shock shape, DS
+
+        soniclinefile = f'soniclines_{i:02d}.pkl'
+        save_sonic_line( xx,yy, mach, out_file=soniclinefile )
+        os.system(f"cp {soniclinefile} {target_dir}")
         
-        save_sonic_line( xx,yy, mach )
+        seplinefile = f'seplines_{i:02d}.pkl'
+        save_isolines( xx, yy, u, 0.0, seplinefile )
+        os.system(f"cp {seplinefile} {target_dir}")
         
-        save_separation_line( xx, yy, u )
+        shockshapefile = f'shockshape_{i:02d}.pkl'
+        save_isolines( xx, yy, gradrho, 0.15, shockshapefile, clip=True)
+        os.system(f"cp {shockshapefile} {target_dir}")
         
-        save_isolines( xx, yy, gradrho, 0.15, "mean_shock_shape.pkl",clip=True)
-        
+        shockDSfile = f'shockDS_{i:02d}.pkl'
         DS = compute_DS( gradrho )
+        save_isolines( xx, yy, DS, 0.2, shockDSfile, clip=True)
+        os.system(f"cp {shockDSfile} {target_dir}")
         
-        save_isolines( xx, yy, DS, 0.2, "mean_shock_DS.pkl", clip=True)
-        
+        print(f"Saved {soniclinefile}, {seplinefile}, {shockshapefile}, {shockDSfile}.\n")
+
+# ----- plot slices
+
         cbar = r'$Mach$'
         
         plot_slicez_stat( xx,yy,mach, 
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
                           filename=casecode+'_MachZ_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
@@ -197,7 +218,10 @@ for i, loc in enumerate( locs ):
 
         cbar = r'$<T>/T_{\infty}$'
         
-        plot_slicez_stat( xx,yy,T/160.15, 
+        plot_slicez_stat( xx,yy,T/160.15,
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
+                          sonic=soniclinefile,
                           filename=casecode+'_TemperatureZ_'+str(i+1),
                           col_map='plasma',
                           cbar_label=cbar,
@@ -206,13 +230,18 @@ for i, loc in enumerate( locs ):
         cbar = r'$\nabla{\rho}$'
         
         plot_slicez_stat( xx,yy,gradrho, 
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
+                          sonic=soniclinefile,
                           filename=casecode+'_grad_rho_'+str(i+1),
                           col_map='Greys',
                           cbar_label=cbar,
                           wall=wall)
 
         plot_slicez_stat( xx,yy,gradrho, 
-                          shockshape="mean_shock_shape.pkl",
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
+                          sonic=soniclinefile,
                           filename=casecode+'_mean_shock_shape_'+str(i+1),
                           col_map='Greys',
                           cbar_label=cbar,
@@ -220,7 +249,9 @@ for i, loc in enumerate( locs ):
 
         cbar = 'DS'
         plot_slicez_stat( xx,yy,DS, 
-                          DS='mean_shock_DS.pkl',
+                          separation=seplinefile,
+                          DS=shockDSfile,
+                          sonic=soniclinefile,
                           filename=casecode+'_mean_shock_DS_'+str(i+1),
                           col_map='Greys_r',
                           cbar_label=cbar,
@@ -230,30 +261,37 @@ for i, loc in enumerate( locs ):
         cbar = r'$tke$'
         
         plot_slicez_stat( xx,yy,tke, 
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
+                          sonic=soniclinefile,
                           filename=casecode+'_tke_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
-                          wall=wall,
-                          shockshape="mean_shock_shape.pkl")
+                          wall=wall)
         
         cbar = r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$"
         cbar_levels = np.linspace(0,0.5,51)
         cbar_ticks  = np.linspace(0,0.5,6)
         
         plot_slicez_stat( xx,yy,p_fluc/p_ref, 
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
+                          sonic=soniclinefile,
                           filename=casecode+'_pressure_fluc_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           wall=wall,
-                          shockshape="mean_shock_shape.pkl",
                           x_lim=[-15,10],
                           y_lim=[0,6] )
 
         cbar = 'pressure gradient'
         
         plot_slicez_stat( xx,yy,grad_p*delta/p_ref, 
+                          separation=seplinefile,
+                          shockshape=shockshapefile,
+                          sonic=soniclinefile,
                           filename=casecode+'_p_grad_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
