@@ -259,7 +259,43 @@ class Mesh_bloxx:
             grid.write_to_file(output_folder + '/' + grid.filename)
         
         print(f"sorted grids are output to {output_folder}")
+
+
+# ----------------------------------------------------------------------
+# >>> Select blocks in a given box                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/02/07  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def select_blocks(self, box):
+        
+        """
+        box: a tuple of 6 floats (x1, y1, z1, x2, y2, z2)
+        select blocks in the box
+        """
+        
+        selected_grids = []
+        
+        for grid in self.grids:
             
+            if (grid.LX[0] >= box[0] and grid.LX[1] <= box[3] and
+                grid.LY[0] >= box[1] and grid.LY[1] <= box[4] and
+                grid.LZ[0] >= box[2] and grid.LZ[1] <= box[5]):
+                
+                selected_grids.append(grid)
+        
+        return selected_grids
+    
+    
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -277,13 +313,15 @@ class Mesh_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/sorted_grids/'
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/240129/grid_unsorted/'
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/grid_experiment/grid')
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/240129')
     
     mesh = Mesh_bloxx(file_path)
     
-    mesh.sort_grids('../sorted_grids/')
+    mesh.grids = mesh.select_blocks((-119, -0.8, 9.0, -102, 1.06, 10.5))
+    
+    mesh.sort_grids('./selected_grids/')
 
 
 # ----------------------------------------------------------------------
