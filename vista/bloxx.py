@@ -224,16 +224,11 @@ class Mesh_bloxx:
 #
 # ----------------------------------------------------------------------
 
-    def sort_grids(self, output_folder):
+    def sort_grids(self):
         
         """
-        output_folder: output folder path
         resort grids in the output folder
         """
-        
-        # create output folder if not exist
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
         
         lx1 = [grid.LX[1] for grid in self.grids]
         ly1 = [grid.LY[1] for grid in self.grids]
@@ -254,13 +249,43 @@ class Mesh_bloxx:
         
         # change grid filename and write to file
         for grid in self.grids:
-            
             grid.filename = f"inca_grid_{new_index[grid.filename]:06d}.inp"
-            grid.write_to_file(output_folder + '/' + grid.filename)
         
-        print(f"sorted grids are output to {output_folder}")
+        print(f"Grids are sorted based on (x,y,z) !")
 
 
+# ----------------------------------------------------------------------
+# >>> save grids                                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/02/14  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def save_grid(self, output_folder):
+        
+        if len(self.grids) == 0:
+            
+            print("\033[93m No grid to save \033[0m")
+            return
+        
+        else:
+
+            # create output folder if not exist
+            if not os.path.exists(output_folder):
+                os.makedirs(output_folder)
+            
+            for grid in self.grids:
+                grid.write_to_file(output_folder.rstrip('/') + '/' + grid.filename)
+
+            print(f"\033[92mGrids are saved to {output_folder} \033[0m")
+            
 # ----------------------------------------------------------------------
 # >>> Select blocks in a given box                                (Nr.)
 # ----------------------------------------------------------------------
@@ -313,15 +338,17 @@ class Mesh_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/240129/grid_unsorted/'
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/test_CE_setup/grid'
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/240129')
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/231124')
     
     mesh = Mesh_bloxx(file_path)
     
-    mesh.grids = mesh.select_blocks((-119, -0.8, 9.0, -102, 1.06, 10.5))
+#    mesh.grids = mesh.select_blocks((-119, -0.8, 9.0, -102, 1.06, 10.5))
     
-    mesh.sort_grids('./selected_grids/')
+    mesh.sort_grids()
+    
+    mesh.save_grid('./grid')
 
 
 # ----------------------------------------------------------------------
