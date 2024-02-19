@@ -820,21 +820,32 @@ class StatisticData:
         
         print(df)
         
-        # compute turbulence (Reynolds Stress)
+# ----- compute turbulence (Reynolds Stress) and turbulent kinetic energy
         
         if RS:
             df['u`u`']= np.array(df['uu']) - np.array(df['u'])**2
             df['v`v`']= np.array(df['vv']) - np.array(df['v'])**2
             df['w`w`']= np.array(df['ww']) - np.array(df['w'])**2
             df['u`v`']= np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+            df['tke'] = df['u`u`'] + df['v`v`'] + df['w`w`']
             
             # delete some var in vars and add some
             
             vars =[var for var in vars if var not in ['uu','vv','ww','uv','pp']]
-            vars += ['u`u`','v`v`','w`w`','u`v`']
+            vars += ['u`u`','v`v`','w`w`','u`v`','tke']
             
             print(df)
-            
+
+# ----- compute total temperature and total pressure
+
+        ke = 0.5*(np.array(df['uu']) + np.array(df['vv']) + np.array(df['ww']))
+        R  = 287.0508571
+        gamma = 1.4
+        Cp = R*gamma/(gamma-1)
+        df['Tt'] = np.array(df['T']) + ke/Cp
+        df['pt'] = np.array(df['p'])*(np.array(df['Tt'])/np.array(df['T']))**(gamma/(gamma-1))
+        vars += ['Tt','pt']
+
 # ----- do averaging in x-z plane
 
         # check if 'vol_fra' is in df.columns (so that smooth wall case
@@ -879,9 +890,10 @@ class StatisticData:
         
         if roughwall:
             for var in vars:
-                if var not in ['p','rho','T']:
+                if var not in ['p','rho','mu','T','Tt','pt']:
                     df_profile.loc[0,var] = 0.0
                 
+        print("points below wall are droppped and u,v,w are set to zero at wall.")
         print( df_profile )
         
 # ----- output profile into txt

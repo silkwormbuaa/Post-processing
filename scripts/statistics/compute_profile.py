@@ -26,22 +26,24 @@ from   vista.timer       import timer
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 from   vista.colors      import colors          as    clr
+from   vista.log         import Logger
+sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 # option zone
 # =============================================================================
 
-bbox = [-57, -49.625, -1.2576, 45.0, -11.0, 11.0]  # bounding box
-wbox = [-57, -49.625, -1.2576, 0.0,  -11.0, 11.0]  # bounding box for rough wall
-wbox_sw = [ -57, -49.625, 0, 1.736953420, -11.0, 11.0]
+bbox    = [ -115, -110, -1.2576, 45.0, -11.0, 11.0]  # bounding box
+wbox    = [ -115, -110, -1.2576, 0.0,  -11.0, 11.0]  # bounding box for rough wall
+wbox_sw = [ -115, -110, 0, 1.736953420, -11.0, 11.0]
 
-outfile  = 'profile_mean_new.dat'
+outfile  = 'profile_mean_1.dat'
 
 # =============================================================================
 
 resultspath = os.getcwd()
 
-outpath  = resultspath + '/profile'
+outpath  = resultspath + '/profile_array'
 datafile = resultspath + '/statistics.bin'
 gridfile = resultspath + '/inca_grid.bin'
 ccfile   = resultspath + '/cutcells_setup.dat'
@@ -129,6 +131,7 @@ with timer("Assign vol_fra to G"):
                 # block number starts from 1, but python list index
                 # starts from 0
                 G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+                
     else:
         
         for num in block_list:
@@ -144,14 +147,15 @@ with timer("compute wall friction"):
     
     if roughwall:
 
-        for num in block_list_w:
+        # match wall distance to S
+        for num in block_list:
             S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
             
         print(S.bl[num-1].df)
         
         S.friction_projection( block_list_w, G, cc_df )
         S.wall_vars_projection( block_list_w, G, cc_df )
-        
+
         S.df_fric = S.df_fric[ (S.df_fric['x']>wbox[0]) & (S.df_fric['x']<wbox[1]) ]
         S.df_wall = S.df_wall[ (S.df_wall['x']>wbox[0]) & (S.df_wall['x']<wbox[1]) ]
         
