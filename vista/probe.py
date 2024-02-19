@@ -201,6 +201,13 @@ class ProbeFile:
             
             ax.scatter( probe.xyz[0], probe.xyz[1], probe.xyz[2] )
         
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        
+        # set aspect equal
+        plt.gca().set_aspect('auto', adjustable='box')
+        
         plt.show()
 
 # ----------------------------------------------------------------------
@@ -219,8 +226,8 @@ class ProbeFile:
 
 def Testing():
 
-#    fname = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/inca_probes.inp'
-    outfile = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/test.inp'
+    fname = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/inca_probes.inp'
+    outfile = '/home/wencanwu/my_simulation/STBLI_low_Re/240210/test.inp'
     probes = ProbeFile()
 #    probes.read( fname )
 #    probes.show()
@@ -236,7 +243,7 @@ def Testing():
         probes.probes.append( probe ) 
     
     z  = 0.65
-    y  = -0.52
+    y  = -1.04
 
     for x in xs:
         

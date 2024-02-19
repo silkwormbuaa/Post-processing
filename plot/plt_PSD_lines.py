@@ -38,7 +38,7 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 5              # 1,2,3,4,5
+output_nr = 3              # 1,2,3,4,5
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
@@ -48,9 +48,9 @@ pure      = False
 datapath0 = '/home/wencanwu/my_simulation/temp/smooth_wall/probes/probe_x/'
 datapath1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/probe_x/'
 datapath2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/probes/probe_x/'
-datapath3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/probes/probe_x/'
+datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/probes/probe_x/'
 datapath4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/probe_x/'
-datapath5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/probes/probe_x/'
+datapath5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/probes/probe_x/'
 
 outpath  = '/home/wencanwu/my_simulation/temp/DataPost/PSD'
 
@@ -180,7 +180,7 @@ with timer('psd'):
     
 #    ax.set_xlabel( r'$St_{sep}$' )
     ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
-#    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
+    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
 
     if not pure:
         ax.legend() 
@@ -224,7 +224,7 @@ with timer('bin chart'):
     
     # plot
     
-    fig, ax = plt.subplots( figsize=[9,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=[10,6], constrained_layout=True )
     
     barwidth = np.diff( bin_edges )
     
@@ -255,6 +255,7 @@ with timer('bin chart'):
                     width=1)
     
     ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
+    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
     
     if not pure: ax.legend()
     
