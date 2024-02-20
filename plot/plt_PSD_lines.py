@@ -38,7 +38,7 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 3              # 1,2,3,4,5
+output_nr = 4              # 1,2,3,4,5
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
@@ -231,11 +231,14 @@ with timer('bin chart'):
 #    ax.bar( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], width=barwidth, alpha=0.5, color='gray', label='smooth' )
 #    ax.bar( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], width=barwidth, alpha=0.5, color='blue', label=label_r )
 
-    spl = make_interp_spline( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], k=3 )
-    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace(-2,2,100 )), color='red', linewidth=2, label='smooth' )
+#    spl = make_interp_spline( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], k=3 )
+#    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace(-2,2,100 )), color='red', linewidth=2, label='smooth' )
 
-    spl = make_interp_spline( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], k=3 )
-    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace( -2,2,100 )), color='blue', linewidth=2, label=label_r )
+#    spl = make_interp_spline( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], k=3 )
+#    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace( -2,2,100 )), color='blue', linewidth=2, label=label_r )
+    
+    ax.plot( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], color='red', linewidth=2, label='smooth' )
+    ax.plot( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], color='blue', linewidth=2, label=label_r )
     
     ax.set_xscale( 'log' )
     ax.set_xlim( [0.01,100] )
@@ -263,7 +266,7 @@ with timer('bin chart'):
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(2)
     
-    plt.savefig( fig_name+'_bin_line' )
+    plt.savefig( fig_name+'_bin_line_nospline' )
     plt.show()
     plt.close()    
     
