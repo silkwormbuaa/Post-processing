@@ -30,8 +30,8 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = True
-plt_u_vd    = True
+plt_u_vd_lw = False
+plt_u_vd    = False
 plt_u       = False
 plt_RS_uu   = False
 plt_RS_vv   = False
@@ -39,7 +39,7 @@ plt_RS_ww   = False
 plt_RS_uv   = False
 plt_RS_DNS  = False
 plt_rho     = False
-plt_T       = False
+plt_T       = True
 plt_Mt      = False
 
 pure = False
@@ -50,12 +50,12 @@ fmt = '.pdf'
 
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
 
-data0 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall/results/profile'
-data1 = '/media/wencanwu/Seagate Expansion Drive/temp/221014/results/profile'
-data2 = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/profile'
-data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results/profile'
+data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/results/profile'
+data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/results/profile'
+data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/results/profile'
+data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/results/profile'
 data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/profile'
-data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/profile'
+data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/results/profile'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
@@ -842,7 +842,16 @@ if plt_rho :
 if plt_T :
     
     fig, ax = plt.subplots(figsize=[8,8])
-    
+
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['T'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+        
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
