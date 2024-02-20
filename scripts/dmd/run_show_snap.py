@@ -18,24 +18,16 @@ source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 import numpy             as     np
-
 import pandas            as     pd
-
-from   vista.timer       import timer
-
-from   vista.snapshot    import Snapshot
-
-from   vista.paradmd     import ParaDmd
-
-from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-
-from   vista.plot_style  import plot_dmd_mode 
-
-from   vista.colors      import colors    as col
-
 from   scipy.interpolate import griddata
 
+from   vista.timer       import timer
+from   vista.snapshot    import Snapshot
+from   vista.paradmd     import ParaDmd
+from   vista.tools       import get_filelist
+from   vista.tools       import read_case_parameter
+from   vista.plot_style  import plot_dmd_mode 
+from   vista.colors      import colors    as col
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 

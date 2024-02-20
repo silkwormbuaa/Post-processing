@@ -820,7 +820,7 @@ def plot_slicez_stat( xx, yy, v,
             filename+='_pure'
             fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
             
-        plt.savefig( 'figz_'+filename )
+        plt.savefig( filename )
         print(f"{filename} is output.\n")
 
     plt.close()        

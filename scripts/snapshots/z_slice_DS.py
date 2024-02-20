@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+'''
+@File    :   z_slice_DS.py
+@Time    :   2024/02/20 
+@Author  :   Wencan WU 
+@Version :   1.0
+@Email   :   w.wu-3@tudelft.nl
+@Desc    :   Visualize the DS contour from snapshot_Z_xxx.bin
+'''
+
+import os
+import sys
+import numpy             as     np
+from   mpi4py            import MPI
+
+source_dir = os.path.realpath(__file__).split('scripts')[0]
+sys.path.append( source_dir )
+
+from   vista.snapshot    import Snapshot
+from   vista.tools       import get_filelist
+from   vista.tools       import distribute_mpi_work
+from   vista.plane_analy import shift_coordinates
+from   vista.plane_analy import compute_DS
+from   vista.plane_analy import save_isolines
+from   scipy.interpolate import griddata
+from   vista.plot_style  import plot_slicez_stat
+from   vista.timer       import timer
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+n_procs = comm.Get_size()
+
+snaps_dir = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots'
+
+# -- get snapshots list
+os.chdir( snaps_dir )
+
+snapfiles = None
+
+if rank == 0:
+    
+    if os.path.exists('./figures_u') == False: 
+        os.system('mkdir ./figures_u')
+
+    if os.path.exists('./figures_DS') == False: 
+        os.system('mkdir ./figures_DS')
+
+    snapfiles = get_filelist( snaps_dir, 'snapshot_Z' )
+
+snapfiles = comm.bcast( snapfiles, root=0 )
+
+# --- Distribute the tasks (evenly as much as possible)
+    
+n_snaps = len( snapfiles )
+
+i_start, i_end = distribute_mpi_work(n_snaps, n_procs, rank)
+
+snapfiles = snapfiles[i_start:i_end]
+
+print(f"I am processor {rank}, I take below tasks:")
+
+for file in snapfiles:
+    
+    print(file)
+
+print("=========="); sys.stdout.flush()
+
+comm.barrier()
+
+#for file in snapfiles: print( file )
+with timer('15 snapshots'):
+    for snapfile in snapfiles:
+        
+        snap = Snapshot( snapfile )
+
+        snap.verbose = False
+
+        snap.read_snapshot()
+
+        snap.drop_ghost( buff=3 )
+
+        snap.assemble_block()
+
+        delta = 5.2
+        ximp  = 50.4
+
+        df_slice = shift_coordinates( snap.df, delta, 0., 0., ximp )
+
+        x_slice = np.array( df_slice['xs'] )
+        y_slice = np.array( df_slice['y_scale'] )
+
+        u_slice = np.array( df_slice['u'] )
+        DS_slice = np.array( df_slice['DS'])
+
+        x = np.linspace( -20, 12, 321 )
+
+        y = np.linspace( 0.01, 8, 201 )
+
+        xx,yy = np.meshgrid( x, y )
+
+        u = griddata( (x_slice,y_slice), u_slice,
+                    (xx,yy), method='linear')
+
+        sep_line_file = f'separationlines_{snap.itstep:08d}.pkl'
+        save_isolines( xx,yy,u, 0.0, sep_line_file )
+
+        cbar = r'$u/u_{\infty}$'
+        cbar_levels = np.linspace( -0.2, 1, 37)
+        cbar_ticks  = np.linspace( -0.2, 1, 7)
+
+        plot_slicez_stat( xx,yy,u/507,
+                        filename=f'u_{snap.itstep:08d}',
+                        col_map='coolwarm',
+                        cbar_label=cbar,
+                        separation=sep_line_file,
+                        sonic=False,
+                        cbar_levels=cbar_levels,
+                        cbar_ticks=cbar_ticks,
+                        x_lim=[-13,10],
+                        y_lim=[0,8],
+                        pure=False)
+        os.system(f'mv u_{snap.itstep:08d}.png ./figures_u/')
+        os.remove( sep_line_file )

@@ -18,24 +18,17 @@ source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 import numpy             as     np
-
 from   scipy.interpolate import griddata
 
 from   vista.snapshot    import Snapshot
-
 from   vista.grid        import GridData
-
 from   vista.timer       import timer
-
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_separation_line
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import compute_DS
-
 from   vista.tools       import read_case_parameter
-
 from   vista.plot_style  import plot_slicez_stat
-
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -129,7 +122,7 @@ with timer("Interpolate and plot "):
                       filename='schlieren',
                       col_map='Greys',
                       cbar_label=cbar,
-                      separation=True,
+                      separation='separationlines.pkl',
                       sonic=False,
                       cbar_levels=cbar_levels)
 
@@ -140,7 +133,7 @@ with timer("Interpolate and plot "):
                       filename='DS_schlieren',
                       col_map='Greys_r',
                       cbar_label=cbar,
-                      separation=True,
+                      separation='separationlines.pkl',
                       sonic=False,
                       cbar_levels=cbar_levels,
                       x_lim=[-13,10],
@@ -155,7 +148,7 @@ with timer("Interpolate and plot "):
                       filename='streamwise_velocity',
                       col_map='coolwarm',
                       cbar_label=cbar,
-                      separation=True,
+                      separation='separationlines.pkl',
                       sonic=False,
                       cbar_levels=cbar_levels,
                       cbar_ticks=cbar_ticks,
