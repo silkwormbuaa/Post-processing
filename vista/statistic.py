@@ -276,7 +276,7 @@ class StatisticData:
         
         return     :  self.bl (list of BlockData)
         """
-        
+        verbose = self.verbose
         end_of_file = False
                
         # New position after reading headers
@@ -298,7 +298,7 @@ class StatisticData:
             # read in block one by one
             # only blocks in fill list will be filled with data chunk
         
-            self.bl.append(BlockData(file, bl_list, n_var, sel_vars, vars_indx))
+            self.bl.append(BlockData(file, bl_list, n_var, sel_vars, vars_indx, verbose))
             
             self.pos = self.pos + self.bl[-1].size
                                     
@@ -1518,7 +1518,7 @@ class StatisticData:
 
 if __name__ == "__main__":
     
-    file = "/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/initial/statistics.bin"
+    file = "/media/wencanwu/Seagate Expansion Drive1/temp/smooth_wall_with_new_io/initial/statistics.bin"
     
     S = StatisticData( file )
     

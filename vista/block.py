@@ -37,31 +37,37 @@ from   .io_binary        import read_log_bin
 
 class BlockData:
     
-    verbose = False
-    
     # size of type 
     
     sin = 4
     sfl = 8
     slg = 4
     
-    def __init__( self, file, block_list, n_var, vars, var_indx ):
+    def __init__( self, file=None, block_list=None, n_var=None, vars=None, var_indx=None, verbose=False ):
         
         """
+        can initialized as void or ...
+        
         file       : opened file object
         block_list : list of blocks's numbers
         n_var      : number vars in the stored blocks
         vars       : list of selected variable name strings
         var_indx   : list of indexes of selected variables in data chunk
         """
+        if file is None:
+            pass
+        else:
+            self.init_from_file( file, block_list, n_var, vars, var_indx, verbose )
+    
+    
+    def init_from_file( self, file, block_list, n_var, vars, var_indx, verbose ):
+        
+        # if verbose?
+        self.verbose = verbose
         
         # start position of file pointer
         
         pos_start = file.tell()
-        
-        # index of block, can be read from blockdata itself
-        
-        self.num = 0
         
         # size of this BlockData (in bytes)
         
@@ -76,7 +82,7 @@ class BlockData:
 
         self.df_fric = None
         
-        # read global block number and block dimensions
+        # read global block number(index) and block dimensions
         
         self.num = read_int_bin( file.read(self.sin), self.sin )
         self.npx = read_int_bin( file.read(self.sin), self.sin )
@@ -157,34 +163,9 @@ class SnapBlock(BlockData):
             self.init_from_file( file, block_list, n_vars, vars, snap_with_gx,
                                  type, kind)
         
-# ----------------------------------------------------------------------
-# >>> initialize SnapBlock from file                              (Nr.)
-# ----------------------------------------------------------------------
-#
-# Wencan Wu : w.wu-3@tudelft.nl
-#
-# History
-#
-# 2023/10/16  - created
-#
-# Desc
-#
-# ----------------------------------------------------------------------
 
     def init_from_file( self, file, block_list, n_vars, vars, snap_with_gx, 
                         type, kind=4):
-        
-        """
-        file         : opened file object
-        block_list   : list of blocks's numbers
-        n_vars       : number vars in the stored blocks
-        vars         : list of selected variable name strings
-        snap_with_gx : if contain grids
-        type         : snapshot type, 'block' or 'slice'
-        kind         : should be consistent to Snapshot.kind
-        
-        ! SnapBlock read in all variables.
-        """
         
 # ----- Initialize attributes of instance.
 
@@ -397,4 +378,3 @@ class SnapBlock(BlockData):
         
         self.df = df
             
-        
