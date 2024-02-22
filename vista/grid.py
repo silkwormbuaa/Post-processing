@@ -6,7 +6,7 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   GridData is a class referring to a grid data binary file.
-             BlockGrid is the data structure class within the range of a block.
+             GridBlock is the data structure class within the range of a block.
 '''
 
 import sys
@@ -47,13 +47,13 @@ from   .tools            import mean_of_list
 
 class GridData:
     
-    def __init__(self, grid_file ):
+    def __init__(self, grid_file=None ):
         
         # directory to the grid binary file
         self.grid_file = grid_file
         
         # grid file size
-        self.fsize = os.stat( self.grid_file ).st_size
+        self.fsize = 0
         
         # file pointer position
         self.pos = 0
@@ -64,7 +64,7 @@ class GridData:
         # number of grids without ghost cells
         self.n_real  = 0
         
-        # BlockGrid List
+        # GridBlock List
         self.g = list()
         
         # verbose ?
@@ -89,6 +89,9 @@ class GridData:
 # ----------------------------------------------------------------------
 
     def read_grid( self ):
+
+        # grid file size
+        self.fsize = os.stat( self.grid_file ).st_size
         
         with open( self.grid_file, 'rb' ) as f:
             
@@ -191,14 +194,14 @@ class GridData:
         
         i = 1
         
-#        self.g.append( BlockGrid( file, 0,self.grid_with_solver))
+#        self.g.append( GridBlock( file, 0,self.grid_with_solver))
         
         while not end_of_file:
             
             # read in block grid one by one
             # input: file, index, if grid_with_solver
                         
-            self.g.append(BlockGrid(file,i,self.grid_with_solver,self.verbose))
+            self.g.append(GridBlock(file,i,self.grid_with_solver,self.verbose))
             
             self.pos = self.pos + self.g[-1].size
             
@@ -560,23 +563,43 @@ class GridData:
 #
 # ----------------------------------------------------------------------
 
-class BlockGrid:
-    
-    def __init__( self, file , num , grid_with_solver, verbose=False ):
+class GridBlock:
         
-        self.verbose = verbose
-        self.grid_with_solver = grid_with_solver
+    def __init__( self, file=None , num=None , grid_with_solver=None, verbose=False ):
+        
+        """
+        a void GridBlock can be initialized by given nothing or ...
+        
+        file: grid file
+        num : index of GridBlock
+        grid_with_solver : if grid with solver
+        verbose : if print out info
+        """
+        
+        if file is None:
+            pass
+        
+        else: 
+            self.init_from_file( file, num, grid_with_solver, verbose )
+
+
+    def init_from_file( self, file, num, grid_with_solver, verbose ):
         
         sin = 4
         sfl = 8
         slg = 4
-        len_specname = 15      # should be 19, after INCA 5b66ccd, 7th Feb 2023
         
-        # index of BlockGrid, like first block's grid, second ...
+        self.verbose = verbose
+        self.grid_with_solver = grid_with_solver
+        
+        len_specname = 15      # should be 19, after INCA 5b66ccd, 7th Feb 2023 
+                               # 15 before INCA 5b66ccd, 7th Feb 2023
+        
+        # index of GridBlock, like first block's grid, second ...
         self.num = num
         if self.verbose: print( 'grid number is', self.num )
         
-        # size of this BlockGrid (in bytes)
+        # size of this GridBlock (in bytes)
         self.size = 0
         
         # pass spaces before 'write'
@@ -848,9 +871,11 @@ class BlockGrid:
 
 def Testing():
 
-    filename = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/initial/inca_grid.bin'
+    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_wall_with_new_io/initial/inca_grid.bin'
     
     grd = GridData( filename )
+    
+#    grd.grid_file = filename
     
     grd.verbose = True
     
