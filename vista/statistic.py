@@ -407,52 +407,33 @@ class StatisticData:
             
 
 # ----------------------------------------------------------------------
-# >>> drop ghost cells                                           (Nr.)
+# >>> drop ghost cells                                          (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2023/09/01  - created
+# 2024/02/22  - created
 #
 # Desc
 #
 # ----------------------------------------------------------------------
 
-    def drop_ghost( self, G, block_list, buff=3 ):
+    def drop_ghost( self, block_list, buff=3 ):
         
         """
         Only applicable to 3D statistics data. \n
-        G          : GridData instance \n
         block_list : list of blocks that are going to drop ghost cells \n
         
-        return : self.bl[].df
         """
         
         for num in block_list:
             
-            npx = G.g[num-1].nx + buff*2
-            npy = G.g[num-1].ny + buff*2
-            npz = G.g[num-1].nz + buff*2
+            self.bl[num-1].drop_ghost(buff)
             
-            vars = self.bl[num-1].df.columns
-            
-            data_chunk = None
-            
-            for var in vars:
-                
-                data = np.array( self.bl[num-1].df[var] )
-                data = data.reshape( npz, npy, npx )
-                data = data[buff:npz-buff,buff:npy-buff,buff:npx-buff].flatten()
-                
-                if data_chunk is None: data_chunk = [data]
-                else: data_chunk.append(data)
-            
-            data_chunk = np.array(data_chunk).T
-            
-            self.bl[num-1].df = pd.DataFrame(data_chunk,columns=vars)
-            
+        print('Ghost cells in selected blocks are dropped.')
+        
 
 # ----------------------------------------------------------------------
 # >>> compute Mach number                                         (Nr.)
@@ -1533,4 +1514,5 @@ if __name__ == "__main__":
         
         S.read_stat_body( f, bl_list, vars)
         
+        S.drop_ghost( bl_list)
         

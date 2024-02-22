@@ -72,6 +72,9 @@ class BlockData:
         # size of this BlockData (in bytes)
         
         self.size = 0
+        
+        # number of variables
+        
         self.n_var = n_var
         
         # empty list for future use
@@ -122,8 +125,115 @@ class BlockData:
         # move file pointer to the end of current block
 
         file.seek( pos_start + self.size)
+        
+        # init grid points
+        
+        self.gx = None; self.gy = None; self.gz = None
 
 
+# ----------------------------------------------------------------------
+# >>> Drop ghost cells                                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/02/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def drop_ghost( self, buff=3 ):
+        
+# ----- check if the block is filled
+
+        if self.df.empty:
+            raise ValueError(f"BlockData {self.num} is empty.")
+        
+# ----- check if the block is 3D or 2D, if 2D, which type
+
+        if any(x==1 for x in (self.npx,self.npy,self.npz)):
+            if self.npx == 1: block_type = 'X'
+            if self.npy == 1: block_type = 'Y'
+            if self.npz == 1: block_type = 'Z'
+        else:
+            block_type = 'block'
+
+# ----- drop ghost cells
+
+        # N1, N2, N3 are dimensions with ghost cells
+        
+        N1 = self.npx
+        N2 = self.npy
+        N3 = self.npz
+        n_var = len( self.df.columns )
+        
+        # drop ghost cell coordinates
+        
+        if self.gx is not None:
+            self.gx = self.gx[buff:-buff]
+        
+        if self.gy is not None:
+            self.gy = self.gy[buff:-buff]
+        
+        if self.gz is not None:
+            self.gz = self.gz[buff:-buff]
+
+        # drop ghost cells
+        # Notice the binary data storage order [n_var, Z, Y, X]
+        # Reshape to chunk -> slice -> reshape to vector
+        
+        if block_type == 'block':
+            
+            Nx = N1 - buff*2
+            Ny = N2 - buff*2
+            Nz = N3 - buff*2
+            
+            sol_buff = (self.df.values).T.reshape( n_var, N3, N2, N1 )
+            sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
+
+        elif block_type == 'X':
+            
+            Nx = 1
+            Ny = N2 - buff*2
+            Nz = N3 - buff*2
+            
+            sol_buff = (self.df.values).T.reshape( n_var, N3, N2 )
+            sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+
+        elif block_type == 'Y':
+            
+            Nx = N1 - buff*2
+            Ny = 1
+            Nz = N3 - buff*2
+
+            sol_buff = (self.df.values).T.reshape( n_var, N3, N1 )
+            sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+            
+        elif block_type == 'Z':
+            Nx = N1 - buff*2
+            Ny = N2 - buff*2
+            Nz = 1
+        
+            sol_buff = (self.df.values).T.reshape( n_var, N2, N1 )
+            sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+        
+        # Reshape the matrix ( no matter 2D or 3D) to long vectors
+                
+        sol_buff = sol_buff.reshape(( n_var, Nx*Ny*Nz ))
+        
+        df = pd.DataFrame(sol_buff.T, columns=self.df.columns)
+        
+        # Append to snap_data_clean
+        
+        self.npx = Nx
+        self.npy = Ny
+        self.npz = Nz
+        self.df = df
+        
+        
 # ----------------------------------------------------------------------
 # >>> Define a subclass SnapBlock                                 (Nr.)
 # ----------------------------------------------------------------------
@@ -140,13 +250,15 @@ class BlockData:
 
 class SnapBlock(BlockData):
     
-    def __init__( self, file=None, block_list=None, n_vars=None, vars=None, 
+    verbose = False
+    
+    def __init__( self, file=None, block_list=None, n_var=None, vars=None, 
                         snap_with_gx = None, type=None, kind=4 ):
         
         """
         file         : opened file object
         block_list   : list of blocks's numbers
-        n_vars       : number vars in the stored blocks
+        n_var       : number vars in the stored blocks
         vars         : list of selected variable name strings
         snap_with_gx : if contain grids
         type         : snapshot type, 'block' or 'slice'
@@ -160,11 +272,11 @@ class SnapBlock(BlockData):
             pass
         
         else:
-            self.init_from_file( file, block_list, n_vars, vars, snap_with_gx,
+            self.init_from_file( file, block_list, n_var, vars, snap_with_gx,
                                  type, kind)
         
 
-    def init_from_file( self, file, block_list, n_vars, vars, snap_with_gx, 
+    def init_from_file( self, file, block_list, n_var, vars, snap_with_gx, 
                         type, kind=4):
         
 # ----- Initialize attributes of instance.
@@ -190,7 +302,7 @@ class SnapBlock(BlockData):
         # size of this BlockData (in bytes)
         
         self.size = 0
-        self.n_vars = n_vars
+        self.n_var = n_var
         
         # empty grids points list
         
@@ -313,7 +425,7 @@ class SnapBlock(BlockData):
     
         # calculate the block data size in byte
         
-        self.size = 4*self.sin + n_grid*kind + self.np*n_vars*kind
+        self.size = 4*self.sin + n_grid*kind + self.np*n_var*kind
         
         # move file pointer to the end of current block(if not fill)
 

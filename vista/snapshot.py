@@ -132,7 +132,7 @@ class Snapshot:
   
         # Number of variables
   
-        self.n_vars = 0  
+        self.n_var = 0  
         
         # Name list string of variables
         
@@ -214,7 +214,7 @@ class Snapshot:
                  
                 self.snap_data.append( SnapBlock(fs, 
                                                  block_list, 
-                                                 self.n_vars,
+                                                 self.n_var,
                                                  self.vars_name,
                                                  self.snap_with_gx,
                                                  self.type) )
@@ -310,7 +310,7 @@ class Snapshot:
             # size = N1 * N2 * N3 * n_var * self.kind
             
             size.append( snap_bl.npx * snap_bl.npy * snap_bl.npz
-                        * self.n_vars * self.kind )
+                        * self.n_var * self.kind )
             
             N1.append( snap_bl.npx )
             N2.append( snap_bl.npy )
@@ -429,14 +429,7 @@ class Snapshot:
         self.snap_with_vp  = buf_log[4]
         self.snap_with_cp  = buf_log[5]
         self.snap_with_mu  = buf_log[6]
-  
-        # just in case ?
-        
-#        if self.itstep != self.itstep_check:
-  
-#            self.itstep = self.itstep_check
-  
-  
+
 #        if not self.snap_lean   : self.snap_lean     = True
 #  
 #        if not self.compressible: self.compressible  = True
@@ -445,7 +438,6 @@ class Snapshot:
 #  
 #        if not self.snap_with_tp: self.snap_with_tp  = True
 
-  
         # Block-snapshots
   
         if self.type == 'block':
@@ -469,36 +461,36 @@ class Snapshot:
   
         if self.snap_lean: 
             
-            self.n_vars += 3
+            self.n_var += 3
             self.vars_name += ['u', 'v', 'w']
   
         else: 
             
-            self.n_vars += 5
+            self.n_var += 5
             self.vars_name += ['u', 'v', 'w', 'xx', 'xx']
             
   
         if self.snap_with_tp: 
             
-            self.n_vars += 2
+            self.n_var += 2
             self.vars_name += ['T', 'p']
             
   
         if self.snap_with_vp: 
             
-            self.n_vars += 1
+            self.n_var += 1
             self.vars_name += ['vapor']
             
             
         if self.snap_with_cp: 
             
-            self.n_vars += 2
+            self.n_var += 2
             self.vars_name += ['cappa', 'cp']
             
   
         if self.snap_with_mu: 
             
-            self.n_vars += 1
+            self.n_var += 1
             self.vars_name += ['mu']
         
         
@@ -508,13 +500,13 @@ class Snapshot:
   
             if self.slic_type == 'W': 
                 
-                self.n_vars += 1
+                self.n_var += 1
                 self.vars_name += ['cf']
             
             
         if self.snap_with_wd: 
             
-            self.n_vars += 1
+            self.n_var += 1
             self.vars_name += ['wd']
             
 
@@ -526,7 +518,7 @@ class Snapshot:
             print( 'Current snapshot: ...' + self.dir[-50:] )
             print( ' - File size is %d Mb (%d B)'%(self.fsize/(1000000),self.fsize) )
             print( ' - Kind   := %d' %(self.kind  ) )
-            print( ' - Fields := %d' %(self.n_vars) )
+            print( ' - Fields := %d' %(self.n_var) )
             print( ' - Time   := %.4e'%(self.itime ) )
             print( ' - Step   := %d' %(self.itstep) )
             print( ' - lean   := %d' %(self.snap_lean) )
@@ -538,7 +530,7 @@ class Snapshot:
             print( ' - mu     := %d' %(self.snap_with_mu) )
             print( ' - wd     := %d' %(self.snap_with_wd) )
             print( ' - Cf     := %d' %(self.snap_with_cf) )
-            print( ' - n_vars := %d' %(self.n_vars) )
+            print( ' - n_var  := %d' %(self.n_var) )
    
             print( '' ); sys.stdout.flush()
           
@@ -660,158 +652,56 @@ class Snapshot:
                 
 
 # ----------------------------------------------------------------------
-# >>> Drop ghost point data                                     ( 4 )
+# >>> Drop ghost point data                                       (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2023/04/24  - created
+# 2024/02/22  - created
 #
 # Desc
 #
-#
 # ----------------------------------------------------------------------
-   
-    def drop_ghost( self , buff=3 ):
-        
+
+    def drop_ghost( self, buff=3 ):
+
         """
         self.snap_data will be replaced by self.snap_cleandata
         
-        self.n_cells (total number of cell after dropping ghost) will be counted
+        self.n_cells (number of cell after dropping ghost) will be updated
         """
-
+        
         # Check if data is available
         
         if len(self.snap_data) == 0:
-            
             raise  ValueError('please read in snapshot data first!')
         
-        # When data is loaded
-            
-        else:    
+        # when data is loaded
+        
+        else:
             
             # Clean data(with out ghost cells)
-            
             self.snap_cleandata = []  
             
+            for block in self.snap_data:
+                
+                block.drop_ghost(buff)
+                self.snap_cleandata.append( block )
             
-            # Loop over all snap_data's elements
-            # Snap_data_bl = [ bl_num, N1, N2, N3, GX, df_sol ]
+        # Release memory occupied by snap_data
             
-            for snap_data_bl in self.snap_data:
-                
-                # N1, N2, N3 are dimensions with ghost cells
-                
-                N1     = snap_data_bl.npx
-                N2     = snap_data_bl.npy
-                N3     = snap_data_bl.npz
-                
-                df     = snap_data_bl.df
-                n_vars = len( df.columns )
-                
-                # drop ghost cell coordinates
-                
-                if snap_data_bl.gx is not None:
-                    snap_data_bl.gx = snap_data_bl.gx[buff:-buff]
-                
-                if snap_data_bl.gy is not None:
-                    snap_data_bl.gy = snap_data_bl.gy[buff:-buff]
-                
-                if snap_data_bl.gz is not None:
-                    snap_data_bl.gz = snap_data_bl.gz[buff:-buff]
-                
-                
-                # Nx, Ny, Nz are dimensions without ghost cells
-                
-                if self.type == 'block':
-                    
-                    Nx = N1 - buff*2
-                    Ny = N2 - buff*2
-                    Nz = N3 - buff*2
-                    
-                    # Solution buffer to get solution field without ghost cells
-                    
-                    # Notice the binary data storage order [n_var, Z, Y, X]
-                    # Reshape to chunk -> slice -> reshape to vector
-
-                    sol_buff = (snap_data_bl.df.values).T.\
-                                reshape( n_vars, N3, N2, N1 )
-                    
-                    sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
-                
-                
-                elif self.type == 'slice':
-                    
-                    if self.slic_type == 'X':
-                        
-                        Nx = 1
-                        Ny = N2 - buff*2
-                        Nz = N3 - buff*2
-                        
-                        sol_buff = (snap_data_bl.df.values).T.\
-                                    reshape( n_vars, N3, N2 )
-                        
-                        sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
-
-                    
-                    if self.slic_type == 'Y' or self.slic_type == 'W':
-                        
-                        Nx = N1 - buff*2
-                        Ny = 1
-                        Nz = N3 - buff*2
-
-                        sol_buff = (snap_data_bl.df.values).T.\
-                                    reshape( n_vars, N3, N1 )
-                        
-                        sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
-                    
-                    
-                    if self.slic_type == 'Z':
-                        
-                        Nx = N1 - buff*2
-                        Ny = N2 - buff*2
-                        Nz = 1
-                    
-                        sol_buff = (snap_data_bl.df.values).T.\
-                                    reshape( n_vars, N2, N1 )
-                        
-                        sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
-                    
-                
-                # Reshape the matrix ( no matter 2D or 3D) to long vectors
-                     
-                sol_buff = sol_buff.reshape(( n_vars, Nx*Ny*Nz ))
-                
-                df = pd.DataFrame(sol_buff.T, columns=df.columns)
-                
-                # Append to snap_data_clean
-                
-                snap_data_bl.npx = Nx
-                snap_data_bl.npy = Ny
-                snap_data_bl.npz = Nz
-                snap_data_bl.df = df
-                
-                
-                self.snap_cleandata.append( snap_data_bl )  
-                        
-            
-            # Release memory occupied by snap_data
-            
-            del self.snap_data
-            
-            
-            # Count total number of cells in the snapshots
-            
-            self.n_cells = 0
-            
-            for snap_bl in self.snap_cleandata:
-                
-                self.n_cells += snap_bl.npx * snap_bl.npy * snap_bl.npz
-            
-            print(f"Snapshot {self.itstep} dropped ghost cells.")
-
+        del self.snap_data
+        
+        # count total number of cells in the snapshots after dropping ghost
+        
+        self.n_cells = 0
+        for bl in self.snap_cleandata:
+            self.n_cells += bl.npx * bl.npy * bl.npz
+        
+        print(f"Snapshot {self.itstep} dropped ghost cells.")
+        
 
 # ----------------------------------------------------------------------
 # >>> check the range of snapshot                                ( 5 )
@@ -1465,28 +1355,28 @@ class Snapshot:
                 G2 = grd.gy
                 G3 = grd.gz
                 
-                vars = bl_data.df.columns
-                n_vars = len( vars )
+                vars   = bl_data.df.columns
+                n_var  = len( vars )
                 df_sol = deepcopy( bl_data.df.values )
-                sol = np.array(df_sol).T.reshape(n_vars,N3,N2,N1)
+                sol = np.array(df_sol).T.reshape(n_var,N3,N2,N1)
                 
                 if slic_type == 'X':                
                     
                     dims = [1,N2,N3]
                     GX = [G2,G3]
-                    sol = sol[:,:,:,idx].reshape(n_vars,N3*N2)
+                    sol = sol[:,:,:,idx].reshape(n_var,N3*N2)
                                     
                 if slic_type == 'Y':
                     
                     dims = [N1,1,N3]
                     GX = [G1,G3]
-                    sol = sol[:,:,idx,:].reshape(n_vars,N3*N1)
+                    sol = sol[:,:,idx,:].reshape(n_var,N3*N1)
                     
                 if slic_type == 'Z':
                     
                     dims = [N1,N2,1]
                     GX   = [G1,G2]
-                    sol  = sol[:,idx,:,:].reshape(n_vars,N2*N1)
+                    sol  = sol[:,idx,:,:].reshape(n_var,N2*N1)
                 
                 df_sol   = pd.DataFrame(sol.T,columns=vars)
                 
@@ -1515,7 +1405,7 @@ class Snapshot:
         
         snap_2d.slic_type    = slic_type
         snap_2d.type         = 'slice'
-        snap_2d.n_vars       = self.n_vars
+        snap_2d.n_var        = self.n_var
         snap_2d.vars_name    = self.vars_name
         
         return snap_2d
@@ -1767,7 +1657,7 @@ class Snapshot:
                         write_flt_bin( bl_data.gx, f, self.kind )
                         write_flt_bin( bl_data.gy, f, self.kind )
 
-                # sol(n_vars, N3, N2, N1)
+                # sol(n_var, N3, N2, N1)
                 
                 write_flt_bin( np.array(bl_data.df.values).T, f, self.kind )
                 
@@ -1849,11 +1739,11 @@ def Testing():
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
 #    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
-    test_dir1 = '/home/wencanwu/my_simulation/temp/240129'
+    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/snapshot_01360165'
     
 #    test_dir1 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/snapshots/snapshot_00628554'
         
-    snap3d_file = test_dir1 + '/snapshot.bin'
+    snap2d_file = test_dir1 + '/snapshot_Z_001.bin'
 
     # - read in grid info
 
@@ -1865,7 +1755,7 @@ def Testing():
     
     os.chdir( test_dir1 )
     
-    snapshot1 = Snapshot( snap3d_file )    
+    snapshot1 = Snapshot( snap2d_file )    
     
     snapshot1.verbose = True
     
@@ -1877,12 +1767,13 @@ def Testing():
         
         print(snapshot1.snap_cleandata[0].df)
         print(snapshot1.snap_cleandata[1].gx)
+        print(snapshot1.snap_cleandata[1].gy)
         
         print(snapshot1.vars_name)
     
-    with timer('write snapshot'):
+#    with timer('write snapshot'):
         
-        snapshot1.write_snapshot_szplt('snapshot.szplt')
+#        snapshot1.write_snapshot_szplt('snapshot.szplt')
         
 #        snapshot1.grid3d = G
     

@@ -207,7 +207,7 @@ with timer("compute wall friction"):
 
 with timer("compute profile"):
     
-    S.drop_ghost( G, block_list )
+    S.drop_ghost( block_list )
     S.compute_profile( block_list, bbox, vars, 
                        outfile=outfile, roughwall=roughwall )
 
