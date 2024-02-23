@@ -536,120 +536,34 @@ class Snapshot:
           
 
 # ----------------------------------------------------------------------
-# >>> compute gradient for 3D snapshot data                       (Nr.)
+# >>> compute gradients in snapshots                             (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2023/09/16  - created
+# 2024/02/23  - created
 #
 # Desc
 #
 # ----------------------------------------------------------------------
 
-    def compute_gradients( self, block_list:list,  grads:list, 
-                                 grid3d:GridData,  buff=3):
-        """
-        block_list : list of blocks that are going to compute gradients
-        grads      : list of str representing gradients 
-                     ['schlieren','shadowgraph','grad_V']
-        G          : GridData instance of corresponding case
+    def compute_gradients( self, block_list:list, grads:list, buff=3 ):
         
-        return : self.snap_data[num-1].df['grad_rho'] (...['laplacian'])        
+        """
+        block_list: list of blocks that are going to compute gradients
+        grads: list of strings, choose from ['schlieren', 'laplacian', 'Q_cr']
         """
         
         for num in block_list:
             
-            df = self.snap_data[self.bl_nums.index(num)].df
+            snap_bl = self.snap_data[self.bl_nums.index(num)]
             
-            g = grid3d.g[num-1]
+            snap_bl.compute_gradients_block( grads, buff=buff )
             
-            T = np.array( df['T'] )
-            p = np.array( df['p'] )
-            
-            df['rho'] = p / (T*287.0508571)
-            
-# --------- compute magnitude of density gradient
-
-            if 'schlieren' in grads:
-                
-                rho = np.array( df['rho'] )
-                
-                npx = g.nx + buff*2
-                npy = g.ny + buff*2
-                npz = g.nz + buff*2
-                
-                rho = rho.reshape( npz, npy, npx )
-                
-                drho_dx = np.gradient(rho, g.gx, axis=2)
-                drho_dy = np.gradient(rho, g.gy, axis=1)
-                drho_dz = np.gradient(rho, g.gz, axis=0)
-                
-                grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
-                
-                df['grad_rho'] = grad_rho.flatten()
-                
-# --------- compute Laplacian of the density
-
-            if 'shadowgraph' in grads:
-                
-                if 'schlieren' in grads:
-                    
-                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
-                              + np.gradient(drho_dy, g.gy, axis=1) \
-                              + np.gradient(drho_dz, g.gz, axis=0) 
-                              
-                    df['laplacian'] = laplacian.flatten()
-            
-                else:
-                    
-                    rho = np.array( df['rho'] )
-                    
-                    npx = g.nx + buff*2
-                    npy = g.ny + buff*2
-                    npz = g.nz + buff*2
-                    
-                    rho = rho.reshape( npz, npy, npx )
-                    
-                    drho_dx = np.gradient(rho, g.gx, axis=2)
-                    drho_dy = np.gradient(rho, g.gy, axis=1)
-                    drho_dz = np.gradient(rho, g.gz, axis=0)
-
-                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
-                              + np.gradient(drho_dy, g.gy, axis=1) \
-                              + np.gradient(drho_dz, g.gz, axis=0) 
-                              
-                    df['laplacian'] = laplacian.flatten()
-
-# ------------- compute velocity gradient
-
-            if 'grad_V' in grads:
-                
-                npx = g.nx + buff*2
-                npy = g.ny + buff*2
-                npz = g.nz + buff*2
-                
-                u = np.array( df['u'] ).reshape( npz, npy, npx )
-                v = np.array( df['v'] ).reshape( npz, npy, npx )
-                w = np.array( df['w'] ).reshape( npz, npy, npx )
-                
-                du_dx = np.gradient( u, g.gx, axis=2 )
-                du_dy = np.gradient( u, g.gy, axis=1 )
-                du_dz = np.gradient( u, g.gz, axis=0 )
-                dv_dx = np.gradient( v, g.gx, axis=2 )
-                dv_dy = np.gradient( v, g.gy, axis=1 )
-                dv_dz = np.gradient( v, g.gz, axis=0 )
-                dw_dx = np.gradient( w, g.gx, axis=2 )
-                dw_dy = np.gradient( w, g.gy, axis=1 )
-                dw_dz = np.gradient( w, g.gz, axis=0 )
-                
-                Q = -0.5*( du_dx**2 + dv_dy**2 + dw_dz**2 ) \
-                    -du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
-                
-                df['Q-criterion'] = Q.flatten()
-                
+        print(f"Snapshot {self.itstep} gradients ({grads}) are computed.\n")
+             
 
 # ----------------------------------------------------------------------
 # >>> Drop ghost point data                                       (Nr.)

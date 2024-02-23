@@ -70,7 +70,7 @@ with timer("read in 3d snapshot "):
 
     snap3d.read_snapshot( block_list )
     
-    snap3d.compute_gradients( block_list, grads, grid3d, buff=3 )
+    snap3d.compute_gradients( block_list, grads, buff=3 )
     
 
 with timer("get slice dataframe "):

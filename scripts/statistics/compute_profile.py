@@ -138,7 +138,7 @@ with timer("Assign vol_fra to G"):
             G.g[num-1].assign_vol_fra()
 
     # match grid and pass vol_fra from G to S
-    S.match_grid( G, block_list )
+    S.match_grid( block_list, G )
 
 
 # - compute wall friction

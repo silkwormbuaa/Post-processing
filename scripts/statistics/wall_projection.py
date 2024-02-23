@@ -102,7 +102,7 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
         wd_snap.read_snapshot(block_list)
 
         for num in block_list:
-            S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1][5]['wd']
+            S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
             
         print(S.bl[num-1].df)
 

@@ -169,7 +169,7 @@ if not os.path.exists(df_slice_file):
     
         # match grid and pass vol_fra from G to S
         
-        S.match_grid( G, block_list )
+        S.match_grid( block_list, G )
         
         # manipulate rho (rho*vol_fra)
         

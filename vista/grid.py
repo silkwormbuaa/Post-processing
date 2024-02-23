@@ -220,13 +220,18 @@ class GridData:
 # 2023/02/05  - created
 #
 # Desc
-#
-# - based on lx0,ly0,lz0, sorting block grids index (not Blockgrid!)
-# - same x-y location blocks form a block group
+#    - looks like useless, no where use it.
+#    - low Re number case, there are 8 blocks in spanwise direction, 
+#      this method helps to find the block group(sharing same lx0,ly0)
 #
 # ----------------------------------------------------------------------
+
     def get_sorted_groups( self ):
-        
+    
+        """
+        based on lx0,ly0,lz0, sorting block grids index (not Blockgrid!)
+        same x-y location blocks form a block group
+        """        
         if len(self.g) == 0:
             raise ValueError('Please read grid blocks first!')
         
@@ -591,10 +596,12 @@ class GridBlock:
             self.dz = float()
             self.hz = float()
             self.wz = float()
+            
+            self.vol_fra = None
         
         else: 
             self.init_from_file( file, num, grid_with_solver, verbose )
-
+            self.vol_fra = None
 
     def init_from_file( self, file, num, grid_with_solver, verbose ):
         

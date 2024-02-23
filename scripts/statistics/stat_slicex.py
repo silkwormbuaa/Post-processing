@@ -119,9 +119,11 @@ for i, loc in enumerate(locs):
                 
                 S.read_stat_body( f, block_list, vars )
                 
+                S.match_grid( block_list, G )
+                
                 S.compute_vars( block_list, ['mach','RS','p`'])
                 
-                S.compute_gradients( block_list, ['vorticity','Q_cr','lambda2'], G)
+                S.compute_gradients( block_list, ['vorticity','Q_cr','lambda2'])
                 
                 S.compute_source_terms( block_list, G )
                 

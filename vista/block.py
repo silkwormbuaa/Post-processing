@@ -57,10 +57,13 @@ class BlockData:
         var_indx   : list of indexes of selected variables in data chunk
         """
         if file is None:
-            pass
+            self.g = GridBlock()
+        
         else:
             self.init_from_file( file, block_list, n_var, vars, var_indx, verbose )
-    
+            
+            # init grid points
+            self.g = GridBlock()
     
     def init_from_file( self, file, block_list, n_var, vars, var_indx, verbose ):
         
@@ -127,10 +130,6 @@ class BlockData:
         # move file pointer to the end of current block
 
         file.seek( pos_start + self.size)
-        
-        # init grid points
-        
-        self.g = GridBlock()
 
 
 # ----------------------------------------------------------------------
@@ -243,6 +242,262 @@ class BlockData:
         self.df = df
         
 
+# ----------------------------------------------------------------------
+# >>> compute gradients                                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/02/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_gradients_block( self, grads:list, buff=3 ):
+        
+        """
+        grads: list of strings, choose from 
+        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2']
+        """
+        
+        df = self.df
+        g  = self.g
+
+        T = np.array( df['T'] )
+        p = np.array( df['p'] )
+        
+        R = 287.0508571
+        df['rho'] = p / (T*R)
+        
+# ----- check if the block is 3D or 2D, if 2D, which type
+
+        if any(x==1 for x in (self.npx,self.npy,self.npz)):
+            if self.npx == 1: block_type = 'X'
+            if self.npy == 1: block_type = 'Y'
+            if self.npz == 1: block_type = 'Z'
+        else:
+            block_type = 'block'
+    
+# ----- compute magnitude of density gradient
+
+        if 'schlieren' in grads:
+            
+            rho = np.array( df['rho'] )
+            
+            if block_type == 'block':
+            
+                rho = rho.reshape( self.npz, self.npy, self.npx )
+                drho_dz = np.gradient(rho, g.gz, axis=0)
+                drho_dy = np.gradient(rho, g.gy, axis=1)
+                drho_dx = np.gradient(rho, g.gx, axis=2)
+                grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
+            
+            elif block_type == 'X':
+                
+                rho = rho.reshape( self.npz, self.npy )
+                drho_dz = np.gradient(rho, g.gz, axis=0)
+                drho_dy = np.gradient(rho, g.gy, axis=1)
+                grad_rho = np.sqrt( drho_dy**2 + drho_dz**2 )
+                
+            elif block_type == 'Y':
+                
+                rho = rho.reshape( self.npz, self.npx )
+                drho_dz = np.gradient(rho, g.gz, axis=0)
+                drho_dx = np.gradient(rho, g.gx, axis=1)
+                grad_rho = np.sqrt( drho_dx**2 + drho_dz**2 )
+                
+            elif block_type == 'Z':
+                
+                rho = rho.reshape( self.npy, self.npx )
+                drho_dy = np.gradient(rho, g.gy, axis=0)
+                drho_dx = np.gradient(rho, g.gx, axis=1)
+                grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 )
+                
+            df['grad_rho'] = grad_rho.flatten()
+            
+# ----- compute Laplacian of the density
+
+        if 'laplacian' in grads:
+            
+            if 'grad_rho' not in df.columns:
+                raise ValueError("Include 'schlieren' first!")
+            
+            if block_type == 'block':
+                
+                laplacian = np.gradient(drho_dz, g.gz, axis=0) \
+                          + np.gradient(drho_dy, g.gy, axis=1) \
+                          + np.gradient(drho_dx, g.gx, axis=2)
+                df['laplacian'] = laplacian.flatten()
+            
+            elif block_type == 'X':
+                
+                laplacian = np.gradient(drho_dz, g.gz, axis=0) \
+                          + np.gradient(drho_dy, g.gy, axis=1)
+                df['laplacian'] = laplacian.flatten()
+
+            elif block_type == 'Y':
+                
+                laplacian = np.gradient(drho_dz, g.gz, axis=0) \
+                          + np.gradient(drho_dx, g.gx, axis=1)
+                df['laplacian'] = laplacian.flatten()
+                
+            elif block_type == 'Z':
+                
+                laplacian = np.gradient(drho_dy, g.gy, axis=0) \
+                          + np.gradient(drho_dx, g.gx, axis=1)
+                df['laplacian'] = laplacian.flatten()
+
+
+# ----- compute magnitude of pressure gradient
+
+        if 'grad_p' in grads:
+            
+            p = np.array( df['p'] )
+            
+            if block_type == 'block':
+                
+                p = p.reshape( self.npz, self.npy, self.npx )
+                dp_dz = np.gradient(p, g.gz, axis=0)
+                dp_dy = np.gradient(p, g.gy, axis=1)
+                dp_dx = np.gradient(p, g.gx, axis=2)
+                grad_p = np.sqrt( dp_dx**2 + dp_dy**2 + dp_dz**2 )
+            
+            elif block_type == 'X':
+                
+                p = p.reshape( self.npz, self.npy )
+                dp_dz = np.gradient(p, g.gz, axis=0)
+                dp_dy = np.gradient(p, g.gy, axis=1)
+                grad_p = np.sqrt( dp_dy**2 + dp_dz**2 )
+                
+            elif block_type == 'Y':
+                
+                p = p.reshape( self.npz, self.npx )
+                dp_dz = np.gradient(p, g.gz, axis=0)
+                dp_dx = np.gradient(p, g.gx, axis=1)
+                grad_p = np.sqrt( dp_dx**2 + dp_dz**2 )
+                
+            elif block_type == 'Z':
+                
+                p = p.reshape( self.npy, self.npx )
+                dp_dy = np.gradient(p, g.gy, axis=0)
+                dp_dx = np.gradient(p, g.gx, axis=1)
+                grad_p = np.sqrt( dp_dx**2 + dp_dy**2 )
+                
+            df['grad_p'] = grad_p.flatten()
+
+# ----- compute vorticity
+
+        if 'vorticity' in grads:
+            
+            if block_type == 'block':
+                u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
+                v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
+                w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
+                
+                w1 = np.gradient(w,g.gy,axis=1) - np.gradient(v,g.gz,axis=0)
+                w2 = np.gradient(u,g.gz,axis=0) - np.gradient(w,g.gx,axis=2)
+                w3 = np.gradient(v,g.gx,axis=2) - np.gradient(u,g.gy,axis=1)
+                
+                df['w1'] = w1.flatten()
+                df['w2'] = w2.flatten()
+                df['w3'] = w3.flatten()
+            
+            if block_type == 'X':
+                v = np.array( df['v'] ).reshape( self.npz, self.npy )
+                w = np.array( df['w'] ).reshape( self.npz, self.npy )
+                w1 = np.gradient(w,g.gy,axis=1) - np.gradient(v,g.gz,axis=0)
+                df['w1'] = w1.flatten()
+            
+            if block_type == 'Y':
+                u = np.array( df['u'] ).reshape( self.npz, self.npx )
+                w = np.array( df['w'] ).reshape( self.npz, self.npx )
+                w2 = np.gradient(u,g.gz,axis=0) - np.gradient(w,g.gx,axis=1)
+                df['w2'] = w2.flatten()
+            
+            if block_type == 'Z':
+                u = np.array( df['u'] ).reshape( self.npy, self.npx )
+                v = np.array( df['v'] ).reshape( self.npy, self.npx )
+                w3 = np.gradient(v,g.gx,axis=1) - np.gradient(u,g.gy,axis=0)
+                df['w3'] = w3.flatten()
+                
+# ----- compute Q-cr
+
+        if 'Q_cr' in grads:
+            
+            if block_type != 'block':
+                raise ValueError("Q_cr is only for block type!")
+            
+            u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
+            v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
+            w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
+            
+            du_dx = np.gradient( u, g.gx, axis=2 )
+            du_dy = np.gradient( u, g.gy, axis=1 )
+            du_dz = np.gradient( u, g.gz, axis=0 )
+            dv_dx = np.gradient( v, g.gx, axis=2 )
+            dv_dy = np.gradient( v, g.gy, axis=1 )
+            dv_dz = np.gradient( v, g.gz, axis=0 )
+            dw_dx = np.gradient( w, g.gx, axis=2 )
+            dw_dy = np.gradient( w, g.gy, axis=1 )
+            dw_dz = np.gradient( w, g.gz, axis=0 )
+            t_comp= 1/3*(du_dx + dv_dy + dw_dz)
+
+            Q_cr = -0.5*( (du_dx-t_comp)**2 
+                        + (dv_dy-t_comp)**2 
+                        + (dw_dz-t_comp)**2 ) \
+                 - du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
+            
+            df['Q_cr'] = Q_cr.flatten()  
+
+# ----- compute lambda2
+
+        if 'lambda2' in grads:
+            
+            if block_type != 'block':
+                raise ValueError("lambda2 is only for block type!")
+            
+            u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
+            v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
+            w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
+            
+            du_dx = np.gradient( u, g.gx, axis=2 )
+            du_dy = np.gradient( u, g.gy, axis=1 )
+            du_dz = np.gradient( u, g.gz, axis=0 )
+            dv_dx = np.gradient( v, g.gx, axis=2 )
+            dv_dy = np.gradient( v, g.gy, axis=1 )
+            dv_dz = np.gradient( v, g.gz, axis=0 )
+            dw_dx = np.gradient( w, g.gx, axis=2 )
+            dw_dy = np.gradient( w, g.gy, axis=1 )
+            dw_dz = np.gradient( w, g.gz, axis=0 )
+
+            J = np.array([[du_dx,du_dy,du_dz],
+                          [dv_dx,dv_dy,dv_dz],
+                          [dw_dx,dw_dy,dw_dz]])
+            
+            S     = 0.5 * ( J + np.transpose(J,(1,0,2,3,4)) )
+            Omega = 0.5 * ( J - np.transpose(J,(1,0,2,3,4)) )
+            
+            eigs = np.zeros( (3,self.npz,self.npy,self.npx) )
+
+            for i in range(self.npz):
+                for j in range(self.npy):
+                    for k in range(self.npx):
+                        eigs_unsorted = np.linalg.eigvals(S[:,:,i,j,k]**2+Omega[:,:,i,j,k]**2)
+                        eigs[:,i,j,k] = np.sort(eigs_unsorted)[::-1]
+                        
+            df['lambda2'] = eigs[1,:,:,:].flatten()   
+
+
+# ----- update dataframe
+
+        self.df = df
+        self.n_var = len( df.columns )
+        
+        
+        
 # ----------------------------------------------------------------------
 # >>> Define a subclass SnapBlock                                 (Nr.)
 # ----------------------------------------------------------------------

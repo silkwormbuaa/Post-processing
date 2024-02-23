@@ -378,11 +378,11 @@ class StatisticData:
 #   - match data with grids
 # ----------------------------------------------------------------------
     
-    def match_grid( self, G, block_list ):
+    def match_grid( self, block_list, G ):
         
         """
-        G          : GridData object \n
         block_list : list of selected blocks' numbers \n
+        G          : GridData object \n
         
         return : x,y,z and vol_fra are added to self.bl[].df \n
         """
@@ -390,6 +390,8 @@ class StatisticData:
         for num in block_list:
             
             g = G.g[num-1]
+            
+            self.bl[num-1].g = g
             
             X,Y,Z = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
             hx,hy,hz = np.meshgrid( g.hx, g.hy, g.hz, indexing='ij' )
@@ -402,8 +404,8 @@ class StatisticData:
             
             # adding vol_fra !! original vol_fra has i,j,k order, 
             # should be transpose as k,j,i
-            
-            self.bl[num-1].df['vol_fra'] = np.ravel( G.g[num-1].vol_fra.T )
+            if g.vol_fra is not None:
+                self.bl[num-1].df['vol_fra'] = np.ravel( g.vol_fra.T )
             
 
 # ----------------------------------------------------------------------
@@ -522,7 +524,6 @@ class StatisticData:
                 self.bl[num-1].df['v_favre'] = np.array( df['vrho'] ) / rho
                 self.bl[num-1].df['w_favre'] = np.array( df['wrho'] ) / rho
                 
-                
 
 # ----------------------------------------------------------------------
 # >>> compute gradients of variables                              (Nr.)
@@ -533,164 +534,29 @@ class StatisticData:
 # History
 #
 # 2023/09/11  - created
+# 2024/02/22  - computation method is within Block
 #
 # Desc
 #   - need to be improved when dealing with near-wall cells
 # ----------------------------------------------------------------------
-       
-    def compute_gradients( self, block_list:list, grads:list, G:GridData,
-                           buff=3):
-
+                
+    def compute_gradients( self, block_list:list, grads:list, buff=3):
+        
         """
         block_list: list of blocks that are going to compute gradients\n
-        grads: list of str representing gradients 
-               ['schlieren','shadowgraph','vorticity','grad_p','Q_cr'] \n
-        G: GridData instance of corresponding case\n
-        
-        return: self.bl[].df['grad_rho'] (...['laplacian']/['w1']/['w2']/['w3])
+        grads: list of str representing gradients from
+        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2']\n
         """
-
+        
         for num in block_list:
             
-            df = self.bl[num-1].df
-            g  = G.g[num-1]
+            block = self.bl[num-1]
             
-            npx = g.nx + buff*2
-            npy = g.ny + buff*2
-            npz = g.nz + buff*2
-            
-# --------- compute magnitude of density gradient
+            block.compute_gradients_block( grads, buff=buff )
+        
+        print(f"Gradients {grads} are computed.\n")
 
-            if 'schlieren' in grads:
-                
-                rho = np.array( df['rho'] ).reshape( npz, npy, npx )
-                
-                drho_dx = np.gradient(rho, g.gx, axis=2)
-                drho_dy = np.gradient(rho, g.gy, axis=1)
-                drho_dz = np.gradient(rho, g.gz, axis=0)
-                
-                grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
-                
-                self.bl[num-1].df['grad_rho'] = grad_rho.flatten()
 
-# --------- compute Laplacian of the density
-
-            if 'shadowgraph' in grads:
-                
-                if 'schlieren' in grads:
-                    
-                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
-                              + np.gradient(drho_dy, g.gy, axis=1) \
-                              + np.gradient(drho_dz, g.gz, axis=0) 
-                              
-                    self.bl[num-1].df['laplacian'] = laplacian.flatten()
-            
-                else:
-                    
-                    rho = np.array( df['rho'] ).reshape( npz, npy, npx )
-                    
-                    drho_dx = np.gradient(rho, g.gx, axis=2)
-                    drho_dy = np.gradient(rho, g.gy, axis=1)
-                    drho_dz = np.gradient(rho, g.gz, axis=0)
-
-                    laplacian = np.gradient(drho_dx, g.gx, axis=2) \
-                              + np.gradient(drho_dy, g.gy, axis=1) \
-                              + np.gradient(drho_dz, g.gz, axis=0) 
-                              
-                    self.bl[num-1].df['laplacian'] = laplacian.flatten()
-                    
-# ---------- compute vorticity
-
-            if 'vorticity' in grads:
-
-                u = np.array( df['u'] ).reshape( npz, npy, npx )
-                v = np.array( df['v'] ).reshape( npz, npy, npx )
-                w = np.array( df['w'] ).reshape( npz, npy, npx )
-                
-                w1 = np.gradient(w,g.gy,axis=1) - np.gradient(v,g.gz,axis=0)
-                w2 = np.gradient(u,g.gz,axis=0) - np.gradient(w,g.gx,axis=2)
-                w3 = np.gradient(v,g.gx,axis=2) - np.gradient(u,g.gy,axis=1)
-                
-                self.bl[num-1].df['w1'] = w1.flatten()
-                self.bl[num-1].df['w2'] = w2.flatten()
-                self.bl[num-1].df['w3'] = w3.flatten()
-                               
-# ---------- compute pressure gradient
-
-            if 'grad_p' in grads:
-                
-                p = np.array( df['p'] ).reshape( npz, npy, npx )
-                
-                dp_dx = np.gradient(p, g.gx, axis=2)
-                dp_dy = np.gradient(p, g.gy, axis=1)
-                dp_dz = np.gradient(p, g.gz, axis=0)
-                
-                grad_p = np.sqrt( dp_dx**2 + dp_dy**2 + dp_dz**2 )
-                
-                self.bl[num-1].df['grad_p'] = grad_p.flatten()
-
-# ---------- compute Q criterion
-
-            if 'Q_cr' in grads:
-
-                u = np.array( df['u'] ).reshape( npz, npy, npx )
-                v = np.array( df['v'] ).reshape( npz, npy, npx )
-                w = np.array( df['w'] ).reshape( npz, npy, npx )
-                
-                du_dx = np.gradient( u, g.gx, axis=2 )
-                du_dy = np.gradient( u, g.gy, axis=1 )
-                du_dz = np.gradient( u, g.gz, axis=0 )
-                dv_dx = np.gradient( v, g.gx, axis=2 )
-                dv_dy = np.gradient( v, g.gy, axis=1 )
-                dv_dz = np.gradient( v, g.gz, axis=0 )
-                dw_dx = np.gradient( w, g.gx, axis=2 )
-                dw_dy = np.gradient( w, g.gy, axis=1 )
-                dw_dz = np.gradient( w, g.gz, axis=0 )
-                t_comp= 1/3*(du_dx + dv_dy + dw_dz)
-                
-                Q_cr = -0.5*( (du_dx-t_comp)**2 
-                            + (dv_dy-t_comp)**2 
-                            + (dw_dz-t_comp)**2 ) \
-                       - du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
-                
-                self.bl[num-1].df['Q_cr'] = Q_cr.flatten()
-
-# ---------- compute lambda2 criterion 
-            # there is some difference compared with tecplot
-
-            if 'lambda2' in grads:
-
-                u = np.array( df['u'] ).reshape( npz, npy, npx )
-                v = np.array( df['v'] ).reshape( npz, npy, npx )
-                w = np.array( df['w'] ).reshape( npz, npy, npx )
-                
-                du_dx = np.gradient( u, g.gx, axis=2 )
-                du_dy = np.gradient( u, g.gy, axis=1 )
-                du_dz = np.gradient( u, g.gz, axis=0 )
-                dv_dx = np.gradient( v, g.gx, axis=2 )
-                dv_dy = np.gradient( v, g.gy, axis=1 )
-                dv_dz = np.gradient( v, g.gz, axis=0 )
-                dw_dx = np.gradient( w, g.gx, axis=2 )
-                dw_dy = np.gradient( w, g.gy, axis=1 )
-                dw_dz = np.gradient( w, g.gz, axis=0 )
-
-                J = np.array([[du_dx,du_dy,du_dz],
-                              [dv_dx,dv_dy,dv_dz],
-                              [dw_dx,dw_dy,dw_dz]])
-                
-                S     = 0.5 * ( J + np.transpose(J,(1,0,2,3,4)) )
-                Omega = 0.5 * ( J - np.transpose(J,(1,0,2,3,4)) )
-                
-                eigs = np.zeros( (3,npz,npy,npx) )
-
-                for i in range(npz):
-                    for j in range(npy):
-                        for k in range(npx):
-                            eigs_unsorted = np.linalg.eigvals(S[:,:,i,j,k]**2+Omega[:,:,i,j,k]**2)
-                            eigs[:,i,j,k] = np.sort(eigs_unsorted)[::-1]
-                            
-                self.bl[num-1].df['lambda2'] = eigs[1,:,:,:].flatten() 
-                    
 # ----------------------------------------------------------------------
 # >>> compute source term of secondary flow                      (Nr.)
 # ----------------------------------------------------------------------
