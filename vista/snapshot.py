@@ -864,9 +864,9 @@ class Snapshot:
                 
                 bl_number.append( snap_bl.num )
                 
-                x_bl = snap_bl.gx
-                y_bl = snap_bl.gy
-                z_bl = snap_bl.gz
+                x_bl = snap_bl.g.gx
+                y_bl = snap_bl.g.gy
+                z_bl = snap_bl.g.gz
                 
                 # Notice the order of output X,Y,Z !
                 # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
@@ -920,8 +920,8 @@ class Snapshot:
                     # GX => snap_bl[4] 
                     # For slice, only two coordinates vectors
                     
-                    y_bl = snap_bl.gy
-                    z_bl = snap_bl.gz
+                    y_bl = snap_bl.g.gy
+                    z_bl = snap_bl.g.gz
                     
                     Y, Z = np.meshgrid( y_bl, z_bl )
                     
@@ -965,8 +965,8 @@ class Snapshot:
                     
                     bl_number.append(snap_bl.num)
                     
-                    x_bl = snap_bl.gx
-                    z_bl = snap_bl.gz
+                    x_bl = snap_bl.g.gx
+                    z_bl = snap_bl.g.gz
                     
                     X, Z = np.meshgrid( x_bl, z_bl )
                     
@@ -1010,8 +1010,8 @@ class Snapshot:
                     
                     bl_number.append(snap_bl.num)
                     
-                    x_bl = snap_bl.gx
-                    y_bl = snap_bl.gy
+                    x_bl = snap_bl.g.gx
+                    y_bl = snap_bl.g.gy
                     
                     X, Y = np.meshgrid( x_bl, y_bl )
                     
@@ -1113,9 +1113,9 @@ class Snapshot:
         
             for snap_bl in self.snap_data:
                 
-                x_bl = snap_bl.gx[buff:-buff]
-                y_bl = snap_bl.gy[buff:-buff]
-                z_bl = snap_bl.gz[buff:-buff]
+                x_bl = snap_bl.g.gx[buff:-buff]
+                y_bl = snap_bl.g.gy[buff:-buff]
+                z_bl = snap_bl.g.gz[buff:-buff]
                 
                 # Notice the order of output X,Y,Z !
                 # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
@@ -1144,8 +1144,8 @@ class Snapshot:
                 
                 for snap_bl in self.snap_data:
                     
-                    y_bl = snap_bl.gy[buff:-buff]
-                    z_bl = snap_bl.gz[buff:-buff]
+                    y_bl = snap_bl.g.gy[buff:-buff]
+                    z_bl = snap_bl.g.gz[buff:-buff]
                     
                     Y,Z = np.meshgrid( y_bl, z_bl )
                     
@@ -1164,8 +1164,8 @@ class Snapshot:
                 
                 for snap_bl in self.snap_data:
                     
-                    x_bl = snap_bl.gx[buff:-buff]
-                    z_bl = snap_bl.gz[buff:-buff]
+                    x_bl = snap_bl.g.gx[buff:-buff]
+                    z_bl = snap_bl.g.gz[buff:-buff]
                     
                     X,Z = np.meshgrid( x_bl, z_bl )
                     
@@ -1184,8 +1184,8 @@ class Snapshot:
                 
                 for snap_bl in self.snap_data:
                     
-                    x_bl = snap_bl.gx[buff:-buff]
-                    y_bl = snap_bl.gy[buff:-buff]
+                    x_bl = snap_bl.g.gx[buff:-buff]
+                    y_bl = snap_bl.g.gy[buff:-buff]
                     
                     X,Y = np.meshgrid( x_bl, y_bl )
                     
@@ -1642,20 +1642,20 @@ class Snapshot:
 
                 if self.type == 'block':
                     
-                    write_flt_bin( bl_data.gx, f, self.kind )
-                    write_flt_bin( bl_data.gy, f, self.kind )
-                    write_flt_bin( bl_data.gz, f, self.kind )
+                    write_flt_bin( bl_data.g.gx, f, self.kind )
+                    write_flt_bin( bl_data.g.gy, f, self.kind )
+                    write_flt_bin( bl_data.g.gz, f, self.kind )
                 
                 elif self.type == 'slice':
                     if bl_data.npx == 1:
-                        write_flt_bin( bl_data.gy, f, self.kind )
-                        write_flt_bin( bl_data.gz, f, self.kind )
+                        write_flt_bin( bl_data.g.gy, f, self.kind )
+                        write_flt_bin( bl_data.g.gz, f, self.kind )
                     if bl_data.npy == 1:
-                        write_flt_bin( bl_data.gx, f, self.kind )
-                        write_flt_bin( bl_data.gz, f, self.kind )
+                        write_flt_bin( bl_data.g.gx, f, self.kind )
+                        write_flt_bin( bl_data.g.gz, f, self.kind )
                     if bl_data.npz == 1:
-                        write_flt_bin( bl_data.gx, f, self.kind )
-                        write_flt_bin( bl_data.gy, f, self.kind )
+                        write_flt_bin( bl_data.g.gx, f, self.kind )
+                        write_flt_bin( bl_data.g.gy, f, self.kind )
 
                 # sol(n_var, N3, N2, N1)
                 
@@ -1707,7 +1707,7 @@ class Snapshot:
                                              (npz, npy, npx),
                                              dtypes=FieldDataType.Float )
 
-            xx,yy,zz = np.meshgrid( bl_data.gx, bl_data.gy, bl_data.gz, indexing='ij' )
+            xx,yy,zz = np.meshgrid( bl_data.g.gx, bl_data.g.gy, bl_data.g.gz, indexing='ij' )
 
             # tecplot needs x,y,z in C order
             
@@ -1766,8 +1766,8 @@ def Testing():
         snapshot1.drop_ghost( buff=3 )
         
         print(snapshot1.snap_cleandata[0].df)
-        print(snapshot1.snap_cleandata[1].gx)
-        print(snapshot1.snap_cleandata[1].gy)
+        print(snapshot1.snap_cleandata[1].g.gx)
+        print(snapshot1.snap_cleandata[1].g.gy)
         
         print(snapshot1.vars_name)
     

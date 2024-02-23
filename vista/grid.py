@@ -577,7 +577,20 @@ class GridBlock:
         """
         
         if file is None:
-            pass
+            self.gx = float()
+            self.dx = float()
+            self.hx = float()
+            self.wx = float()
+            
+            self.gy = float()
+            self.dy = float()
+            self.hy = float()
+            self.wy = float()
+
+            self.gz = float()
+            self.dz = float()
+            self.hz = float()
+            self.wz = float()
         
         else: 
             self.init_from_file( file, num, grid_with_solver, verbose )

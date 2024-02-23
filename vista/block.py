@@ -17,6 +17,8 @@ from   .io_binary        import read_flt_bin
 from   .io_binary        import read_3Dflt_bin
 from   .io_binary        import read_log_bin
 
+from   .grid             import GridBlock
+
 
 # ----------------------------------------------------------------------
 # >>> Class Statistic Block Data                                ( 1 )
@@ -128,7 +130,7 @@ class BlockData:
         
         # init grid points
         
-        self.gx = None; self.gy = None; self.gz = None
+        self.g = GridBlock()
 
 
 # ----------------------------------------------------------------------
@@ -172,14 +174,21 @@ class BlockData:
         
         # drop ghost cell coordinates
         
-        if self.gx is not None:
-            self.gx = self.gx[buff:-buff]
-        
-        if self.gy is not None:
-            self.gy = self.gy[buff:-buff]
-        
-        if self.gz is not None:
-            self.gz = self.gz[buff:-buff]
+        if self.g is not None:
+            
+            if block_type == 'block':
+                self.g.gx = self.g.gx[buff:-buff]
+                self.g.gy = self.g.gy[buff:-buff]
+                self.g.gz = self.g.gz[buff:-buff]
+            elif block_type == 'X':
+                self.g.gy = self.g.gy[buff:-buff]
+                self.g.gz = self.g.gz[buff:-buff]
+            elif block_type == 'Y':
+                self.g.gx = self.g.gx[buff:-buff]
+                self.g.gz = self.g.gz[buff:-buff]
+            elif block_type == 'Z':
+                self.g.gx = self.g.gx[buff:-buff]
+                self.g.gy = self.g.gy[buff:-buff]
 
         # drop ghost cells
         # Notice the binary data storage order [n_var, Z, Y, X]
@@ -233,7 +242,7 @@ class BlockData:
         self.npz = Nz
         self.df = df
         
-        
+
 # ----------------------------------------------------------------------
 # >>> Define a subclass SnapBlock                                 (Nr.)
 # ----------------------------------------------------------------------
@@ -269,7 +278,7 @@ class SnapBlock(BlockData):
         """
         
         if file is None:
-            pass
+            self.g = GridBlock()
         
         else:
             self.init_from_file( file, block_list, n_var, vars, snap_with_gx,
@@ -306,9 +315,8 @@ class SnapBlock(BlockData):
         
         # empty grids points list
         
-        self.gx = None
-        self.gy = None
-        self.gz = None
+        n_grid = 0
+        self.g = GridBlock()
         
         # empty dataframe for datachunk
 
@@ -339,17 +347,15 @@ class SnapBlock(BlockData):
         
 # ----- read grid points
 
-        n_grid = 0
-
         if snap_with_gx and type == 'block':
             
-            self.gx = read_3Dflt_bin( pos, file, self.npx, 1, 1, kind )
+            self.g.gx = read_3Dflt_bin( pos, file, self.npx, 1, 1, kind )
             pos += self.npx*kind
             
-            self.gy = read_3Dflt_bin( pos, file, 1, self.npy, 1, kind )
+            self.g.gy = read_3Dflt_bin( pos, file, 1, self.npy, 1, kind )
             pos += self.npy*kind
             
-            self.gz = read_3Dflt_bin( pos, file, 1, 1, self.npz, kind )
+            self.g.gz = read_3Dflt_bin( pos, file, 1, 1, self.npz, kind )
             pos += self.npz*kind
             
             n_grid = self.npx + self.npy + self.npz
@@ -360,12 +366,12 @@ class SnapBlock(BlockData):
             
             if self.npx == 1: 
                 
-                self.gx = None
+                self.g.gx = None
                 
-                self.gy = read_3Dflt_bin( pos, file, 1,self.npy,1, kind )
+                self.g.gy = read_3Dflt_bin( pos, file, 1,self.npy,1, kind )
                 pos += self.npy*kind
 
-                self.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
+                self.g.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
                 pos += self.npz*kind
                 
                 n_grid = self.npy + self.npz
@@ -374,12 +380,12 @@ class SnapBlock(BlockData):
             
             elif self.npy == 1:
 
-                self.gx = read_3Dflt_bin( pos, file, self.npx,1,1, kind )
+                self.g.gx = read_3Dflt_bin( pos, file, self.npx,1,1, kind )
                 pos += self.npx*kind
                 
-                self.gy = None
+                self.g.gy = None
 
-                self.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
+                self.g.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
                 pos += self.npz*kind
                 
                 n_grid = self.npx + self.npz
@@ -388,13 +394,13 @@ class SnapBlock(BlockData):
             
             elif self.npz == 1:
                 
-                self.gx = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
+                self.g.gx = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
                 pos += self.npx*kind
 
-                self.gy = read_3Dflt_bin( pos, file, 1,self.npy,1,kind )
+                self.g.gy = read_3Dflt_bin( pos, file, 1,self.npy,1,kind )
                 pos += self.npy*kind
                 
-                self.gz = None
+                self.g.gz = None
                 
                 n_grid = self.npx + self.npy
 
@@ -476,15 +482,15 @@ class SnapBlock(BlockData):
         # grid coordinates vectors
         
         if type == 'block':
-            self.gx = GX[0]; self.gy = GX[1]; self.gz = GX[2]
+            self.g.gx = GX[0]; self.g.gy = GX[1]; self.g.gz = GX[2]
         
         if type == 'slice':
             if   self.npx == 1: 
-                self.gx = None;  self.gy = GX[0]; self.gz = GX[1]
+                self.g.gx = None;  self.g.gy = GX[0]; self.g.gz = GX[1]
             elif self.npy == 1: 
-                self.gx = GX[0]; self.gy = None;  self.gz = GX[1]
+                self.g.gx = GX[0]; self.g.gy = None;  self.g.gz = GX[1]
             elif self.npz == 1: 
-                self.gx = GX[0]; self.gy = GX[1]; self.gz = None
+                self.g.gx = GX[0]; self.g.gy = GX[1]; self.g.gz = None
         
         # dataframe
         
