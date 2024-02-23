@@ -21,7 +21,7 @@ sys.path.append( source_dir )
 
 from   vista.tools       import get_filelist
 
-figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_u'
+figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
 os.chdir( figpath )
 

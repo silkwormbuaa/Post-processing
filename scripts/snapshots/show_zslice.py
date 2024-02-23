@@ -31,14 +31,19 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 n_procs = comm.Get_size()
 
-snaps_dir = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots'
+#snaps_dir = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots'
 
 # -- get snapshots list
+
+snaps_dir = os.getcwd()
+
 os.chdir( snaps_dir )
 
 snapfiles = None
 
 if rank == 0:
+    
+    print(f"I am root, now at {snaps_dir}.")
     
     if os.path.exists('./figures_u') == False: 
         os.system('mkdir ./figures_u')
@@ -69,7 +74,7 @@ print("=========="); sys.stdout.flush()
 comm.barrier()
 
 #for file in snapfiles: print( file )
-with timer('15 snapshots'):
+with timer('show snapshots'):
     for snapfile in snapfiles:
         
         snap = Snapshot( snapfile )
@@ -77,6 +82,8 @@ with timer('15 snapshots'):
         snap.verbose = False
 
         snap.read_snapshot()
+        
+        snap.compute_gradients()
 
         snap.drop_ghost( buff=3 )
 
@@ -91,7 +98,8 @@ with timer('15 snapshots'):
         y_slice = np.array( df_slice['y_scale'] )
 
         u_slice = np.array( df_slice['u'] )
-        DS_slice = np.array( df_slice['DS'])
+        grad_rho_slice = np.array( df_slice['grad_rho'] )
+#        DS_slice = compute_DS( df_slice['grad_rho'] )
 
         x = np.linspace( -20, 12, 321 )
 
@@ -100,7 +108,15 @@ with timer('15 snapshots'):
         xx,yy = np.meshgrid( x, y )
 
         u = griddata( (x_slice,y_slice), u_slice,
-                    (xx,yy), method='linear')
+                      (xx,yy), method='linear')
+        
+        grad_rho = griddata( (x_slice,y_slice), grad_rho_slice,
+                             (xx,yy), method='linear')
+        
+        DS = compute_DS( grad_rho )
+        
+        # DS= griddata( (x_slice,y_slice), DS_slice,
+        #               (xx,yy), method='linear')
 
         sep_line_file = f'separationlines_{snap.itstep:08d}.pkl'
         save_isolines( xx,yy,u, 0.0, sep_line_file )
@@ -108,17 +124,41 @@ with timer('15 snapshots'):
         cbar = r'$u/u_{\infty}$'
         cbar_levels = np.linspace( -0.2, 1, 37)
         cbar_ticks  = np.linspace( -0.2, 1, 7)
-
+        tag = f't = {snap.itime:6.2f} ms'
         plot_slicez_stat( xx,yy,u/507,
-                        filename=f'u_{snap.itstep:08d}',
-                        col_map='coolwarm',
-                        cbar_label=cbar,
-                        separation=sep_line_file,
-                        sonic=False,
-                        cbar_levels=cbar_levels,
-                        cbar_ticks=cbar_ticks,
-                        x_lim=[-13,10],
-                        y_lim=[0,8],
-                        pure=False)
+                          filename=f'u_{snap.itstep:08d}',
+                          col_map='coolwarm',
+                          cbar_label=cbar,
+                          separation=sep_line_file,
+                          sonic=False,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
+                          tag=tag,
+                          tag_loc=[-13,6],
+                          x_lim=[-15,10],
+                          y_lim=[0,8],
+                          pure=False)
+        
+        cbar = r'$DS$'
+        cbar_levels = np.linspace( 0.0, 0.8,33)
+        
+        plot_slicez_stat( xx,yy,DS,
+                          filename=f'DS_{snap.itstep:08d}',
+                          col_map='Greys_r',
+                          cbar_label=cbar,
+                          separation=sep_line_file,
+                          sonic=False,
+                          cbar_levels=cbar_levels,
+                          tag=tag,
+                          tag_loc=[-13,6],
+                          x_lim=[-15,10],
+                          y_lim=[0,8],
+                          pure=False)
+        
+        
         os.system(f'mv u_{snap.itstep:08d}.png ./figures_u/')
+        os.system(f'mv DS_{snap.itstep:08d}.png ./figures_DS/')
         os.remove( sep_line_file )
+        sys.stdout.flush()
+
+        

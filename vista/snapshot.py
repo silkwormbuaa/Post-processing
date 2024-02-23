@@ -549,18 +549,26 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def compute_gradients( self, block_list:list, grads:list, buff=3 ):
+    def compute_gradients( self, block_list=None, grads=['schlieren'], buff=3 ):
         
         """
-        block_list: list of blocks that are going to compute gradients
-        grads: list of strings, choose from ['schlieren', 'laplacian', 'Q_cr']
+        block_list: list of blocks that are going to compute gradients;
+                    if None, all blocks will compute gradients.
+        grads: list of strings, choose from 
+        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2'],
+        default is ['schlieren']
         """
         
-        for num in block_list:
+        if block_list is None:
             
-            snap_bl = self.snap_data[self.bl_nums.index(num)]
+            for snap_bl in self.snap_data:
+                snap_bl.compute_gradients_block( grads, buff=buff )
+        
+        else:
             
-            snap_bl.compute_gradients_block( grads, buff=buff )
+            for num in block_list:
+                snap_bl = self.snap_data[self.bl_nums.index(num)]
+                snap_bl.compute_gradients_block( grads, buff=buff )
             
         print(f"Snapshot {self.itstep} gradients ({grads}) are computed.\n")
              

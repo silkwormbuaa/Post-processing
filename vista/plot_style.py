@@ -710,6 +710,8 @@ def plot_slicez_stat( xx, yy, v,
                       cbar_label=None,
                       cbar_levels=None,
                       cbar_ticks=None,
+                      tag=None,
+                      tag_loc=None,
                       x_lim=None,
                       y_lim=None,
                       wall=None,
@@ -780,6 +782,13 @@ def plot_slicez_stat( xx, yy, v,
 #        ax.plot(z_wall,y_wall,'black')
         ax.fill_between(x_wall,-0.2,y_wall,color='grey')
         ax.plot(x_wall,np.array([0.0,0.0]),'--',linewidth=0.2)
+        
+    if tag:
+        ax.text( tag_loc[0],tag_loc[1],
+                 tag,
+                 va='center',
+                 fontsize=40,
+                 zorder=101)
     
     if x_lim is not None: ax.set_xlim(x_lim)
     if y_lim is not None: ax.set_ylim(y_lim)   
