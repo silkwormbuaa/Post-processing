@@ -302,12 +302,12 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     len_w = 1.04
     
     if casecode is not None:
-        if   casecode == '1014': Case=1
-        elif casecode == '0926': Case=2
-        elif casecode == '0825': Case=3
-        elif casecode == '0927': Case=4
-        elif casecode == '1221': Case=5
-        elif casecode == 'smooth_wall': Case=0
+        if   casecode == '221014': Case=1
+        elif casecode == '220926': Case=2
+        elif casecode == '220825': Case=3
+        elif casecode == '220927': Case=4
+        elif casecode == '221221': Case=5
+        elif casecode == 'smooth': Case=0
         
     
     if   Case == 1:   D = 10.4
