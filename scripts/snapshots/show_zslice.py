@@ -75,7 +75,7 @@ comm.barrier()
 
 #for file in snapfiles: print( file )
 with timer('show snapshots'):
-    for snapfile in snapfiles:
+    for i, snapfile in enumerate(snapfiles):
         
         snap = Snapshot( snapfile )
 
@@ -159,6 +159,8 @@ with timer('show snapshots'):
         os.system(f'mv u_{snap.itstep:08d}.png ./figures_u/')
         os.system(f'mv DS_{snap.itstep:08d}.png ./figures_DS/')
         os.remove( sep_line_file )
+        
+        print(f"Processor {rank} finished {i+1}/{len(snapfiles)}.")
         sys.stdout.flush()
 
         
