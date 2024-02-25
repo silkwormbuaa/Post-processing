@@ -11,6 +11,7 @@
 
 import os
 import sys
+import pickle
 import numpy             as     np
 from   mpi4py            import MPI
 
@@ -50,6 +51,9 @@ if rank == 0:
 
     if os.path.exists('./figures_DS') == False: 
         os.system('mkdir ./figures_DS')
+    
+    if os.path.exists('./pkl_data') == False:
+        os.system('mkdir ./pkl_data')
 
     snapfiles = get_filelist( snaps_dir, 'snapshot_Z' )
 
@@ -115,8 +119,11 @@ with timer('show snapshots'):
         
         DS = compute_DS( grad_rho )
         
-        # DS= griddata( (x_slice,y_slice), DS_slice,
-        #               (xx,yy), method='linear')
+        with open(f'pkl_data/data_{snap.itstep:08d}.pkl', 'wb') as f:
+            pickle.dump(xx, f)
+            pickle.dump(yy, f)
+            pickle.dump(u,  f)
+            pickle.dump(DS, f)
 
         sep_line_file = f'separationlines_{snap.itstep:08d}.pkl'
         save_isolines( xx,yy,u, 0.0, sep_line_file )
@@ -158,7 +165,7 @@ with timer('show snapshots'):
         
         os.system(f'mv u_{snap.itstep:08d}.png ./figures_u/')
         os.system(f'mv DS_{snap.itstep:08d}.png ./figures_DS/')
-        os.remove( sep_line_file )
+        os.system(f'mv {sep_line_file} ./pkl_data/')
         
         print(f"Processor {rank} finished {i+1}/{len(snapfiles)}.")
         sys.stdout.flush()
