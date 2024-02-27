@@ -308,10 +308,11 @@ def compute_separation_ratio( array, write=True ):
 #
 # ----------------------------------------------------------------------
 
-def compute_DS( grad_rho ):
+def compute_DS( grad_rho, min=None, max=None ):
     
     """
     grad_rho : array of density gradient
+    min, max : min and max value of grad_rho, if not given, will be computed from grad_rho
     
     return : same shape array of DS. 
     Refer to Wu and Martin(2007) and Guo(2022) for more details.
@@ -319,8 +320,8 @@ def compute_DS( grad_rho ):
     
     DS = np.zeros_like( grad_rho )
     
-    min = np.min( grad_rho )
-    max = np.max( grad_rho )
+    if min is None:  min = np.min( grad_rho )
+    if max is None:  max = np.max( grad_rho )
     
     DS = 0.8*np.exp( -10.0*(grad_rho-min) / (max-min) )
     
