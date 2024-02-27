@@ -117,7 +117,7 @@ with timer('show snapshots'):
         grad_rho = griddata( (x_slice,y_slice), grad_rho_slice,
                              (xx,yy), method='linear')
         
-        DS = compute_DS( grad_rho )
+        DS = compute_DS( grad_rho, min=0.0, max=2.0 )
         
         with open(f'pkl_data/data_{snap.itstep:08d}.pkl', 'wb') as f:
             pickle.dump(xx, f)
