@@ -101,21 +101,20 @@ with timer('show snapshots'):
         x_slice = np.array( df_slice['xs'] )
         y_slice = np.array( df_slice['y_scale'] )
 
-        u_slice = np.array( df_slice['u'] )
+        u_slice        = np.array( df_slice['u'] )
+        p_slice        = np.array( df_slice['p'] )
+        rho_slice      = np.array( df_slice['rho'] )
         grad_rho_slice = np.array( df_slice['grad_rho'] )
 #        DS_slice = compute_DS( df_slice['grad_rho'] )
 
         x = np.linspace( -20, 12, 321 )
-
         y = np.linspace( 0.01, 8, 201 )
-
         xx,yy = np.meshgrid( x, y )
 
-        u = griddata( (x_slice,y_slice), u_slice,
-                      (xx,yy), method='linear')
-        
-        grad_rho = griddata( (x_slice,y_slice), grad_rho_slice,
-                             (xx,yy), method='linear')
+        u = griddata( (x_slice,y_slice), u_slice, (xx,yy), method='linear')
+        p = griddata( (x_slice,y_slice), p_slice, (xx,yy), method='linear')
+        rho = griddata( (x_slice,y_slice), rho_slice, (xx,yy), method='linear')
+        grad_rho = griddata( (x_slice,y_slice), grad_rho_slice, (xx,yy), method='linear')
         
         DS = compute_DS( grad_rho, min=0.0, max=2.0 )
         
@@ -123,48 +122,14 @@ with timer('show snapshots'):
             pickle.dump(xx, f)
             pickle.dump(yy, f)
             pickle.dump(u,  f)
-            pickle.dump(DS, f)
+            pickle.dump(p,  f)
+            pickle.dump(rho,f)
+            pickle.dump(grad_rho, f)
 
         sep_line_file = f'separationlines_{snap.itstep:08d}.pkl'
         save_isolines( xx,yy,u, 0.0, sep_line_file )
 
-        cbar = r'$u/u_{\infty}$'
-        cbar_levels = np.linspace( -0.2, 1, 37)
-        cbar_ticks  = np.linspace( -0.2, 1, 7)
-        tag = f't = {snap.itime:6.2f} ms'
-        plot_slicez_stat( xx,yy,u/507,
-                          filename=f'u_{snap.itstep:08d}',
-                          col_map='coolwarm',
-                          cbar_label=cbar,
-                          separation=sep_line_file,
-                          sonic=False,
-                          cbar_levels=cbar_levels,
-                          cbar_ticks=cbar_ticks,
-                          tag=tag,
-                          tag_loc=[-13,6],
-                          x_lim=[-15,10],
-                          y_lim=[0,8],
-                          pure=False)
-        
-        cbar = r'$DS$'
-        cbar_levels = np.linspace( 0.0, 0.8,33)
-        
-        plot_slicez_stat( xx,yy,DS,
-                          filename=f'DS_{snap.itstep:08d}',
-                          col_map='Greys_r',
-                          cbar_label=cbar,
-                          separation=sep_line_file,
-                          sonic=False,
-                          cbar_levels=cbar_levels,
-                          tag=tag,
-                          tag_loc=[-13,6],
-                          x_lim=[-15,10],
-                          y_lim=[0,8],
-                          pure=False)
-        
-        
-        os.system(f'mv u_{snap.itstep:08d}.png ./figures_u/')
-        os.system(f'mv DS_{snap.itstep:08d}.png ./figures_DS/')
+
         os.system(f'mv {sep_line_file} ./pkl_data/')
         
         print(f"Processor {rank} finished {i+1}/{len(snapfiles)}.")
