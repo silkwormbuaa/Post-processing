@@ -43,34 +43,23 @@ os.chdir( snaps_dir )
 snapfiles = None
 
 if rank == 0:
-    
     print(f"I am root, now at {snaps_dir}.")
-    
-    if os.path.exists('./figures_u') == False: 
-        os.system('mkdir ./figures_u')
-
-    if os.path.exists('./figures_DS') == False: 
-        os.system('mkdir ./figures_DS')
-    
     if os.path.exists('./pkl_data') == False:
         os.system('mkdir ./pkl_data')
-
     snapfiles = get_filelist( snaps_dir, 'snapshot_Z' )
 
+os.chdir('./pkl_data')
 snapfiles = comm.bcast( snapfiles, root=0 )
 
 # --- Distribute the tasks (evenly as much as possible)
     
 n_snaps = len( snapfiles )
-
 i_start, i_end = distribute_mpi_work(n_snaps, n_procs, rank)
-
 snapfiles = snapfiles[i_start:i_end]
 
 print(f"I am processor {rank}, I take below tasks:")
 
 for file in snapfiles:
-    
     print(file)
 
 print("=========="); sys.stdout.flush()
@@ -86,11 +75,8 @@ with timer('show snapshots'):
         snap.verbose = False
 
         snap.read_snapshot()
-        
         snap.compute_gradients()
-
         snap.drop_ghost( buff=3 )
-
         snap.assemble_block()
 
         delta = 5.2
@@ -118,7 +104,9 @@ with timer('show snapshots'):
         
         DS = compute_DS( grad_rho, min=0.0, max=2.0 )
         
-        with open(f'pkl_data/data_{snap.itstep:08d}.pkl', 'wb') as f:
+        with open(f'data_{snap.itstep:08d}.pkl', 'wb') as f:
+            pickle.dump(snap.itstep, f)
+            pickle.dump(snap.itime, f)
             pickle.dump(xx, f)
             pickle.dump(yy, f)
             pickle.dump(u,  f)
@@ -128,11 +116,6 @@ with timer('show snapshots'):
 
         sep_line_file = f'separationlines_{snap.itstep:08d}.pkl'
         save_isolines( xx,yy,u, 0.0, sep_line_file )
-
-
-        os.system(f'mv {sep_line_file} ./pkl_data/')
         
         print(f"Processor {rank} finished {i+1}/{len(snapfiles)}.")
         sys.stdout.flush()
-
-        
