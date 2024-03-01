@@ -12,6 +12,7 @@
 import os
 import sys
 import cv2
+from   moviepy.editor           import VideoFileClip, concatenate_videoclips
 
 #https://stackoverflow.com/questions/63829991/qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it
 os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
@@ -21,25 +22,121 @@ sys.path.append( source_dir )
 
 from   vista.tools       import get_filelist
 
-figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
-os.chdir( figpath )
+def main():
+    
+    figpath = '/home/wencanwu/temp/1221/figures_DS'
+#    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
-figfiles = get_filelist( figpath, 'png' )
+    os.chdir( figpath )
 
-img = []
+    figfiles = get_filelist( figpath, 'png' )
+    
+    n_fig = len(figfiles)
+    size_figs = n_fig*os.path.getsize(figfiles[0])/1e9
+    size_limit = 0.15
+    
+    if size_figs > size_limit:
+        
+        print(f"Total size of the images is {size_figs:10.3f} GB, \
+                so we have to get video separately.")
+        
+        # number of videos and number of frames per video
+        n_videos = int(size_figs//size_limit) + 1
+        nfpv     = n_fig//n_videos
+        
+        print(f"The video is separated into {n_videos} parts.\n")
+        
+        # set the video names and the corresponding figfiles
+        videos = [ f'output_{i:03d}.mp4' for i in range(n_videos) ]
+        figs = [ figfiles[i*nfpv:(i+1)*nfpv] for i in range(n_videos-1) ]
+        figs.append( figfiles[(n_videos-1)*nfpv:] )
+        
+        for i, (figfile, video) in enumerate(zip(figs, videos)):
+            create_video_from_images(figfile, video, fps=25)
+            print(f'total loading progress:{(i+1)/len(figs)*100:8.2f}%...')
+        
+        concatenate_videos(videos, '../output.mp4')
 
-for i in range(len(figfiles)):
-    img.append(cv2.imread(figfiles[i]))
+    else:
+        create_video_from_images(figfiles, '../output.mp4', fps=25)
+        
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
-height, width, layers = img[1].shape
+def create_video_from_images(image_paths, output_video_path, fps=25):
+    
+    img = []
+    
+    for i, image in enumerate(image_paths):
+        img.append(cv2.imread(image))
+        if i%10 == 0: print(f"{i} image loaded.")
+    
+    height, width, layers = img[1].shape
+    
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video  = cv2.VideoWriter(output_video_path, fourcc, fps, (width,height)) 
+    
+    for i in range(len(img)):
+        video.write(img[i])
+        if i%(len(img)//10) == 0: print(f"Progress : {i/len(img)*100:8.2f}%... ")
+    
+    cv2.destroyAllWindows()
+    video.release()
 
-# choose codec according to format needed
-fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
-video = cv2.VideoWriter('video.mp4', fourcc, 5, (width, height))
 
-for j in range(len(img)):
-    video.write(img[j])
+# ----------------------------------------------------------------------
+# >>> Concatenate videos
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
 
-cv2.destroyAllWindows()
-video.release()
+def concatenate_videos(video_files, output_video_path):
+    
+    video_clips = []
+    
+    for video_file in video_files:
+        video_clips.append(VideoFileClip(video_file))
+    
+    final_clip = concatenate_videoclips(video_clips)
+    final_clip.write_videofile(output_video_path)
+    
+    for video_file in video_files:
+        os.remove(video_file)
+
+
+# ----------------------------------------------------------------------
+# >>> Main()
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if __name__ == "__main__":
+    sys.exit(main())
