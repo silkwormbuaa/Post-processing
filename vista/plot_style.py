@@ -21,9 +21,9 @@ from   matplotlib.patches import Circle
 
 from   mpl_toolkits.axes_grid1 import make_axes_locatable
 
-#plt.rcParams["text.usetex"] = True
-#plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
-#plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
+plt.rcParams["text.usetex"] = True
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 

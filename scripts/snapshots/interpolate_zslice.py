@@ -6,7 +6,8 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   Visualize the DS contour from snapshot_Z_xxx.bin
+@Desc    :   Interpolate z slice type snapshot and dump the data into pkl files
+             for faster plotting.
 '''
 
 import os
@@ -25,7 +26,6 @@ from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import compute_DS
 from   vista.plane_analy import save_isolines
 from   scipy.interpolate import griddata
-from   vista.plot_style  import plot_slicez_stat
 from   vista.timer       import timer
 
 comm = MPI.COMM_WORLD
