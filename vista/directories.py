@@ -66,6 +66,8 @@ class Directories:
         self.pp_snapshots    = os.path.join( self.pos_dir, 'snapshots' )
         self.pp_DMD          = os.path.join( self.pos_dir, 'DMD' )
         
+        self.pp_wall_proj    = os.path.join( self.pp_statistics, 'wall_projection' )
+        
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
 # ----------------------------------------------------------------------

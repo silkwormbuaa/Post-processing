@@ -24,6 +24,8 @@ from   vista.statistic   import StatisticData
 
 from   vista.snapshot    import Snapshot
 
+from   vista.directories import Directories
+
 from   vista.grid        import GridData
 
 from   vista.timer       import timer
@@ -47,21 +49,20 @@ bbox = [ -60.0, 108.0, -1.3, 0.01, -11.0, 11.0]
 
 # =============================================================================
 
-resultspath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-outpath   = resultspath + '/wall_projection'
+outpath   = dirs.pp_wall_proj
 
-stat_file = resultspath + '/statistics.bin'
-grid_file = resultspath + '/inca_grid.bin'
-ccfile    = resultspath + '/cutcells_setup.dat'
+stat_file = dirs.statistics 
+grid_file = dirs.grid
+ccfile    = dirs.cc_setup
 
 fric_file = outpath + '/friction_projection.pkl'
 pres_file = outpath + '/wall_vars_projection.pkl'
 
-snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
-                            key='snapshot.bin')[0]
+snapshotfile = get_filelist( dirs.wall_dist, key='snapshot.bin')[0]
 
-parametersfile = resultspath.split('/results')[0] + '/case_parameters'
+parametersfile = dirs.case_para_file
 
 # - enter outpath
 
@@ -183,11 +184,17 @@ with timer("plotting"):
                           filename='fric',
                           cbar_levels=cbar_levels)
     
+    cbar_levels = np.linspace( 1.0, 2.25, 26 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
-                          filename='pressure' )
+                          filename='pressure',
+                          cbar_levels=cbar_levels)
     
-    plot_wall_projection( xx, zz, p_fluc/p_ref, filename='pressure_fluc' )
+    cbar_levels = np.linspace(0.025,0.085,31)
+    plot_wall_projection( xx, zz, p_fluc/p_ref,
+                          separation="separationline_xz.pkl", 
+                          filename='pressure_fluc',
+                          cbar_levels=cbar_levels)
     
 # --- periodic average results
     
@@ -201,9 +208,11 @@ with timer("plotting"):
                           filename='fric_periodic',
                           cbar_levels=cbar_levels)
 
+    cbar_levels = np.linspace( 1.0, 2.25, 26 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz_periodic.pkl",
-                          filename='pressure_periodic' )
+                          filename='pressure_periodic',
+                          cbar_levels=cbar_levels)
 
 # --- output separation area ratio and length ratio distribution
 

@@ -26,6 +26,8 @@ from   vista.statistic   import StatisticData
 
 from   vista.grid        import GridData
 
+from   vista.directories import Directories
+
 from   vista.timer       import timer
 
 from   vista.plane_analy import save_sonic_line
@@ -49,13 +51,12 @@ outfolder = '/xy_planes'
 
 # =============================================================================
 
+dirs = Directories( os.getcwd() )
 
-datapath = os.getcwd()
-
-datafile = datapath + '/statistics.bin'
-gridfile = datapath + '/inca_grid.bin'
-outpath  = datapath + outfolder
-parametersfile = datapath.split('/results')[0] + '/case_parameters'
+datafile = dirs.statistics
+gridfile = dirs.grid
+outpath  = dirs.pp_statistics + outfolder
+parametersfile = dirs.case_para_file
 
 # - read in case parameters
 
@@ -116,10 +117,12 @@ for i, loc in enumerate( locs ):
                 
                 S.read_stat_body( f, block_list, vars )
                 
+                S.match_grid( block_list, G )
+                
                 S.compute_vars( block_list, ['mach','RS','p`'] )
                 
                 S.compute_gradients( block_list, 
-                                    ['schlieren','shadowgraph','vorticity','grad_p'])
+                                    ['schlieren','shadowgraph','grad_p'])
                 
         with timer("Get slice dataframe "):
             

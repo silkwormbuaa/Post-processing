@@ -280,7 +280,7 @@ class BlockData:
             if self.npz == 1: block_type = 'Z'
         else:
             block_type = 'block'
-    
+
 # ----- compute magnitude of density gradient
 
         if 'schlieren' in grads:
