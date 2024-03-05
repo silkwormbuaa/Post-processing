@@ -293,6 +293,8 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     case=3 : 0825 case, D/delta = 0.5
     case=4 : 0927 case, D/delta = 0.25
     case=5 : 1221 case, D/delta = 0.125
+    case=6 : 0211 case, D/delta = 0.25, A = 0.13
+    case=7 : 0210 case, D/delta = 0.25, A = 0.52
     
     write out wall_X.dat or return list of y
     """
@@ -307,6 +309,8 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
         elif casecode == '220825': Case=3
         elif casecode == '220927': Case=4
         elif casecode == '221221': Case=5
+        elif casecode == '240211': Case=6
+        elif casecode == '240210': Case=7
         elif casecode == 'smooth': Case=0
         
     
@@ -318,6 +322,8 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     elif Case == 5:
         len_w = 0.65
         D     = 0.65
+    elif Case == 6: D = 1.3; A = 0.13
+    elif Case == 7: D = 1.3; A = 0.52
     
     y_list = []
     
@@ -458,7 +464,6 @@ def read_case_parameter( filename ):
                 # add parameter pair into the dictionary
                 
                 parameters[key] = value
-                
     
     return parameters
                 
@@ -486,34 +491,24 @@ def distribute_mpi_work(n_tasks, n_processors, rank):
     # algorithm divides number of blocks in a dealing way
     
     n_tasks_local = n_tasks // n_processors       # floor dividing
-    
     left_tasks = n_tasks - n_tasks_local*n_processors
-    
     
     if rank < left_tasks:
         
         n_tasks_local = n_tasks_local + 1
-        
         i_start = 0 + rank*n_tasks_local
-        
         i_end = i_start + n_tasks_local
-    
     
     elif n_tasks_local > 0:
         
         i_start = 0 + rank*n_tasks_local + left_tasks
-        
         i_end = i_start + n_tasks_local    
     
-        
     else:
         
         n_tasks_local = 0
-        
         i_start = None
-        
         i_end = None
-        
     
     return i_start, i_end
 
