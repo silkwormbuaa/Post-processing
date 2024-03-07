@@ -6,7 +6,7 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   read statistic binary data.
+@Desc    :   Extract profile from statistic binary data.
            ! Set the headers for cutcell_setup first
 '''
 
@@ -22,6 +22,7 @@ import numpy             as     np
 from   vista.statistic   import StatisticData
 from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
+from   vista.directories import Directories
 from   vista.timer       import timer
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
@@ -33,29 +34,26 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # option zone
 # =============================================================================
 
-bbox    = [ -115, -110, -1.2576, 45.0, -11.0, 11.0]  # bounding box
-wbox    = [ -115, -110, -1.2576, 0.0,  -11.0, 11.0]  # bounding box for rough wall
-wbox_sw = [ -115, -110, 0, 1.736953420, -11.0, 11.0]
+locs = [-79.6, -112.5, -53.6, -27.6, 76.4, 102.4] 
 
-outfile  = 'profile_mean_1.dat'
+## locs in dimensionless [-31.33,-25, -20,-15, 5, 10 ] 
 
 # =============================================================================
 
-resultspath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-outpath  = resultspath + '/profile_array'
-datafile = resultspath + '/statistics.bin'
-gridfile = resultspath + '/inca_grid.bin'
-ccfile   = resultspath + '/cutcells_setup.dat'
+outpath  = dirs.pp_profile_array
+datafile = dirs.statistics
+gridfile = dirs.grid
+ccfile   = dirs.cc_setup
+parametersfile = dirs.case_para_file
 
 # read parameters to check if it is a rough wall case
-parametersfile = resultspath.split('/results')[0] + '/case_parameters'
 parameters = read_case_parameter( parametersfile )
 roughwall  = True if parameters.get('roughwall').lower() == 'true' else False
 
 if roughwall:
-    snapshotfile = get_filelist(resultspath.split('/results')[0] +'/wall_dist',
-                                key='snapshot.bin')[0]
+    snapshotfile = get_filelist(dirs.wall_dist,key='snapshot.bin')[0]
 
 
 # - enter outpath
@@ -66,159 +64,173 @@ if not os.path.exists(outpath):
 
 os.chdir(outpath)
 
+# =============================================================================
 
-# - read in grid file
-
-with timer("read in grid"):
+for i, loc in enumerate(locs):
     
-    G = GridData( gridfile )
-    G.verbose = False
+    bbox    = [ loc-2.5, loc+2.5, -1.2576, 45.0,  -11.0, 11.0]  # bounding box
+    wbox    = [ loc-2.5, loc+2.5, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
+    wbox_sw = [ loc-2.5, loc+2.5, 0, 1.736953420, -11.0, 11.0]
 
-    G.read_grid()
-    
-    # given a rectangular region, get a list of blocks in the region
-    block_list = G.select_blockgrids( bbox )
-    
-    if roughwall:
-        block_list_w = G.select_blockgrids( wbox )
-    else: block_list_w = G.select_blockgrids( wbox_sw )
+    outfile  = f'profile_mean_{i:02d}.dat'
+    wall_stat_file = f'wall_statistics_{i:02d}.dat'
 
+    # - read in grid file
 
-# - read in statistics data
-
-with timer("read block statistics data "):
-
-    S = StatisticData( datafile )
-    
-    with open( datafile, 'br' ) as f:   
-            
-        S.read_stat_header( f )
-        vars = ['u','v','w','p','pp','rho','mu','T','uu','vv','ww','uv']
+    with timer("read in grid"):
         
-        # only blocks in the list will be filled data chunk
-        S.read_stat_body( f, block_list, vars )
+        G = GridData( gridfile )
+        G.verbose = False
+
+        G.read_grid()
+        
+        # given a rectangular region, get a list of blocks in the region
+        block_list = G.select_blockgrids( bbox )
+        
+        if roughwall:
+            block_list_w = G.select_blockgrids( wbox )
+        else: block_list_w = G.select_blockgrids( wbox_sw )
 
 
-# - assign vol_fra to grid, then match G to S
+    # - read in statistics data
 
-with timer("Assign vol_fra to G"):
-    
-    if roughwall:
+    with timer("read block statistics data "):
 
-        # - read in wall distance data
-        with timer("read wall distance field"):
+        S = StatisticData( datafile )
+        
+        with open( datafile, 'br' ) as f:   
+                
+            S.read_stat_header( f )
+            vars = ['u','v','w','p','pp','rho','mu','T','uu','vv','ww','uv']
             
-            wd_snap = Snapshot( snapshotfile )
-            wd_snap.read_snapshot( block_list )
+            # only blocks in the list will be filled data chunk
+            S.read_stat_body( f, block_list, vars )
 
-        # - read in cut cell data and assign vol_fra
 
-        with timer("read in cut cell info "):
+    # - assign vol_fra to grid, then match G to S
 
-            cc_df = pd.read_csv( ccfile, delimiter = r'\s+' )
+    with timer("Assign vol_fra to G"):
+        
+        if roughwall:
 
-            cc_df.drop( columns=['fax0','faz0'
-                                ,'fax1','faz1', 'processor']
-                                , inplace=True )
+            # - read in wall distance data
+            with timer("read wall distance field"):
+                
+                wd_snap = Snapshot( snapshotfile )
+                wd_snap.read_snapshot( block_list )
+
+            # - read in cut cell data and assign vol_fra
+
+            with timer("read in cut cell info "):
+
+                cc_df = pd.read_csv( ccfile, delimiter = r'\s+' )
+
+                cc_df.drop( columns=['fax0','faz0'
+                                    ,'fax1','faz1', 'processor']
+                                    , inplace=True )
+                
+                for num in block_list:
+
+                    # dataframe slice for a certain block
+                    temp_df = cc_df[ cc_df['block_number'] == num ]
+                    
+                    wall_dist = np.array( wd_snap.snap_data[num-1].df['wd'] )
+                    
+                    # block number starts from 1, but python list index
+                    # starts from 0
+                    G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+                    
+        else:
             
             for num in block_list:
+                G.g[num-1].assign_vol_fra()
 
-                # dataframe slice for a certain block
-                temp_df = cc_df[ cc_df['block_number'] == num ]
-                
-                wall_dist = np.array( wd_snap.snap_data[num-1].df['wd'] )
-                
-                # block number starts from 1, but python list index
-                # starts from 0
-                G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
-                
-    else:
+        # match grid and pass vol_fra from G to S
+        S.match_grid( block_list, G )
+
+
+    # - compute wall friction
+
+    with timer("compute wall friction"):
         
-        for num in block_list:
-            G.g[num-1].assign_vol_fra()
+        if roughwall:
 
-    # match grid and pass vol_fra from G to S
-    S.match_grid( block_list, G )
+            # match wall distance to S
+            for num in block_list:
+                S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
+                
+            #print(S.bl[num-1].df)
+            
+            S.friction_projection( block_list_w, G, cc_df )
+            S.wall_vars_projection( block_list_w, G, cc_df )
 
+            S.df_fric = S.df_fric[ (S.df_fric['x']>wbox[0]) & (S.df_fric['x']<wbox[1]) ]
+            S.df_wall = S.df_wall[ (S.df_wall['x']>wbox[0]) & (S.df_wall['x']<wbox[1]) ]
+            
+            tau_ave = np.array(S.df_fric['fric']).mean()
+            mu_ave  = np.array(S.df_wall['mu']).mean()
+            rho_ave = np.array(S.df_wall['rho']).mean()
 
-# - compute wall friction
+            u_tau = np.sqrt( abs(tau_ave/rho_ave) )
+            lv    = mu_ave/rho_ave/u_tau    
+                
+            with open(wall_stat_file,'w') as f:
+                
+                f.write(f"tau_ave  {tau_ave:15.5f}\n")
+                f.write(f"rho_ave  {rho_ave:15.5f}\n")
+                f.write(f"mu_ave   {mu_ave:15.5f} \n")
+                f.write(f"u_tau    {u_tau:15.5f}  \n")
+                f.write(f"lv       {lv:15.5f}     \n")
+            
+            # remove useless file generated by projection function
+            os.remove("friction_projection.pkl")
+            os.remove("wall_vars_projection.pkl")
+            
+        else:
+            
+            S.extract_wall_vars_sw( block_list_w, G )
+            
+            S.df_wall = S.df_wall[ (S.df_wall['x']>wbox[0]) & (S.df_wall['x']<wbox[1]) ]
+            
+            tau_ave = np.array(S.df_wall['fric']).mean()
+            mu_ave  = np.array(S.df_wall['mu']).mean()
+            rho_ave = np.array(S.df_wall['rho']).mean()
 
-with timer("compute wall friction"):
+            u_tau = np.sqrt( abs(tau_ave/rho_ave) )
+            lv    = mu_ave/rho_ave/u_tau    
+                
+            with open(wall_stat_file,'w') as f:
+                
+                f.write(f"tau_ave  {tau_ave:15.5f}\n")
+                f.write(f"rho_ave  {rho_ave:15.5f}\n")
+                f.write(f"mu_ave   {mu_ave:15.5f} \n")
+                f.write(f"u_tau    {u_tau:15.5f}  \n")
+                f.write(f"lv       {lv:15.5f}     \n")
+            
+            # remove useless file generated by projection function
+            os.remove("wall_vars_projection.pkl")
+            
+
+    # - with vol_fra assigned, compute profile
+
+    with timer("compute profile"):
+        
+        S.drop_ghost( block_list )
+        S.compute_profile( block_list, bbox, vars, 
+                           outfile=outfile, roughwall=roughwall )
+
+    del S
     
-    if roughwall:
-
-        # match wall distance to S
-        for num in block_list:
-            S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
-            
-        print(S.bl[num-1].df)
-        
-        S.friction_projection( block_list_w, G, cc_df )
-        S.wall_vars_projection( block_list_w, G, cc_df )
-
-        S.df_fric = S.df_fric[ (S.df_fric['x']>wbox[0]) & (S.df_fric['x']<wbox[1]) ]
-        S.df_wall = S.df_wall[ (S.df_wall['x']>wbox[0]) & (S.df_wall['x']<wbox[1]) ]
-        
-        tau_ave = np.array(S.df_fric['fric']).mean()
-        mu_ave  = np.array(S.df_wall['mu']).mean()
-        rho_ave = np.array(S.df_wall['rho']).mean()
-
-        u_tau = np.sqrt( abs(tau_ave/rho_ave) )
-        lv    = mu_ave/rho_ave/u_tau    
-            
-        with open("wall_statistics.dat",'w') as f:
-            
-            f.write(f"tau_ave  {tau_ave:15.5f}\n")
-            f.write(f"rho_ave  {rho_ave:15.5f}\n")
-            f.write(f"mu_ave   {mu_ave:15.5f} \n")
-            f.write(f"u_tau    {u_tau:15.5f}  \n")
-            f.write(f"lv       {lv:15.5f}     \n")
-        
-        # remove useless file generated by projection function
-        os.remove("friction_projection.pkl")
-        os.remove("wall_vars_projection.pkl")
-        
-    else:
-        
-        S.extract_wall_vars_sw( block_list_w, G )
-        
-        S.df_wall = S.df_wall[ (S.df_wall['x']>wbox[0]) & (S.df_wall['x']<wbox[1]) ]
-        
-        tau_ave = np.array(S.df_wall['fric']).mean()
-        mu_ave  = np.array(S.df_wall['mu']).mean()
-        rho_ave = np.array(S.df_wall['rho']).mean()
-
-        u_tau = np.sqrt( abs(tau_ave/rho_ave) )
-        lv    = mu_ave/rho_ave/u_tau    
-            
-        with open("wall_statistics.dat",'w') as f:
-            
-            f.write(f"tau_ave  {tau_ave:15.5f}\n")
-            f.write(f"rho_ave  {rho_ave:15.5f}\n")
-            f.write(f"mu_ave   {mu_ave:15.5f} \n")
-            f.write(f"u_tau    {u_tau:15.5f}  \n")
-            f.write(f"lv       {lv:15.5f}     \n")
-        
-        # remove useless file generated by projection function
-        os.remove("wall_vars_projection.pkl")
-        
-
-# - with vol_fra assigned, compute profile
-
-with timer("compute profile"):
+    # - remind to modify the profile
     
-    S.drop_ghost( block_list )
-    S.compute_profile( block_list, bbox, vars, 
-                       outfile=outfile, roughwall=roughwall )
-
-# - remind to modify the profile
-
-if not roughwall:
-    print(clr.bg.red,
-          "Please add the values at the wall(y=0) manually!",
-          clr.reset)
-else:
-    print(clr.bg.red,
-          "Please modify the wall coordinate(y=-0.52) manually!",
-          clr.reset)
+    print(f"Saved {outfile} and {wall_stat_file}.")
+    
+    if not roughwall:
+        print(clr.bg.red,
+            "Please add the values at the wall(y=0) manually!",
+            clr.reset)
+    else:
+        print(clr.bg.red,
+            "Please modify the wall coordinate(y=-0.52) manually!",
+            clr.reset,'\n')
     

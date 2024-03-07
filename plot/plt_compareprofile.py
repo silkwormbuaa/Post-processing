@@ -6,14 +6,11 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   compare profiles at 
 '''
-
 
 import os
 import sys
-import pandas            as     pd
-import numpy             as     np
 import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
@@ -36,7 +33,7 @@ label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.1
 lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0]
 
-# different figures for different locations
+# different locations for all cases
 for i in range(1, 7):
     
     lines = []  

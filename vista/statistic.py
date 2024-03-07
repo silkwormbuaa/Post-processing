@@ -743,6 +743,8 @@ class StatisticData:
         print("points below wall are droppped and u,v,w are set to zero at wall.")
         print( df_profile )
         
+        pd.reset_option('display.max_rows')  # rest max_rows displayed
+        
 # ----- output profile into txt
 
         if outfile is False: outfile = 'profile_spanwisemean.dat'
