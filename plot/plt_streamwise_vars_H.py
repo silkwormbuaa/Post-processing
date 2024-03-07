@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   plt_streamwise_vars.py
-@Time    :   2022/10/18 
+@File    :   plt_streamwise_vars_H.py
+@Time    :   2024/03/05 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   Plot spanwise averaged variable distribution along streamwise direction for low Re cases
+@Desc    :   plotting streamwise variables for different ridge heights cases
 '''
 
 import os
@@ -25,34 +26,31 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/home/wencanwu/my_simulation/temp/DataPost/streamwise_lines"
+OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost"
 
 sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
 sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
-data1 = '/media/wencanwu/Seagate Expansion Drive/temp/221014/results/wall_projection/streamwise_vars.pkl'
-data2 = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/wall_projection/streamwise_vars.pkl'
-data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results/wall_projection/streamwise_vars.pkl'
-data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/wall_projection/streamwise_vars.pkl'
-data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/wall_projection/streamwise_vars.pkl'
+data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 
-datalist = [data1,   data2,   data3,                   data4,        data5]
-dy       = [0.494,   0.468,   0.416,                   0.312,        0.26]
-color    = ['green', 'blue', 'black',                  'red',        'purple']
-label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
-width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
+datalist = [data1,   data2,   data3 ]
+color    = ['red',  'black', 'blue' ]
+label    = ['0.05',   '0.1',  '0.2' ]
+lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1))]
+width    = [4.0,      4.0,    4.0  ]
 lines = []
 
 plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
-pure = True
+pure = False
 
-fmt =  '.pdf' # or '.png'
+fmt =  '.png' # or '.png'
 
 # - read in data files
 
@@ -62,7 +60,7 @@ for i, datafile in enumerate( datalist ):
     
     with open(datafile,'rb') as f:  line.df = pickle.load( f )
     line.color  = color[i]
-    line.label  = r'$\mathrm{D/\delta_0=}$' + label[i]
+    line.label  = r'$\mathrm{H/\delta_0=}$' + label[i]
     line.lstyle = lstyle[i]
     line.width  = width[i]
     
@@ -109,39 +107,6 @@ if plt_pwfluc:
             label=r'$smooth$', 
             ls   ='--',
             linewidth=4)
-
-    # separation locations
-
-    #ax.plot( [-10.6786859,-10.6786859],
-    #         [0.0,0.1],
-    #         'purple',
-    #         linewidth=1)
-    #
-    #ax.plot( [-10.6574429,-10.6574429],
-    #         [0.0,0.1],
-    #            'red',
-    #            linewidth=1)
-    #
-    #ax.plot( [-9.179693795,-9.179693795],
-    #         [0.0,0.1],
-    #            'black',
-    #            linewidth=1)
-    #
-    #ax.plot( [-8.316817364,-8.316817364],
-    #         [0.0,0.1],
-    #            'blue',
-    #            linewidth=1)
-    #
-    #ax.plot( [-8.405281852,-8.405281852],
-    #         [0.0,0.1],
-    #            'green',
-    #            linewidth=1)
-    #
-    #ax.plot( [-8.56077913,-8.56077913],
-    #         [0.0,0.1],
-    #            'gray',
-    #            linewidth=1)
-
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))

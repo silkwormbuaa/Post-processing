@@ -13,31 +13,22 @@ import os
 import sys
 import time
 import pickle
+import numpy             as     np
+from   scipy.interpolate import griddata
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-import numpy             as     np
-
-import matplotlib.pyplot as     plt
-
-from   scipy.interpolate import griddata
-
 from   vista.statistic   import StatisticData
-
 from   vista.grid        import GridData
-
+from   vista.directories import Directories
 from   vista.timer       import timer
-
 from   vista.tools       import define_wall_shape
 from   vista.tools       import read_case_parameter
-
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
-
 from   vista.plot_style  import plot_slicex_stat
-
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -49,12 +40,12 @@ periodic_ave = False
 
 # =============================================================================
 
-datapath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-datafile = datapath + '/statistics.bin'
-gridfile = datapath + '/inca_grid.bin'
-outpath  = datapath + outfolder
-parametersfile = datapath.split('/results')[0] + '/case_parameters'
+datafile = dirs.statistics
+gridfile = dirs.grid
+outpath  = dirs.pp_statistics + outfolder
+parametersfile = dirs.case_para_file
 
 # - read in case paramters
 
