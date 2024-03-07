@@ -14,25 +14,14 @@ import os
 
 import sys
 
-import pandas            as     pd
-import numpy             as     np
-import matplotlib.pyplot as     plt
-
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.statistic   import StatisticData
-
 from   vista.grid        import GridData
-
 from   vista.timer       import timer
 
 from   vista.tools       import read_case_parameter
-from   vista.tools       import get_filelist
-
-from   vista.line        import LineData
-
-
 
 # =============================================================================
 
