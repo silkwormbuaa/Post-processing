@@ -75,7 +75,7 @@ class Probe:
         string = f'{self.fmt} {self.rate:3d}  {self.xyz[0]:>13.6e}  ' + \
                  f'{self.xyz[1]:>13.6e}  {self.xyz[2]:>13.6e}  {self.mode}'
         
-        file.write( string)
+        file.write( string )
         
         
 
@@ -95,14 +95,20 @@ class Probe:
 
 class ProbeFile:
         
-    def __init__( self ) -> None:
+    def __init__( self, filename=None ) -> None:
         
         
         """
-        probes: list of probes
+        filename : inca_probes.inp file
+        
+        return:
+        self.probes: list of probes
         """
         self.header = '#(1) FORMAT (2) RATE (3) X (4) Y (5) Z (6) MODE'
-        self.probes = []                                                    
+        self.probes = []
+        
+        if filename:
+            self.read( filename )                                       
 
 
 # ----------------------------------------------------------------------

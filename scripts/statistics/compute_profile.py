@@ -231,6 +231,6 @@ for i, loc in enumerate(locs):
             clr.reset)
     else:
         print(clr.bg.red,
-            "Please modify the wall coordinate(y=-0.52) manually!",
+            f"Please modify the wall coordinate(y=-{parameters.get('H')}) manually!",
             clr.reset,'\n')
     

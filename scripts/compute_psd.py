@@ -10,62 +10,66 @@
 '''
 
 import os
-
 import sys
-
 import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 from   vista.psd         import ProbeData
-
+from   vista.directories import Directories
+from   vista.probe       import ProbeFile
 from   vista.timer       import timer
-
-from   vista.tools       import get_filelist
-
 from   vista.colors      import colors as col
+from   vista.tools       import read_case_parameter
 
 
-probe_dir = os.getcwd()
+dirs   = Directories( os.getcwd() )
+probes = ProbeFile( dirs.set_prb )
 
-probe_x_dir = probe_dir + '/probe_x'
+os.chdir( dirs.prb_dir )
 
-psd_x_dir = probe_dir + 'psd_x'
+prb_data = dirs.probes
+n_data = len( prb_data )
+print(f"We are in directory:{dirs.prb_dir}\n")
+print(f"We have got {n_data:5d} probes data.\n")
 
-filelist = get_filelist( probe_x_dir )
+parameters = read_case_parameter( dirs.case_para_file )
+h = float( parameters.get('H') )
 
-n_probe = len( filelist )
+# -- check if number of probe data and number of probes are consistent
 
+if n_data != len( probes.probes ):
+    raise ValueError("Number of probe data and number of probes are not consistent.")
 
-print(f"We are in directory:{probe_dir}\n")
+# -- check if probe location and classify them to either ridge/valley or others
 
-print(f"We have got {n_probe:5d} probes data.\n")
+if not os.path.exists( dirs.pp_psd_ridge  ): os.mkdir( dirs.pp_psd_ridge  )
+if not os.path.exists( dirs.pp_psd_valley ): os.mkdir( dirs.pp_psd_valley )
+if not os.path.exists( dirs.pp_psd_others ): os.mkdir( dirs.pp_psd_others )
 
+# -- start computing PSD 
 
-with timer('Finish computing PSD '):
-    
-    # enter the psd_x_dir
-    
-    if os.path.exists( psd_x_dir ): os.chdir( psd_x_dir )
-    
-    else: os.mkdir( psd_x_dir ); os.chdir( psd_x_dir )
+with timer('Computing PSD '):
     
     # start 
     
-    for i, probefile in enumerate( filelist ):
+    for i, probe in enumerate( probes.probes ):
             
-            t_0 = time.time()
-            
-            probe = ProbeData( probefile, withT=False )
-            
-            probe.cleandata( starttime=20 )
-            
-            probe.psd( 8, 0.5 )
+        t_0 = time.time()
 
-            probe.write_psd()
-            
-            t_1 = time.time()
-            print(col.fg.green,f"{float(i)/n_probe*100:6.2f}%",col.reset,end='')
-            print(f" PSD of probe {probefile[-9:-4]} took {t_1-t_0:8.2f}s.")
+        # -- check if the probe is at the ridge or valley
+        xyz = probe.xyz
+        if abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001: os.chdir( dirs.pp_psd_ridge )
+        elif abs(xyz[1] + h) < 0.001 :                  os.chdir( dirs.pp_psd_valley )
+        else:                                           os.chdir( dirs.pp_psd_others )
+        
+        probe = ProbeData( prb_data[i], withT=True )
+        probe.cleandata( starttime=20 )
+        probe.psd( 8, 0.5 )
+        probe.write_psd()
+        
+        t_1 = time.time()
+        print(col.fg.green,f"{float(i)/n_data*100:6.2f}%",col.reset,end='')
+        print(f" PSD of probe {prb_data[i][-9:-4]} took {t_1-t_0:8.2f}s.")
 

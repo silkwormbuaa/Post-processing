@@ -22,7 +22,7 @@ class Directories:
         generate static directories under current case directory
         """
         
-        # -- first level directories
+    # --- first level directories
         self.case_dir = os.path.abspath( case_dir )
         self.res_dir  = os.path.join( self.case_dir, 'results' )
         self.set_dir  = os.path.join( self.case_dir, 'setup' )
@@ -34,12 +34,15 @@ class Directories:
 
         # -- second level directories
         
-        # results directories items
+        # results directory items
         
         self.statistics = os.path.join( self.res_dir, 'statistics.bin' )
         self.solution   = os.path.join( self.res_dir, 'results.bin' )
         self.grid       = os.path.join( self.res_dir, 'inca_grid.bin' )
-          
+        
+        # setup directory items  
+        
+        self.set_prb = os.path.join( self.set_dir, 'inca_probes.inp' )
         
         # tecplot szplt files 
         
@@ -71,6 +74,12 @@ class Directories:
         self.pp_wall_proj     = os.path.join( self.pp_statistics, 'wall_projection' )
         self.pp_profile_array = os.path.join( self.pp_statistics, 'profile_array' )
         
+        # pp_probes subdirectories
+        
+        self.pp_psd_ridge  = os.path.join( self.pp_probes, 'psd_ridge' )
+        self.pp_psd_valley = os.path.join( self.pp_probes, 'psd_valley' )
+        self.pp_psd_others  = os.path.join( self.pp_probes, 'psd_others' )
+        
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
 # ----------------------------------------------------------------------
@@ -96,6 +105,11 @@ class Directories:
         items = os.listdir( self.snp_dir )
         folders = [ item for item in items if os.path.isdir( os.path.join( self.snp_dir, item ) ) ]
         return os.listdir( folders )
+    
+    # snapshots
+    @property
+    def probes( self ):
+        return get_filelist( self.prb_dir, '.dat' )
     
         
 # ----------------------------------------------------------------------
