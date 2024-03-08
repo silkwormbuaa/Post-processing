@@ -60,7 +60,7 @@ casecode =  str( parameters.get('casecode') )
 n_period = int( parameters.get('period') )
 tag      = str( parameters.get('tag'))
 
-locs = locs_delta*delta + 50.4
+locs = locs_delta*delta + x_imp
 
 
 # - read in grid info
@@ -100,7 +100,7 @@ for i, loc in enumerate(locs):
 
         S = StatisticData( datafile )
 
-        with timer("read selected blocks "):
+        with timer("read selected blocks and match grid"):
             
             with open(datafile,'br') as f:
                 
@@ -118,7 +118,7 @@ for i, loc in enumerate(locs):
                 
                 S.compute_source_terms( block_list, G )
                 
-        with timer("Get slice dataframe and match grids"):
+        with timer("Get slice dataframe"):
             
             df_slice = S.get_slice_df( block_list, G, indx_slic, 'X' )
             

@@ -14,21 +14,16 @@ import os
 import sys
 import gc
 import time
-
 from   mpi4py            import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.snapshot    import Snapshot
-
 from   vista.grid        import GridData
-
 from   vista.timer       import timer
-
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
-
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 

@@ -399,7 +399,9 @@ class StatisticData:
             self.bl[num-1].df['x'] = X.T.flatten()
             self.bl[num-1].df['y'] = Y.T.flatten()
             self.bl[num-1].df['z'] = Z.T.flatten()
+            self.bl[num-1].df['hx'] = hx.T.flatten()
             self.bl[num-1].df['hy'] = hy.T.flatten()
+            self.bl[num-1].df['hz'] = hz.T.flatten()
             
             
             # adding vol_fra !! original vol_fra has i,j,k order, 

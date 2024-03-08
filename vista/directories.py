@@ -73,6 +73,7 @@ class Directories:
         
         self.pp_wall_proj     = os.path.join( self.pp_statistics, 'wall_projection' )
         self.pp_profile_array = os.path.join( self.pp_statistics, 'profile_array' )
+        self.pp_integral      = os.path.join( self.pp_statistics, 'integral' )
         
         # pp_probes subdirectories
         
