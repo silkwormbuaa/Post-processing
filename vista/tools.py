@@ -9,13 +9,9 @@
 '''
 
 import os 
-
 import math
-
 import shutil
-
 import numpy             as     np
-
 import matplotlib.pyplot as     plt
 
 # ----------------------------------------------------------------------
@@ -194,6 +190,38 @@ def if_penetrate( zone_range, segment ):
     
     return Penetrate
 
+
+# ----------------------------------------------------------------------
+# >>> point_in_box                                          (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/08  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def point_in_box( xyz, box ):
+    
+    """
+    xyz: [x,y,z] of the given point
+    box: [xmin,ymin,zmin,xmax,ymax,zmax] of the 3D box
+    """
+    
+    if ( xyz[0] >= box[0] ) and ( xyz[0] < box[3] ) and \
+       ( xyz[1] >= box[1] ) and ( xyz[1] < box[4] ) and \
+       ( xyz[2] >= box[2] ) and ( xyz[2] < box[5] ):
+        
+        return True
+    
+    else:
+        return False
+    
+    
 # ----------------------------------------------------------------------
 # >>> If a point is above wall                                   ( 3 )
 # ----------------------------------------------------------------------

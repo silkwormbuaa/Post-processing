@@ -11,24 +11,17 @@
 
 
 import os
-
 import numpy             as np
-
 import pandas            as pd
 
 from   .io_binary        import read_int_bin
-
 from   .io_binary        import read_flt_bin
-
 from   .io_binary        import read_log_bin
-
 from   .io_binary        import read_char_bin
-
 from   .tools            import is_above_wavywall
-
 from   .tools            import if_overlap_3d
-
 from   .tools            import mean_of_list
+from   .tools            import point_in_box
 
 # ----------------------------------------------------------------------
 # >>> Initialize a grid from binary file                        ( 1-0 )
@@ -550,6 +543,42 @@ class GridData:
 
         return selected_bls, indx_probe
             
+
+# ----------------------------------------------------------------------
+# >>> Find probe index                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/08  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def find_probe_index( self, xyz, buff=3 ):
+        
+        """
+        xyz: [x,y,z] of the given point
+        return: bl_num, [i,j,k]
+        Note: i,j,k are the index when buffer layers are included
+        """
+
+        for grd in self.g:
+            
+            if (grd.lx0 <= xyz[0] < grd.lx1 and
+                grd.ly0 <= xyz[1] < grd.ly1 and
+                grd.lz0 <= xyz[2] < grd.lz1):
+                
+                i,j,k = grd.find_probe_index( xyz, buff )
+                bl_num = grd.num
+                
+                break
+        
+        return bl_num, [i, j, k]
+                
         
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
@@ -874,6 +903,51 @@ class GridBlock:
             self.vol_fra = np.ones( shape=(self.nx+6,self.ny+6,self.nz+6) )
 
 
+# ----------------------------------------------------------------------
+# >>> find point index                                   (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/08  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def point_index( self, xyz, buff=3 ):
+        
+        """
+        xyz: list of x,y,z coordinates of the given point
+        
+        return: i,j,k
+        """
+
+        # check if the point is within the block
+        
+        bbox = [self.lx0, self.ly0, self.lz0, self.lx1, self.ly1, self.lz1]
+        
+        if not point_in_box( xyz, bbox ):
+            raise ValueError(f"The point{xyz} is not within the block {self.num}")
+                
+        else:
+
+            for i in range( buff, self.nx + buff ):
+                if (self.gx[i]-0.5*self.hx[i] <= xyz[0] < self.gx[i]+0.5*self.hx[i]):
+                    break
+            
+            for j in range( buff, self.ny + buff ):
+                if (self.gy[j]-0.5*self.hy[j] <= xyz[1] < self.gy[j]+0.5*self.hy[j]):
+                    break
+            
+            for k in range( buff, self.nz + buff ):
+                if (self.gz[k]-0.5*self.hz[k] <= xyz[2] < self.gz[k]+0.5*self.hz[k]):
+                    break
+
+        return i,j,k
+        
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
