@@ -116,7 +116,6 @@ class ProbeData:
 # - trim data to multiples of N of segments points for PSD(welch)
 # - get mean time interval, frequency, mean p and p'
 #
-#
 # ----------------------------------------------------------------------
 
     def cleandata( self, starttime ):

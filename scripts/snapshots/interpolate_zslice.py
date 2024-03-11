@@ -48,6 +48,8 @@ if rank == 0:
         os.system('mkdir ./pkl_data')
     snapfiles = get_filelist( snaps_dir, 'snapshot_Z' )
 
+# wait for the root to create the directory
+comm.barrier() 
 os.chdir('./pkl_data')
 snapfiles = comm.bcast( snapfiles, root=0 )
 
