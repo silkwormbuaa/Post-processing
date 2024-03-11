@@ -36,6 +36,7 @@ print(f"We have got {n_data:5d} probes data.\n")
 
 parameters = read_case_parameter( dirs.case_para_file )
 h = float( parameters.get('H') )
+prb_withT = True if parameters.get('prb_withT').lower() == 'true' else False
 
 # -- check if number of probe data and number of probes are consistent
 
@@ -64,10 +65,10 @@ with timer('Computing PSD '):
         elif abs(xyz[1] + h) < 0.001 :                  os.chdir( dirs.pp_psd_valley )
         else:                                           os.chdir( dirs.pp_psd_others )
         
-        probe = ProbeData( prb_data[i], withT=True )
-        probe.cleandata( starttime=20 )
-        probe.psd( 8, 0.5 )
-        probe.write_psd()
+        probedata = ProbeData( prb_data[i], withT=prb_withT )
+        probedata.cleandata( starttime=20 )
+        probedata.psd( 8, 0.5 )
+        probedata.write_psd()
         
         t_1 = time.time()
         print(col.fg.green,f"{float(i)/n_data*100:6.2f}%",col.reset,end='')
