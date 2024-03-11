@@ -9,12 +9,13 @@
          :   correctly.
 '''
 import os
-
-import numpy             as     np
-
+import sys
 import matplotlib.pyplot as     plt
 
-from   plt_tools         import PlotDataframe
+source_dir = os.path.realpath(__file__).split('plot')[0]
+sys.path.append( source_dir )
+
+from   vista.plot_tools  import PlotDataframe
 
 
 # ----------------------------------------------------------------------

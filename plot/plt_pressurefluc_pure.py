@@ -9,16 +9,14 @@
 '''
 
 import os
-
-import pickle
-
-import numpy             as     np
-
-from   plt_tools         import PlotDataframe
-
+import sys
 import matplotlib.pyplot as     plt
-
 import matplotlib.ticker as     ticker
+
+source_dir = os.path.realpath(__file__).split('plot')[0]
+sys.path.append( source_dir )
+
+from   vista.plot_tools  import PlotDataframe
 
 plt.rcParams.update({'font.size': 18})
 

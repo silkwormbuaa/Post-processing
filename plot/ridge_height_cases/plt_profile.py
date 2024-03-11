@@ -631,7 +631,7 @@ if plt_RS_uv:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
-        ax.set_ylabel( r"$\rho \angle u^{'} v^{'} \rangle / \tau_w$" )
+        ax.set_ylabel( r"$\rho \langle u^{'} v^{'} \rangle / \tau_w$" )
         ax.tick_params( axis='x', pad = 15 )
         ax.tick_params( axis='y', pad = 10 )
 #        ax.legend( ) 

@@ -9,26 +9,15 @@
 '''
 
 import os
-
 import sys
-
 import numpy             as     np
-
-import matplotlib        as     mpl
-
 import matplotlib.pyplot as     plt
-
-from   matplotlib        import cm
-
-from   matplotlib.colors import ListedColormap,LinearSegmentedColormap
-
-from   plt_tools         import *
+from   vista.plot_tools  import *
 
 source_dir = os.path.realpath(__file__).split('plot')[0] 
 sys.path.append( source_dir )
 
 from   vista.tools       import get_filelist
-
 from   vista.timer       import timer
 
 plt.rcParams["text.usetex"] = True

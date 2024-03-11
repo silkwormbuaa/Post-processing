@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-@File    :   plt_tools.py
+@File    :   plot_tools.py
 @Time    :   2022/10/17 
 @Author  :   Wencan WU 
 @Version :   1.0
@@ -10,7 +10,6 @@
 import re
 import numpy             as     np
 import pandas            as     pd
-import matplotlib.pyplot as     plt
 
 # ----------------------------------------------------------------------
 # >>> CLASS - DATAFRAME FOR PLOTTING                            ( 1-0 )
