@@ -12,7 +12,6 @@
 import os
 import sys
 import pickle
-from   plt_tools         import PlotDataframe
 import matplotlib.pyplot as     plt
 import matplotlib.ticker as     ticker
 
@@ -20,6 +19,7 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line        import LineData
+from   vista.plot_tools  import PlotDataframe
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
@@ -38,7 +38,7 @@ data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/statis
 
 
 datalist = [data1,   data2,   data3 ]
-color    = ['red',  'black', 'blue' ]
+color    = ['black',  'red', 'blue' ]
 label    = ['0.05',   '0.1',  '0.2' ]
 lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1))]
 width    = [4.0,      4.0,    4.0  ]
@@ -50,7 +50,7 @@ plt_Cf     = True
 
 pure = False
 
-fmt =  '.png' # or '.png'
+fmt =  '.pdf' # or '.png'
 
 # - read in data files
 
