@@ -20,7 +20,9 @@ class timer():
     def __exit__(self, *args):
         # self.end = time.time()
         self.interval = time.time() - self.start
-        print("%s took: %0.2fs" % (self.message, self.interval))
+        hours, remainder = divmod(self.interval, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        print("%s took: %02d:%02d:%02d" % (self.message, hours, minutes, seconds))
         print("=====================\n")
 
 
