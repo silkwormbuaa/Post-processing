@@ -238,7 +238,7 @@ def Testing():
 #    probes.read( fname )
 #    probes.show()
 
-    xs = np.arange( -20.0, 115, 0.43382353 )
+    xs = np.arange( -30.0, 115, 0.43382353 )
     y  = 0.00001
     z  = 0.00001
     

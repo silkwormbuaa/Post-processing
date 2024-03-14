@@ -964,7 +964,7 @@ class GridBlock:
 
 def Testing():
 
-    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_wall_with_new_io/initial/inca_grid.bin'
+    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/results/inca_grid.bin'
     
     grd = GridData( filename )
     
@@ -974,18 +974,9 @@ def Testing():
     
     grd.read_grid()
     
-    gy = grd.g[0].gy
-    hy = grd.g[0].hy
-    dy = grd.g[0].dy
-    wy = grd.g[0].wy
-    print(gy)
-    
-    print(hy)
-    
-    print(dy)
-    
-    print(wy)
-    
+    for i in [0,1,2,-3,-2,-1]:
+        g = grd.g[i]
+        print( f"block number: {g.num},lx0={g.lx0},lx1={g.lx1},ly0={g.ly0},ly1={g.ly1},lz0={g.lz0},lz1={g.lz1}" )
     
 
 
