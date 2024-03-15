@@ -16,7 +16,7 @@ import time
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
-from   vista.psd         import ProbeData
+from   vista.probe       import ProbeData
 from   vista.directories import Directories
 from   vista.probe       import ProbeFile
 from   vista.timer       import timer
@@ -26,6 +26,8 @@ from   vista.tools       import read_case_parameter
 
 dirs   = Directories( os.getcwd() )
 probes = ProbeFile( dirs.set_prb )
+
+# -- enter working directory and read relevant parameters 
 
 os.chdir( dirs.prb_dir )
 
@@ -55,22 +57,27 @@ with timer('Computing PSD '):
     
     # start 
     
+    n_ridge = 0 ; n_valley = 0 ; n_others = 0
+    
     for i, probe in enumerate( probes.probes ):
             
         t_0 = time.time()
 
         # -- check if the probe is at the ridge or valley
         xyz = probe.xyz
-        if abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001: os.chdir( dirs.pp_psd_ridge )
-        elif abs(xyz[1] + h) < 0.001 :                  os.chdir( dirs.pp_psd_valley )
-        else:                                           os.chdir( dirs.pp_psd_others )
+        if abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001: os.chdir( dirs.pp_psd_ridge ) ; n_ridge += 1
+        elif abs(xyz[1] + h) < 0.001 :                  os.chdir( dirs.pp_psd_valley ); n_valley += 1
+        else:                                           os.chdir( dirs.pp_psd_others ); n_others += 1
         
         probedata = ProbeData( prb_data[i], withT=prb_withT )
-        probedata.cleandata( starttime=20 )
-        probedata.psd( 8, 0.5 )
+        probedata.cleandata( t_start=20.0 )
+        probedata.get_fluc( 'p' )
+        probedata.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
         probedata.write_psd()
         
         t_1 = time.time()
         print(col.fg.green,f"{float(i)/n_data*100:6.2f}%",col.reset,end='')
         print(f" PSD of probe {prb_data[i][-9:-4]} took {t_1-t_0:8.2f}s.")
+    
+    print(f"\n ridge:{n_ridge}, valley:{n_valley}, others:{n_others}.\n")
 

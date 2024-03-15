@@ -11,6 +11,8 @@ import re
 import numpy             as     np
 import pandas            as     pd
 import matplotlib.pyplot as     plt
+import pickle
+from   vista.colors      import colors as col
 from   .psd              import pre_multi_psd
 
 class Probe:
@@ -236,6 +238,7 @@ class ProbeData:
         """
         filename: probe data file
         """
+        
         self.var_list = [ 'step',
                           'time',
                           'u',
@@ -252,7 +255,13 @@ class ProbeData:
         # psd results dataframe
         self.psd_df = pd.DataFrame()
         
-        if filename: self.read( filename)
+        # probe location
+        self.xyz = [0.0, 0.0, 0.0]
+        
+        # probe index
+        self.probe_index = 0
+        
+        if filename: self.read( filename )
 
 
 # ----------------------------------------------------------------------
@@ -271,15 +280,23 @@ class ProbeData:
 
     def read( self, filename ):
         
+        """
+        filename: probe data file, [-9,-4] need to be probe index
+        read probe data file and store data into self.df
+        """
+        
+        self.probe_index = int( filename[-9:-4] )
+        
         with open( filename, 'r' ) as f:
             
             lines = f.readlines()
             
             # regular expression to read probe location
             
-            self.x = float( re.search(r'x =(.*?),',lines[0]).group(1) )
-            self.y = float( re.search(r'y =(.*?),',lines[0]).group(1) )
-            self.z = float( re.search(r'z =(.*?)(?:\n)',lines[0]).group(1) )
+            x = float( re.search(r'x =(.*?),',lines[0]).group(1) )
+            y = float( re.search(r'y =(.*?),',lines[0]).group(1) )
+            z = float( re.search(r'z =(.*?)(?:\n)',lines[0]).group(1) )
+            self.xyz = [ x, y, z ]
             
             # read in the data body
             
@@ -288,8 +305,7 @@ class ProbeData:
             for i in range( 1, len(lines) ):
                 
                 cleanl = lines[i].strip().split()
-                
-                cleanl = [ float(item) for item in cleanl ]
+                cleanl = [ parse_float(item,i,self.probe_index) for item in cleanl ]
 
                 if row is None: 
                     
@@ -424,6 +440,85 @@ class ProbeData:
         self.psd_df[f'pmpsd_{var}'] = pm_psd
 
 
+# ----------------------------------------------------------------------
+# >>> write psd dataframe                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/15  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_psd( self, filename=None ):
+        
+        """
+        dump self.xyz and seld.psd_df
+        """
+        
+        if filename is None:
+            filename = f'psd_{self.probe_index:05d}.pkl'
+        
+        with open( filename, 'wb' ) as f:
+            
+            pickle.dump( self.xyz, f)
+            pickle.dump( self.psd_df, f )
+
+
+# ----------------------------------------------------------------------
+# >>> read psd                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/15  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def read_psd( self, filename ):
+        
+        """
+        load self.xyz and seld.psd_df
+        """
+        
+        self.probe_index = int( filename[-9:-4] )
+        
+        with open( filename, 'rb' ) as f:
+            
+            self.xyz = pickle.load( f )
+            self.psd_df = pickle.load( f )
+
+
+# ----------------------------------------------------------------------
+# >>> parse float considering bad values                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/15  - created
+#
+# Desc
+#    some probe data contains bad values, give a warning to user if so.
+# ----------------------------------------------------------------------
+
+def parse_float(value, i, index):
+    
+    try:
+        return float(value)
+    
+    except ValueError:
+        print(col.fg.yellow,f"Probe {index:05d}: Bad value {value} is found in row {i}.",col.reset)
+        return 0.0
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
@@ -485,7 +580,7 @@ def WriteProbe():
 
 def Testing():
     
-    filename = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/probe_x/probe_00097.dat'
+    filename = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/start_x/probe_00052.dat'
 
     probe = ProbeData( filename, withT=False )
     
@@ -515,3 +610,4 @@ def Testing():
 if __name__ == "__main__":
 
     Testing()
+    #WriteProbe()
