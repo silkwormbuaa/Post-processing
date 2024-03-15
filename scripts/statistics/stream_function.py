@@ -13,37 +13,25 @@ import os
 import sys
 import time
 import pickle
+import numpy             as     np
+import pandas            as     pd
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-import numpy             as     np
-
-import pandas            as     pd
-
 from   scipy.interpolate import griddata
-
 from   vista.statistic   import StatisticData
-
 from   vista.snapshot    import Snapshot
-
 from   vista.grid        import GridData
-
 from   vista.timer       import timer
-
 from   vista.tools       import define_wall_shape
 from   vista.tools       import read_case_parameter
 from   vista.tools       import get_filelist
-
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
 from   vista.plane_analy import compute_stream_function
-
 from   vista.plot_style  import plot_slicex_stat
-from   vista.plot_style  import plot_stream_function
-
 from   vista.log         import Logger
-
 sys.stdout = Logger( os.path.basename(__file__) )
 
 

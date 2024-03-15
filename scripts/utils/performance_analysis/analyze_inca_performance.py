@@ -34,10 +34,10 @@ sys.path.append( source_dir )
 
 def main():
     
-    os.chdir('/home/wencanwu/Downloads/performance_compare/')
+    os.chdir('/home/wencanwu/performance_comparison/midRe')
     
-    file1 = '/home/wencanwu/Downloads/performance_compare/inca_out1/output1.out'
-    file2 = '/home/wencanwu/Downloads/performance_compare/inca_out2/output2.out'
+    file1 = 'rome.out'
+    file2 = 'genoa.out'
     
     df1 = read_inspect_output( file1 )
     df2 = read_inspect_output( file2 )

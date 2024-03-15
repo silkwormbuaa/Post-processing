@@ -12,7 +12,6 @@ import os
 import sys
 import numpy             as     np
 import matplotlib.pyplot as     plt
-from   vista.plot_tools  import *
 
 source_dir = os.path.realpath(__file__).split('plot')[0] 
 sys.path.append( source_dir )
