@@ -79,7 +79,9 @@ elif opt == 2:
     # add header to probe data file
     with timer("Add header to probe data file"):
         
-        for i, prbdata in enumerate( prbdatafiles ):
+        for i in range( 0, len(prbdatafiles) ):
+            
+            prbdata = prbdatafiles[i]
             
             xyz_prb = probes.probes[i].xyz
             xyz_grd = grid.find_probe_xyz( xyz_prb )

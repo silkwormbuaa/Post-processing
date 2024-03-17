@@ -59,9 +59,11 @@ with timer('Computing PSD '):
     
     n_ridge = 0 ; n_valley = 0 ; n_others = 0
     
-    for i, probe in enumerate( probes.probes ):
+    for i in range( 0, len(probes.probes) ):
             
         t_0 = time.time()
+        
+        probe = probes.probes[i]
 
         # -- check if the probe is at the ridge or valley
         xyz = probe.xyz
