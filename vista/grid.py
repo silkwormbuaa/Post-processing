@@ -555,7 +555,7 @@ class GridData:
 # 2024/03/08  - created
 #
 # Desc
-#
+#     - maybe used in finding solution's index
 # ----------------------------------------------------------------------
 
     def find_probe_index( self, xyz, buff=3 ):
@@ -572,14 +572,42 @@ class GridData:
                 grd.ly0 <= xyz[1] < grd.ly1 and
                 grd.lz0 <= xyz[2] < grd.lz1):
                 
-                i,j,k = grd.find_probe_index( xyz, buff )
+                i,j,k = grd.point_index( xyz, buff )
                 bl_num = grd.num
                 
                 break
         
         return bl_num, [i, j, k]
                 
+
+# ----------------------------------------------------------------------
+# >>> find probe xyz                                             (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/17  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def find_probe_xyz( self, xyz, buff=3 ):
         
+        """"
+        xyz: [x,y,z] of the given point
+        """
+        bl_num, indx = self.find_probe_index( xyz, buff=buff )
+        
+        g = self.g[bl_num-1]
+        x = g.gx[indx[0]]
+        y = g.gy[indx[1]]
+        z = g.gz[indx[2]]
+        
+        return [x,y,z]
+
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
 # ----------------------------------------------------------------------
@@ -640,7 +668,7 @@ class GridBlock:
         self.verbose = verbose
         self.grid_with_solver = grid_with_solver
         
-        len_specname = 15      # should be 19, after INCA 5b66ccd, 7th Feb 2023 
+        len_specname = 19      # should be 19, after INCA 5b66ccd, 7th Feb 2023 
                                # 15 before INCA 5b66ccd, 7th Feb 2023
         
         # index of GridBlock, like first block's grid, second ...
