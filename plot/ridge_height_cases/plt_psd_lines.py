@@ -13,21 +13,14 @@ import os
 import sys
 import pandas            as     pd
 import numpy             as     np
-from   scipy.interpolate import make_interp_spline
 
 source_dir = os.path.realpath(__file__).split('plot')[0] 
 sys.path.append( source_dir )
 
 import matplotlib.pyplot as     plt
 import matplotlib.ticker as     ticker
-
-from   vista.psd         import ProbeData
-
+from   vista.probe       import ProbeData
 from   vista.timer       import timer
-
-from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-
 from   vista.line        import data_bin_avg
 
 plt.rcParams["text.usetex"] = True
@@ -38,14 +31,14 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 3              # 1,2,3
+output_nr = 1              # 1,2,3
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
 # =============================================================================
 
 
-datapath0 = '/home/wencanwu/my_simulation/temp/smooth_wall/probes/probe_x/'
+datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/probes'
 datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/probes/'
 datapath2 = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/probe_x/'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/probes/'
@@ -87,41 +80,32 @@ elif output_nr == 3:
     #240210
     with timer("reading one probe"):
         os.chdir( datapath3 )
-        if loc == 'sep':      probefile_r = 'probe_00001.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00025.dat'
+        if loc == 'sep':      probefile_r = 'probe_00020.dat'
+        elif loc == 'pf_max': probefile_r = 'probe_00048.dat'
         Lsep_r      = 17.1           #13.12627403
-        probe_r  = ProbeData( probefile_r ) 
+        probe_r  = ProbeData( probefile_r, withT=True ) 
         fig_name = 'varingLsep_240210_' + loc
         label_r  = r"$H/{\delta}_0=0.20$"
-
-
-""" #1125
-with timer("reading one probe"):
-    os.chdir( folderpath1 )
-#    probefile_r = 'probe_00176.dat'
-    probefile_r = 'probe_00189.dat'
-    Lsep_r      = 13.12627
-    probe_r = ProbeData( probefile_r ) """
     
 # =============================================================================
 # start plotting
 # =============================================================================
 
-with timer("clean data"):
-    probe_s.cleandata( starttime=20 )
-    probe_r.cleandata( starttime=20 )
+os.chdir(outpath)
     
 with timer('psd'):
+    probe_s.cleandata( t_start=20 )
+    probe_s.get_fluc( 'p' )
+    probe_s.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
     
-    os.chdir(outpath)
-    
-    probe_s.psd( 8, 0.5 )
-    probe_r.psd( 8, 0.5 )
+    probe_r.cleandata( t_start=20 )
+    probe_r.get_fluc( 'p' )
+    probe_r.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
     
     fig, ax = plt.subplots( figsize=[9,4], constrained_layout=True )
     
-    St_Lsep_s = probe_s.St * Lsep_s
-    St_Lsep_r = probe_r.St * Lsep_r
+    St_Lsep_s = probe_s.psd_df['freq'] * 5.2 / 507 * Lsep_s
+    St_Lsep_r = probe_r.psd_df['freq'] * 5.2 / 507 * Lsep_r
     
     ax.minorticks_on()
     ax.tick_params( which='major',
@@ -140,13 +124,13 @@ with timer('psd'):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
     ax.semilogx(St_Lsep_s, 
-                probe_s.nd_pprime_fwpsd,
+                probe_s.psd_df['pmpsd_p_fluc'],
                 'red', 
                 linewidth=1,
                 label='smooth')
     
     ax.semilogx(St_Lsep_r, 
-                probe_r.nd_pprime_fwpsd,
+                probe_r.psd_df['pmpsd_p_fluc'],
                 'blue', 
                 linewidth=1,
                 label=label_r)
@@ -183,10 +167,10 @@ with timer('psd'):
 with timer('bin chart'):
     
     dfs = pd.DataFrame( { 'St_Lsep_s':St_Lsep_s,
-                          'psd': probe_s.nd_pprime_fwpsd } )
+                          'psd': probe_s.psd_df['pmpsd_p_fluc'] } )
     
     dfr = pd.DataFrame( { 'St_Lsep_r':St_Lsep_r,
-                          'psd': probe_r.nd_pprime_fwpsd } )
+                          'psd': probe_r.psd_df['pmpsd_p_fluc'] } )
     
     bin_edges = np.logspace( -2, 2, 41, endpoint=True )
     
