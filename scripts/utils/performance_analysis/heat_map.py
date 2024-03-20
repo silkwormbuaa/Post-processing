@@ -124,7 +124,7 @@ def compare_2incaout( out_dir, out_dir2):
     
     plt.figure(figsize=(64, 10))  
     sb.heatmap(df_2t_avg.T, cmap='Greys', fmt='.1f',norm=LogNorm(1,100))
-    plt.title('Heatmap of 2t_avg')  
+    plt.title('Heatmap of t_avg_2/t_avg_1')  
     plt.subplots_adjust(bottom=0.3) 
     plt.savefig('2t_avg.png')
     plt.show()
@@ -326,5 +326,5 @@ if __name__ == "__main__":
     # show_1incaout( out_dir )
     # show_1incaout( out_dir2 )
 
-    evaluate_local_performance_fluctuation( out_dir )
-    # evaluate_local_performance_fluctuation( out_dir2 )
+    #evaluate_local_performance_fluctuation( out_dir )
+    evaluate_local_performance_fluctuation( out_dir2 )
