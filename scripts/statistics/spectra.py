@@ -11,27 +11,19 @@
 
 
 import os
-
 import sys
-
 import pandas            as     pd
-import numpy             as     np
-import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.statistic   import StatisticData
-
 from   vista.snapshot    import Snapshot
-
 from   vista.grid        import GridData
-
 from   vista.timer       import timer
-
-from   vista.tools       import read_case_parameter
+from   vista.directories import Directories
+from   vista.directories import create_folder
 from   vista.tools       import get_filelist
-
 from   vista.line        import LineData
 
 
@@ -43,29 +35,21 @@ loc = (-42.5,0.52)
 
 # =============================================================================
 
-datapath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-datafile = datapath + '/statistics.bin'
-gridfile = datapath + '/inca_grid.bin'
-
-snappath = datapath.split('/results')[0]+'/snapshots'
-snapfiles = get_filelist( snappath, 'snapshot.bin' ) 
-
-outpath  = datapath + outfolder
-parametersfile = datapath.split('/results')[0] + '/case_parameters'
+datafile = dirs.statistics 
+gridfile = dirs.grid
+snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' ) 
+outpath  = dirs.pos_dir + outfolder
 
 # - read in grid info
 
 G = GridData( gridfile )
 G.read_grid()
 
-
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
-
+create_folder( outpath )
 os.chdir(outpath)
 
 

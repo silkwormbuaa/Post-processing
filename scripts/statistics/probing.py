@@ -20,7 +20,8 @@ sys.path.append( source_dir )
 from   vista.statistic   import StatisticData
 from   vista.grid        import GridData
 from   vista.timer       import timer
-
+from   vista.directories import Directories
+from   vista.directories import create_folder
 from   vista.tools       import read_case_parameter
 
 # =============================================================================
@@ -31,13 +32,13 @@ loc = (-53.6,0.0)
 
 # =============================================================================
 
-datapath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-datafile = datapath + '/statistics.bin'
-gridfile = datapath + '/inca_grid.bin'
+datafile = dirs.statistics
+gridfile = dirs.grid
 
-outpath  = datapath + outfolder
-parametersfile = datapath.split('/results')[0] + '/case_parameters'
+outpath  = dirs.pos_dir + outfolder
+parametersfile = dirs.case_para_file
 
 # - read in case parameters
 
@@ -50,15 +51,10 @@ casecode =  str( parameters.get('casecode') )
 G = GridData( gridfile )
 G.read_grid()
 
-
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
-
+create_folder( outpath )
 os.chdir(outpath)
-
 
 # - do probing 
 

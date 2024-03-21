@@ -20,6 +20,7 @@ source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.snapshot    import Snapshot
+from   vista.directories import create_folder
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
 from   vista.plane_analy import shift_coordinates
@@ -44,8 +45,7 @@ snapfiles = None
 
 if rank == 0:
     print(f"I am root, now at {snaps_dir}.")
-    if os.path.exists('./pkl_data') == False:
-        os.system('mkdir ./pkl_data')
+    create_folder( './pkl_data' )
     snapfiles = get_filelist( snaps_dir, 'snapshot_Z' )
 
 # wait for the root to create the directory

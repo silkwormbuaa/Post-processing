@@ -24,6 +24,7 @@ from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.directories import Directories
 from   vista.timer       import timer
+from   vista.directories import create_folder
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 from   vista.colors      import colors          as    clr
@@ -55,13 +56,9 @@ roughwall  = True if parameters.get('roughwall').lower() == 'true' else False
 if roughwall:
     snapshotfile = get_filelist(dirs.wall_dist,key='snapshot.bin')[0]
 
-
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
-
+create_folder( outpath )
 os.chdir(outpath)
 
 # =============================================================================

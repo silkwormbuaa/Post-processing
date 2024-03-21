@@ -24,6 +24,7 @@ from   vista.snapshot    import Snapshot
 from   vista.directories import Directories
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.directories import create_folder
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
@@ -57,11 +58,9 @@ parametersfile = dirs.case_para_file
 
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
+create_folder( outpath )
 
-os.chdir(outpath)
+os.chdir( outpath )
 
 
 if not (os.path.exists(fric_file) and os.path.exists(pres_file)):

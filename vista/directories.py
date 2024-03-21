@@ -10,6 +10,7 @@
 
 
 import os
+from   pathlib           import Path
 from   .tools            import get_filelist
 
 class Directories:
@@ -112,7 +113,29 @@ class Directories:
     def probes( self ):
         return get_filelist( self.prb_dir, '.dat' )
     
-        
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/21  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def create_folder( path ):
+    
+    try:
+        Path(path).mkdir(parents=True, exist_ok=True)
+        print(f"Folder created at path: {path}")
+    except FileExistsError:
+        print(f"Folder already exists at path: {path}")
+     
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------

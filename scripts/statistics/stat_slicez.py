@@ -24,6 +24,7 @@ from   vista.statistic   import StatisticData
 from   vista.grid        import GridData
 from   vista.directories import Directories
 from   vista.timer       import timer
+from   vista.directories import create_folder
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
@@ -70,10 +71,7 @@ G.read_grid()
 
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
-
+create_folder( outpath )
 os.chdir(outpath)
 
 # - do slicing and output slices

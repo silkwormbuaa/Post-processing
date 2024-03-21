@@ -24,6 +24,8 @@ from   vista.statistic   import StatisticData
 from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.directories import Directories
+from   vista.directories import create_folder
 from   vista.tools       import define_wall_shape
 from   vista.tools       import read_case_parameter
 from   vista.tools       import get_filelist
@@ -43,13 +45,13 @@ periodic_ave = False
 
 # =============================================================================
 
-datapath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-datafile = datapath + '/statistics.bin'
-gridfile = datapath + '/inca_grid.bin'
-ccfile   = datapath + '/cutcells_setup.dat'
-outpath  = datapath + outfolder
-parametersfile = datapath.split('/results')[0] + '/case_parameters'
+datafile = dirs.statistics
+gridfile = dirs.grid
+ccfile   = dirs.cc_setup
+outpath  = dirs.pos_dir + outfolder
+parametersfile = dirs.case_para_file
 
 # - read in case paramters
 
@@ -66,24 +68,18 @@ tag      = str( parameters.get('tag'))
 roughwall  = True if parameters.get('roughwall').lower() == 'true' else False
 
 if roughwall:
-    snapshotfile = get_filelist(datapath.split('/results')[0] +'/wall_dist',
-                                key='snapshot.bin')[0]
+    snapshotfile = get_filelist(dirs.wall_dist,key='snapshot.bin')[0]
 
 loc = loc_delta*delta + 50.4
 
-
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
-
+create_folder( outpath )
 os.chdir(outpath)
 
 # - read in grid info
 
 G = GridData( gridfile )
-
 G.read_grid()
 
 block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )

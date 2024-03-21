@@ -23,6 +23,7 @@ from   vista.grid        import GridData
 from   vista.directories import Directories
 from   vista.timer       import timer
 from   vista.log         import Logger
+from   vista.directories import create_folder
 sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
@@ -47,8 +48,8 @@ G = GridData( gridfile)
 G.read_grid()
 
 # - enter output directory
-if not os.path.exists( outpath ): os.mkdir( outpath )
 
+create_folder( outpath )
 os.chdir( outpath )
 
 # - do slicing and integrate

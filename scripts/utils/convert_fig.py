@@ -24,6 +24,7 @@ sys.path.append( source_dir )
 
 from   vista.tools       import get_filelist
 from   vista.tools       import convert_image_format
+from   vista.directories import create_folder
 
 
 # receive parameters from user
@@ -53,10 +54,7 @@ imgpath = os.getcwd()
 
 output_dir = imgpath + '/'+ 'converted_' + output_format
 
-if not os.path.exists(output_dir): 
-    os.mkdir( output_dir )
-    print(f"Created directory {output_dir}.\n")
-
+create_folder( output_dir )
 os.chdir(output_dir)
 
 # find all images with input format

@@ -23,6 +23,8 @@ sys.path.append( source_dir )
 from   vista.statistic   import StatisticData
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.directories import Directories
+from   vista.directories import create_folder
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import compute_separation_ratio
@@ -37,26 +39,21 @@ bbox = [ -60.0, 108.0, 0, 1.736953420, -11.0, 11.0]
 
 # =============================================================================
 
-resultspath = os.getcwd()
+dirs = Directories( os.getcwd() )
 
-outpath   = resultspath + '/wall_projection'
-
-stat_file = resultspath + '/statistics.bin'
-grid_file = resultspath + '/inca_grid.bin'
-ccfile    = resultspath + '/cutcells_setup.dat'
+outpath   = dirs.pp_wall_proj
+stat_file = dirs.statistics
+grid_file = dirs.grid
+parametersfile = dirs.case_para_file
 
 pres_file = outpath + '/wall_vars_projection.pkl'
 
-parametersfile = resultspath.split('/results')[0] + '/case_parameters'
-
 # - enter outpath
 
-if not os.path.exists(outpath): 
-    os.mkdir( outpath )
-    print(f"Created directory {outpath}.\n")
-
+create_folder( outpath )
 os.chdir(outpath)
 
+# - check if the wall projection file exists
 
 if not os.path.exists(pres_file) :
 

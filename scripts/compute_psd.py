@@ -21,8 +21,12 @@ from   vista.directories import Directories
 from   vista.probe       import ProbeFile
 from   vista.timer       import timer
 from   vista.colors      import colors as col
+from   vista.directories import create_folder
 from   vista.tools       import read_case_parameter
+from   vista.log         import Logger
+sys.stdout = Logger( os.path.basename(__file__) )
 
+# =============================================================================
 
 dirs   = Directories( os.getcwd() )
 probes = ProbeFile( dirs.set_prb )
@@ -47,9 +51,9 @@ if n_data != len( probes.probes ):
 
 # -- check if probe location and classify them to either ridge/valley or others
 
-if not os.path.exists( dirs.pp_psd_ridge  ): os.mkdir( dirs.pp_psd_ridge  )
-if not os.path.exists( dirs.pp_psd_valley ): os.mkdir( dirs.pp_psd_valley )
-if not os.path.exists( dirs.pp_psd_others ): os.mkdir( dirs.pp_psd_others )
+create_folder( dirs.pp_psd_ridge  )
+create_folder( dirs.pp_psd_valley )
+create_folder( dirs.pp_psd_others )
 
 # -- start computing PSD 
 
