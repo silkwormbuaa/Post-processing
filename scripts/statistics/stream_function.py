@@ -50,7 +50,7 @@ dirs = Directories( os.getcwd() )
 datafile = dirs.statistics
 gridfile = dirs.grid
 ccfile   = dirs.cc_setup
-outpath  = dirs.pos_dir + outfolder
+outpath  = dirs.pp_statistics + outfolder
 parametersfile = dirs.case_para_file
 
 # - read in case paramters
