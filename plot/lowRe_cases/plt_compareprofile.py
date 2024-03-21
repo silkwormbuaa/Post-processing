@@ -23,6 +23,8 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size']   = 40
 
+# =============================================================================
+
 datapath = '/home/wencanwu/my_simulation/temp/DataPost/profile_arrays/'
 
 cases = ['smooth', '221014', '220926', '220825', '220927',  '221221']
@@ -31,7 +33,58 @@ dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26
 color    = ['gray','green', 'blue', 'black',                  'red',        'purple']
 label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
 lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
-width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0]
+width    = [2.0,   2.0,      2.0,    2.0,                     2.0,          2.0]
+
+plt_pt   = True
+plt_Tt   = True
+plt_t    = True
+plt_tke  = True
+
+# shift y? 
+shift_y = True
+
+fmt  = '.png' # or '.pdf'
+zoom = False
+
+# ----------------------------------------------------------------------
+# >>> define style                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/03/21  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plt_style( ):
+    
+    ax = plt.gca()
+    
+    ax.minorticks_on()
+    
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=2.0,
+                   pad=10)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=1.5,
+                   pad=10)
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+
+
+# =============================================================================
 
 # different locations for all cases
 for i in range(1, 7):
@@ -43,7 +96,6 @@ for i in range(1, 7):
         filename = datapath + cases[j] + f'/profile_mean_{i}.dat'
         line = ProfileData(filename)
         line.shift_y( dy[j] )
-        line.df['y_'] = line.df['y']/5.2
         
         line.label = r'$D/\delta_0=$' + label[j]
         line.color = color[j]
@@ -56,88 +108,151 @@ for i in range(1, 7):
     
     os.chdir(datapath)
 
-    fig, ax = plt.subplots(figsize=[12,15], constrained_layout=True)
-
-    for line in lines:
-        
-        ax.plot(line.df['pt']/45447.289, 
-                line.df['ys']/5.2,  
-                label=line.label, 
-                color=line.color, 
-                linestyle=line.lstyle, 
-                linewidth=line.width)
-        
-        ax.minorticks_on()
-    
-    ax.set_ylim(-0.1,2.0)
-#    ax.set_xlim(0, 1.2)
-    fig.legend(loc='upper left')
-    plt.savefig(f'ys_bottom_pt_{i}.png')
-#    plt.show()
-    plt.close()
-
+# plot total pressure profile
 # =============================================================================
+   
+    if plt_pt:
+        
+        fig, ax = plt.subplots(figsize=[8,8], constrained_layout=True)
 
-    fig, ax = plt.subplots(figsize=[12,15], constrained_layout=True)
+        for line in lines:
+            
+            x = line.df['pt']/(45447.289*7.824)
+            if shift_y: y = line.df['ys']/5.2
+            else: y = line.df['y']/5.2
+            
+            ax.plot(x,y,  
+                    label=line.label, 
+                    color=line.color, 
+                    linestyle=line.lstyle, 
+                    linewidth=line.width)
+            
+        
+        ax.set_xlabel(r'$p_t/p_{t_0}$')
+        ax.set_xlim(0.2, 1.1)
+        
+        plt_style()
+        
+        if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
+        else:       ax.set_ylabel(r'$y/\delta_0$')
+        
+        if zoom: ax.set_ylim(-0.1,2.0); filename = f'pt_{i}_zoom'
+        else:    ax.set_ylim(-0.1,8.0); filename = f'pt_{i}'
+        
+        if shift_y: filename = filename + '_ys' + fmt
+        else:       filename = filename + '_y' + fmt
+     
+        plt.savefig( filename )
+        plt.close()
+        
 
-    for line in lines:
+# plot total temperature profile
+# =============================================================================
+    
+    if plt_Tt:
+        fig, ax = plt.subplots(figsize=[8,8], constrained_layout=True)
+
+        for line in lines:
+            
+            x = line.df['Tt']/288.15                # 160.15
+            if shift_y: y = line.df['ys']/5.2
+            else: y = line.df['y']/5.2
+            
+            ax.plot(x, y,  
+                    label=line.label, 
+                    color=line.color, 
+                    linestyle=line.lstyle, 
+                    linewidth=line.width)
+
+        ax.set_xlabel(r'$T_t/T_{t0}$')
+        ax.set_xlim(0.95,1.02)
+
+        plt_style()
+         
+        if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
+        else:       ax.set_ylabel(r'$y/\delta_0$')
         
-        ax.plot(line.df['Tt']/288.15,    #160.15
-                line.df['ys']/5.2,  
-                label=line.label, 
-                color=line.color, 
-                linestyle=line.lstyle, 
-                linewidth=line.width)
+        if zoom: ax.set_ylim(-0.1,2.0); filename = f'Tt_{i}_zoom'
+        else:    ax.set_ylim(-0.1,8.0); filename = f'Tt_{i}'
         
-        ax.minorticks_on()
+        if shift_y: filename = filename + '_ys' + fmt
+        else:       filename = filename + '_y' + fmt
         
-    ax.set_ylim(-0.1,2.0)
-#    ax.set_xlim(0, 1.2)
-    fig.legend(loc='upper left')
-    plt.savefig(f'ys_bottom_Tt_{i}.png')
-#    plt.show()
-    plt.close()
+        plt.savefig( filename )
+        plt.close()
+        
+        
+# plot static temperature profile
+# =============================================================================    
+    
+    if plt_t:
+        
+        fig, ax = plt.subplots(figsize=[8,8], constrained_layout=True)
+
+        for line in lines:
+            
+            x = line.df['T']/160.15
+            if shift_y: y = line.df['ys']/5.2
+            else: y = line.df['y']/5.2
+            
+            ax.plot(x,y,
+                    label=line.label, 
+                    color=line.color, 
+                    linestyle=line.lstyle, 
+                    linewidth=line.width)
+        
+        
+        ax.set_xlabel(r'$T/T_{\infty}$')
+        ax.set_xlim(1.0,1.8)
+        
+        plt_style()
+        
+        if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
+        else:       ax.set_ylabel(r'$y/\delta_0$')
+        
+        if zoom: ax.set_ylim(-0.1,2.0); filename = f'T_{i}_zoom'
+        else:    ax.set_ylim(-0.1,8.0); filename = f'T_{i}'
+        
+        if shift_y: filename = filename + '_ys' + fmt
+        else:       filename = filename + '_y' + fmt
+        
+        plt.savefig( filename )
+        plt.close()
+        
+
+# plot tke profile
 # =============================================================================    
 
-    fig, ax = plt.subplots(figsize=[12,15], constrained_layout=True)
+    if plt_tke:
+            
+        fig, ax = plt.subplots(figsize=[8,8], constrained_layout=True)
 
-    for line in lines:
+        for line in lines:
+            
+            x = line.df['tke']
+            if shift_y: y = line.df['ys']/5.2
+            else: y = line.df['y']/5.2
+            
+            ax.plot(x,y,
+                    label=line.label, 
+                    color=line.color, 
+                    linestyle=line.lstyle, 
+                    linewidth=line.width)
         
-        ax.plot(line.df['T'], 
-                line.df['ys']/5.2,  
-                label=line.label, 
-                color=line.color, 
-                linestyle=line.lstyle, 
-                linewidth=line.width)
+        ax.set_xlabel('tke')
+        ax.set_xlim(0.0,8000)
         
-        ax.minorticks_on()
-    
-    ax.set_ylim(-0.1,2.0)
-#    ax.set_xlim(0, 1.2)
-    fig.legend(loc='upper left')
-    plt.savefig(f'ys_bottom_T_{i}.png')
-#    plt.show()
-    plt.close()
-    
-# =============================================================================    
+        plt_style()
+        
+        if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
+        else:       ax.set_ylabel(r'$y/\delta_0$')
+        
+        if zoom: ax.set_ylim(-0.1,2.0); filename = f'tke_{i}_zoom'
+        else:    ax.set_ylim(-0.1,8.0); filename = f'tke_{i}'
+        
+        if shift_y: filename = filename + '_ys' + fmt
+        else:       filename = filename + '_y' + fmt
+        
+        plt.savefig( filename )
+        plt.close()
 
-    fig, ax = plt.subplots(figsize=[12,15], constrained_layout=True)
-
-    for line in lines:
-        
-        ax.plot(line.df['tke'], 
-                line.df['ys']/5.2,  
-                label=line.label, 
-                color=line.color, 
-                linestyle=line.lstyle, 
-                linewidth=line.width)
-        
-        ax.minorticks_on()
-    
-    ax.set_ylim(-0.1,2.0)
-#    ax.set_xlim(0, 1.2)
-    fig.legend(loc='upper left')
-    plt.savefig(f'ys_bottom_tke_{i}.png')
-#    plt.show()
-    plt.close()
-    

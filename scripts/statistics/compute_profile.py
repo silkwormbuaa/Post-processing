@@ -37,7 +37,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 locs = [-112.5, -79.6, -53.6, -27.6, 76.4, 102.4] 
 
-## locs in dimensionless [-31.33,-25, -20,-15, 5, 10 ] 
+## locs in dimensionless [-31.33, -25, -20,-15, 5, 10 ] 
 
 # =============================================================================
 
@@ -65,7 +65,7 @@ os.chdir(outpath)
 
 for i, loc in enumerate(locs):
     
-    bbox    = [ loc-2.5, loc+2.5, -1.2576, 45.0,  -11.0, 11.0]  # bounding box
+    bbox    = [ loc-2.5, loc+2.5, -1.2576, 86.0,  -11.0, 11.0]  # bounding box
     wbox    = [ loc-2.5, loc+2.5, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
     wbox_sw = [ loc-2.5, loc+2.5, 0, 1.736953420, -11.0, 11.0]
 
