@@ -32,7 +32,7 @@ locs = [ -115.0, 119.9 ]
 slic_type = 'X'         # only 'X'
 range = [-10.4, 0.0, 10.4, 86]   
 
-opt = 2 
+opt = 2     # option 1: use u, v, w, rho, p, T; option 2: use urho, uu, vv, ww for mass flow and kinetic energy
 
 # =============================================================================
 
