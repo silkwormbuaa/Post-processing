@@ -31,28 +31,29 @@ sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
 sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
-data1 = '/media/wencanwu/Seagate Expansion Drive/temp/221014/results/wall_projection/streamwise_vars.pkl'
-data2 = '/media/wencanwu/Seagate Expansion Drive/temp/220926/results/wall_projection/streamwise_vars.pkl'
-data3 = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results/wall_projection/streamwise_vars.pkl'
-data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/wall_projection/streamwise_vars.pkl'
-data5 = '/media/wencanwu/Seagate Expansion Drive/temp/221221/results/wall_projection/streamwise_vars.pkl'
+data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
+data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-datalist = [data1,   data2,   data3,                   data4,        data5]
-dy       = [0.494,   0.468,   0.416,                   0.312,        0.26]
-color    = ['green', 'blue', 'black',                  'red',        'purple']
-label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
-width    = [4.0,      4.0,    4.0,                     4.0,          4.0]
+datalist = [data1,   data2,   data3,                   data4,        data5, data6]
+dy       = [0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
+color    = ['green', 'blue', 'black',                  'red',        'purple', 'yellow']
+label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125',  'awall']
+lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',    'dotted']
+width    = [4.0,      4.0,    4.0,                     4.0,          4.0, 4.0]
 lines = []
 
 plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
-pure = True
+pure = False
 
-fmt =  '.pdf' # or '.png'
+fmt =  '.png' # or '.png'
 
 # - read in data files
 
@@ -163,7 +164,7 @@ if plt_pwfluc:
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #                linestyle='--',linewidth=0.2)
 
-    figname = "pressure_fluctuation"
+    figname = "pressure_fluctuation_awall"
 
     # Adjust the spacing around the plot to remove the white margin
     if pure:
@@ -243,7 +244,7 @@ if plt_pw:
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #                linestyle='--',linewidth=0.2)
 
-    figname = "wall_pressure"
+    figname = "wall_pressure_awall"
 
     # Adjust the spacing around the plot to remove the white margin
     if pure:
@@ -330,7 +331,7 @@ if plt_Cf:
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #                linestyle='--',linewidth=0.2)
 
-    figname = "friction_coefficient"
+    figname = "friction_coefficient_awall"
 
     # Adjust the spacing around the plot to remove the white margin
     if pure:
