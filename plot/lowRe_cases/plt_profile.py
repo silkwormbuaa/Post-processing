@@ -30,43 +30,44 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = False
-plt_u_vd    = False
-plt_u       = False
-plt_RS_uu   = False
-plt_RS_vv   = False
-plt_RS_ww   = False
-plt_RS_uv   = False
-plt_RS_DNS  = False
-plt_rho     = False
+plt_u_vd_lw = True
+plt_u_vd    = True
+plt_u       = True
+plt_RS_uu   = True
+plt_RS_vv   = True
+plt_RS_ww   = True
+plt_RS_uv   = True
+plt_RS_DNS  = True
+plt_rho     = True
 plt_T       = True
 plt_Mt      = False
 
 pure = False
 
-fmt = '.pdf'
+fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profiles'
+OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profile'
 
-data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/results/profile'
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/results/profile'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/results/profile'
-data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/results/profile'
-data4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/profile'
-data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/results/profile'
+data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/results/profile'
+data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/postprocess/statistics/upstream_profile'
+data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/postprocess/statistics/upstream_profile'
+data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/postprocess/statistics/upstream_profile'
+data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/upstream_profile'
+data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/postprocess/statistics/upstream_profile'
+data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
 dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
-datalist = [data0, data1,   data2,   data3,                   data4,        data5]
-dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26]
-color    = ['gray','green', 'blue', 'black',                  'red',        'purple']
-label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125']
-lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
-width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0]
+datalist = [data0, data1,   data2,   data3,                   data4,        data5, data6]
+dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
+color    = ['gray','green', 'blue', 'black',                  'red',        'purple', 'yellow']
+label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125', 'smooth']
+lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',     'dotted']
+width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0,     4.0]
 lines = []
 
 # ----------------------------------------------------------------------
@@ -273,8 +274,8 @@ if plt_u_vd :
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
-        ax.tick_params( axis='x', pad=15 )
         ax.set_ylabel( r'$\langle u \rangle ^+_{vd}$' )
+        ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
@@ -302,7 +303,7 @@ if plt_u_vd :
 
 if plt_u :
     
-    fig, ax = plt.subplots(figsize=[8,8])
+    fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
     
     for line in lines:
         
@@ -349,10 +350,10 @@ if plt_u :
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$" )  
-        ax.tick_params( axis='x' )
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.tick_params( axis='x', pad=15 )
         ax.set_ylabel( r'$u^+$' )
-        ax.tick_params( axis='y' )
+        ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
     # set the bounding box of axes
@@ -379,7 +380,7 @@ if plt_u :
 
 if plt_RS_uu:
 
-    fig, ax = plt.subplots( figsize=[8,8] )
+    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
 
     for line in lines:
         
@@ -427,10 +428,10 @@ if plt_RS_uu:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
         ax.set_ylabel( r"$\rho \langle u^{'} u^{'} \rangle / \tau_w$" )
-        ax.tick_params( axis='x' )
-        ax.tick_params( axis='y' )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
     # set the bounding box of axes
@@ -443,7 +444,7 @@ if plt_RS_uu:
 
 if plt_RS_vv:
     
-    fig, ax = plt.subplots( figsize=[8,8] )
+    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
     
     for line in lines:
         
@@ -490,10 +491,10 @@ if plt_RS_vv:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
         ax.set_ylabel( r"$\rho \langle v^{'} v^{'} \rangle / \tau_w$" )
-        ax.tick_params( axis='x' )
-        ax.tick_params( axis='y' )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
     # set the bounding box of axes
@@ -506,7 +507,7 @@ if plt_RS_vv:
 
 if plt_RS_ww:
     
-    fig, ax = plt.subplots( figsize=[8,8] )
+    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
     
     for line in lines:
         
@@ -553,10 +554,10 @@ if plt_RS_ww:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
         ax.set_ylabel( r"$\rho \langle w^{'} w^{'} \rangle / \tau_w$")
-        ax.tick_params( axis='x' )
-        ax.tick_params( axis='y' )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
     # set the bounding box of axes
@@ -584,7 +585,7 @@ if plt_RS_ww:
 
 if plt_RS_uv:
 
-    fig, ax = plt.subplots( figsize=[8,8] )
+    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
     
     for line in lines:
         
@@ -631,10 +632,10 @@ if plt_RS_uv:
         ax.yaxis.set_ticklabels([])
         figname += '_pure'
     else:
-        ax.set_xlabel( "$y_s^+$" )  
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
         ax.set_ylabel( r"$\rho \angle u^{'} v^{'} \rangle / \tau_w$" )
-        ax.tick_params( axis='x' )
-        ax.tick_params( axis='y' )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
     # set the bounding box of axes
@@ -789,7 +790,7 @@ if plt_RS_DNS:
 
 if plt_rho :
     
-    fig, ax = plt.subplots(figsize=[8,8])
+    fig, ax = plt.subplots(figsize=[9,8], constrained_layout=True )
     
     for line in lines:
         
@@ -803,11 +804,17 @@ if plt_rho :
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$" )  
-    ax.tick_params( axis='x' )
     
-    ax.set_ylabel( r"$\rho$" )
-    ax.tick_params( axis='y' )
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=1.5)
     
     ax.set_xlim( [1,1000] )
     
@@ -816,12 +823,23 @@ if plt_rho :
     
     ax.xaxis.set_minor_locator( x_minor )
 
-#    ax.legend( ) 
-    ax.set_title( r"$\rho$ profile" )
-
-    ax.grid()
+    figname = 'rho'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.set_ylabel( r"$\rho$" )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
     
-    plt.savefig( "rho_shifted" + fmt )
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
 
 
@@ -841,7 +859,7 @@ if plt_rho :
 
 if plt_T :
     
-    fig, ax = plt.subplots(figsize=[8,8])
+    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
 
     for line in lines:
         
@@ -855,11 +873,17 @@ if plt_T :
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$" )  
-    ax.tick_params( axis='x' )
     
-    ax.set_ylabel( r'$T/T_{\infty}$' )
-    ax.tick_params( axis='y' )
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=1.5)
     
     ax.set_xlim( [1,1000] )
     
@@ -868,12 +892,23 @@ if plt_T :
     
     ax.xaxis.set_minor_locator( x_minor )
 
-#    ax.legend( ) 
-#    ax.set_title( r"$u^+_{VD}$ profile", size=20 )
+    figname = 'T'
+    if pure: 
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.set_ylabel( r'$T/T_{\infty}$' )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 
-    ax.grid()
-    
-    plt.savefig( "T_shifted_new" + fmt)
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+
+    plt.savefig( figname + fmt)
     plt.show()
 
 # ----------------------------------------------------------------------
@@ -892,7 +927,7 @@ if plt_T :
 
 if plt_Mt :
     
-    fig, ax = plt.subplots(figsize=[8,8])
+    fig, ax = plt.subplots( figsize=[9,8], constrained_layout=True )
 
     ax.minorticks_on()
     
