@@ -116,17 +116,6 @@ elif output_nr == 3:
     x_ppmax = [-11.5126578, -11.5126578]
     y_ppmax = [0.001, 100]
     fig_name = 'psd_240210'
-    
-    #1125
-#    St_Lsep = (np.array(St) * 13.1286891).tolist()
-#    print(St_Lsep[0][:10])
-#    print(St_Lsep[0][-10:])
-#    x_sep = [-10.55859, -10.55859]
-#    y_sep = [0.001,100]
-#    x_reatt = [2.570097, 2.570097]
-#    y_reatt = [0.001,100]
-#    fig_name = "psd_1125"
-
 
 
 fig, ax = plt.subplots( figsize=[15,6],
