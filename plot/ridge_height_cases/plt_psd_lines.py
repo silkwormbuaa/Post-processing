@@ -40,7 +40,7 @@ pure      = False
 
 datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/probes'
 datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/probes/'
-datapath2 = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/probe_x/'
+datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/probes/'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/probes/'
 
 outpath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/psd'
@@ -138,7 +138,6 @@ with timer('psd'):
     ax.set_xlim( [0.01,1] )
     ax.set_ylim( [0.0,0.3] )
     
-#    ax.set_xlabel( r'$St_{sep}$' )
     ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
     ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
 

@@ -20,14 +20,10 @@ sys.path.append( source_dir )
 
 import matplotlib.pyplot as     plt
 import matplotlib.ticker as     ticker
-
-from   vista.psd         import ProbeData
-
+from   vista.probe       import ProbeData
 from   vista.timer       import timer
-
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
-
 from   vista.line        import data_bin_avg
 
 plt.rcParams["text.usetex"] = True
@@ -38,21 +34,22 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 4              # 1,2,3,4,5
+output_nr = 6              # 1,2,3,4,5,6
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
 # =============================================================================
 
 
-datapath0 = '/home/wencanwu/my_simulation/temp/smooth_wall/probes/probe_x/'
-datapath1 = '/home/wencanwu/my_simulation/temp/221014_lowRe/probes/probe_x/'
-datapath2 = '/home/wencanwu/my_simulation/temp/220926_lowRe/probes/probe_x/'
-datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/probes/probe_x/'
-datapath4 = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/probe_x/'
-datapath5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/probes/probe_x/'
+datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/probes/'
+datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/probes/'
+datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/probes/'
+datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/probes/'
+datapath4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/probes/'
+datapath5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/probes/'
+datapath6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/probes/'
 
-outpath  = '/home/wencanwu/my_simulation/temp/DataPost/PSD'
+outpath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/psd'
 
 
 # smooth wall
@@ -114,38 +111,41 @@ elif output_nr == 5:
         if loc == 'sep':      probefile_r = 'probe_00175.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00195.dat'
         Lsep_r      = 13.266
-        probe_r  = ProbeData( probefile_r ) 
+        probe_r  = ProbeData( probefile_r, withT=True ) 
         fig_name = 'psd_line_5_1221_' + loc
         label_r  = r"$D/{\delta}_0=0.125$"
 
-
-""" #1125
-with timer("reading one probe"):
-    os.chdir( folderpath1 )
-#    probefile_r = 'probe_00176.dat'
-    probefile_r = 'probe_00189.dat'
-    Lsep_r      = 13.12627
-    probe_r = ProbeData( probefile_r ) """
+elif output_nr == 6:
+    # smooth_adiabatic
+    with timer("reading one probe"):
+        os.chdir( datapath6 )
+        if loc == 'sep':      probefile_r = 'probe_00144.dat'
+        elif loc == 'pf_max': probefile_r = 'probe_00158.dat'
+        Lsep_r      = 9.52
+        probe_r  = ProbeData( probefile_r, withT=True )
+        fig_name = 'psd_line_smooth_adiabatic_' + loc
+        label_r  = r"$\mathrm{adiabatic}$"
     
 # =============================================================================
 # start plotting
 # =============================================================================
 
-with timer("clean data"):
-    probe_s.cleandata( starttime=20 )
-    probe_r.cleandata( starttime=20 )
+os.chdir(outpath)
     
 with timer('psd'):
     
-    os.chdir(outpath)
+    probe_s.cleandata( t_start=20.0 )
+    probe_s.get_fluc( 'p' )
+    probe_s.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
     
-    probe_s.psd( 8, 0.5 )
-    probe_r.psd( 8, 0.5 )
+    probe_r.cleandata( t_start=20.0 )
+    probe_r.get_fluc( 'p' )
+    probe_r.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
     
     fig, ax = plt.subplots( figsize=[9,4], constrained_layout=True )
     
-    St_Lsep_s = probe_s.St * Lsep_s
-    St_Lsep_r = probe_r.St * Lsep_r
+    St_Lsep_s = probe_s.psd_df['freq'] * 5.2 / 507 * Lsep_s
+    St_Lsep_r = probe_r.psd_df['freq'] * 5.2 / 507 * Lsep_r
     
     ax.minorticks_on()
     ax.tick_params( which='major',
@@ -164,13 +164,13 @@ with timer('psd'):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
     ax.semilogx(St_Lsep_s, 
-                probe_s.nd_pprime_fwpsd,
+                probe_s.psd_df['pmpsd_p_fluc'],
                 'red', 
                 linewidth=1,
                 label='smooth')
     
     ax.semilogx(St_Lsep_r, 
-                probe_r.nd_pprime_fwpsd,
+                probe_r.psd_df['pmpsd_p_fluc'],
                 'blue', 
                 linewidth=1,
                 label=label_r)
@@ -178,7 +178,6 @@ with timer('psd'):
     ax.set_xlim( [0.01,1] )
     ax.set_ylim( [0.0,0.3] )
     
-#    ax.set_xlabel( r'$St_{sep}$' )
     ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
     ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
 
@@ -207,10 +206,10 @@ with timer('psd'):
 with timer('bin chart'):
     
     dfs = pd.DataFrame( { 'St_Lsep_s':St_Lsep_s,
-                          'psd': probe_s.nd_pprime_fwpsd } )
+                          'psd': probe_s.psd_df['pmpsd_p_fluc'] } )
     
     dfr = pd.DataFrame( { 'St_Lsep_r':St_Lsep_r,
-                          'psd': probe_r.nd_pprime_fwpsd } )
+                          'psd': probe_r.psd_df['pmpsd_p_fluc'] } )
     
     bin_edges = np.logspace( -2, 2, 41, endpoint=True )
     
