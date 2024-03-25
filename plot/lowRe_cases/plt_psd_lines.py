@@ -41,7 +41,7 @@ pure      = False
 # =============================================================================
 
 
-datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/probes/'
+datapath0 = '/home/wencanwu/my_simulation/temp/smooth_wall/probes/probe_x'
 datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/probes/'
 datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/probes/'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/probes/'
@@ -57,7 +57,7 @@ with timer("reading smooth wall probe"):
     os.chdir( datapath0 )
     if loc == 'sep':      probefile_s  = 'probe_00142.dat'
     elif loc == 'pf_max': probefile_s  = 'probe_00156.dat'
-    Lsep_s       = 13.12627403
+    Lsep_s       = 9.628729 #13.12627403
     probe_s = ProbeData( probefile_s, withT=False )
 
 if output_nr == 1:
@@ -66,7 +66,7 @@ if output_nr == 1:
         os.chdir( datapath1 )
         if loc == 'sep':      probefile_r = 'probe_00144.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00152.dat'
-        Lsep_r      = 9.805522
+        Lsep_r      = 9.628729 #9.805522
         probe_r  = ProbeData( probefile_r, withT=False )
         fig_name = 'psd_line_1_1014_' + loc
         label_r  = r"$D/{\delta}_0=2.0$" 
@@ -77,7 +77,7 @@ elif output_nr == 2:
         os.chdir( datapath2 )
         if loc == 'sep':      probefile_r = 'probe_00145.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00154.dat'
-        Lsep_r      = 9.676337
+        Lsep_r      = 9.628729 # 9.676337
         probe_r  = ProbeData( probefile_r, withT=False )
         fig_name = 'psd_line_2_0926_' + loc
         label_r  = r"$D/{\delta}_0=1.0$" 
@@ -88,7 +88,7 @@ elif output_nr == 3:
         os.chdir( datapath3 )
         if loc == 'sep':      probefile_r = 'probe_00135.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00140.dat'
-        Lsep_r      = 11.340638
+        Lsep_r      = 9.628729 #11.340638
         probe_r  = ProbeData( probefile_r, withT=False )
         fig_name = 'psd_line_3_0825_' + loc
         label_r  = r"$D/{\delta}_0=0.5$" 
@@ -99,7 +99,7 @@ elif output_nr == 4:
         os.chdir( datapath4 )
         if loc == 'sep':      probefile_r = 'probe_00118.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00125.dat'
-        Lsep_r      = 13.12627
+        Lsep_r      = 9.628729 #13.12627
         probe_r  = ProbeData( probefile_r, withT=False )
         fig_name = 'psd_line_4_0927_' + loc
         label_r  = r"$D/{\delta}_0=0.25$"
@@ -110,7 +110,7 @@ elif output_nr == 5:
         os.chdir( datapath5 )
         if loc == 'sep':      probefile_r = 'probe_00175.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00195.dat'
-        Lsep_r      = 13.266
+        Lsep_r      = 9.628729 #13.266
         probe_r  = ProbeData( probefile_r, withT=True ) 
         fig_name = 'psd_line_5_1221_' + loc
         label_r  = r"$D/{\delta}_0=0.125$"
@@ -121,7 +121,7 @@ elif output_nr == 6:
         os.chdir( datapath6 )
         if loc == 'sep':      probefile_r = 'probe_00144.dat'
         elif loc == 'pf_max': probefile_r = 'probe_00158.dat'
-        Lsep_r      = 9.52
+        Lsep_r      = 9.628729 #9.52
         probe_r  = ProbeData( probefile_r, withT=True )
         fig_name = 'psd_line_smooth_adiabatic_' + loc
         label_r  = r"$\mathrm{adiabatic}$"

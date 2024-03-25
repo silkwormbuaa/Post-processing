@@ -537,7 +537,7 @@ def parse_float(value, i, index):
 def WriteProbe():
 
     fname = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/inca_probes.inp'
-    outfile = '/home/wencanwu/my_simulation/STBLI_low_Re/240210/test.inp'
+    outfile = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/test.inp'
     probes = ProbeFile()
 #    probes.read( fname )
 #    probes.show()
@@ -553,7 +553,7 @@ def WriteProbe():
         probes.probes.append( probe ) 
     
     z  = 0.65
-    y  = -1.04
+    y  = -0.52
 
     for x in xs:
         
@@ -609,5 +609,5 @@ def Testing():
 
 if __name__ == "__main__":
 
-    Testing()
-    #WriteProbe()
+    #Testing()
+    WriteProbe()

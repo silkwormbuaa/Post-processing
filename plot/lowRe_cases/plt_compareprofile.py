@@ -25,9 +25,11 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-datapath = '/home/wencanwu/my_simulation/temp/DataPost/profile_arrays/'
+outpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/profile_arrays'
 
-cases = ['smooth', '221014', '220926', '220825', '220927',  '221221']
+cases = ['smooth_adiabatic', '221014', '220926', '220825', '220927',  '221221']
+
+datapaths = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/statistics/profile_array' for case in cases]
 
 dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26]
 color    = ['gray','green', 'blue', 'black',                  'red',        'purple']
@@ -45,6 +47,9 @@ shift_y = True
 
 fmt  = '.png' # or '.pdf'
 zoom = False
+
+if zoom: ylim = [-0.1, 2.0]
+else:    ylim = [-0.1, 10.0]
 
 # ----------------------------------------------------------------------
 # >>> define style                                                (Nr.)
@@ -87,13 +92,13 @@ def plt_style( ):
 # =============================================================================
 
 # different locations for all cases
-for i in range(1, 7):
+for i in range(0, 6):
     
     lines = []  
     
     # different lines of different cases on one figure
     for j in range(6):
-        filename = datapath + cases[j] + f'/profile_mean_{i}.dat'
+        filename = datapaths[j] + f'/profile_mean_{i:02d}.dat'
         line = ProfileData(filename)
         line.shift_y( dy[j] )
         
@@ -106,7 +111,7 @@ for i in range(1, 7):
         
     lines[0].label = 'smooth'
     
-    os.chdir(datapath)
+    os.chdir(outpath)
 
 # plot total pressure profile
 # =============================================================================
@@ -130,14 +135,15 @@ for i in range(1, 7):
         
         ax.set_xlabel(r'$p_t/p_{t_0}$')
         ax.set_xlim(0.2, 1.1)
+        ax.set_ylim(ylim[0],ylim[1])
         
         plt_style()
         
         if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
         else:       ax.set_ylabel(r'$y/\delta_0$')
         
-        if zoom: ax.set_ylim(-0.1,2.0); filename = f'pt_{i}_zoom'
-        else:    ax.set_ylim(-0.1,8.0); filename = f'pt_{i}'
+        if zoom: filename = f'pt_{i}_zoom'
+        else:    filename = f'pt_{i}'
         
         if shift_y: filename = filename + '_ys' + fmt
         else:       filename = filename + '_y' + fmt
@@ -172,8 +178,8 @@ for i in range(1, 7):
         if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
         else:       ax.set_ylabel(r'$y/\delta_0$')
         
-        if zoom: ax.set_ylim(-0.1,2.0); filename = f'Tt_{i}_zoom'
-        else:    ax.set_ylim(-0.1,8.0); filename = f'Tt_{i}'
+        if zoom: filename = f'Tt_{i}_zoom'
+        else:    filename = f'Tt_{i}'
         
         if shift_y: filename = filename + '_ys' + fmt
         else:       filename = filename + '_y' + fmt
@@ -210,8 +216,8 @@ for i in range(1, 7):
         if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
         else:       ax.set_ylabel(r'$y/\delta_0$')
         
-        if zoom: ax.set_ylim(-0.1,2.0); filename = f'T_{i}_zoom'
-        else:    ax.set_ylim(-0.1,8.0); filename = f'T_{i}'
+        if zoom: filename = f'T_{i}_zoom'
+        else:    filename = f'T_{i}'
         
         if shift_y: filename = filename + '_ys' + fmt
         else:       filename = filename + '_y' + fmt
@@ -247,8 +253,8 @@ for i in range(1, 7):
         if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
         else:       ax.set_ylabel(r'$y/\delta_0$')
         
-        if zoom: ax.set_ylim(-0.1,2.0); filename = f'tke_{i}_zoom'
-        else:    ax.set_ylim(-0.1,8.0); filename = f'tke_{i}'
+        if zoom: filename = f'tke_{i}_zoom'
+        else:    filename = f'tke_{i}'
         
         if shift_y: filename = filename + '_ys' + fmt
         else:       filename = filename + '_y' + fmt

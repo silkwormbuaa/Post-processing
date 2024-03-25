@@ -25,7 +25,7 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/home/wencanwu/my_simulation/temp/DataPost/streamwise_lines"
+OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/averaged_streamwise_vars"
 
 sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
