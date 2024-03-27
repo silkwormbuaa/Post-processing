@@ -27,9 +27,9 @@ plt.rcParams['font.size']   = 40
 
 OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/averaged_streamwise_vars"
 
-sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
-sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
-sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
+# sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
+# sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
+# sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/postprocess/statistics/wall_projection/streamwise_vars.pkl'
@@ -39,11 +39,11 @@ data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/postprocess/statis
 
 data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-datalist = [data1,   data2,   data3,                   data4,        data5, data6]
+datalist = [data1,   data2,   data3,                   data4,        data5,  data6]
 dy       = [0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
-color    = ['green', 'blue', 'black',                  'red',        'purple', 'yellow']
+color    = ['green', 'blue', 'black',                  'red',        'purple', 'gray']
 label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125',  'awall']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',    'dotted']
+lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',    '--']
 width    = [4.0,      4.0,    4.0,                     4.0,          4.0, 4.0]
 lines = []
 
@@ -51,9 +51,9 @@ plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
-pure = False
+pure = True
 
-fmt =  '.png' # or '.png'
+fmt =  '.pdf' # or '.png'
 
 # - read in data files
 
@@ -69,11 +69,11 @@ for i, datafile in enumerate( datalist ):
     
     lines.append( line )
 
-d0_pwfluc = PlotDataframe(sw_pfluc_file)
-d0_pw     = PlotDataframe(sw_Cp_file)
-d0_f      = PlotDataframe(sw_Cf_file)
-d0_f.shift_x( 50.4, 5.2 )
-d0_pw.shift_x( 50.4, 5.2 )
+# d0_pwfluc = PlotDataframe(sw_pfluc_file)
+# d0_pw     = PlotDataframe(sw_Cp_file)
+# d0_f      = PlotDataframe(sw_Cf_file)
+# d0_f.shift_x( 50.4, 5.2 )
+# d0_pw.shift_x( 50.4, 5.2 )
 
 os.chdir(OutPath)
 
@@ -104,12 +104,12 @@ if plt_pwfluc:
                  label = line.label,
                  linewidth = line.width)
 
-    ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
-            d0_pwfluc.df['<p`>_'],
-            'gray', 
-            label=r'$smooth$', 
-            ls   ='--',
-            linewidth=4)
+    # ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
+    #         d0_pwfluc.df['<p`>_'],
+    #         'gray', 
+    #         label=r'$smooth$', 
+    #         ls   ='--',
+    #         linewidth=4)
 
     # separation locations
 
@@ -217,12 +217,12 @@ if plt_pw:
                 label = line.label,
                 linewidth = line.width)
 
-    ax.plot( d0_pw.df['x_s'], 
-            d0_pw.df['Cp'],
-            'gray', 
-            label=r'$smooth$', 
-            ls   ='--',
-            linewidth=4)
+    # ax.plot( d0_pw.df['x_s'], 
+    #         d0_pw.df['Cp'],
+    #         'gray', 
+    #         label=r'$smooth$', 
+    #         ls   ='--',
+    #         linewidth=4)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
@@ -297,12 +297,12 @@ if plt_Cf:
                 label = line.label,
                 linewidth = line.width)
 
-    ax.plot( d0_f.df['x_s'], 
-            d0_f.df['Cf']*1000,
-            'gray', 
-            label=r'$smooth$', 
-            ls   ='--',
-            linewidth=4)
+    # ax.plot( d0_f.df['x_s'], 
+    #         d0_f.df['Cf']*1000,
+    #         'gray', 
+    #         label=r'$smooth$', 
+    #         ls   ='--',
+    #         linewidth=4)
     
     ax.plot( [-20,12],
              [0,0],

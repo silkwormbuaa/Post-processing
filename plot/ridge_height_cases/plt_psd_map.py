@@ -29,13 +29,13 @@ plt.rcParams['font.family'] = "Times New Roman"
 # Option zone
 # =============================================================================
 
-output_nr = 1              # 1,2,3
+output_nr = 3              # 1,2,3
 pure      = False
 
 # =============================================================================
 
 
-datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/probes/psd_ridge'
+datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/probes/psd_valley'
 datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/probes/psd_ridge'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/probes/psd_ridge'
 

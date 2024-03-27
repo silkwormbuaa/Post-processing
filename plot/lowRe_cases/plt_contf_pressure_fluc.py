@@ -35,7 +35,7 @@ plt.rcParams['font.size']   = 40
 target_dir = '/home/wencanwu/my_simulation/temp/DataPost/Contour_pressure_fluctuation/'
 df_dir     = '/home/wencanwu/my_simulation/temp/DataPost/contour/'
 
-casename = ['221014','220926','220825','220927','221221','smooth']
+casename = ['221014','220926','220825','220927','221221','smooth_adiabatic']
 label    = [r'$D/\delta_0=2.0$',r'$D/\delta_0=1.0$',
             r'$D/\delta_0=0.5$',r'$D/\delta_0=0.25$',
             r'$D/\delta_0=0.125$','smooth']
@@ -46,7 +46,7 @@ col_map     = 'coolwarm'  #'RdBu_r'
 cbar_label  = r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
 cbar_levels = np.linspace(0,0.5,51)
 cbar_ticks  = np.linspace(0,0.5,6)
-figname     = 'contour_pressure_fluctuation'
+figname     = 'contour_pressure_fluctuation_awall'
 format      = '.pdf'
 
 # =============================================================================

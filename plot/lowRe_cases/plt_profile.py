@@ -44,7 +44,7 @@ plt_Mt      = False
 
 pure = False
 
-fmt = '.png'
+fmt = '.pdf'
 
 # =============================================================================
 
@@ -62,7 +62,7 @@ data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postproc
 
 dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
-datalist = [data0, data1,   data2,   data3,                   data4,        data5, data6]
+datalist = [data6, data1,   data2,   data3,                   data4,        data5]
 dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
 color    = ['gray','green', 'blue', 'black',                  'red',        'purple', 'yellow']
 label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125', 'smooth']

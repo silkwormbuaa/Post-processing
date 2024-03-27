@@ -1156,7 +1156,7 @@ def plot_wall_projection( xx, zz, v,
                           col_map=None,
                           cbar_label=None,
                           cbar_levels=None,
-                          pure=False):
+                          pure=True):
     
     """
     only applicable to the ridge type smooth wall case setting.
