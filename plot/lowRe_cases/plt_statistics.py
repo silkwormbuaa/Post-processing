@@ -757,7 +757,7 @@ if plt_Hson :
 #    ax.set_xlabel( r'$\mathrm{D/delta_0}$', fontdict={'size':24} )
     
     ax.set_xlim( [0.0,2.1] )
-    ax.set_ylim( [0.080,0.13] )
+    ax.set_ylim( [0.075,0.125] )
     
 #    ax.grid(visible=True, which='major',axis='both',color='gray',
 #            linestyle='--',linewidth=0.5)
