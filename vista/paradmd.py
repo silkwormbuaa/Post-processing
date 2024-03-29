@@ -900,7 +900,7 @@ class ParaDmd:
             self.alphas = pickle.load( f )
             
         
-        print("Pqs.dat file is read.\n")
+        print("Pqs.pkl file is read.\n")
 
 
 

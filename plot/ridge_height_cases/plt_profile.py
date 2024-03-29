@@ -50,7 +50,7 @@ fmt = '.png'
 
 OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/upstream_profiles'
 
-data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/results/profile'
+data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/statistics/upstream_profile'
 data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/upstream_profile'
 data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/statistics/upstream_profile'
@@ -760,7 +760,7 @@ if plt_RS_DNS:
     else:
         ax.set_xlabel(  r"$y_s^+$",labelpad=-5 )  
         ax.tick_params( axis='x', pad=15 )
-        ax.set_ylabel( r"$\rho \langle u_i'u_j'\rangle /\tau_w$" )
+        ax.set_ylabel( r"$\rho \langle u_i^{'}u_j^{'}\rangle /\tau_w$" )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( prop={'size':22} ) 
 

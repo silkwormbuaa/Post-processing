@@ -28,9 +28,9 @@ plt.rcParams['font.size']   = 40
 
 OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/averaged_streamwise_vars"
 
-sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
-sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
-sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
+# sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
+# sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
+# sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
@@ -38,10 +38,10 @@ data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/statis
 data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-datalist = [data1,   data2,   data3, data4, data5]
-color    = ['black',  'red', 'blue','yellow', 'green' ]
+datalist = [data1,   data2,   data3, data4]   #, data5 ]
+color    = ['black',  'red', 'blue','gray'] #, 'green' ]
 label    = ['0.05',   '0.1',  '0.2', 'smooth_awall','smooth_iwall']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), 'dotted', 'dashed']
+lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), 'dashed', 'dotted']
 width    = [4.0,      4.0,    4.0 , 4.0, 4.0 ]
 lines = []
 
@@ -67,11 +67,11 @@ for i, datafile in enumerate( datalist ):
     
     lines.append( line )
 
-d0_pwfluc = PlotDataframe(sw_pfluc_file)
-d0_pw     = PlotDataframe(sw_Cp_file)
-d0_f      = PlotDataframe(sw_Cf_file)
-d0_f.shift_x( 50.4, 5.2 )
-d0_pw.shift_x( 50.4, 5.2 )
+# d0_pwfluc = PlotDataframe(sw_pfluc_file)
+# d0_pw     = PlotDataframe(sw_Cp_file)
+# d0_f      = PlotDataframe(sw_Cf_file)
+# d0_f.shift_x( 50.4, 5.2 )
+# d0_pw.shift_x( 50.4, 5.2 )
 
 os.chdir(OutPath)
 
@@ -102,12 +102,12 @@ if plt_pwfluc:
                  label = line.label,
                  linewidth = line.width)
 
-    ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
-            d0_pwfluc.df['<p`>_'],
-            'gray', 
-            label=r'$smooth$', 
-            ls   ='--',
-            linewidth=4)
+    # ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
+    #         d0_pwfluc.df['<p`>_'],
+    #         'gray', 
+    #         label=r'$smooth$', 
+    #         ls   ='--',
+    #         linewidth=4)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
@@ -125,7 +125,7 @@ if plt_pwfluc:
                     width=1)
 
     ax.set_xlim([-20,10])
-    ax.set_ylim([0.02,0.1])
+    ax.set_ylim([0.01,0.09])
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #                linestyle='--',linewidth=0.2)
 
@@ -182,12 +182,12 @@ if plt_pw:
                 label = line.label,
                 linewidth = line.width)
 
-    ax.plot( d0_pw.df['x_s'], 
-            d0_pw.df['Cp'],
-            'gray', 
-            label=r'$smooth$', 
-            ls   ='--',
-            linewidth=4)
+    # ax.plot( d0_pw.df['x_s'], 
+    #         d0_pw.df['Cp'],
+    #         'gray', 
+    #         label=r'$smooth$', 
+    #         ls   ='--',
+    #         linewidth=4)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
@@ -262,12 +262,12 @@ if plt_Cf:
                 label = line.label,
                 linewidth = line.width)
 
-    ax.plot( d0_f.df['x_s'], 
-            d0_f.df['Cf']*1000,
-            'gray', 
-            label=r'$smooth$', 
-            ls   ='--',
-            linewidth=4)
+    # ax.plot( d0_f.df['x_s'], 
+    #         d0_f.df['Cf']*1000,
+    #         'gray', 
+    #         label=r'$smooth$', 
+    #         ls   ='--',
+    #         linewidth=4)
     
     ax.plot( [-20,12],
              [0,0],
@@ -291,7 +291,7 @@ if plt_Cf:
                     width=1)
 
     ax.set_xlim([-20.0,10.0])
-    ax.set_ylim([-2.5,4.5])
+    ax.set_ylim([-2.5,5.0])
     
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #                linestyle='--',linewidth=0.2)
@@ -310,7 +310,7 @@ if plt_Cf:
         ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5) 
         ax.tick_params(axis='x', pad=15)
         
-        ax.set_ylabel("$C_fx10^3$")
+        ax.set_ylabel(r"$C_f \times 10^3$")
         ax.tick_params(axis='y', pad=10)
 
 #        ax.legend( ) 

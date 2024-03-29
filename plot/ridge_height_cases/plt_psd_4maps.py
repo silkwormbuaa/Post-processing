@@ -30,14 +30,14 @@ plt.rcParams['font.size']   = 30
 
 outpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/psd'
 
-datapaths = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/postprocess/probes/psd_ridge'
+datapaths = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
 datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/probes/psd_ridge'
 datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/probes/psd_ridge'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/probes/psd_ridge'
 datapaths = [datapaths, datapath1, datapath2, datapath3]
 
 # separation range in normalized unit
-x_separs = [-8.560779, -9.510, -10.65744, -13.85 ]
+x_separs = [-8.42  , -9.510, -10.65744, -13.85 ]
 x_reatts = [1.06795,   1.93,   2.468831,  3.25 ]
 x_ppmaxs = [-7.3333,  -8.7426, -10.0611,  -11.5126 ]
 
