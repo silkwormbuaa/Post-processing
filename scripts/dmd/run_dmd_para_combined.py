@@ -60,7 +60,7 @@ with timer('Get Y snapshots file list, snapshots info and case parameters'):
     
     if paradmd.rank == 0:
         
-        snap_filesY = get_filelist( snap_dir + '/snapshots','snapshot_Y_003.bin')
+        snap_filesY = get_filelist( snap_dir + '/snapshots','snapshot_Y_002.bin')
         
         testfile = snap_filesY[0]
         

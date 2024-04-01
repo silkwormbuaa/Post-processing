@@ -48,13 +48,13 @@ step = 1
 
 t_0 = time.time()
 
-shock_shape_file = snap_dir + '/mean_shock_shape.pkl'
+shock_shape_file = snap_dir + '/shockshape_00.pkl'
 
 with timer('\n - Get snapshots file and grid vector'):
 
 # -- grid of Y
 
-    snap_files = get_filelist( snap_dir + '/snapshots','snapshot_Y_003.bin' )
+    snap_files = get_filelist( snap_dir + '/snapshots','snapshot_Y_002.bin' )
     
     testfile = snap_files[0]
     
@@ -238,12 +238,16 @@ with timer("\n - Generate the interpolation grid "):
     ymax = 41.6
 #    ymax = modes_Z.df_modes['y'].max()
     
-    zmin = modes_Y.df_modes['z'].min()
-    zmax = modes_Y.df_modes['z'].max()
+    zmin = modes_Y.df_modes['z'].min()+0.01
+    zmax = modes_Y.df_modes['z'].max()-0.01
     
-    x = np.linspace( xmin, xmax, 451)
+    x = np.linspace( -115, xmax, 451)
     y = np.linspace( ymin, ymax, 111)
     z = np.linspace( zmin, zmax, 121)
+    
+    print(f"x range is {xmin} to {xmax}")
+    print(f"y range is {ymin} to {ymax}")
+    print(f"z range is {zmin} to {zmax}")
     
     modes_Y.grids_interp = np.meshgrid( x, z )
     modes_Z.grids_interp = np.meshgrid( x, y )
@@ -268,6 +272,20 @@ with timer("\n - Interpolate and output figures "):
     
     xx1, yy1, v1 = modes_Y.interp_recons( header,'Y' )
     xx2, yy2, v2 = modes_Z.interp_recons( header,'Z' )
+    
+    print(v1)
+    print(v2)
+    
+    print(f"v1 max is {np.max(v1)}, v1 min is {np.min(v1)}")
+    print(f"v2 max is {np.max(v2)}, v2 min is {np.min(v2)}")
+    
+    print(f"reconst_00000 min is {np.min(np.array(modes_Y.df_modes[header]).real)}, max is {np.max(np.array(modes_Y.df_modes[header]).real)}")
+    print(f"modes_Y range is x: {np.min(modes_Y.df_modes['x'])}, to {np.max(modes_Y.df_modes['x'])}")
+    print(f"modes_Y range is z: {np.min(modes_Y.df_modes['z'])}, to {np.max(modes_Y.df_modes['z'])}")
+
+    print(f"reconst_00000 min is {np.min(modes_Z.df_modes[header])}, max is {np.max(modes_Z.df_modes[header])}")
+    print(f"modes_Z range is x: {np.min(modes_Z.df_modes['x'])}, to {np.max(modes_Z.df_modes['x'])}")
+    print(f"modes_Z range is y: {np.min(modes_Z.df_modes['y'])}, to {np.max(modes_Z.df_modes['y'])}")
         
     plot_combined_dmd_mode( (xx1,yy1), v1, 'y',
                             (xx2,yy2), v2, 'z',
