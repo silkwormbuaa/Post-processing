@@ -139,6 +139,7 @@ with timer("plotting"):
     u_ref   = float( parameters.get('u_ref') )
     p_ref   = float( parameters.get('p_ref') )
     period  = int(   parameters.get('period') )
+    casecode = parameters.get('tag')
     
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
@@ -172,19 +173,25 @@ with timer("plotting"):
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz.pkl",
                           filename='fric',
-                          cbar_levels=cbar_levels)
+                          cbar_label=r'$C_f\times 10^3$',
+                          cbar_levels=cbar_levels,
+                          label=casecode)
     
     cbar_levels = np.linspace( 1.0, 2.25, 26 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
                           filename='pressure',
-                          cbar_levels=cbar_levels)
+                          cbar_label=r'$p/p_{\infty}$',
+                          cbar_levels=cbar_levels,
+                          label=casecode)
     
     cbar_levels = np.linspace(0.025,0.085,31)
     plot_wall_projection( xx, zz, p_fluc/p_ref,
                           separation="separationline_xz.pkl", 
                           filename='pressure_fluc',
-                          cbar_levels=cbar_levels)
+                          cbar_label=r"$\sqrt{\langle p'p'\rangle}/p_{\infty}$",
+                          cbar_levels=cbar_levels,
+                          label=casecode)
     
 # --- periodic average results
     
@@ -196,13 +203,17 @@ with timer("plotting"):
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz_periodic.pkl",
                           filename='fric_periodic',
-                          cbar_levels=cbar_levels)
+                          cbar_label=r'$C_f\times 10^3$',
+                          cbar_levels=cbar_levels,
+                          label=casecode)
 
     cbar_levels = np.linspace( 1.0, 2.25, 26 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz_periodic.pkl",
                           filename='pressure_periodic',
-                          cbar_levels=cbar_levels)
+                          cbar_label=r'$p/p_{\infty}$',
+                          cbar_levels=cbar_levels,
+                          label=casecode)
 
 # --- output separation area ratio and length ratio distribution
 

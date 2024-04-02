@@ -197,7 +197,7 @@ if plt_u_vd_lw:
     else:
         ax.set_xlabel(  r"$y_s^+$",labelpad=-5 )  
         ax.tick_params( axis='x', pad=15 )
-        ax.set_ylabel( r'$\langle u \rangle ^+_{vd}$' )
+        ax.set_ylabel( r'$\langle u \rangle ^+_{vD}$' )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( prop={'size':30} ) 
 
@@ -274,7 +274,7 @@ if plt_u_vd :
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
-        ax.set_ylabel( r'$\langle u \rangle ^+_{vd}$' )
+        ax.set_ylabel( r'$\langle u \rangle ^+_{vD}$' )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 

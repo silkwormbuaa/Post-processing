@@ -46,8 +46,8 @@ plt_tke  = True
 # shift y? 
 shift_y = True
 
-fmt  = '.pdf' # or '.pdf'
-zoom = False
+fmt  = '.png' # or '.pdf'
+zoom = True
 
 if zoom: ylim = [-0.1, 2.0]
 else:    ylim = [-0.1, 10.0]
@@ -133,22 +133,25 @@ for i in range(0, 6):
                     linestyle=line.lstyle, 
                     linewidth=line.width)
         
-        ax2 = fig.add_axes([0.5,0.46,0.2,0.5])
+        if not zoom:
         
-        for line in lines:
+            ax2 = fig.add_axes([0.5,0.46,0.2,0.5])
             
-            x = line.df['pt']/(45447.289*7.824)
-            if shift_y: y = line.df['ys']/5.2
-            else: y = line.df['y']/5.2
-            
-            ax2.plot(x,y,  
-                    label=line.label, 
-                    color=line.color, 
-                    linestyle=line.lstyle, 
-                    linewidth=line.width)
+            for line in lines:
+                
+                x = line.df['pt']/(45447.289*7.824)
+                if shift_y: y = line.df['ys']/5.2
+                else: y = line.df['y']/5.2
+                
+                ax2.plot(x,y,  
+                        label=line.label, 
+                        color=line.color, 
+                        linestyle=line.lstyle, 
+                        linewidth=line.width)
 
-        ax2.set_xlim(0.9, 1.00)
-        ax2.set_ylim(3.5, 8.5)
+            ax2.set_xlim(0.9, 1.00)
+            ax2.set_ylim(3.5, 8.5)
+            plt_style( ax2 )
         
         ax.set_xlabel(r'$p_t/p_{t_0}$')
         ax.set_xlim(0.2, 1.1)
@@ -160,7 +163,6 @@ for i in range(0, 6):
         ax.plot([0.9, 0.75], [6, 7],'black', lw=2)
         
         plt_style( ax )
-        plt_style( ax2 )
         
         if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
         else:       ax.set_ylabel(r'$y/\delta_0$')

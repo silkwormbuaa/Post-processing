@@ -247,7 +247,7 @@ for i, loc in enumerate(locs):
         cbar = r'$\langle Mach \rangle$'
         cbar_levels = np.linspace(0.0,2.0,21)
         cbar_ticks  = np.linspace(0.0,2.0,5)
-        if casecode == 'smooth_wall':
+        if casecode == 'smooth':
             plot_slicex_stat( zz, yy, mach,
                               tag=tag,
                               filename=casecode+'_Mach_'+str(i+1),
@@ -324,6 +324,8 @@ for i, loc in enumerate(locs):
                           col_map='RdBu_r',
                           title=title)
 
+        print(f"vmax = {np.max(v):10.2f} (vmax/u_ref*100 ={np.max(v/u_ref*100):10.2f})")
+        
 # ------ turbulent kinetic energy
 
         cbar = r'$\langle tke ^+ \rangle \cdot 100$'

@@ -41,6 +41,9 @@ x_separs = [-8.42  , -9.510, -10.65744, -13.85 ]
 x_reatts = [1.06795,   1.93,   2.468831,  3.25 ]
 x_ppmaxs = [-7.3333,  -8.7426, -10.0611,  -11.5126 ]
 
+# labels
+label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
+
 # subplots position and size
 
 fig = plt.figure( figsize=(15, 20) )
@@ -80,6 +83,8 @@ for i in range(4):
     ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=1.0)
     ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=1.0)
     ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=1.0)
+    
+    ax.text( 4.0, 0.02, label[i] )
     
     ax.set_xlim([-12.5, 10.0])
     ax.set_yscale('log')

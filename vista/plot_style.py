@@ -990,7 +990,8 @@ def plot_slicex_stat( zz, yy, v,
                             shrink=0.8,
                             location='left',
                             aspect=10,
-                            ticks=cbar_ticks)
+                            ticks=cbar_ticks,
+                            pad=0.15)
         
         cbar.outline.set_linewidth(2)
         
@@ -1017,13 +1018,18 @@ def plot_slicex_stat( zz, yy, v,
     
 #    plt.axis('scaled')
 
+    ax.set_xlabel(r"$z/\delta_0$")
+    ax.set_ylabel(r"$y_s/\delta_0$")
+    ax.tick_params(axis='both', length=10, width=2, pad=10)
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(2)
+
     if filename:
         if pure: 
             filename+='_pure'
             fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
             
         plt.savefig( 'figx_'+filename )
-        
         
         print(f"{filename} is output.\n")
 
@@ -1156,7 +1162,8 @@ def plot_wall_projection( xx, zz, v,
                           col_map=None,
                           cbar_label=None,
                           cbar_levels=None,
-                          pure=True):
+                          label=None,
+                          pure=False):
     
     """
     only applicable to the ridge type smooth wall case setting.
@@ -1165,7 +1172,7 @@ def plot_wall_projection( xx, zz, v,
 
     if figsize is None:
         if pure: figsize=(30,4) 
-        else:    figsize = (30,10)
+        else:    figsize = (25,10)
 
     fig, ax = plt.subplots( figsize=figsize )
 
@@ -1189,16 +1196,18 @@ def plot_wall_projection( xx, zz, v,
             for line in lines:
                 x_sep = line[:,0]
                 z_sep = line[:,1]
-                ax.plot(x_sep,z_sep,'black',linewidth=0.8)
+                ax.plot(x_sep,z_sep,'black',linewidth=1.2)
                 
     ax.set_ylim([-2.0,2.0])
     ax.set_xlim([-20.0,10.0])
     
     if not pure:
         cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7)
-        cbar.ax.set_ylabel(cbar_label,fontsize=30)
+        cbar.ax.set_ylabel(cbar_label,rotation=0,fontsize=30,labelpad=150,loc='bottom')
         cbar.ax.tick_params(labelsize=30)
-
+        cbar.ax.set_position([0.4,0.7,0.3,0.1])
+        cbar.ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+        
         ax.minorticks_on()
         ax.tick_params( which='major',
                         axis='both',
@@ -1214,6 +1223,12 @@ def plot_wall_projection( xx, zz, v,
         ax.tick_params(axis='x',labelsize=30,pad=10)
         ax.tick_params(axis='y',labelsize=30,pad=10)
         
+        ax.set_xlabel(r"$(x-x_{imp})/\delta_0$")
+        ax.set_ylabel(r"$z/\delta_0$")
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(1.5)
+        
+        ax.text(5,-1,label)
         
         # set axises stay with contour and x,y unit length equal
         

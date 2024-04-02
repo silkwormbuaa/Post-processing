@@ -122,7 +122,7 @@ if plt_DU_vd_plus :
         
     else:
         ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r'$\Delta \langle u \rangle_{vd}^+$', labelpad=0 )
+        ax.set_ylabel( r'$\Delta \langle u \rangle_{vD}^+$', labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
 

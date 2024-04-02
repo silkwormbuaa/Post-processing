@@ -102,6 +102,7 @@ with timer("plotting"):
     u_ref   = float( parameters.get('u_ref') )
     p_ref   = float( parameters.get('p_ref') )
     period  = int(   parameters.get('period') )
+    casecode = parameters.get('tag')
     
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     
@@ -129,18 +130,24 @@ with timer("plotting"):
 
     save_isolines( xx, zz, fric, 1.0, "separationline_xz.pkl")
     
-    
     cbar_levels = np.linspace(-5.0,10.0,31)
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz.pkl",
                           filename='fric',
+                          cbar_label=r'$C_f\times 10^3$',
+                          label=casecode,
                           cbar_levels=cbar_levels)
     
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
+                          cbar_label=r'$p/p_{\infty}$',
+                          label=casecode,
                           filename='pressure' )
-    
-    plot_wall_projection( xx, zz, p_fluc/p_ref, filename='pressure_fluc' )
+
+    plot_wall_projection( xx, zz, p_fluc/p_ref, 
+                          cbar_label=r"$\sqrt{\langle p'p'\rangle}/p_{\infty}$",
+                          label=casecode,
+                          filename='pressure_fluc' )
 
 
 # --- output separation area ratio and length ratio distribution

@@ -36,7 +36,7 @@ casename   = ['smooth_adiabatic','240211','220927','240210']
 
 df_dirs  = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/statistics/xy_planes' for case in casename]
 
-label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$D/\delta_0=0.20$',]
+label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
 
 varname     = 'p`'
 varnorm     = 45447.289
@@ -44,19 +44,19 @@ col_map     = 'coolwarm'  #'RdBu_r'
 cbar_label  = r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
 cbar_levels = np.linspace(0,0.5,51)
 cbar_ticks  = np.linspace(0,0.5,6)
-figname     = 'contour_pressure_fluctuation_awall'
-format      = '.pdf'
+figname0    = 'contour_pressure_fluctuation_awall'
+format      = '.png'
 
 # =============================================================================
 
 for i in range(2):
 
     if   i == 0: 
-        figname = figname + '_ridge'
+        figname = figname0 + '_ridge'
         y = np.linspace(0.01, 8, 201)
         
     elif i == 1: 
-        figname = figname + '_valley'
+        figname = figname0 + '_valley'
         if casename == 'smooth': y = np.linspace(0.01, 8, 201)
         else:                    y = np.linspace(-0.1, 8, 405)
     
