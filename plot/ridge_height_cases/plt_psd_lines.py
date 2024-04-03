@@ -31,14 +31,14 @@ plt.rcParams['font.size']   = 30
 # Option zone
 # =============================================================================
 
-output_nr = 1              # 1,2,3
+output_nr = 3              # 1,2,3
 loc       = 'sep'          # 'sep' or 'pf_max'
 pure      = False
 
 # =============================================================================
 
 
-datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth/probes'
+datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/probes'
 datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/probes/'
 datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/probes/'
 datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/probes/'
@@ -49,10 +49,10 @@ outpath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_h
 # smooth wall
 with timer("reading smooth wall probe"):
     os.chdir( datapath0 )
-    if loc == 'sep':      probefile_s  = 'probe_00142.dat'
-    elif loc == 'pf_max': probefile_s  = 'probe_00156.dat'
-    Lsep_s       = 9.6287     #13.12627403
-    probe_s = ProbeData( probefile_s, withT=False )
+    if loc == 'sep':      probefile_s  = 'probe_00144.dat'
+    elif loc == 'pf_max': probefile_s  = 'probe_00158.dat'
+    Lsep_s       = 9.52     #13.12627403
+    probe_s = ProbeData( probefile_s, withT=True )
 
 if output_nr == 1:
     #240211
@@ -107,6 +107,18 @@ with timer('psd'):
     St_Lsep_s = probe_s.psd_df['freq'] * 5.2 / 507 * Lsep_s
     St_Lsep_r = probe_r.psd_df['freq'] * 5.2 / 507 * Lsep_r
     
+    ax.semilogx(St_Lsep_s, 
+                probe_s.psd_df['pmpsd_p_fluc'],
+                'red', 
+                linewidth=1,
+                label='smooth')
+    
+    ax.semilogx(St_Lsep_r, 
+                probe_r.psd_df['pmpsd_p_fluc'],
+                'blue', 
+                linewidth=1,
+                label=label_r)
+    
     ax.minorticks_on()
     ax.tick_params( which='major',
                     axis='both',
@@ -123,18 +135,6 @@ with timer('psd'):
 #    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
-    ax.semilogx(St_Lsep_s, 
-                probe_s.psd_df['pmpsd_p_fluc'],
-                'red', 
-                linewidth=1,
-                label='smooth')
-    
-    ax.semilogx(St_Lsep_r, 
-                probe_r.psd_df['pmpsd_p_fluc'],
-                'blue', 
-                linewidth=1,
-                label=label_r)
-    
     ax.set_xlim( [0.01,1] )
     ax.set_ylim( [0.0,0.3] )
     
