@@ -131,22 +131,33 @@ with timer("plotting"):
     save_isolines( xx, zz, fric, 1.0, "separationline_xz.pkl")
     
     cbar_levels = np.linspace(-5.0,10.0,31)
+    cbar_ticks  = np.linspace(-5.0,10.0,4)
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz.pkl",
                           filename='fric',
                           cbar_label=r'$C_f\times 10^3$',
                           label=casecode,
+                          cbar_ticks=cbar_ticks,
                           cbar_levels=cbar_levels)
     
+    cbar_levels = np.linspace( 1.0, 2.5, 31 )
+    cbar_ticks  = np.linspace( 1.0, 2.5, 7 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
                           cbar_label=r'$p/p_{\infty}$',
                           label=casecode,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           filename='pressure' )
-
+    
+    cbar_levels = np.linspace(0.020,0.090,36)
+    cbar_ticks  = np.linspace(0.020,0.090,8)
     plot_wall_projection( xx, zz, p_fluc/p_ref, 
+                          separation="separationline_xz.pkl",
                           cbar_label=r"$\sqrt{\langle p'p'\rangle}/p_{\infty}$",
                           label=casecode,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           filename='pressure_fluc' )
 
 
