@@ -668,7 +668,7 @@ class GridBlock:
         self.verbose = verbose
         self.grid_with_solver = grid_with_solver
         
-        len_specname = 19      # should be 19, after INCA 5b66ccd, 7th Feb 2023 
+        len_specname = 15      # should be 19, after INCA 5b66ccd, 7th Feb 2023 
                                # 15 before INCA 5b66ccd, 7th Feb 2023
         
         # index of GridBlock, like first block's grid, second ...

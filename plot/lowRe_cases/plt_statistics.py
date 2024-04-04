@@ -35,6 +35,8 @@ pure =  False  # if pure, without legend and label
 
 show = True
 
+fmt = '.png' # '.pdf'
+
 plt_DU_vd_plus =  True       # roughness function based on vd transformed velocity
 plt_Cf         =  True       # skin friction coefficient
 plt_vbar       =  True       # normalized vertical velocity
@@ -132,7 +134,7 @@ if plt_DU_vd_plus :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
     
     if show: plt.show()
 
@@ -215,7 +217,7 @@ if plt_Cf :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()    
 
@@ -289,7 +291,7 @@ if plt_vbar :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
     
     if show: plt.show()    
 
@@ -371,7 +373,7 @@ if plt_Lsep :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()    
 
@@ -453,7 +455,7 @@ if plt_Asep :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()
 
@@ -538,7 +540,7 @@ if plt_Pmax :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()
 
@@ -621,7 +623,7 @@ if plt_pmax :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()
 
@@ -698,7 +700,7 @@ if plt_Hvor :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()    
 
@@ -781,7 +783,7 @@ if plt_Hson :
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()
     
@@ -857,7 +859,7 @@ if plt_Hstream:
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()
 
@@ -938,7 +940,7 @@ if plt_pt:
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
     
-    plt.savefig( figname+'.pdf' )
+    plt.savefig( figname+fmt )
 
     if show: plt.show()
     

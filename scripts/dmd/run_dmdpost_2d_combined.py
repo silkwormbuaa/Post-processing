@@ -54,7 +54,7 @@ with timer('\n - Get snapshots file and grid vector'):
 
 # -- grid of Y
 
-    snap_files = get_filelist( snap_dir + '/snapshots','snapshot_Y_002.bin' )
+    snap_files = get_filelist( snap_dir + '/snapshots','snapshot_Y_003.bin' )
     
     testfile = snap_files[0]
     
@@ -241,7 +241,7 @@ with timer("\n - Generate the interpolation grid "):
     zmin = modes_Y.df_modes['z'].min()+0.01
     zmax = modes_Y.df_modes['z'].max()-0.01
     
-    x = np.linspace( -115, xmax, 451)
+    x = np.linspace( xmin, xmax, 451)
     y = np.linspace( ymin, ymax, 111)
     z = np.linspace( zmin, zmax, 121)
     

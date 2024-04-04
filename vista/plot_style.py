@@ -363,11 +363,11 @@ def plot_psi_st( st, psi1, psi2=None,
     
     # Labels
     
-#    ax.set_xlabel( r"$St_{L_{sep}}$")
+    ax.set_xlabel( r"$St_{L_{sep}}$")
     ax.set_ylabel( r"$|\psi_{i}|$")
     
     # hide x axis label and tick number
-    ax.xaxis.set_tick_params( which='both', labelbottom=False )
+    ax.xaxis.set_tick_params( which='both', labelbottom=True )
     
     # Plot line
     
@@ -1162,6 +1162,7 @@ def plot_wall_projection( xx, zz, v,
                           col_map=None,
                           cbar_label=None,
                           cbar_levels=None,
+                          cbar_ticks=None,
                           label=None,
                           pure=False):
     
@@ -1202,11 +1203,11 @@ def plot_wall_projection( xx, zz, v,
     ax.set_xlim([-20.0,10.0])
     
     if not pure:
-        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7)
+        cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7, ticks=cbar_ticks)
         cbar.ax.set_ylabel(cbar_label,rotation=0,fontsize=30,labelpad=150,loc='bottom')
         cbar.ax.tick_params(labelsize=30)
         cbar.ax.set_position([0.4,0.7,0.3,0.1])
-        cbar.ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+        # cbar.ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
         
         ax.minorticks_on()
         ax.tick_params( which='major',
