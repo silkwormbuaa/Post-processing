@@ -188,7 +188,7 @@ for i, loc in enumerate( locs ):
         os.system(f"cp {shockshapefile} {target_dir}")
         
         shockDSfile = f'shockDS_{i:02d}.pkl'
-        DS = compute_DS( gradrho )
+        DS = compute_DS( gradrho, min=0.0, max=2.0 )
         save_isolines( xx, yy, DS, 0.2, shockDSfile, clip=True)
         os.system(f"cp {shockDSfile} {target_dir}")
         

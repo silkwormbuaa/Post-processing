@@ -111,8 +111,8 @@ with timer("Interpolate and plot "):
     grad_rho = griddata( (x_slice,y_slice), grad_rho_slice,
                          (xx,yy), method='linear')
     
-    DS = compute_DS( grad_rho )
-   
+    DS = compute_DS( grad_rho, min=0.0, max=2.0 )
+
     save_separation_line( xx,yy,u )
     
     cbar = r'$\nabla{\rho}$'
