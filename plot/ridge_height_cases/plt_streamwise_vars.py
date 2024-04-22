@@ -49,9 +49,11 @@ plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
+figsizes = [15,5]
+
 pure = False
 
-fmt =  '.png' # or '.png'
+fmt =  'taller.png' # or '.png'
 
 # - read in data files
 
@@ -91,7 +93,7 @@ os.chdir(OutPath)
 
 if plt_pwfluc:
 
-    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -171,7 +173,7 @@ if plt_pwfluc:
 
 if plt_pw:
 
-    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -251,7 +253,7 @@ if plt_pw:
 
 if plt_Cf:
     
-    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         

@@ -21,6 +21,8 @@ from   scipy.interpolate import griddata
 source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
+from   vista.plane_analy import compute_DS
+
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
@@ -38,13 +40,13 @@ df_dirs  = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/s
 
 label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
 
-varname     = 'p`'
-varnorm     = 45447.289
-col_map     = 'coolwarm'  #'RdBu_r'
-cbar_label  = r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
-cbar_levels = np.linspace(0,0.5,51)
-cbar_ticks  = np.linspace(0,0.5,6)
-figname0    = 'contour_pressure_fluctuation_awall'
+varname     = 'DS'        # 'u', 'mach', 'grad_rho', 'T', 'tke', 'p`', 'grad_p', 'DS'
+varnorm     = 1.0         # 45447.289
+col_map     = 'Greys_r'   #'RdBu_r'
+cbar_label  = 'DS'        #r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
+cbar_levels = np.linspace( 0.0, 0.8,33) #np.linspace(0,0.5,51)
+cbar_ticks  = np.linspace( 0.0, 0.8,5) #np.linspace(0,0.5,6)
+figname0    = 'contour_DS_awall' #'contour_pressure_fluctuation_awall'
 format      = '.png'
 
 # =============================================================================
@@ -88,7 +90,10 @@ for i in range(2):
         x = np.linspace(-20,10,301)
         xx,yy = np.meshgrid(x, y)
         
-        var_slice     = np.array( df_slice[varname] )
+        if varname == 'DS': 
+            var_slice = compute_DS(np.array( df_slice['grad_rho'] ), min=0.0, max=2.0 )
+            
+        else: var_slice  = np.array( df_slice[varname] )
         
         var = griddata( (x_slice,y_slice), 
                         var_slice/varnorm,
