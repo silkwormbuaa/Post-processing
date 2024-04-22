@@ -1283,6 +1283,7 @@ class StatisticData:
         return     : dataframe of x-z plane data with coordinates and vars\n
         vars      : ['x','z','p','pp','mu','rho','fric','p`']\n
         
+        Only applied to the smooth wall case. Extracting wall variables.
         Need data chunk with <p>,<pp>,<u>,<mu>,<rho> ready.
         Only applicable to smooth wall case.
         """

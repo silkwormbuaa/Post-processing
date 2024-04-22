@@ -540,7 +540,7 @@ class SnapBlock(BlockData):
                                  type, kind)
         
 
-    def init_from_file( self, file, block_list, n_var, vars, snap_with_gx, 
+    def init_from_file( self, file, block_list, var_read, n_var, vars, snap_with_gx, 
                         type, kind=4):
         
 # ----- Initialize attributes of instance.
@@ -568,6 +568,10 @@ class SnapBlock(BlockData):
         self.size = 0
         self.n_var = n_var
         
+        # the variables that will be read; if var_read is None, read all
+        
+        if var_read is None: var_read = vars
+        
         # empty grids points list
         
         n_grid = 0
@@ -575,7 +579,7 @@ class SnapBlock(BlockData):
         
         # empty dataframe for datachunk
 
-        self.df = pd.DataFrame(columns=vars)
+        self.df = pd.DataFrame(columns=var_read)
         
         # matrix of friction projection on x-z plane
 
@@ -672,16 +676,19 @@ class SnapBlock(BlockData):
         if (block_list is None) or (self.num in block_list):
             self.to_fill = True
 
-        # primitive variables 'u,v,w,rho,rhoE'
-        # mean variables = primitive variables + 'p T mu'
+        # primitive variables ['u', 'v', 'w', 'T', 'p'] with current setting
+        # only read variables in var_read
         if self.to_fill:
             
             for var in vars:
             
-                buff = read_flt_bin( file.read(self.np*kind), kind )
-
-                self.df[var] = buff
+                if var in var_read:
+                    buff = read_flt_bin( file.read(self.np*kind), kind )
+                    self.df[var] = buff
                 
+                else:
+                    file.seek( self.np*kind, 1 )
+                    
 # ----- recording and move file pointer
     
         # calculate the block data size in byte

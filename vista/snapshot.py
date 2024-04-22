@@ -175,7 +175,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def read_snapshot( self, block_list=None ):
+    def read_snapshot( self, block_list=None, var_read=None ):
         
         """
         block_list: (optional) if None, read all blocks.
@@ -205,6 +205,7 @@ class Snapshot:
             # different format have different length of header
             fs.seek( self.header_size ) 
 
+            print(self.vars_name)
 # --------- Read body
             
             while not end_of_file:
@@ -213,7 +214,8 @@ class Snapshot:
                 # self.pos is updated inside self.read_snap_block
                  
                 self.snap_data.append( SnapBlock(fs, 
-                                                 block_list, 
+                                                 block_list,
+                                                 var_read, 
                                                  self.n_var,
                                                  self.vars_name,
                                                  self.snap_with_gx,
