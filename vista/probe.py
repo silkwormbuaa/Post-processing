@@ -14,6 +14,7 @@ import matplotlib.pyplot as     plt
 import pickle
 from   vista.colors      import colors as col
 from   .psd              import pre_multi_psd
+from   .psd              import psd_hann
 
 class Probe:
     
@@ -406,7 +407,7 @@ class ProbeData:
     
     
 # ----------------------------------------------------------------------
-# >>> compute probe psd                                   (Nr.)
+# >>> compute probe pre-multiplied psd                                   (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -439,6 +440,40 @@ class ProbeData:
         
         self.psd_df[f'pmpsd_{var}'] = pm_psd
 
+
+# ----------------------------------------------------------------------
+# >>> compute probe psd                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/07  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_psd( self, var, n_seg, overlap, nfft=None ):
+        
+        """
+        var: variable to compute PSD
+        n_seg: number of segments
+        overlap: overlap ratio
+        nfft: int, length of the FFT used, if a zero padded FFT is desired. 
+              If None, the FFT length is nperseg. Defaults to None.
+        
+        """
+        
+        data = np.array( self.df[var] )
+        
+        freq, psd = psd_hann( data, self.fs, n_seg, overlap, nfft )
+        
+        if self.psd_df.empty:
+            self.psd_df['freq'] = freq
+        
+        self.psd_df[f'psd_{var}'] = psd 
 
 # ----------------------------------------------------------------------
 # >>> write psd dataframe                                        (Nr.)

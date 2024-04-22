@@ -34,7 +34,7 @@ plt.rcParams['font.size']   = 30
 
 loc = 'sep'
 independent_len = False
-figname = 'psd_4lines'
+figname = 'psd_4lines_notnorm'
 fmat = '.png'
 cases = [0,1,2,3]
 withT = [True, True, False, True]
@@ -43,6 +43,7 @@ lstyle = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)) ]
 width  = [4.0,   4.0,      4.0,    4.0 ]
 label  = ['smooth', r'H/\delta_0=0.05', r'H/\delta_0=0.10', r'H/\delta_0=0.20']
 showlegend = False
+normalize = False
 
 # =============================================================================
 
@@ -73,7 +74,14 @@ with timer("reading probes"):
         probe = ProbeData( prbfiles[casenr], withT=withT[casenr] )
         probe.cleandata( t_start=20.0 )
         probe.get_fluc( 'p' )
-        probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+        
+        if normalize: 
+            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+            var = 'pmpsd_p_fluc'
+        else:         
+            probe.compute_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+            var = 'psd_p_fluc'
+            
         probes.append( probe )
 
 # =============================================================================
@@ -93,7 +101,7 @@ for casenr in cases:
     
     st = probe.psd_df['freq'] * 5.2 / 507 * lsep
     
-    ax.semilogx( st, probe.psd_df['pmpsd_p_fluc'],
+    ax.semilogx( st, probe.psd_df[var],
                  color=color[casenr], 
                  linestyle=lstyle[casenr], 
                  linewidth=width[casenr], 
@@ -144,7 +152,7 @@ for casenr in cases:
     
     st = probe.psd_df['freq'] * 5.2 / 507 * lsep
     
-    df = pd.DataFrame( { 'st': st, 'psd': probe.psd_df['pmpsd_p_fluc'] } )
+    df = pd.DataFrame( { 'st': st, 'psd': probe.psd_df[var] } )
     bin_edges = np.logspace( -2, 2, 41, endpoint=True )
     
     df_bin = data_bin_avg( df, 'st', bin_edges )
@@ -165,7 +173,7 @@ for casenr in cases:
 
 ax.set_xscale( 'log' )
 ax.set_xlim( [0.01,100] )
-ax.set_ylim( [0.0, 0.5] )
+# ax.set_ylim( [0.0, 0.5] )
 
 ax.minorticks_on()
 ax.tick_params( which='major',
