@@ -205,7 +205,8 @@ class Snapshot:
             # different format have different length of header
             fs.seek( self.header_size ) 
 
-            print(self.vars_name)
+            print(f"...{self.dir[-25:]} has variable {self.vars_name}")
+
 # --------- Read body
             
             while not end_of_file:
@@ -1585,6 +1586,101 @@ class Snapshot:
                 
                 write_flt_bin( np.array(bl_data.df.values).T, f, self.kind )
                 
+
+# ----------------------------------------------------------------------
+# >>> Assign wall_dist field from wd_snap to a real snapshot      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/23  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def assign_wall_dist( self, wd_snap ):
+        
+        """
+        wd_snap : Snapshot instance with wall distance field
+        
+        copy wall distance field from wd_snap to self.snap_data[].df
+        """
+        
+        for snap_bl in self.snap_data:
+            
+            bl_num = snap_bl.num
+            wd_df = wd_snap.snap_data[bl_num-1].df
+            snap_bl.df['wd'] = wd_df['wd']
+
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_bubble_volume( self, G:GridData, cc_df:pd.DataFrame, 
+                               roughwall=False, buff=3 ):
+        
+        """
+        G     : GridData instance
+        cc_df : cutcell dataframe from cutcells_setup.dat
+        
+        return: separation bubble volume
+        Need data chunk with u ready.
+        G should contain cell volume.
+        wd should be contained in snap_data[num-1].df
+        """
+        
+        vol_bubble = 0.0
+        
+        for snap_bl in self.snap_data:
+            
+            bl_num = snap_bl.num
+            g = G.g[bl_num-1]
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+            data_df = snap_bl.df
+            
+            u = np.array(data_df['u']).reshape(npz,npy,npx)
+            
+            identifier = u < 0.0
+            identifier = identifier*1.0   # convert to float
+            
+            vol = g.vol
+            
+            if roughwall:
+            
+                temp_df = cc_df[cc_df['block_number'] == bl_num]
+                wall_dist = np.array( snap_bl.df['wd'] )
+                g.assign_vol_fra( df=temp_df, wall_dist=wall_dist)
+            
+            else:
+                
+                g.assign_vol_fra()
+                
+#            print(np.shape(vol),np.shape(identifier),np.shape(g.vol_fra.T))
+            
+            vol_bubble += np.sum( vol*identifier*(g.vol_fra.T) )
+        
+        self.vol_bubble = vol_bubble
+        
+        return vol_bubble    
+
 
 # ----------------------------------------------------------------------
 # >>> Write snapshot into tecplot szplt format                   (Nr.)

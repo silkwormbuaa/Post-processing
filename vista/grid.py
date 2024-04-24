@@ -260,7 +260,8 @@ class GridData:
 
         self.grouped['lx1'] = self.grouped['lx1'].apply(mean_of_list)
         self.grouped['ly1'] = self.grouped['ly1'].apply(mean_of_list)
-        
+
+
 # ----------------------------------------------------------------------
 # >>> Get Selected Block Grids                                 ( 1-4 )
 # ----------------------------------------------------------------------
@@ -608,6 +609,32 @@ class GridData:
         
         return [x,y,z]
 
+
+# ----------------------------------------------------------------------
+# >>> compute bubble size                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def cell_volume( self ):
+        
+        """
+        compute the bubble size
+        """
+        
+        for gblock in self.g:
+            
+            gblock.vol = np.array(gblock.cell_volume())
+        
+
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
 # ----------------------------------------------------------------------
@@ -924,7 +951,7 @@ class GridBlock:
                 
                 self.vol_fra[i[index]-1,j[index]-1,k[index]-1] = value
             
-            print(f"Block {self.num} cut cell volume fractions are assigned.")
+    #        print(f"Block {self.num} cut cell volume fractions are assigned.")
 
         # df is None: smooth wall ; len(df) ==0 : no cut cell
         elif (df is None) or len(df) == 0:
@@ -975,7 +1002,37 @@ class GridBlock:
                     break
 
         return i,j,k
+
+
+# ----------------------------------------------------------------------
+# >>> compute cell volume                                         (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/22  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def cell_volume( self, buff=3 ):
         
+        """
+        compute cell volume, store results in self.vol.
+        with buffer cells included
+        """
+        
+        hx = self.hx; npx = self.nx + 2*buff
+        hy = self.hy; npy = self.ny + 2*buff
+        hz = self.hz; npz = self.nz + 2*buff
+        
+        self.vol = np.outer( hz, np.outer( hy, hx) ).reshape(npz,npy,npx)
+
+        return self.vol
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
