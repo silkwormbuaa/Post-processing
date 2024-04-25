@@ -611,7 +611,7 @@ class GridData:
 
 
 # ----------------------------------------------------------------------
-# >>> compute bubble size                                        (Nr.)
+# >>> compute cell volume                                  (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -627,7 +627,7 @@ class GridData:
     def cell_volume( self ):
         
         """
-        compute the bubble size
+        compute the volume of each cell
         """
         
         for gblock in self.g:

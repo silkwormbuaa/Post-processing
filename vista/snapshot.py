@@ -1617,7 +1617,7 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> compute bubble volume                                (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -1640,7 +1640,7 @@ class Snapshot:
         return: separation bubble volume
         Need data chunk with u ready.
         G should contain cell volume.
-        wd should be contained in snap_data[num-1].df
+        wd (wall distance) should be contained in self.snap_data[num-1].df
         """
         
         vol_bubble = 0.0
@@ -1667,7 +1667,7 @@ class Snapshot:
             
                 temp_df = cc_df[cc_df['block_number'] == bl_num]
                 wall_dist = np.array( snap_bl.df['wd'] )
-                g.assign_vol_fra( df=temp_df, wall_dist=wall_dist)
+                g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )
             
             else:
                 

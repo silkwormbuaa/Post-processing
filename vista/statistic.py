@@ -1355,6 +1355,95 @@ class StatisticData:
             
 
 # ----------------------------------------------------------------------
+# >>> assign_wall_dist                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def assign_wall_dist( self, block_list, wd_snap ):
+        
+        """
+        block_list : list of selected blocks' numbers
+    
+        wd_snap : Snapshot instance with wall distance field
+        
+        copy wall distance field from wd_snap to self.bl[].df
+        """
+        
+        for num in block_list:
+            self.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
+
+
+# ----------------------------------------------------------------------
+# >>> compute bubble volume                                         (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/04/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_bubble_volume( self, G:GridData, block_list,
+                               cc_df=None, roughwall=False, buff=3 ):
+        
+        """
+        G     : GridData instance
+        cc_df : cutcell dataframe from cutcells_setup.dat
+        
+        return: separation bubble volume
+        Need data chunk with u ready.
+        G should contain cell volume.
+        wd (wall distance) should be contained in self.bl[num-1].df
+        """
+        
+        vol_bubble = 0.0
+        
+        for num in block_list:
+            
+            df = self.bl[num-1].df
+            g = G.g[num-1]
+
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+            u = np.array( df['u'] ).reshape( npz, npy, npx )
+            
+            identifier = u < 0.0
+            identifier = identifier*1.0
+            
+            vol = g.vol
+            
+            if roughwall:
+                
+                temp_df   = cc_df[ cc_df['block_number'] == num ]
+                wall_dist = np.array( df['wd'] )
+                g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+            
+            else:
+                
+                g.assign_vol_fra()
+                
+            vol_bubble += np.sum( vol*identifier*(g.vol_fra.T) )
+            
+        self.vol_bubble = vol_bubble
+        
+        return vol_bubble
+
+# ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
 # ----------------------------------------------------------------------
 #
