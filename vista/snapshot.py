@@ -1630,7 +1630,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def compute_bubble_volume( self, G:GridData, cc_df:pd.DataFrame, 
+    def compute_bubble_volume( self, G:GridData, cc_df=None, 
                                roughwall=False, buff=3 ):
         
         """

@@ -26,6 +26,11 @@ from   vista.tools       import distribute_mpi_work
 from   vista.timer       import timer
 #sys.stdout = Logger( os.path.basename(__file__) )
 
+# =============================================================================
+roughwall = True
+# =============================================================================
+
+
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 n_procs = comm.Get_size()
@@ -51,7 +56,9 @@ if rank == 0:
     grid_file = dirs + '/inca_grid.bin'
     ccfile    = dirs + '/cutcells_setup.dat'
 
-    wd_snap_file  = get_filelist( dirs + '/wall_dist', key='snapshot.bin')[0]
+    if roughwall:
+        wd_snap_file  = get_filelist( dirs + '/wall_dist', key='snapshot.bin')[0]
+        
     snapshotfiles = get_filelist( dirs + '/snapshots', key='snapshot.bin')
 
     with timer('load grid data'):
@@ -60,27 +67,32 @@ if rank == 0:
         grd.cell_volume()
     sys.stdout.flush()
 
-    with timer('load wall distance snapshot data'):
+    if roughwall:
         
-        wd_snap = Snapshot( wd_snap_file )
-        wd_snap.read_snapshot( var_read=['wd'] )
-    sys.stdout.flush()
+        with timer('load wall distance snapshot data'):
+            wd_snap = Snapshot( wd_snap_file )
+            wd_snap.read_snapshot( var_read=['wd'] )
+        sys.stdout.flush()
         
-    with timer("read cutcell info"):
-        
-        cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
-        cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], 
-                    inplace=True)
-    sys.stdout.flush()
+        with timer("read cutcell info"):
+            
+            cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
+            cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], 
+                        inplace=True)
+        sys.stdout.flush()
+    
+    else: cc_df = None
 
 
 # broadcast information to all the processors
 
 comm.barrier()
 grd           = comm.bcast( grd, root=0 )
-wd_snap       = comm.bcast( wd_snap, root=0 )
-cc_df         = comm.bcast( cc_df, root=0 )
 snapshotfiles = comm.bcast( snapshotfiles, root=0 )
+
+if roughwall:
+    wd_snap   = comm.bcast( wd_snap, root=0 )
+    cc_df     = comm.bcast( cc_df, root=0 )
 
 
 # distribute works
@@ -107,7 +119,7 @@ for i,snapshotfile in enumerate(snapshotfiles[i_start:i_end]):
     
     with timer('compute bubble size'):
         
-        vol = snap.compute_bubble_volume( grd, cc_df, roughwall=True )
+        vol = snap.compute_bubble_volume( grd, cc_df=cc_df, roughwall=roughwall )
         
         print(f"snapshot ...{snapshotfile[-25:]} bubble size:{vol:15.4f}")
     
