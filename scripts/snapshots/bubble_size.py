@@ -9,60 +9,125 @@
 @Desc    :   compute the instanteneous separation bubble size considering the cutcells
 '''
 
-
 import os
 import sys
+import numpy             as     np
 import pandas            as     pd
+from   mpi4py            import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.grid        import GridData
 from   vista.snapshot    import Snapshot
-from   vista.directories import Directories
 from   vista.log         import Logger
 from   vista.tools       import get_filelist
+from   vista.tools       import distribute_mpi_work
 from   vista.timer       import timer
-sys.stdout = Logger( os.path.basename(__file__) )
+#sys.stdout = Logger( os.path.basename(__file__) )
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+n_procs = comm.Get_size()
+
+dirs = os.getcwd()
+
+grd = None
+wd_snap = None
+snapshotfiles = None
+cc_df = None
+
+print(f"Rank {rank} is working on {dirs}.")
+sys.stdout.flush()
 
 
-dirs = Directories( '/media/wencanwu/Seagate Expansion Drive1/temp/220927' )
+# root processor read in grid, wall distance snapshot and cutcell info
 
-grid_file = dirs.grid
-ccfile    = dirs.cc_setup
-wd_snap_file = get_filelist( dirs.wall_dist, key='snapshot.bin')[0]
-
-snapshotfiles = get_filelist( dirs.snp_dir, key='snapshot.bin')
-
-with timer('load grid data'):
-    grd = GridData( grid_file )
-    grd.read_grid()
-    grd.cell_volume()
-
-with timer('load wall distance snapshot data'):
+if rank == 0:
     
-    wd_snap = Snapshot( wd_snap_file )
-#    wd_snap.verbose = True
-    wd_snap.read_snapshot( var_read=['wd'] )
-    
-    
-with timer("read cutcell info"):
-    
-    cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
-    cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], 
-                inplace=True)
+    print(f"I am root, now at {dirs}.")
+    sys.stdout.flush()
 
-for snapshotfile in snapshotfiles:
+    grid_file = dirs + '/inca_grid.bin'
+    ccfile    = dirs + '/cutcells_setup.dat'
+
+    wd_snap_file  = get_filelist( dirs + '/wall_dist', key='snapshot.bin')[0]
+    snapshotfiles = get_filelist( dirs + '/snapshots', key='snapshot.bin')
+
+    with timer('load grid data'):
+        grd = GridData( grid_file )
+        grd.read_grid()
+        grd.cell_volume()
+    sys.stdout.flush()
+
+    with timer('load wall distance snapshot data'):
+        
+        wd_snap = Snapshot( wd_snap_file )
+        wd_snap.read_snapshot( var_read=['wd'] )
+    sys.stdout.flush()
+        
+    with timer("read cutcell info"):
+        
+        cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
+        cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], 
+                    inplace=True)
+    sys.stdout.flush()
+
+
+# broadcast information to all the processors
+
+comm.barrier()
+grd           = comm.bcast( grd, root=0 )
+wd_snap       = comm.bcast( wd_snap, root=0 )
+cc_df         = comm.bcast( cc_df, root=0 )
+snapshotfiles = comm.bcast( snapshotfiles, root=0 )
+
+
+# distribute works
+
+n_snaps = len( snapshotfiles )
+i_start, i_end = distribute_mpi_work( n_snaps, n_procs, rank )
+
+snapshot_index = np.zeros(n_snaps, dtype=int)
+bubble_volume = np.zeros(n_snaps, dtype=float)
+
+
+# compute bubble size
+
+for i,snapshotfile in enumerate(snapshotfiles[i_start:i_end]):
+    
+    snapshot_index[i_start+i] = int(snapshotfile[-21:-13])
     
     with timer(f'load snapshot data ...{snapshotfile[-15:]}'):
         
         snap = Snapshot( snapshotfile )
-#        snap.verbose = True
         snap.read_snapshot( var_read=['u'] )
         snap.assign_wall_dist( wd_snap)
+    sys.stdout.flush()
     
     with timer('compute bubble size'):
         
         vol = snap.compute_bubble_volume( grd, cc_df, roughwall=True )
         
         print(f"snapshot ...{snapshotfile[-25:]} bubble size:{vol:15.4f}")
+    
+    bubble_volume[i_start+i] = vol
+    sys.stdout.flush()
+    
+    
+# wait for all the processors to finish computing bubble size
+
+snapshot_index = comm.reduce( snapshot_index, root=0, op=MPI.SUM )
+bubble_volume  = comm.reduce( bubble_volume, root=0, op=MPI.SUM )
+
+
+# root processor write the bubble size to file
+
+if rank == 0:
+    
+    with open('bubble_size.dat','w') as f:
+        
+        f.write("snapshot_index bubble_volume\n")
+        for i in range(n_snaps):
+            f.write(f"{snapshot_index[i]:10d}{bubble_volume[i]:15.4f}\n")
+
