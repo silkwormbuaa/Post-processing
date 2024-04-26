@@ -27,7 +27,7 @@ from   vista.timer       import timer
 #sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
-roughwall = True
+roughwall = False
 # =============================================================================
 
 
@@ -114,7 +114,8 @@ for i,snapshotfile in enumerate(snapshotfiles[i_start:i_end]):
         
         snap = Snapshot( snapshotfile )
         snap.read_snapshot( var_read=['u'] )
-        snap.assign_wall_dist( wd_snap )
+        if roughwall:
+            snap.assign_wall_dist( wd_snap )
     sys.stdout.flush()
     
     with timer('compute bubble size'):
