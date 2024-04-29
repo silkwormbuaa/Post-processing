@@ -1675,7 +1675,9 @@ class Snapshot:
                 
 #            print(np.shape(vol),np.shape(identifier),np.shape(g.vol_fra.T))
             
-            vol_bubble += np.sum( vol*identifier*(g.vol_fra.T) )
+            vol_bubble_block = vol*identifier*(g.vol_fra.T)
+                
+            vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
         
         self.vol_bubble = vol_bubble
         
