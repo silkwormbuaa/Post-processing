@@ -1379,6 +1379,10 @@ class StatisticData:
         """
         
         for num in block_list:
+            
+            if self.bl[num-1].num != wd_snap.snap_data[num-1].num:
+                raise ValueError("block number not match when assigning walldist.")
+            
             self.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
 
 
