@@ -9,7 +9,6 @@
 '''
 
 import numpy             as     np
-
 import pandas            as     pd
 
 from   .io_binary        import read_int_bin
@@ -18,6 +17,7 @@ from   .io_binary        import read_3Dflt_bin
 from   .io_binary        import read_log_bin
 
 from   .grid             import GridBlock
+from   .grid             import GridData
 
 
 # ----------------------------------------------------------------------
@@ -60,12 +60,12 @@ class BlockData:
             self.g = GridBlock()
         
         else:
-            self.init_from_file( file, block_list, n_var, vars, var_indx, verbose )
+            self._init_from_file( file, block_list, n_var, vars, var_indx, verbose )
             
             # init grid points
             self.g = GridBlock()
     
-    def init_from_file( self, file, block_list, n_var, vars, var_indx, verbose ):
+    def _init_from_file( self, file, block_list, n_var, vars, var_indx, verbose ):
         
         # if verbose?
         self.verbose = verbose
@@ -536,11 +536,11 @@ class SnapBlock(BlockData):
             self.g = GridBlock()
         
         else:
-            self.init_from_file( file, block_list, n_var, vars, snap_with_gx,
+            self._init_from_file( file, block_list, n_var, vars, snap_with_gx,
                                  type, kind)
         
 
-    def init_from_file( self, file, block_list, var_read, n_var, vars, snap_with_gx, 
+    def _init_from_file( self, file, block_list, var_read, n_var, vars, snap_with_gx, 
                         type, kind=4):
         
 # ----- Initialize attributes of instance.
@@ -757,4 +757,81 @@ class SnapBlock(BlockData):
         # dataframe
         
         self.df = df
-            
+
+
+# ----------------------------------------------------------------------
+# >>> Class SolutionBlock                                         (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/05/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+class SolutionBlock(BlockData):
+    
+    # size of data type
+    sin, sfl, slg = 4, 8, 4
+    
+    def __init__( self, fs=None, block_list=None, n_vars=None, vars=None, 
+                        G=None, verbose=False ):
+        
+        if fs is None:
+            self.g = GridBlock()
+        
+        else: 
+            self._init_from_file( fs, G, block_list, n_vars, vars, verbose)
+    
+    def _init_from_file( self, fs, G:GridData, block_list:list, n_vars, 
+                               vars:list, verbose):
+
+        # start position of a file pointer
+        pos_start = fs.tell()
+        
+        # empty list for future use
+        self.df = pd.DataFrame(columns=vars)
+        
+        # matrix of friction projection on x-z plane
+        self.df_fric = None
+        
+        # read global block number(index)
+        
+        self.num = read_int_bin( fs.read(self.sin), self.sin )
+        print(self.num)
+        
+        self.g = G.g[self.num-1]
+        
+        self.npx = self.g.nx + 6
+        self.npy = self.g.ny + 6
+        self.npz = self.g.nz + 6
+        self.np  = self.g.np
+        
+        # if this block will be read? by default, to_fill is False
+        self.to_fill = False
+        if self.num in block_list: self.to_fill = True
+        
+        if verbose:
+            print(f"read in block {self.num},",end='')
+            print(f"dimension {self.npx} {self.npy} {self.npz}. {self.to_fill}")
+        
+        # read in data into dataframe
+        if self.to_fill:
+            for var in vars:
+                pos = pos_start + self.sin + vars.index(var)*self.np*self.sfl
+                fs.seek( pos )
+                buff = read_flt_bin( fs.read(self.np*self.sfl), self.sfl )
+                self.df[var] = buff
+        
+        # calculate the block data size in byte
+        
+        self.size = self.np*n_vars*self.sfl + self.sin
+        
+        # move file pointer to the end of the current block
+        
+        fs.seek( pos_start + self.size )
+

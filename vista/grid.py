@@ -683,10 +683,10 @@ class GridBlock:
             self.vol_fra = None
         
         else: 
-            self.init_from_file( file, num, grid_with_solver, verbose )
+            self._init_from_file( file, num, grid_with_solver, verbose )
             self.vol_fra = None
 
-    def init_from_file( self, file, num, grid_with_solver, verbose ):
+    def _init_from_file( self, file, num, grid_with_solver, verbose ):
         
         sin = 4
         sfl = 8
@@ -712,9 +712,11 @@ class GridBlock:
         # read grid dimension 
         # nx, ny, nz do not include buffer cells, 
         # instead, npx,npy,npz should include buffer cells 
+        # self.np number of cells in a block
         self.nx = read_int_bin( file.read(sin), sin )
         self.ny = read_int_bin( file.read(sin), sin )
         self.nz = read_int_bin( file.read(sin), sin )
+        self.np = (self.nx+6)*(self.ny+6)*(self.nz+6)
         
         self.size += 3*sin
         if self.verbose: 
