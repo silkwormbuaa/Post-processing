@@ -1715,6 +1715,7 @@ class Snapshot:
         
         tp.new_layout()
         frame = tp.active_frame()
+        self.vars_name = self.snap_cleandata[0].df.columns.tolist()
         dataset = frame.create_dataset('snapshot',['x','y','z']+self.vars_name)
         
         for i in range( self.n_bl ):
