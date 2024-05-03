@@ -1685,6 +1685,22 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/05/03  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_bubble_volume_pdf
+
+# ----------------------------------------------------------------------
 # >>> Write snapshot into tecplot szplt format                   (Nr.)
 # ----------------------------------------------------------------------
 #
@@ -1742,6 +1758,7 @@ class Snapshot:
                 zone.values(var)[:] = np.array(bl_data.df[var]).reshape(npz,npy,npx).T.ravel()
             
         tp.data.save_tecplot_szl( filename )
+        print(f"Finish writing snapshot to {filename}.")
         
 
 # ----------------------------------------------------------------------
