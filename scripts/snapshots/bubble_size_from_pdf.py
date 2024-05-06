@@ -24,7 +24,7 @@ from   vista.timer       import timer
 from   vista.tools       import get_filelist
 
 # =============================================================================
-roughwall = False
+roughwall = True
 # =============================================================================
 
 workpath = os.getcwd()
@@ -42,7 +42,8 @@ if roughwall:
     with timer("load wall distance snapshot data"):
         wd_snap = Snapshot( wd_snap_file )
         wd_snap.read_snapshot( var_read=['wd'] )
-        
+    
+    snapshot_container.copy_var_from( wd_snap, ['wd'] )
 
 # load the grid data
 
@@ -62,8 +63,14 @@ else: cc_df = None
 
 # compute the bubble size by the definition of 50% pdf
 
+with timer("compute bubble size"):
+    
+    sep1 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, roughwall=roughwall, opt=1 )
+    sep2 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, roughwall=roughwall, opt=2 )
 
-
+    print(f"bubble size by 50% pdf: {sep1:.2f}")
+    print(f"bubble size PDF: {sep2:.2f}")
+    
 # write the PDF file into tecplot szplt format.
 
 snapshot_container.drop_ghost()
