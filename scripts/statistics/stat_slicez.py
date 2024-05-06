@@ -7,7 +7,9 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   get a slice from statistics.bin (only applicable to 3D)
-             df_slice_00 is at the ridge top, df_slice_01 is at the valley
+             df_slice_00 is at the ridge top, df_slice_01 is at the valley.
+             Be careful with the interpolation range for different ridge height 
+             cases!!!
 '''
 
 import os
@@ -146,7 +148,7 @@ for i, loc in enumerate( locs ):
         
         if i == 1:
             if casecode == 'smooth':  y = np.linspace(0.01, 8, 201)
-            else:                     y = np.linspace(-0.1,8, 405)
+            else:                     y = np.linspace(-0.10,8, 405)
             wall=False
         
         xx,yy = np.meshgrid(x,y)
