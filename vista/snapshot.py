@@ -1451,6 +1451,40 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/05/06  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def copy_var_from( self, snap_source, varnames:list):
+
+        """
+        snap_source: Snapshot instance where data is copied from
+        varname    : name of variable to be copied
+        """
+        
+        for snap_bl in self.snap_data:
+            
+            bl_num = snap_bl.num
+            
+            bl_src_indx = snap_source.bl_nums.index(bl_num)
+            bl_src = snap_source.snap_data[bl_src_indx]
+            
+            for var in varnames:
+                snap_bl.df[var] = bl_src.df[var]
+
+        print(f"copied variables {varnames} from snapshot {snap_source.itstep} to snapshot {self.itstep}.\n")
+
+
+# ----------------------------------------------------------------------
 # >>> Write snapshot                                                (Nr.)
 # ----------------------------------------------------------------------
 #
@@ -1685,7 +1719,7 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> compute separatio bubble volume from PDF                    (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -1698,7 +1732,64 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def compute_bubble_volume_pdf
+    def compute_bubble_volume_pdf( self, G:GridData, cc_df=None,
+                                   roughwall=False, opt=1, buff=3 ):
+        
+        """
+        compute separation bubble volume from PDF of separation.
+        
+        Need the pdf_sep ready in self.snap_data[].df
+        """
+        
+        vol_bubble = 0.0
+        
+        for snap_bl in self.snap_data:
+            
+            bl_num = snap_bl.num
+            g = G.g[bl_num-1]
+            
+            npx = g.nx + buff*2
+            npy = g.ny + buff*2
+            npz = g.nz + buff*2
+            
+            data_df = snap_bl.df
+            
+            pdf_sep = np.array(data_df['pdf_sep']).reshape(npz,npy,npx)
+            vol = g.vol
+            
+            if opt == 1:
+                
+                identifier = pdf_sep > 0.5
+                identifier = identifier*1.0   # convert to float
+                
+                if roughwall:
+                    
+                    temp_df = cc_df[cc_df['block_number'] == bl_num]
+                    wall_dist = np.array( snap_bl.df['wd'] )
+                    g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+                
+                else: g.assign_vol_fra()
+            
+                vol_bubble_block = vol*identifier*(g.vol_fra.T)
+                vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+            
+            elif opt == 2:
+                
+                if roughwall:
+                        
+                    temp_df = cc_df[cc_df['block_number'] == bl_num]
+                    wall_dist = np.array( snap_bl.df['wd'] )
+                    g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )    
+        
+                else: g.assign_vol_fra()
+                
+                vol_bubble_block = vol*pdf_sep*(g.vol_fra.T)
+                vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+        
+        self.vol_bubble = vol_bubble
+        
+        return vol_bubble
+    
 
 # ----------------------------------------------------------------------
 # >>> Write snapshot into tecplot szplt format                   (Nr.)
