@@ -7,6 +7,8 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Script of computing the bubble size from the separation pdf.
+
+             Need inca_grid.bin, cutcells_setup.dat, snapshot_container.pkl and wall_dist/ in the same directory.
 '''
 
 

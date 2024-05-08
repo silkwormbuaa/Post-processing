@@ -143,11 +143,11 @@ for i, loc in enumerate( locs ):
         x = np.linspace(-20,10,301)
         
         if i == 0:
-            y = np.linspace(0.01, 8, 201)
+            y = np.linspace(0.005, 8, 201)
             wall = False
         
         if i == 1:
-            if casecode == 'smooth':  y = np.linspace(0.01, 8, 201)
+            if casecode == 'smooth':  y = np.linspace(0.005, 8, 201)
             else:                     y = np.linspace(-0.10,8, 405)
             wall=False
         

@@ -7,6 +7,8 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Script of computing the possibility density function of separation.
+
+             Need inca_grid.bin and snapshots/ in the same directory.
 '''
 
 
