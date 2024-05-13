@@ -51,8 +51,8 @@ plt_pmax       =  False      # maximum pressure fluctuation
 plt_Hvor       =  False      # height of vortex
 plt_Hson       =  False      # height of sonic line
 plt_pt         =  False      # total pressure change
-plt_bubble     =  False      # bubble size
-plt_bubble_dev =  True       # bubble size deviation
+plt_bubble     =  True       # bubble size
+plt_bubble_dev =  False      # bubble size deviation
 
 
 os.chdir(Datapath)
@@ -893,10 +893,10 @@ if plt_bubble:
     fig,ax = plt.subplots( figsize=[8.8,8], 
                            constrained_layout=True )
     
-    bubble_smooth = data.df['bubble_size'].iloc[0]
+    bubble_smooth = data.df['bubble_stat'].iloc[0]
     
     ax.scatter( data.df[xvar].iloc[1:],
-                data.df['bubble_size'].iloc[1:]/bubble_smooth,
+                data.df['bubble_stat'].iloc[1:]/bubble_smooth,
                 color='blue',
                 marker='s',
                 s=200,
@@ -925,9 +925,9 @@ if plt_bubble:
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1.0))
     
     ax.set_xlim( [0.0,0.25] )
-    ax.set_ylim( [0.0,4.0] )
+    ax.set_ylim( [0.0,5.0] )
     
-    figname = 'bubble_size'
+    figname = 'bubble_stat'
     
     if pure:
         figname = figname + '_pure'
@@ -936,7 +936,7 @@ if plt_bubble:
         ax.yaxis.set_ticklabels([])
     else:
         ax.set_xlabel( r"$H/\delta_0$", labelpad=0 )
-        ax.set_ylabel( r"$V/V_{smooth}$", 
+        ax.set_ylabel( r"$\overline{V}/\overline{V}_{smooth}$", 
                        labelpad=0 )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
