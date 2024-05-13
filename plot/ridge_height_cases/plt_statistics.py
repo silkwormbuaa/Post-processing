@@ -41,16 +41,18 @@ fmt = '.png'  # '.pdf'
 
 show = False
 
-plt_DU_vd_plus =  True       # roughness function based on vd transformed velocity
-plt_Cf         =  True       # skin friction coefficient
-plt_vbar       =  True       # normalized vertical velocity
-plt_Lsep       =  True       # length of separation
-plt_Asep       =  True       # area of separation
-plt_Pmax       =  True       # maximum wall pressure
-plt_pmax       =  True       # maximum pressure fluctuation
-plt_Hvor       =  True       # height of vortex
-plt_Hson       =  True       # height of sonic line
-plt_pt         =  True       # total pressure change
+plt_DU_vd_plus =  False      # roughness function based on vd transformed velocity
+plt_Cf         =  False      # skin friction coefficient
+plt_vbar       =  False      # normalized vertical velocity
+plt_Lsep       =  False      # length of separation
+plt_Asep       =  False      # area of separation
+plt_Pmax       =  False      # maximum wall pressure
+plt_pmax       =  False      # maximum pressure fluctuation
+plt_Hvor       =  False      # height of vortex
+plt_Hson       =  False      # height of sonic line
+plt_pt         =  False      # total pressure change
+plt_bubble     =  False      # bubble size
+plt_bubble_dev =  True       # bubble size deviation
 
 
 os.chdir(Datapath)
@@ -870,3 +872,157 @@ if plt_pt:
     plt.savefig( figname+fmt )
 
     if show: plt.show()
+    
+
+# ----------------------------------------------------------------------
+# >>> bubble size                                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/05/13  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_bubble:
+    
+    fig,ax = plt.subplots( figsize=[8.8,8], 
+                           constrained_layout=True )
+    
+    bubble_smooth = data.df['bubble_size'].iloc[0]
+    
+    ax.scatter( data.df[xvar].iloc[1:],
+                data.df['bubble_size'].iloc[1:]/bubble_smooth,
+                color='blue',
+                marker='s',
+                s=200,
+                zorder=10)
+    
+    ax.plot( [0.0,3.0],[1.0,1.0],
+             color='gray',
+             linestyle='--',
+             linewidth=4.0)
+    
+    ax.minorticks_on()
+    
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=3.0)
+    
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1.0))
+    
+    ax.set_xlim( [0.0,0.25] )
+    ax.set_ylim( [0.0,4.0] )
+    
+    figname = 'bubble_size'
+    
+    if pure:
+        figname = figname + '_pure'
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+    else:
+        ax.set_xlabel( r"$H/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r"$V/V_{smooth}$", 
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
+        
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(3)
+        
+        plt.savefig( figname+fmt )
+        
+        if show: plt.show()
+        
+        plt.close()
+        
+
+# ----------------------------------------------------------------------
+# >>> bubble size deviation                                     (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/05/13  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_bubble_dev:
+    
+    fig,ax = plt.subplots( figsize=[8.8,8], 
+                           constrained_layout=True )
+    
+    bubble_smooth = data.df['bubble_size'].iloc[0]
+    
+    ax.scatter( data.df[xvar].iloc[1:],
+                data.df['bubble_dev'].iloc[1:]/data.df['bubble_size'].iloc[1:],
+                color='blue',
+                marker='s',
+                s=200,
+                zorder=10)
+    
+    ax.plot( [0.0,3.0],[data.df['bubble_dev'].iloc[0]/bubble_smooth,data.df['bubble_dev'].iloc[0]/bubble_smooth],
+             color='gray',
+             linestyle='--',
+             linewidth=4.0)
+    
+    ax.minorticks_on()
+    
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=3.0)
+    
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
+    
+    ax.set_xlim( [0.0,0.25] )
+    ax.set_ylim( [0.04,0.12] )
+    
+    figname = 'bubble_dev_norm'
+    
+    if pure:
+        figname = figname + '_pure'
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+    else:
+        ax.set_xlabel( r"$H/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r"$\sigma_{V/\overline{V}}$", 
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
+        
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(3)
+        
+        plt.savefig( figname+fmt )
+        
+        if show: plt.show()
+        
+        plt.close()
