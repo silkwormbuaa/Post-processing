@@ -39,7 +39,7 @@ data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postproc
 data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 datalist = [data1,   data2,   data3, data4]   #, data5 ]
-color    = ['black',  'red', 'blue','gray'] #, 'green' ]
+color    = ['black',  'black', 'black','black'] #, 'green' ]
 label    = ['0.05',   '0.1',  '0.2', 'smooth_awall','smooth_iwall']
 lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), 'dashed', 'dotted']
 width    = [4.0,      4.0,    4.0 , 4.0, 4.0 ]
@@ -49,11 +49,11 @@ plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
-figsizes = [15,5]
+figsizes = [9,8]
 
 pure = False
 
-fmt =  'taller.png' # or '.png'
+fmt =  'square.pdf' # or '.png'
 
 # - read in data files
 

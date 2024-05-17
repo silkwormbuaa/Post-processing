@@ -40,14 +40,14 @@ df_dirs  = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/s
 
 label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
 
-varname     = 'DS'        # 'u', 'mach', 'grad_rho', 'T', 'tke', 'p`', 'grad_p', 'DS'
-varnorm     = 1.0         # 45447.289
-col_map     = 'Greys_r'   #'RdBu_r'
-cbar_label  = 'DS'        #r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
-cbar_levels = np.linspace( 0.0, 0.8,33) #np.linspace(0,0.5,51)
-cbar_ticks  = np.linspace( 0.0, 0.8,5) #np.linspace(0,0.5,6)
+varname     = 'DS'         # 'u', 'mach', 'grad_rho', 'T', 'tke', 'p`', 'grad_p', 'DS'
+varnorm     =  1.0         # 45447.289
+col_map     = 'Greys_r'    #'RdBu_r','Greys_r'
+cbar_label  = 'DS'         # r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'   
+cbar_levels = np.linspace( 0.0, 0.8,33) #np.linspace(0,0.5,51) 
+cbar_ticks  = np.linspace( 0.0, 0.8,5)  #np.linspace(0,0.5,6)  
 figname0    = 'contour_DS_awall' #'contour_pressure_fluctuation_awall'
-format      = '.png'
+format      = '.pdf'
 
 # =============================================================================
 
@@ -106,15 +106,15 @@ for i in range(2):
         
         with open(soniclinefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
-            ax.plot(line[:,0],line[:,1],'magenta',linewidth=1.5)
+            ax.plot(line[:,0],line[:,1],'black',linewidth=2.0,linestyle='--')
         
         with open(seplinefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
-            ax.plot(line[:,0],line[:,1],'red',linewidth=1.5)
+            ax.plot(line[:,0],line[:,1],'black',linewidth=2.5,linestyle=':')
                
         with open(shockshapefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
-            ax.plot(line[:,0],line[:,1],'black',linewidth=1.5)
+            ax.plot(line[:,0],line[:,1],'black',linewidth=2.0)
             
         ax.set_xlim([-15,10])
         ax.set_ylim([0,8])

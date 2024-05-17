@@ -29,6 +29,8 @@ outputpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge
 
 files = [file0, file1, file2, file3]
 tags  = ['smooth_adiabatic', 'H/delta=0.05', 'H/delta=0.1', 'H/delta=0.2'] 
+color    = ['gray','black', 'red', 'blue']
+lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1))]
 
 lines = [LineData(file) for file in files]
 
@@ -43,7 +45,7 @@ with open("bubble_size_analysis.dat",'w') as f:
         
         line.df['time'] = np.linspace(20,61,4101)
         
-        ax.plot( line.df['time'], line.df['bubble_volume'] )
+        ax.plot( line.df['time'], line.df['bubble_volume'], color=color[i], linewidth=1.5)
         
         mean_size = np.mean( line.df['bubble_volume'] )
         std_dev = np.std( line.df['bubble_volume'] )
@@ -59,15 +61,18 @@ plt.close()
 
 # pre-multiplied psd of bubble size
 
+fig, ax = plt.subplots()
 for i,line in enumerate(lines):
 
-    fig, ax = plt.subplots()
+    freq, pm_psd = pre_multi_psd( line.df['bubble_volume'], 100, 10, 0.5 )
     
-    freq, pm_psd = pre_multi_psd( line.df['bubble_volume'], 100, 8, 0.5 )
+    ax.semilogx( freq*5.2/507*9.6287, pm_psd, color=color[i], linestyle=lstyle[i], linewidth=1.5 )
     
-    ax.semilogx( freq*5.2/507*9.6287, pm_psd )
-    ax.set_ylim( [0.0,0.8] )
     
-    plt.savefig(f'{i:02d}.png')
-    plt.show()
-    plt.close()
+ax.set_xlabel(r'$St_{L_{sep}}$')
+ax.set_ylabel(r'$pre-multiplied psd$')
+ax.set_ylim( [0.0,0.8] )
+
+plt.savefig(f'psd_bubble.png')
+plt.show()
+plt.close()
