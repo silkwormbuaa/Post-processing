@@ -40,13 +40,13 @@ df_dirs  = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/s
 
 label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
 
-varname     = 'DS'         # 'u', 'mach', 'grad_rho', 'T', 'tke', 'p`', 'grad_p', 'DS'
-varnorm     =  1.0         # 45447.289
-col_map     = 'Greys_r'    #'RdBu_r','Greys_r'
-cbar_label  = 'DS'         # r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'   
-cbar_levels = np.linspace( 0.0, 0.8,33) #np.linspace(0,0.5,51) 
-cbar_ticks  = np.linspace( 0.0, 0.8,5)  #np.linspace(0,0.5,6)  
-figname0    = 'contour_DS_awall' #'contour_pressure_fluctuation_awall'
+varname     = 'p`'         # 'u', 'mach', 'grad_rho', 'T', 'tke', 'p`', 'grad_p', 'DS'
+varnorm     =  45447.289   # 45447.289, 1.0
+col_map     = 'coolwarm'     #'RdBu_r','Greys_r'
+cbar_label  = r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'      # ,'DS' 
+cbar_levels = np.linspace(0,0.5,51)  # np.linspace( 0.0, 0.8,33)  np.linspace(0,0.5,51) 
+cbar_ticks  = np.linspace(0,0.5,6)   # np.linspace( 0.0, 0.8,5)   np.linspace(0,0.5,6)  
+figname0    = 'contour_pressure_fluctuation_awall_linestyle' # 'contour_pressure_fluctuation_awall','contour_DS_awall'
 format      = '.pdf'
 
 # =============================================================================
@@ -107,10 +107,12 @@ for i in range(2):
         with open(soniclinefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
             ax.plot(line[:,0],line[:,1],'black',linewidth=2.0,linestyle='--')
+#            ax.plot(line[:,0],line[:,1],'magenta',linewidth=2.0)
         
         with open(seplinefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
             ax.plot(line[:,0],line[:,1],'black',linewidth=2.5,linestyle=':')
+#           ax.plot(line[:,0],line[:,1],'red',linewidth=2.5)
                
         with open(shockshapefile,'rb') as f: lines = pickle.load(f)
         for line in lines:

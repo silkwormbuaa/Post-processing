@@ -48,7 +48,7 @@ fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/upstream_profiles'
+OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/upstream_profiles/DLES14_black_white'
 
 data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/statistics/upstream_profile'
@@ -62,7 +62,7 @@ dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
 datalist = [data0, data1,   data2,   data3]
 dy       = [0,     0.156,   0.312,   0.624]
-color    = ['gray','black', 'red',  'blue']
+color    = ['black','black', 'black',  'black']
 label    = ['',    '0.05',   '0.1',  '0.20']
 lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)) ]
 width    = [4.0,   4.0,      4.0,    4.0 ]

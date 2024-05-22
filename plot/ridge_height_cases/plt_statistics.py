@@ -37,11 +37,11 @@ xvar =  'H/δ' # or 'ESy'
 
 pure =  False  # if pure, without legend and label
 
-fmt = '.png'  # '.pdf'
+fmt = '.pdf'  # '.pdf'
 
 show = False
 
-plt_DU_vd_plus =  False      # roughness function based on vd transformed velocity
+plt_DU_vd_plus =  True      # roughness function based on vd transformed velocity
 plt_Cf         =  False      # skin friction coefficient
 plt_vbar       =  False      # normalized vertical velocity
 plt_Lsep       =  False      # length of separation
@@ -51,7 +51,7 @@ plt_pmax       =  False      # maximum pressure fluctuation
 plt_Hvor       =  False      # height of vortex
 plt_Hson       =  False      # height of sonic line
 plt_pt         =  False      # total pressure change
-plt_bubble     =  True       # bubble size
+plt_bubble     =  False      # bubble size
 plt_bubble_dev =  False      # bubble size deviation
 
 
