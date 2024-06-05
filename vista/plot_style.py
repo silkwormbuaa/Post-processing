@@ -1248,7 +1248,52 @@ def plot_wall_projection( xx, zz, v,
         print(f"{filename} is output.\n")
 
     plt.close() 
+
+
+# ----------------------------------------------------------------------
+# >>> plot spanwise distribution of wall-projected variables
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/06/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def plot_spanwise_variables( z, v, ylabel, figname ):
     
+    fig, ax = plt.subplots( figsize=(15,10) )
+    
+    ax.plot( z, v, color='black')
+    
+    ax.set_xlabel(r"$z/\delta_0$")
+    ax.set_ylabel(ylabel)
+    
+    ax.minorticks_on()
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='in',
+                    length=10,
+                    width=2)
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=5,
+                    width=1)
+    
+    ax.set_xlim([0,2])
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(2)
+    
+    plt.savefig(figname)
+    print(f"{figname} is output.\n")
+    plt.close()
+
+
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )

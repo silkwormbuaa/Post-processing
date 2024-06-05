@@ -32,12 +32,13 @@ from   vista.plane_analy import compute_separation_ratio
 from   vista.tools       import get_filelist
 from   vista.tools       import read_case_parameter
 from   vista.plot_style  import plot_wall_projection
+from   vista.plot_style  import plot_spanwise_variables
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-bbox = [ -60.0, 108.0, -1.3, 0.01, -11.0, 11.0]
+bbox = [ -60.0, 108.0, -1.3, 0.01, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
 
 # =============================================================================
 
@@ -225,12 +226,22 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
 
+
 # --- output separation area ratio and length ratio distribution
 
     print(f"separation ratio {compute_separation_ratio(fric):10.5f}.")
-#    
-#    
-    
+
+
+# --- output the spanwise distribution of wall variables, e.g. Cf, Cp, p_fluc
+
+    ylabel = r'$C_f\times 10^3$'
+    figname = 'spanwise_cf.png'
+    plot_spanwise_variables( zz[:,0], fric[:,0]/dyn_p*1000.0, 
+                             ylabel, figname)
+
+
+# --- 
+
 with timer("save spanwise averaged variable distribution along x"):
     
     fric_mean   = np.mean( fric/dyn_p*1000.0, axis=0 )
