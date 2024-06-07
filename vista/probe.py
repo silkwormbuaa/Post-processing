@@ -15,6 +15,7 @@ import pickle
 from   vista.colors      import colors as col
 from   .psd              import pre_multi_psd
 from   .psd              import psd_hann
+from   .tools            import define_wall_shape
 
 class Probe:
     
@@ -577,6 +578,8 @@ def WriteProbe():
 #    probes.read( fname )
 #    probes.show()
 
+# --- probes at the ridges
+
     xs = np.arange( -30.0, 115, 0.43382353 )
     y  = 0.00001
     z  = 0.00001
@@ -587,6 +590,8 @@ def WriteProbe():
         probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
+# --- probes at the valleys
+
     z  = 0.65
     y  = -0.52
 
@@ -596,6 +601,29 @@ def WriteProbe():
         probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
+# --- probes before the interaction region
+
+    x = -53.6
+    zs = np.arange( -10.4, 10.6, 0.2)
+    ys = define_wall_shape( zs, casecode='220927', write=False )
+    
+    for z,y in zip(zs,ys):
+        
+        probe = Probe()
+        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
+        probes.probes.append( probe )
+    
+# --- probes after the interaction region
+
+    x = 76.4
+    
+    for z,y in zip(zs,ys):
+        
+        probe = Probe()
+        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
+        probes.probes.append( probe )
+
+
     probes.write( outfile )
 
 

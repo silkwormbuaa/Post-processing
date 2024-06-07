@@ -316,13 +316,13 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
 
     """
     z_list: np.array of z coordinates
-    case=1 : 1014 case, D/delta = 2
-    case=2 : 0926 case, D/delta = 1
-    case=3 : 0825 case, D/delta = 0.5
-    case=4 : 0927 case, D/delta = 0.25
-    case=5 : 1221 case, D/delta = 0.125
-    case=6 : 0211 case, D/delta = 0.25, A = 0.13
-    case=7 : 0210 case, D/delta = 0.25, A = 0.52
+    case=1 : 221014 case, D/delta = 2
+    case=2 : 220926 case, D/delta = 1
+    case=3 : 220825 case, D/delta = 0.5
+    case=4 : 220927 case, D/delta = 0.25
+    case=5 : 221221 case, D/delta = 0.125
+    case=6 : 240211 case, D/delta = 0.25, A = 0.13
+    case=7 : 240210 case, D/delta = 0.25, A = 0.52
     
     write out wall_X.dat or return list of y
     """
@@ -347,11 +347,9 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     elif Case == 3:   D = 2.6       
     elif Case == 4:   D = 1.3
     # Case 5: the wavelength is smaller and do not have flat valley
-    elif Case == 5:
-        len_w = 0.65
-        D     = 0.65
-    elif Case == 6: D = 1.3; A = 0.13
-    elif Case == 7: D = 1.3; A = 0.52
+    elif Case == 5:   len_w = 0.65; D = 0.65
+    elif Case == 6:   D = 1.3;      A = 0.13
+    elif Case == 7:   D = 1.3;      A = 0.52
     
     y_list = []
     
