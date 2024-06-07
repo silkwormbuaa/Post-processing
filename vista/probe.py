@@ -587,7 +587,7 @@ def WriteProbe():
     for x in xs:
         
         probe = Probe()
-        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
 # --- probes at the valleys
@@ -598,7 +598,7 @@ def WriteProbe():
     for x in xs:
         
         probe = Probe()
-        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
 # --- probes before the interaction region
@@ -610,7 +610,7 @@ def WriteProbe():
     for z,y in zip(zs,ys):
         
         probe = Probe()
-        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe )
     
 # --- probes after the interaction region
@@ -620,7 +620,7 @@ def WriteProbe():
     for z,y in zip(zs,ys):
         
         probe = Probe()
-        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe )
 
 
