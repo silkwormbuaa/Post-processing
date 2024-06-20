@@ -35,19 +35,19 @@ pure =  False  # if pure, without legend and label
 
 show = True
 
-fmt = '.png' # '.pdf'
+fmt = '.pdf' # '.png'
 
 plt_DU_vd_plus =  True       # roughness function based on vd transformed velocity
-plt_Cf         =  True       # skin friction coefficient
-plt_vbar       =  True       # normalized vertical velocity
-plt_Lsep       =  True       # length of separation
-plt_Asep       =  True       # area of separation
-plt_Pmax       =  True       # maximum wall pressure
-plt_pmax       =  True       # maximum pressure fluctuation
-plt_Hvor       =  True       # height of vortex
-plt_Hson       =  True       # height of sonic line
-plt_Hstream    =  True       # height of stream function extreme value
-plt_pt         =  True       # total pressure change
+plt_Cf         =  False       # skin friction coefficient
+plt_vbar       =  False       # normalized vertical velocity
+plt_Lsep       =  False       # length of separation
+plt_Asep       =  False       # area of separation
+plt_Pmax       =  False       # maximum wall pressure
+plt_pmax       =  False       # maximum pressure fluctuation
+plt_Hvor       =  False       # height of vortex
+plt_Hson       =  False       # height of sonic line
+plt_Hstream    =  False       # height of stream function extreme value
+plt_pt         =  False       # total pressure change
 
 
 os.chdir(Datapath)
@@ -108,7 +108,7 @@ if plt_DU_vd_plus :
 #    ax.set_xlabel( r'$\mathrm{D/delta_0}$', fontdict={'size':24} )
     
     ax.set_xlim( [0.0,2.1] )
-    ax.set_ylim( [-0.5,2.5] )
+    ax.set_ylim( [-0.5,2.2] )
     
 #    ax.grid(visible=True, which='major',axis='both',color='gray',
 #            linestyle='--',linewidth=0.5)

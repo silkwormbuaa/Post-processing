@@ -13,6 +13,7 @@ import math
 import shutil
 import numpy             as     np
 import matplotlib.pyplot as     plt
+from   scipy.interpolate import interp1d
 
 # ----------------------------------------------------------------------
 # >>> GET FILE LIST                                               ( 0 )
@@ -784,6 +785,52 @@ def lin_grow(xs,ds,expratio,len=None,upbound=None):
     else: raise ValueError("Please give 'len' OR 'upbound' target array.")
     
     return x, d
+
+
+# ----------------------------------------------------------------------
+# >>> interpolator1d                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/06/20  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def create_linear_interpolator(x, y):
+    """
+    create a linear interpolator function based on the given x and y data.
+
+    inputs:
+    x : array-like
+    y : array-like
+
+    return:
+    function
+    """
+    # create a linear interpolator
+    linear_interp = interp1d(x, y, kind='linear', fill_value="extrapolate")
+
+    def interpolator(x0):
+        """
+        根据给定的 x0 值进行线性插值，返回对应的 y0 值。
+
+        参数:
+        x0 : float or array-like
+            需要插值的 x 坐标值。
+
+        返回:
+        float or array-like
+            对应的插值后的 y 坐标值。
+        """
+        return linear_interp(x0)
+
+    return interpolator
+
 
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)

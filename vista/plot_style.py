@@ -919,7 +919,7 @@ def plot_slicex_stat( zz, yy, v,
                     width=0.0020,
                     angles='xy',
                     scale_units='xy', 
-                    scale = 120,
+                    scale = 60,
                     headwidth=5,
                     headlength=7)
             
