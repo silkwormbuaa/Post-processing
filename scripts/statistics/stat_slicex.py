@@ -155,7 +155,7 @@ for i, loc in enumerate(locs):
         # generate interpolation grid
         
         z = np.linspace(-1.0,1.0, 320)  # must be muliple of 16 for periodic average
-        if casecode == 'smooth_wall':
+        if casecode == 'smooth':
             y = np.linspace(0.02, 1.1, 55)
         else:
             y = np.linspace(-0.1, 1.1, 241)
@@ -205,7 +205,7 @@ for i, loc in enumerate(locs):
         
 # ------ extending corner grid for smooth wall
 
-        if casecode == 'smooth_wall':
+        if casecode == 'smooth':
             
             len_ext = np.shape(zz)[1]
             zz = np.concatenate(([zz[0,:]],zz),axis=0)
@@ -219,6 +219,8 @@ for i, loc in enumerate(locs):
             v  = np.concatenate(([np.zeros(len_ext)],v),axis=0)
             w  = np.concatenate(([np.zeros(len_ext)],w),axis=0)
             p_fluc = np.concatenate(([p_fluc[0,:]],p_fluc),axis=0)
+            Q_cr = np.concatenate(([np.zeros(len_ext)],Q_cr),axis=0)
+            l2 = np.concatenate(([np.zeros(len_ext)],l2),axis=0)
             ke = np.concatenate(([np.zeros(len_ext)],ke),axis=0)
         
         

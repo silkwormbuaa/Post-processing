@@ -866,7 +866,7 @@ def plot_slicex_stat( zz, yy, v,
                       extreme_loc=None,
                       x_lim=None,
                       y_lim=None,
-                      pure=False):
+                      pure=True):
     
     """
     zz,yy are required to be equally spaced by streamplot
@@ -899,7 +899,7 @@ def plot_slicex_stat( zz, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'magenta',linewidth=2.0)
+            ax.plot(x_sonic,y_sonic,'magenta',linewidth=5.0)
     
     
     if separation:
@@ -914,16 +914,16 @@ def plot_slicex_stat( zz, yy, v,
     if vectors is not None:
         
         if arrow:
-            ax.quiver( zz[::6,::5],yy[::6,::5], 
-                    vectors[0][::6,::5], vectors[1][::6,::5],
+            ax.quiver( zz[::8,::6],yy[::8,::6], 
+                    vectors[0][::8,::6], vectors[1][::8,::6],
                     width=0.0020,
                     angles='xy',
                     scale_units='xy', 
-                    scale = 60,
+                    scale = 80,
                     headwidth=5,
                     headlength=7)
             
-            rect = matplotlib.patches.Rectangle( (-0.85,0.875), 0.50,0.15, 
+            rect = matplotlib.patches.Rectangle( (-0.85,0.875), 0.60,0.15, 
                                                 facecolor='white',
                                                 alpha=0.8 ) # transpanrency
             ax.add_patch(rect)
@@ -933,11 +933,11 @@ def plot_slicex_stat( zz, yy, v,
                     width=0.0020,
                     angles='xy',
                     scale_units='xy',
-                    scale = 120,
+                    scale = 80,
                     headwidth=5,
                     headlength=7)
             
-            ax.text( -0.70,0.95,
+            ax.text( -0.61,0.94,
                      r"$3\%u_{\infty}$",
                      va='center',
                      fontsize=textfontsize)
