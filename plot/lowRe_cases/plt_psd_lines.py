@@ -1,29 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   vista_run4.py
-@Time    :   2022/11/10 
+@File    :   plt_psd_lines_free.py
+@Time    :   2024/06/24 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   Scripts for comparing psd line plot
+@Desc    :   Scripts for comparing arbitrary combination of psd lines
 '''
+
 
 import os
 import sys
 import pandas            as     pd
 import numpy             as     np
-from   scipy.interpolate import make_interp_spline
 
-source_dir = os.path.realpath(__file__).split('plot')[0] 
+source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 import matplotlib.pyplot as     plt
-import matplotlib.ticker as     ticker
 from   vista.probe       import ProbeData
 from   vista.timer       import timer
-from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
 from   vista.line        import data_bin_avg
 
 plt.rcParams["text.usetex"] = True
@@ -31,244 +28,187 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size']   = 30
 
-# Option zone
 # =============================================================================
 
-output_nr = 1              # 1,2,3,4,5,6
-loc       = 'sep'          # 'sep' or 'pf_max'
-pure      = False
+loc = 'sep'
+independent_len = True
+outpath         = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/psd'
+figname         = 'psd_lines_034'
+fmt             = '.png'
+cases           = [0,3,4]
+showlegend      = False
+normalize       = True
 
 # =============================================================================
 
+casescodes = ['smooth_adiabatic', '221014', '220926',
+              '220825',           '220927', '221221',
+              'smooth_isothermal']
+sep_files  = ['probe_00144.dat', 'probe_00144.dat', 'probe_00145.dat',
+              'probe_00135.dat',  'probe_00118.dat', 'probe_00175.dat',
+              'probe_00144.dat']
+pfmax_files= ['probe_00158.dat', 'probe_00152.dat', 'probe_00154.dat',
+              'probe_00140.dat', 'probe_00125.dat', 'probe_00195.dat',
+              'probe_00158.dat']
+len_sep    = [9.52,               9.805522,       9.676337,
+              11.340638,          13.12627,       13.266,
+              9.52]
+labels     = ['smooth',              r"$D/{\delta}_0=2.0$",  r"$D/{\delta}_0=1.0$",
+               r"$D/{\delta}_0=0.5$",r"$D/{\delta}_0=0.25$", r"$D/{\delta}_0=0.125$",
+               r"$\mathrm{isothermal}$"]
+lstyles    = ['-',   '-',     '-',    
+              '-',   '-',     '-',
+              '-']
+widths     = [2.0, 2.0, 2.0,
+              2.0, 2.0, 2.0,
+              2.0]
+colors     = ['black', 'yellow', 'gray', 
+              'red',   'blue',   'orange', 
+              'brown']
+withTs     = [True,  False, False, 
+              False, False, True, 
+              False]
+datapaths  = ['/media/wencanwu/Seagate Expansion Drive1/temp/'+casecode+'/probes/' 
+             for casecode in casescodes]
 
-datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/probes/'
-datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/probes/'
-datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/probes/'
-datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/probes/'
-datapath4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/probes/'
-datapath5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/probes/'
-datapath6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/probes'
-
-outpath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/psd'
-
-
-# smooth wall
-with timer("reading smooth wall probe"):
-    os.chdir( datapath0 )
-    if loc == 'sep':      probefile_s  = 'probe_00144.dat'
-    elif loc == 'pf_max': probefile_s  = 'probe_00158.dat'
-    Lsep_s       = 9.52 
-    probe_s = ProbeData( probefile_s, withT=True )
-
-if output_nr == 1:
-    #1014
-    with timer("reading one probe"):
-        os.chdir( datapath1 )
-        if loc == 'sep':      probefile_r = 'probe_00144.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00152.dat'
-        Lsep_r      =  9.805522
-        probe_r  = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_1_1014_' + loc
-        label_r  = r"$D/{\delta}_0=2.0$" 
-
-elif output_nr == 2:
-    #0926
-    with timer("reading one probe"):
-        os.chdir( datapath2 )
-        if loc == 'sep':      probefile_r = 'probe_00145.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00154.dat'
-        Lsep_r      =  9.676337
-        probe_r  = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_2_0926_' + loc
-        label_r  = r"$D/{\delta}_0=1.0$" 
-
-elif output_nr == 3:
-    #0825
-    with timer("reading one probe"):
-        os.chdir( datapath3 )
-        if loc == 'sep':      probefile_r = 'probe_00135.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00140.dat'
-        Lsep_r      =  11.340638
-        probe_r  = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_3_0825_' + loc
-        label_r  = r"$D/{\delta}_0=0.5$" 
-
-elif output_nr == 4:
-    #0927
-    with timer("reading one probe"):
-        os.chdir( datapath4 )
-        if loc == 'sep':      probefile_r = 'probe_00118.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00125.dat'
-        Lsep_r      = 13.12627
-        probe_r  = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_4_0927_' + loc
-        label_r  = r"$D/{\delta}_0=0.25$"
-
-elif output_nr == 5:
-    #1221
-    with timer("reading one probe"):
-        os.chdir( datapath5 )
-        if loc == 'sep':      probefile_r = 'probe_00175.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00195.dat'
-        Lsep_r      = 13.266
-        probe_r  = ProbeData( probefile_r, withT=True ) 
-        fig_name = 'psd_line_5_1221_' + loc
-        label_r  = r"$D/{\delta}_0=0.125$"
-
-elif output_nr == 6:
-    # smooth_adiabatic
-    with timer("reading one probe"):
-        os.chdir( datapath6 )
-        if loc == 'sep':      probefile_r = 'probe_00144.dat'
-        elif loc == 'pf_max': probefile_r = 'probe_00158.dat'
-        Lsep_r      = 9.52 # 9.628729
-        probe_r  = ProbeData( probefile_r, withT=False )
-        fig_name = 'psd_line_smooth_adiabatic_' + loc
-        label_r  = r"$\mathrm{isothermal}$"
-    
-# =============================================================================
-# start plotting
 # =============================================================================
 
-os.chdir(outpath)
+if loc == 'sep':      prbfiles = sep_files
+elif loc == 'pf_max': prbfiles = pfmax_files
+
+probes = []
+
+with timer("reading probes"):
     
-with timer('psd'):
+    for casenr in cases:
+        
+        os.chdir( datapaths[casenr] )
+        probe = ProbeData( prbfiles[casenr], withT=withTs[casenr] )
+        probe.cleandata( t_start=20.0 )
+        probe.get_fluc( 'p' )
+        
+        if normalize: 
+            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+            var = 'pmpsd_p_fluc'
+        else:         
+            probe.compute_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+            var = 'psd_p_fluc'
+            
+        probes.append( probe )
+
+# =============================================================================
+# plot
+# =============================================================================
+
+os.chdir( outpath )
+
+fig, ax = plt.subplots( figsize=(12, 6), constrained_layout=True )
+
+for casenr in cases:
     
-    probe_s.cleandata( t_start=20.0 )
-    probe_s.get_fluc( 'p' )
-    probe_s.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+    probe = probes[cases.index(casenr)]
     
-    probe_r.cleandata( t_start=20.0 )
-    probe_r.get_fluc( 'p' )
-    probe_r.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+    if independent_len: lsep = len_sep[casenr]
+    else:               lsep = len_sep[0]
     
-    fig, ax = plt.subplots( figsize=[9,4], constrained_layout=True )
+    st = probe.psd_df['freq'] * 5.2 / 507 * lsep
     
-    St_Lsep_s = probe_s.psd_df['freq'] * 5.2 / 507 * Lsep_s
-    St_Lsep_r = probe_r.psd_df['freq'] * 5.2 / 507 * Lsep_r
+    ax.semilogx( st, probe.psd_df[var],
+                 color=colors[casenr], 
+                 linestyle=lstyles[casenr], 
+                 linewidth=widths[casenr], 
+                 label=labels[casenr] )
     
-    ax.minorticks_on()
-    ax.tick_params( which='major',
-                    axis='both',
-                    direction='in',
-                    length=15,
-                    width=2,
-                    pad=15)
-    ax.tick_params( which='minor',
-                    axis='both', 
-                    direction='in',
-                    length=10,
-                    width=1)
+ax.minorticks_on()
+ax.tick_params( which='major',
+                axis='both',
+                direction='in',
+                length=15,
+                width=2,
+                pad=15)
+ax.tick_params( which='minor',
+                axis='both', 
+                direction='in',
+                length=10,
+                width=1)
 
 #    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+#    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
-    ax.semilogx(St_Lsep_s, 
-                probe_s.psd_df['pmpsd_p_fluc'],
-                'red', 
-                linewidth=1,
-                label='smooth')
+# ax.set_xlim( [0.01,1] )
+# ax.set_ylim( [0.0,0.3] )
+
+ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
+ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
+
+ax.spines[:].set_color('black')
+ax.spines[:].set_linewidth(2)
+
+if showlegend: ax.legend()
+
+plt.savefig( figname + fmt )
+plt.close()
     
-    ax.semilogx(St_Lsep_r, 
-                probe_r.psd_df['pmpsd_p_fluc'],
-                'blue', 
-                linewidth=1,
-                label=label_r)
-    
-    ax.set_xlim( [0.01,1] )
-    ax.set_ylim( [0.0,0.3] )
-    
-    ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
-    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
-
-    if not pure:
-        ax.legend() 
-    
-#    ax.grid(visible=True, which='both',axis='both',color='gray',
-#            linestyle='--',linewidth=0.5)
-        
-    if pure:
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
-        fig_name = fig_name + '_pure'
-
-    # set the bounding box of axes
-    ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(2)
-
-    plt.savefig( fig_name+'zoomed_padded' )
-#    plt.show()
-    plt.close()
-
 # =============================================================================
-# plotting bin chart
+# plot bin chart
 # =============================================================================
 
-with timer('bin chart'):
+fig, ax = plt.subplots( figsize=(12, 6), constrained_layout=True )
+
+for casenr in cases:
     
-    dfs = pd.DataFrame( { 'St_Lsep_s':St_Lsep_s,
-                          'psd': probe_s.psd_df['pmpsd_p_fluc'] } )
+    probe = probes[cases.index(casenr)]
     
-    dfr = pd.DataFrame( { 'St_Lsep_r':St_Lsep_r,
-                          'psd': probe_r.psd_df['pmpsd_p_fluc'] } )
+    if independent_len: lsep = len_sep[casenr]
+    else:               lsep = len_sep[0]
     
+    st = probe.psd_df['freq'] * 5.2 / 507 * lsep
+    
+    df = pd.DataFrame( { 'st': st, 'psd': probe.psd_df[var] } )
     bin_edges = np.logspace( -2, 2, 41, endpoint=True )
     
-    dfsbin = data_bin_avg( dfs, 'St_Lsep_s', bin_edges )
-    dfrbin = data_bin_avg( dfr, 'St_Lsep_r', bin_edges )
+    df_bin = data_bin_avg( df, 'st', bin_edges )
     
     # clear data
     
-    dfsbin.dropna( inplace=True )
-    dfrbin.dropna( inplace=True )
+    df_bin.dropna( inplace=True )
     
-    # plot
-    
-    fig, ax = plt.subplots( figsize=[10,6], constrained_layout=True )
+    # plot    
     
     barwidth = np.diff( bin_edges )
     
-#    ax.bar( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], width=barwidth, alpha=0.5, color='gray', label='smooth' )
-#    ax.bar( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], width=barwidth, alpha=0.5, color='blue', label=label_r )
+    ax.plot( df_bin['st_mid'], df_bin['psd'], 
+             color=colors[casenr], 
+             linewidth=widths[casenr], 
+             linestyle=lstyles[casenr],
+             label=labels[casenr] )
 
-#    spl = make_interp_spline( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], k=3 )
-#    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace(-2,2,100 )), color='red', linewidth=2, label='smooth' )
+ax.set_xscale( 'log' )
+ax.set_xlim( [0.01,100] )
+# ax.set_ylim( [0.0, 0.5] )
 
-#    spl = make_interp_spline( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], k=3 )
-#    ax.plot( np.logspace( -2,2,100 ), spl(np.logspace( -2,2,100 )), color='blue', linewidth=2, label=label_r )
-    
-    ax.plot( dfsbin['St_Lsep_s_mid'], dfsbin['psd'], color='red', linewidth=2, label='smooth' )
-    ax.plot( dfrbin['St_Lsep_r_mid'], dfrbin['psd'], color='blue', linewidth=2, label=label_r )
-    
-    ax.set_xscale( 'log' )
-    ax.set_xlim( [0.01,100] )
-    ax.set_ylim( [0.0, 0.4] )
+ax.minorticks_on()
+ax.tick_params( which='major',
+                axis='both',
+                direction='in',
+                length=15,
+                width=2,
+                pad=15)
+ax.tick_params( which='minor',
+                axis='both', 
+                direction='in',
+                length=10,
+                width=1)
 
-    ax.minorticks_on()
-    ax.tick_params( which='major',
-                    axis='both',
-                    direction='in',
-                    length=15,
-                    width=2,
-                    pad=15)
-    ax.tick_params( which='minor',
-                    axis='both', 
-                    direction='in',
-                    length=10,
-                    width=1)
+ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
+ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
+
+ax.spines[:].set_color('black')
+ax.spines[:].set_linewidth(2)
+
+if showlegend: ax.legend()
+
+plt.savefig( figname + '_bin' + fmt )
+plt.close()    
     
-    ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
-    ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
-    
-    if not pure: ax.legend()
-    
-    # set the bounding box of axes
-    ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(2)
-    
-    plt.savefig( fig_name+'_bin_line_nospline' )
-    plt.show()
-    plt.close()    
-    
-    
-    
-    
+
