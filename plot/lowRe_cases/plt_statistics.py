@@ -37,7 +37,7 @@ show = True
 
 fmt = '.pdf' # '.png'
 
-plt_DU_vd_plus =  True       # roughness function based on vd transformed velocity
+plt_DU_vd_plus =  False       # roughness function based on vd transformed velocity
 plt_Cf         =  False       # skin friction coefficient
 plt_vbar       =  False       # normalized vertical velocity
 plt_Lsep       =  False       # length of separation
@@ -48,6 +48,7 @@ plt_Hvor       =  False       # height of vortex
 plt_Hson       =  False       # height of sonic line
 plt_Hstream    =  False       # height of stream function extreme value
 plt_pt         =  False       # total pressure change
+plt_gamma      =  True        # gamma, secondary flow intensity by Guo et al. 2022
 
 
 os.chdir(Datapath)
@@ -944,3 +945,77 @@ if plt_pt:
 
     if show: plt.show()
     
+
+# ----------------------------------------------------------------------
+# >>> Plot gamma                                                 (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/06/24  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_gamma :
+    
+    fig, ax = plt.subplots( figsize=[8,8], 
+                            constrained_layout=True )
+
+    ax.scatter( data.df[xvar].iloc[1:], 
+                data.df['gamma'].iloc[1:]*1000, 
+                color='blue',
+                marker='s' ,
+                s = 200 )
+
+    ax.minorticks_on()
+    
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=20,
+                   width=3.0)
+    
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.5))
+    
+#    ax.set_xscale( "log" )
+#    ax.set_xlabel( r'$\mathrm{D/delta_0}$', fontdict={'size':24} )
+    
+    ax.set_xlim( [0.0,2.1] )
+    ax.set_ylim( [0.0,7.5] )
+    
+#    ax.grid(visible=True, which='major',axis='both',color='gray',
+#            linestyle='--',linewidth=0.5)
+    
+    figname = "gamma"
+    
+    if pure:
+        figname = figname + '_pure'
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        
+    else:
+        ax.set_xlabel( r"$D/\delta_0$", labelpad=0 )
+        ax.set_ylabel( r'$\Gamma \cdot 100$', 
+                       labelpad=0 )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname+fmt )
+    
+    if show: plt.show()    
