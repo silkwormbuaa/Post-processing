@@ -899,7 +899,7 @@ def plot_slicex_stat( zz, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'magenta',linewidth=5.0)
+            ax.plot(x_sonic,y_sonic,'lime',linewidth=5.0)
     
     
     if separation:

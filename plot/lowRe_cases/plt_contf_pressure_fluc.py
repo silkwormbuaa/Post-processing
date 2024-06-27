@@ -46,7 +46,7 @@ col_map     = 'coolwarm'  #'RdBu_r'
 cbar_label  = r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
 cbar_levels = np.linspace(0,0.5,51)
 cbar_ticks  = np.linspace(0,0.5,6)
-figname     = 'contour_pressure_fluctuation_awall_red'
+figname     = 'contour_pressure_fluctuation_awall_lime'
 format      = '.png'
 
 # =============================================================================
@@ -104,7 +104,7 @@ for i in range(1):
         
         with open(soniclinefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
-            ax.plot(line[:,0],line[:,1],'magenta',linewidth=3)
+            ax.plot(line[:,0],line[:,1],'lime',linewidth=3)
         
         with open(seplinefile,'rb') as f: lines = pickle.load(f)
         for line in lines:
