@@ -24,6 +24,7 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line         import ProfileData
+from   vista.directories  import create_folder
 from   vista.tools        import create_linear_interpolator
 
 plt.rcParams["text.usetex"] = True
@@ -33,7 +34,7 @@ plt.rcParams['font.size']   = 40
 
 fmt = '.png'
 
-OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profile'
+OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profile/rf/'
 
 data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/results/profile'
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/postprocess/statistics/upstream_profile'
@@ -43,13 +44,56 @@ data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statis
 data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/postprocess/statistics/upstream_profile'
 data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
 
+# option zone
+# =============================================================================
+
+# opt = 1, shift wall to valley
+# opt = 2, shift wall coordinate to roughness elevation height
+# opt = 3, do not shift, origin at the top
+
+opt   = 3
+scale = 1    # 1 inner scale; 2 outer scale
+var   = 'u+_vd'  # 'u+' 'u+_vd'
+
+if   var == 'u':
+    ylim = [0,1.1]
+    ylabel = r'$\langle u \rangle /u_{\infty}$'
+else:
+    ylim = [0,23]
+    if var == 'u+': ylabel = r'$\langle u \rangle ^+$'
+    elif var == 'u+_vd': ylabel = r'$\langle u \rangle ^+_{vD}$'
+
+
+if   scale == 1: 
+    figname = var + '_in'
+    xlim = [1,1200]; xlim_rf = [20,400]
+    xlabel = "$y_s^+$"
+    
+elif scale == 2: 
+    figname = var + '_out'
+    xlim = [0,1.5]; xlim_rf = [0,1.2]
+    xlabel = "$y_s/\delta_0$"
+    
+if   opt == 1: 
+    dy = [0.0, 0.52,  0.52,  0.52,  0.52,  0.52, 0.0]
+    figname += '_valley'
+elif opt == 2: 
+    dy = [0.0, 0.494, 0.468, 0.416, 0.312, 0.26, 0.0]
+    figname += '_elevation'
+elif opt == 3: 
+    dy = [0.0, 0.0,   0.0,   0.0,   0.0,   0.0,  0.0]
+    figname += '_top'
+
 
 datalist = [data6, data1,   data2,   data3,                   data4,        data5]
-dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
 color    = ['gray','green', 'blue', 'black',                  'red',        'purple', 'yellow']
 label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125', 'smooth']
 lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',     'dotted']
 width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0,     4.0]
+
+# =============================================================================
+
+
 lines = []
 
 for i, datapath in enumerate(datalist):
@@ -75,23 +119,29 @@ for i, datapath in enumerate(datalist):
     
 lines[0].label = 'smooth'
 
+create_folder( OutPath )
 os.chdir( OutPath )
 
-    
 fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
 
 for line in lines:
     
-    ax.plot( line.df['ys+'], 
-                line.df['u+_vd'],
-                line.color,   
-                label = line.label, 
-                ls    = line.lstyle,
-                linewidth = line.width)
+    if scale == 1: 
+        wallnorm = line.df['ys+']
+        varnorm  = line.df[var]
+        
+    elif scale == 2: 
+        wallnorm = line.df['ys']/5.2
+        varnorm  = line.df[var]/507.0
+    
+    ax.plot( wallnorm, 
+             varnorm,
+             line.color,   
+             label = line.label, 
+             ls    = line.lstyle,
+             linewidth = line.width)
 
 ax.minorticks_on()
-
-#ax.set_xscale( "symlog", linthresh = 1 )
 
 ax.tick_params(which='major',
                 axis='both',
@@ -104,24 +154,17 @@ ax.tick_params(which='minor',
                 length=10,
                 width=1.5)
 
-ax.set_xlim( [200,1200] )
-ax.set_ylim( [17,23] )
-
-x_minor = matplotlib.ticker.LogLocator( 
-                    base=10.0, subs = np.arange(1.0,10.0) )
-
-ax.xaxis.set_minor_locator( x_minor )
-
-
-#    ax.grid(visible=True, which='both',axis='both',color='gray',
-#            linestyle='--',linewidth=0.2)
+if scale == 1:   
+    ax.set_xscale( "symlog", linthresh = 1 )
+#    x_minor = matplotlib.ticker.LogLocator( base=10.0, subs = np.arange(0.1,10.0) )
+#    ax.xaxis.set_minor_locator( x_minor )
 
 # Adjust the spacing around the plot to remove the white margin
 
-figname = 'Uvd_wake'
-
-ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
-ax.set_ylabel( r'$\langle u \rangle ^+_{vD}$' )
+ax.set_xlim( xlim )
+ax.set_ylim( ylim )
+ax.set_xlabel( xlabel, labelpad=-5 )  
+ax.set_ylabel( ylabel )
 ax.tick_params( axis='x', pad=15 )
 ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
@@ -132,6 +175,11 @@ ax.spines[:].set_linewidth(3)
 
 plt.savefig( figname + fmt )
 plt.show()
+
+
+# exit the program if using u 
+
+if var == 'u': sys.exit()
 
 # ----------------------------------------------------------------------
 # >>> compute roughness function                                 (Nr.)
@@ -147,7 +195,7 @@ plt.show()
 #
 # ----------------------------------------------------------------------
 
-ys = np.linspace(500,1200,301)
+ys = np.linspace(400,1200,381)
 uvd_int = []
 rfs = []
 
@@ -203,43 +251,46 @@ for i,rf in enumerate(rfs):
              lines[i+1].color,
              label = lines[i+1].label,
              ls    = lines[i+1].lstyle,
-             linewidth = lines[i+1].width)
+             linewidth = lines[i+1].width )
     
 ax.minorticks_on()
 ax.tick_params(which='major',
-                axis='both',
-                direction='in',
-                length=20,
-                width=2.0)
+               axis='both',
+               direction='in',
+               length=20,
+               width=2.0)
 ax.tick_params(which='minor',
-                axis='both', 
-                direction='in',
-                length=10,
-                width=1.5)
+               axis='both', 
+               direction='in',
+               length=10,
+               width=1.5)
 
-ax.set_xlim( [500,1200] )
-#ax.set_ylim( [17,23] )
+if scale == 1:
+    ax.set_xlim( [400,1200] )
+    ax.set_ylim( [-2,4] )
+    xlabel  = "$y_s^+$"
 
-x_minor = matplotlib.ticker.LogLocator( 
-                    base=10.0, subs = np.arange(1.0,10.0) )
-
-ax.xaxis.set_minor_locator( x_minor )
+elif scale == 2:
+    ax.set_xlim( [0,1.5] )
+    ax.set_ylim( [-2,4] )
+    xlabel = "$y_s/\delta_0$"
+    
+# ax.set_xscale( "symlog", linthresh = 1 )
+# x_minor = matplotlib.ticker.LogLocator( 
+#                     base=10.0, subs = np.arange(1.0,10.0) )
+# ax.xaxis.set_minor_locator( x_minor )
 
 # Adjust the spacing around the plot to remove the white margin
 
-figname = 'roughness_function'
+figname += '_rf_wake'
 
-ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+ax.set_xlabel( xlabel, labelpad=-5 )  
 ax.set_ylabel( r'$\Delta \langle u \rangle ^+_{vD}$' )
 ax.tick_params( axis='x', pad=15 )
 ax.tick_params( axis='y', pad=10 )
-#        ax.legend( ) 
 
 # set the bounding box of axes
 ax.spines[:].set_color('black')
 ax.spines[:].set_linewidth(3)
-
 plt.savefig( figname + fmt )
 plt.show()
-
-
