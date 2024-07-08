@@ -51,7 +51,7 @@ data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postproc
 # opt = 2, shift wall coordinate to roughness elevation height
 # opt = 3, do not shift, origin at the top
 
-opt   = 3
+opt   = 1
 scale = 1    # 1 inner scale; 2 outer scale
 var   = 'u+_vd'  # 'u+' 'u+_vd'
 
@@ -66,8 +66,8 @@ else:
 
 if   scale == 1: 
     figname = var + '_in'
-    xlim = [1,1200]; xlim_rf = [20,400]
-    xlabel = "$y_s^+$"
+    xlim = [1,1000]; xlim_rf = [20,400]
+    xlabel = "$y_{sv}^+$"
     
 elif scale == 2: 
     figname = var + '_out'
@@ -156,8 +156,8 @@ ax.tick_params(which='minor',
 
 if scale == 1:   
     ax.set_xscale( "symlog", linthresh = 1 )
-#    x_minor = matplotlib.ticker.LogLocator( base=10.0, subs = np.arange(0.1,10.0) )
-#    ax.xaxis.set_minor_locator( x_minor )
+    x_minor = matplotlib.ticker.LogLocator( base=10.0, subs = np.arange(1.0,10.0) )
+    ax.xaxis.set_minor_locator( x_minor )
 
 # Adjust the spacing around the plot to remove the white margin
 

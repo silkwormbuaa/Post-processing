@@ -35,17 +35,17 @@ pure =  False  # if pure, without legend and label
 
 show = True
 
-fmt = '.pdf' # '.png'
+fmt = '.png' # '.png'
 
 plt_DU_vd_plus =  False       # roughness function based on vd transformed velocity
 plt_Cf         =  False       # skin friction coefficient
-plt_vbar       =  False       # normalized vertical velocity
+plt_vbar       =  True        # normalized vertical velocity
 plt_Lsep       =  False       # length of separation
 plt_Asep       =  False       # area of separation
 plt_Pmax       =  False       # maximum wall pressure
 plt_pmax       =  False       # maximum pressure fluctuation
-plt_Hvor       =  False       # height of vortex
-plt_Hson       =  False       # height of sonic line
+plt_Hvor       =  True        # height of vortex
+plt_Hson       =  True        # height of sonic line
 plt_Hstream    =  False       # height of stream function extreme value
 plt_pt         =  False       # total pressure change
 plt_gamma      =  True        # gamma, secondary flow intensity by Guo et al. 2022
@@ -74,8 +74,7 @@ os.chdir('./statistics')
 
 if plt_DU_vd_plus :
     
-    fig, ax = plt.subplots( figsize=[8,8], 
-                            constrained_layout=True )
+    fig, ax = plt.subplots( figsize=[8,8], constrained_layout=True )
 
     ax.scatter( data.df[xvar].iloc[1:], 
                 data.df['DU_vd+'].iloc[1:],
@@ -291,6 +290,8 @@ if plt_vbar :
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
+    
+    ax.set_position([0.2, 0.2, 0.7, 0.7])
     
     plt.savefig( figname+fmt )
     
@@ -644,8 +645,7 @@ if plt_pmax :
 
 if plt_Hvor :
     
-    fig, ax = plt.subplots( figsize=[8,8], 
-                            constrained_layout=True )
+    fig, ax = plt.subplots( figsize=[8,8], constrained_layout=True )
 
     # use local boundary layer thickness as reference
     
@@ -700,6 +700,8 @@ if plt_Hvor :
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
+    
+    ax.set_position([0.2, 0.2, 0.7, 0.7])
     
     plt.savefig( figname+fmt )
 
@@ -783,6 +785,8 @@ if plt_Hson :
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
+    
+    ax.set_position([0.25, 0.2, 0.7, 0.7])
     
     plt.savefig( figname+fmt )
 
@@ -1014,6 +1018,8 @@ if plt_gamma :
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
+    
+    ax.set_position([0.2, 0.2, 0.7, 0.7])
     
     plt.savefig( figname+fmt )
     

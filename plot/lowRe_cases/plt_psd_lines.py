@@ -56,15 +56,15 @@ len_sep    = [9.52,               9.805522,       9.676337,
 labels     = ['smooth',              r"$D/{\delta}_0=2.0$",  r"$D/{\delta}_0=1.0$",
                r"$D/{\delta}_0=0.5$",r"$D/{\delta}_0=0.25$", r"$D/{\delta}_0=0.125$",
                r"$\mathrm{isothermal}$"]
-lstyles    = ['-',   '-',     '-',    
-              '-',   '-',     '-',
-              '-']
-widths     = [2.0, 2.0, 2.0,
-              2.0, 2.0, 2.0,
-              2.0]
-colors     = ['black', 'yellow', 'gray', 
-              'red',   'blue',   'orange', 
-              'brown']
+lstyles    = ['--',  ':',     '-.',    
+              (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',     
+              'dotted']
+widths     = [4.0, 4.0, 4.0,
+              4.0, 4.0, 4.0,
+              4.0]
+colors     = ['gray', 'green',  'blue', 
+              'black', 'red',  'purple', 
+              'yellow']
 withTs     = [True,  False, False, 
               False, False, True, 
               False]
