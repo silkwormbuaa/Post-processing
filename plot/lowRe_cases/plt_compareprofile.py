@@ -12,6 +12,7 @@
 import os
 import sys
 import matplotlib.pyplot  as     plt
+import matplotlib.ticker  as     ticker
 from   matplotlib.patches import Rectangle
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
@@ -39,6 +40,7 @@ lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']
 width    = [2.0,   2.0,      2.0,    2.0,                     2.0,          2.0]
 
 plt_pt   = True
+plt_ps   = True
 plt_Tt   = True
 plt_t    = True
 plt_tke  = True
@@ -47,7 +49,7 @@ plt_tke  = True
 shift_y = True
 
 fmt  = '.png' # or '.pdf'
-zoom = True
+zoom = False
 
 if zoom: ylim = [-0.1, 2.0]
 else:    ylim = [-0.1, 10.0]
@@ -176,6 +178,73 @@ for i in range(0, 6):
         plt.savefig( filename )
         plt.close()
         
+# plot static pressure profile
+# =============================================================================
+
+    if plt_ps:
+
+        fig, ax = plt.subplots(figsize=[8,8], constrained_layout=True)
+
+        for line in lines:
+
+            x = line.df['p']/(45447.289*7.824)
+            if shift_y: y = line.df['ys']/5.2
+            else: y = line.df['y']/5.2
+            
+            ax.plot(x,y, 
+                    label=line.label, 
+                    color=line.color, 
+                    linestyle=line.lstyle, 
+                    linewidth=line.width)
+            
+        if not zoom:
+        
+            ax2 = fig.add_axes([0.65,0.46,0.2,0.5])
+            
+            for line in lines:
+                
+                x = line.df['p']/(45447.289*7.824)
+                if shift_y: y = line.df['ys']/5.2
+                else: y = line.df['y']/5.2
+                
+                ax2.plot(x,y,  
+                        label=line.label, 
+                        color=line.color, 
+                        linestyle=line.lstyle, 
+                        linewidth=line.width)
+
+            ax2.set_xlim(0.0, 0.25)
+            ax2.set_ylim(3.5, 8.5)
+            plt_style( ax2 )
+            
+            ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+        
+        else:
+            ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+            
+        ax.set_xlabel(r'$p_s/p_{t_0}$')
+        ax.set_xlim(0.1, 0.5)
+        ax.set_ylim(ylim[0],ylim[1])
+        
+        rectangle = Rectangle((0.9, 3.5), 0.1, 5.0, fill=False, edgecolor='black', lw=2)
+        
+        ax.add_patch( rectangle )
+        ax.plot([0.9, 0.75], [6, 7],'black', lw=2)
+        
+        plt_style( ax )
+        
+        if shift_y: ax.set_ylabel(r'$y_s/\delta_0$')
+        else:       ax.set_ylabel(r'$y/\delta_0$')
+        
+        if zoom: filename = f'ps_{i}_zoom'
+        else:    filename = f'ps_{i}'
+        
+        if shift_y: filename = filename + '_ys' + fmt
+        else:       filename = filename + '_y' + fmt
+     
+        plt.savefig( filename )
+        plt.close()
+
 
 # plot total temperature profile
 # =============================================================================

@@ -131,13 +131,16 @@ for i, loc in enumerate( locs ):
 
         m_total = np.sum(df_slice['m'])
         pt_avg = np.sum(df_slice['pt'] * df_slice['m']) / m_total
+        ps_avg  = np.sum(df_slice['p'] * df_slice['m']) / m_total
         Tt_avg = np.sum(df_slice['Tt'] * df_slice['m']) / m_total
         
         print(f"m_total = {m_total:15.2f}")
         print(f"Tt_avg  = {Tt_avg:15.2f}")
         print(f"pt_avg  = {pt_avg:15.2f}")
+        print(f"ps_avg  = {ps_avg:15.2f}")
         
         with open( output_file, "w" ) as f:
             f.write(f"m_total = {m_total:15.2f}\n")
             f.write(f"Tt_avg  = {Tt_avg:15.2f}\n")
             f.write(f"pt_avg  = {pt_avg:15.2f}\n")
+            f.write(f"ps_avg  = {ps_avg:15.2f}\n")
