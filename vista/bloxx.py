@@ -338,17 +338,17 @@ class Mesh_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/grid'
+    file_path = '/home/wencanwu/test/smooth_adiabatic/grid_full'
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/231124')
+    os.chdir('/home/wencanwu/test/smooth_adiabatic/grid')
     
     mesh = Mesh_bloxx(file_path)
     
-    mesh.grids = mesh.select_blocks((-119, -0.8, 9.0, -101, 2.0, 10.5))
+    mesh.grids = mesh.select_blocks((-119, -0.8, -0.1, -101, 2.0, 5.3))
     
     mesh.sort_grids()
     
-    mesh.save_grid('./fewer_block')
+    mesh.save_grid('./')
 
 
 # ----------------------------------------------------------------------
