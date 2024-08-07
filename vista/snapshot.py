@@ -12,6 +12,7 @@
 
 import os
 import sys
+import vtk
 
 import numpy             as     np
 import pandas            as     pd
@@ -27,6 +28,11 @@ from   .io_binary        import read_3Dflt_bin
 from   .io_binary        import write_flt_bin
 from   .io_binary        import write_int_bin
 from   .io_binary        import write_log_bin
+
+from   .io_vtk           import create_3d_vtkRectilinearGrid
+from   .io_vtk           import add_var_vtkRectilinearGrid
+from   .io_vtk           import create_multiblock_dataset
+from   .io_vtk           import write_vtm_file
 
 from   .grid             import GridData
 
@@ -142,7 +148,7 @@ class Snapshot:
         
         self.n_bl = 0
         
-        # List of blocks numbers
+        # List of blocks numbers (of blocks in binary files)
         
         self.bl_nums = []
         
@@ -1853,6 +1859,69 @@ class Snapshot:
         
 
 # ----------------------------------------------------------------------
+# >>> write snapshot into vtm (multiblock vtk) file            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/08/06  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_vtm( self, filename, vars, buff=3 ):
+        
+        """
+        write snapshot into vtm file (multiblock vtk)
+        
+        filename : filename of output snapshot
+        vars     : list of variables to be written
+        """
+        
+# ----- check if grid data is ready
+        
+        if self.grid3d is None:
+            raise ValueError("Please read in grid data first!")
+        
+        else: 
+            G = self.grid3d
+            G.compute_point() 
+        
+# ----- drop ghost cells
+
+        self.drop_ghost( buff=buff )
+        
+# ----- setup vtk file
+        
+        vtk_blocks = list()
+        
+        for snap_bl in self.snap_cleandata:
+            
+            bl_num = snap_bl.num
+            g = G.g[bl_num-1]
+            
+            px = g.px[buff:-buff]
+            py = g.py[buff:-buff]
+            pz = g.pz[buff:-buff]
+            
+            bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
+            
+            for var in vars:
+                
+                var_data = np.array(snap_bl.df[var])
+                bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
+                
+            vtk_blocks.append( bl_vtk )
+            
+        dataset = create_multiblock_dataset(vtk_blocks)
+        
+        write_vtm_file( filename, dataset )
+        
+
+# ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
 #
@@ -1866,122 +1935,42 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 def Testing():
-    
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401'
-#    test_dir1 = '/home/wencanwu/my_simulation/temp/220825_low/snapshot_01363269/Z_slice'
-    test_dir1 = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/snapshot_01360165'
-    
-#    test_dir1 = '/media/wencanwu/Seagate Expansion Drive/temp/smooth_wall_with_new_io/snapshots/snapshot_00628554'
-        
-    snap2d_file = test_dir1 + '/snapshot_Z_001.bin'
 
-    # - read in grid info
-
-#    G = GridData( gridfile )
-
-#    G.read_grid()
-
-#    block_list, indx_slic = G.select_sliced_blockgrids( 'Y', 0.0 )
+    # test writing snapshot into vtm
     
-    os.chdir( test_dir1 )
+    """
+    test_dir  = '/home/wencanwu/test/vtk/'
+    snapshot_file = test_dir + 'snapshot_00837045/snapshot.bin'
+    grid_file = test_dir + 'inca_grid.bin'
     
-    snapshot1 = Snapshot( snap2d_file )    
+    os.chdir( test_dir )
     
+    G = GridData( grid_file )
+
+    G.read_grid()
+    G.compute_point()
+    
+    snapshot1 = Snapshot( snapshot_file )
+    snapshot1.grid3d = G    
     snapshot1.verbose = True
     
     with timer('read one snapshot '):
         
-        snapshot1.read_snapshot()
+        snapshot1.read_snapshot( var_read = ['u','p'] )
         
-        snapshot1.drop_ghost( buff=3 )
-        
-        print(snapshot1.snap_cleandata[0].df)
-        print(snapshot1.snap_cleandata[1].g.gx)
-        print(snapshot1.snap_cleandata[1].g.gy)
-        
-        print(snapshot1.vars_name)
-    
-#    with timer('write snapshot'):
-        
-#        snapshot1.write_snapshot_szplt('snapshot.szplt')
-        
-#        snapshot1.grid3d = G
-    
-#        snapshot2d = snapshot1.get_slice( 'Y', 0.0 )
-    
-#        snapshot2d.write_snapshot('snapshot_Y_004.bin')
-    
-#    snapshotnew = Snapshot('snapshot_Y_004.bin')
-#    snapshotnew.verbose=True
-#    snapshotnew.read_snapshot()
-    
-        #snapshot1.drop_ghost()
-        #snapshot1.assemble_block()
-        
-#        print( snapshot1.get_grid_vectors() )
-        
-#        print( snapshot1.snap_data[snapshot1.bl_nums.index(1365)][5])
-        
-#        print(snapshot1.snap_data[50])
-    
-#    with timer("\nread 3d snapshot and get snapshot struct"):
-       
-#        snapshot1.get_snapshot_struct()
-    
-#    with timer("\ndo slice"):
-         
-        
-    
-#    snapshot1.verbose = False
+        print(snapshot1.snap_data[0].df)
+        print(snapshot1.snap_data[1].g.gx)
+        print(snapshot1.snap_data[1].g.gy)
 
-'''
+    with timer('write into vtm'):
+        
+        snapshot1.write_vtm( 'test.vtm', ['u','p'] )
+        
+    """
 
-        # Drop ghost points 
-        
-        snapshot1.drop_ghost( buff=3 )
-        
-        
-        # Assemble blocks data to one whole snapshot
-        # (sorting is included in self.assemble_block() )
-        
-        snapshot1.assemble_block()
-        
-        
-        print(snapshot1.df)
-        
-    with timer('show one slice '):
-        
-        x = np.array(snapshot1.df['x'])
-        
-        y = np.array(snapshot1.df['y'])
-        
-        z = np.array(snapshot1.df['z'])
-        
-        p = np.array(snapshot1.df['p'])
-        
-#        print(np.unique(x))
-        
-        N_x = len(np.unique(x))
-        N_y = len(np.unique(y))
-        N_z = len(np.unique(z))
-        
-        x = x.reshape(N_z,N_y,N_x)
-        y = y.reshape(N_z,N_y,N_x)
-        z = z.reshape(N_z,N_y,N_x)
-        p = p.reshape(N_z,N_y,N_x)
-        
-        x = x[50,:,:]
-        y = y[50,:,:]
-        p = p[50,:,:]
-        
-        
-        fig, ax = plt.subplots()
-        contour = ax.pcolor(x,y,p)
-        ax.set_title('pressure')
-        plt.show()
-'''
-'''   
+    # check y plane slice
+    
+    '''   
     with timer('check one data block:'):
         
         # [bl_num, Nx, Ny, Nz, GX, sol_buff]
@@ -2012,8 +2001,9 @@ def Testing():
         contour = ax.contourf(X.T,Z.T, u_slice)
         ax.set_title('Contour Plot')
         plt.show()
-'''         
-
+    '''
+          
+    pass 
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -- )

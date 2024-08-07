@@ -543,6 +543,10 @@ class SnapBlock(BlockData):
     def _init_from_file( self, file, block_list, var_read, n_var, vars, snap_with_gx, 
                         type, kind=4):
         
+        """
+        After initialization, self.g only contains cell center coordinates.
+        """
+        
 # ----- Initialize attributes of instance.
 
         # floating point precision format
