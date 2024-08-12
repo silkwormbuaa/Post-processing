@@ -21,6 +21,11 @@ from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_log_bin
 
+from   .io_vtk           import create_3d_vtkRectilinearGrid
+from   .io_vtk           import add_var_vtkRectilinearGrid
+from   .io_vtk           import create_multiblock_dataset
+from   .io_vtk           import write_vtm_file
+
 from   .tools            import find_indices
 
 from   .lib.form         import phy
@@ -378,7 +383,7 @@ class StatisticData:
 #   - match data with grids
 # ----------------------------------------------------------------------
     
-    def match_grid( self, block_list, G ):
+    def match_grid( self, block_list, G, add_to_df=True ):
         
         """
         block_list : list of selected blocks' numbers \n
@@ -393,21 +398,23 @@ class StatisticData:
             
             self.bl[num-1].g = g
             
-            X,Y,Z = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
-            hx,hy,hz = np.meshgrid( g.hx, g.hy, g.hz, indexing='ij' )
-            
-            self.bl[num-1].df['x'] = X.T.flatten()
-            self.bl[num-1].df['y'] = Y.T.flatten()
-            self.bl[num-1].df['z'] = Z.T.flatten()
-            self.bl[num-1].df['hx'] = hx.T.flatten()
-            self.bl[num-1].df['hy'] = hy.T.flatten()
-            self.bl[num-1].df['hz'] = hz.T.flatten()
-            
-            
-            # adding vol_fra !! original vol_fra has i,j,k order, 
-            # should be transpose as k,j,i
-            if g.vol_fra is not None:
-                self.bl[num-1].df['vol_fra'] = np.ravel( g.vol_fra.T )
+            if add_to_df:
+                
+                X,Y,Z = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
+                hx,hy,hz = np.meshgrid( g.hx, g.hy, g.hz, indexing='ij' )
+                
+                self.bl[num-1].df['x'] = X.T.flatten()
+                self.bl[num-1].df['y'] = Y.T.flatten()
+                self.bl[num-1].df['z'] = Z.T.flatten()
+                self.bl[num-1].df['hx'] = hx.T.flatten()
+                self.bl[num-1].df['hy'] = hy.T.flatten()
+                self.bl[num-1].df['hz'] = hz.T.flatten()
+                
+                
+                # adding vol_fra !! original vol_fra has i,j,k order, 
+                # should be transpose as k,j,i
+                if g.vol_fra is not None:
+                    self.bl[num-1].df['vol_fra'] = np.ravel( g.vol_fra.T )
             
 
 # ----------------------------------------------------------------------
@@ -1449,6 +1456,76 @@ class StatisticData:
         
         return vol_bubble
 
+
+# ----------------------------------------------------------------------
+# >>> write statistics into vtm (multiblock vtk) file        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/08/12  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_vtm( self, filename, vars, block_list, buff=3 ):
+        
+        """
+        write statistics into vtm file (multiblock vtk)
+        
+        filename   : filename of output statistics
+        vars       : list of variables to be written
+        block_list : list of selected blocks' numbers
+        """
+        
+# ----- check if grid data is ready
+
+        if self.grid3d is None:
+            raise ValueError("Please read in grid data first.")
+        
+        else:
+            G = self.grid3d
+            G.compute_point()
+
+# ----- drop ghost cells
+
+        self.drop_ghost( block_list, buff=buff )
+
+# ----- setup vtk file
+
+        vtk_blocks =  list()
+        
+        for bl in self.bl:
+            
+            bl_num = bl.num
+            
+            # only write selected blocks, different to SnapData
+            
+            if bl_num in block_list:
+                
+                g = G.g[bl_num-1]
+                
+                px = g.px[buff:-buff]
+                py = g.py[buff:-buff]
+                pz = g.pz[buff:-buff]
+                
+                bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
+                
+                for var in vars:
+                    
+                    var_data = np.array(bl.df[var])
+                    bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
+                    
+                vtk_blocks.append( bl_vtk )
+            
+        dataset = create_multiblock_dataset(vtk_blocks)
+        
+        write_vtm_file( filename, dataset )
+                    
+
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
 # ----------------------------------------------------------------------
@@ -1465,20 +1542,31 @@ class StatisticData:
 
 if __name__ == "__main__":
     
-    file = "/media/wencanwu/Seagate Expansion Drive1/temp/smooth_wall_with_new_io/initial/statistics.bin"
+    path = "/home/wencanwu/my_simulation/temp/220927_lowRe/results"
     
-    S = StatisticData( file )
+    os.chdir(path)
     
-    with open( file, 'rb') as f:
+    box = [-999,999,-999,999,-999,0]
+    
+    
+    G = GridData( 'inca_grid.bin')
+    G.read_grid()
+    block_list =  G.select_blockgrids( box )
+    
+    
+    S = StatisticData( 'statistics.bin' )
+    
+    with open( 'statistics.bin', 'rb') as f:
         
         S.verbose = True
         
-        S.read_stat_header( f )
-        
-        bl_list = [1,2,3,4,5,6,7,8,9,10,11,12]
         vars = ['u','v','w']
         
-        S.read_stat_body( f, bl_list, vars)
+        S.read_stat_header( f )
+        S.read_stat_body( f, block_list, vars)
         
-        S.drop_ghost( bl_list)
+        S.match_grid( block_list, G, add_to_df=False)
+        S.grid3d = G
+        
+        S.write_vtm( 'statistics.vtm', vars, block_list )
         
