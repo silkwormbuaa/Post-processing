@@ -1938,7 +1938,7 @@ def Testing():
 
     # test writing snapshot into vtm
     
-    """
+    
     test_dir  = '/home/wencanwu/test/vtk/'
     snapshot_file = test_dir + 'snapshot_00837045/snapshot.bin'
     grid_file = test_dir + 'inca_grid.bin'
@@ -1956,7 +1956,7 @@ def Testing():
     
     with timer('read one snapshot '):
         
-        snapshot1.read_snapshot( var_read = ['u','p'] )
+        snapshot1.read_snapshot( var_read = ['u','v','w','p'] )
         
         print(snapshot1.snap_data[0].df)
         print(snapshot1.snap_data[1].g.gx)
@@ -1964,9 +1964,9 @@ def Testing():
 
     with timer('write into vtm'):
         
-        snapshot1.write_vtm( 'test.vtm', ['u','p'] )
+        snapshot1.write_vtm( 'test.vtm', ['u','v','w','p'] )
         
-    """
+    
 
     # check y plane slice
     
