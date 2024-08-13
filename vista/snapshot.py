@@ -1907,15 +1907,23 @@ class Snapshot:
             py = g.py[buff:-buff]
             pz = g.pz[buff:-buff]
             
+            # build one vtk block
             bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
             
             for var in vars:
                 
                 var_data = np.array(snap_bl.df[var])
+                
+                if len(var_data) != snap_bl.npx*snap_bl.npy*snap_bl.npz:
+                    raise ValueError(f"Data length not match for variable {var} in block {bl_num}.")
+                elif len(var_data) == 0:
+                    raise ValueError(f"Data length is zero for variable {var} in block {bl_num}.")
+                
                 bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
                 
             vtk_blocks.append( bl_vtk )
-            
+        
+        # build the multiple blocks dataset
         dataset = create_multiblock_dataset(vtk_blocks)
         
         write_vtm_file( filename, dataset )
@@ -1939,9 +1947,9 @@ def Testing():
     # test writing snapshot into vtm
     
     
-    test_dir  = '/home/wencanwu/test/vtk/'
-    snapshot_file = test_dir + 'snapshot_00837045/snapshot.bin'
-    grid_file = test_dir + 'inca_grid.bin'
+    test_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/snapshots/snapshot_00773347'
+    snapshot_file = test_dir + '/snapshot.bin'
+    grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/results/inca_grid.bin'
     
     os.chdir( test_dir )
     
@@ -1952,11 +1960,11 @@ def Testing():
     
     snapshot1 = Snapshot( snapshot_file )
     snapshot1.grid3d = G    
-    snapshot1.verbose = True
+    snapshot1.verbose = False
     
     with timer('read one snapshot '):
         
-        snapshot1.read_snapshot( var_read = ['u','v','w','p'] )
+        snapshot1.read_snapshot( var_read = ['u','v','w','p','T'] )
         
         print(snapshot1.snap_data[0].df)
         print(snapshot1.snap_data[1].g.gx)
@@ -1964,7 +1972,7 @@ def Testing():
 
     with timer('write into vtm'):
         
-        snapshot1.write_vtm( 'test.vtm', ['u','v','w','p'] )
+        snapshot1.write_vtm( 'test.vtm', ['u','v','w','p','T'] )
         
     
 

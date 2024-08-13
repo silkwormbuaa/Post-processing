@@ -1512,15 +1512,23 @@ class StatisticData:
                 py = g.py[buff:-buff]
                 pz = g.pz[buff:-buff]
                 
+                # build one vtk block
                 bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
                 
                 for var in vars:
                     
                     var_data = np.array(bl.df[var])
+                    
+                    if len(var_data) != bl.npx*bl.npy*bl.npz:
+                        raise ValueError(f"Data length not match for variable {var} in block {bl_num}.")
+                    elif len(var_data) == 0:
+                        raise ValueError(f"Data length is zero for variable {var} in block {bl_num}.")
+
                     bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
                     
                 vtk_blocks.append( bl_vtk )
-            
+        
+        # build the multiple blocks dataset     
         dataset = create_multiblock_dataset(vtk_blocks)
         
         write_vtm_file( filename, dataset )
@@ -1542,11 +1550,11 @@ class StatisticData:
 
 if __name__ == "__main__":
     
-    path = "/home/wencanwu/my_simulation/temp/220927_lowRe/results"
+    path = "/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/results"
     
     os.chdir(path)
     
-    box = [-999,999,-999,999,-999,0]
+    box = [-999,999,-999,999,-999,999]
     
     
     G = GridData( 'inca_grid.bin')
@@ -1560,7 +1568,7 @@ if __name__ == "__main__":
         
         S.verbose = True
         
-        vars = ['u','v','w']
+        vars = ['u','v','w','p','rho']
         
         S.read_stat_header( f )
         S.read_stat_body( f, block_list, vars)
