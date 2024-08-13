@@ -1550,7 +1550,8 @@ class StatisticData:
 
 if __name__ == "__main__":
     
-    path = "/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/results"
+    path = "/media/wencanwu/Seagate Expansion Drive1/temp/231124/results"
+    outpath = "/media/wencanwu/Seagate Expansion Drive1/temp/231124/vtk"
     
     os.chdir(path)
     
@@ -1572,9 +1573,11 @@ if __name__ == "__main__":
         
         S.read_stat_header( f )
         S.read_stat_body( f, block_list, vars)
+    
         
-        S.match_grid( block_list, G, add_to_df=False)
-        S.grid3d = G
-        
-        S.write_vtm( 'statistics.vtm', vars, block_list )
+    S.match_grid( block_list, G, add_to_df=False)
+    S.grid3d = G
+    
+    os.chdir(outpath)
+    S.write_vtm( 'statistics.vtm', vars, block_list )
         
