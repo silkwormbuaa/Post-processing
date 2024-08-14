@@ -16,6 +16,7 @@ import vtk
 
 import numpy             as     np
 import pandas            as     pd
+import pyvista           as     pv
 import tecplot           as     tp
 from   tecplot.constant  import FieldDataType
 from   copy              import deepcopy
@@ -1859,20 +1860,20 @@ class Snapshot:
         
 
 # ----------------------------------------------------------------------
-# >>> write snapshot into vtm (multiblock vtk) file            (Nr.)
+# >>> create vtk multiblock dataset (snapshot)                   (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2024/08/06  - created
+# 2024/08/14  - created
 #
 # Desc
 #
 # ----------------------------------------------------------------------
 
-    def write_vtm( self, filename, vars, buff=3 ):
+    def create_vtk_multiblock( self, vars, buff=3 ):
         
         """
         write snapshot into vtm file (multiblock vtk)
@@ -1925,6 +1926,35 @@ class Snapshot:
         
         # build the multiple blocks dataset
         dataset = create_multiblock_dataset(vtk_blocks)
+
+        return dataset
+
+
+# ----------------------------------------------------------------------
+# >>> write snapshot into vtm (multiblock vtk) file            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/08/06  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_vtm( self, filename, vars, buff=3 ):
+        
+        """
+        write snapshot into vtm file (multiblock vtk)
+        
+        filename : filename of output snapshot
+        vars     : list of variables to be written
+        """
+
+# ----- build the multiple blocks dataset
+        dataset = self.create_vtk_multiblock(vars, buff=buff)
         
         write_vtm_file( filename, dataset )
         
@@ -1950,6 +1980,7 @@ def Testing():
     test_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/snapshots/snapshot_00773347'
     snapshot_file = test_dir + '/snapshot.bin'
     grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/results/inca_grid.bin'
+    vars = ['u','v','w','p','T']
     
     os.chdir( test_dir )
     
@@ -1964,7 +1995,7 @@ def Testing():
     
     with timer('read one snapshot '):
         
-        snapshot1.read_snapshot( var_read = ['u','v','w','p','T'] )
+        snapshot1.read_snapshot( var_read = vars )
         
         print(snapshot1.snap_data[0].df)
         print(snapshot1.snap_data[1].g.gx)
@@ -1972,9 +2003,7 @@ def Testing():
 
     with timer('write into vtm'):
         
-        snapshot1.write_vtm( 'test.vtm', ['u','v','w','p','T'] )
-        
-    
+        snapshot1.write_vtm( 'test.vtm', vars )
 
     # check y plane slice
     

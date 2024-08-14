@@ -1458,29 +1458,28 @@ class StatisticData:
 
 
 # ----------------------------------------------------------------------
-# >>> write statistics into vtm (multiblock vtk) file        (Nr.)
+# >>> create vtk multiblock dataset (statistics)      (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
 #
 # History
 #
-# 2024/08/12  - created
+# 2024/08/14  - created
 #
 # Desc
 #
 # ----------------------------------------------------------------------
 
-    def write_vtm( self, filename, vars, block_list, buff=3 ):
+    def create_vtk_multiblock( self, block_list, vars, buff=3 ):
         
         """
         write statistics into vtm file (multiblock vtk)
         
-        filename   : filename of output statistics
-        vars       : list of variables to be written
         block_list : list of selected blocks' numbers
+        vars       : list of variables to be written
         """
-        
+
 # ----- check if grid data is ready
 
         if self.grid3d is None:
@@ -1530,6 +1529,36 @@ class StatisticData:
         
         # build the multiple blocks dataset     
         dataset = create_multiblock_dataset(vtk_blocks)
+        
+        return dataset 
+
+
+# ----------------------------------------------------------------------
+# >>> write statistics into vtm (multiblock vtk) file        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/08/12  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def write_vtm( self, filename, vars, block_list, buff=3 ):
+        
+        """
+        write statistics into vtm file (multiblock vtk)
+        
+        filename   : filename of output statistics
+        vars       : list of variables to be written
+        block_list : list of selected blocks' numbers
+        """
+        
+        # build the multiple blocks dataset     
+        dataset = self.create_vtk_multiblock( block_list, vars, buff=buff )
         
         write_vtm_file( filename, dataset )
                     
