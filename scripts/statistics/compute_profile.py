@@ -35,7 +35,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # option zone
 # =============================================================================
 
-locs = [-112.5, -79.6, -53.6, -27.6, 76.4, 102.4] 
+locs = [-79.6, -53.6, -27.6, 76.4, 102.4] 
 
 ## locs in dimensionless [-31.33, -25, -20,-15, 5, 10 ] 
 
@@ -114,7 +114,7 @@ for i, loc in enumerate(locs):
             with timer("read wall distance field"):
                 
                 wd_snap = Snapshot( snapshotfile )
-                wd_snap.read_snapshot( block_list )
+                wd_snap.read_snapshot( block_list, var_read=['wd'] )
 
             # - read in cut cell data and assign vol_fra
 

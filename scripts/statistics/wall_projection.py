@@ -91,7 +91,7 @@ if not (os.path.exists(fric_file) and os.path.exists(pres_file)):
     with timer("read wall distance field"):
         
         wd_snap = Snapshot( snapshotfile )
-        wd_snap.read_snapshot(block_list)
+        wd_snap.read_snapshot(block_list,var_read=['wd'])
 
         for num in block_list:
             S.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
@@ -180,8 +180,8 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
     
-    cbar_levels = np.linspace( 1.0, 2.5, 31 )
-    cbar_ticks  = np.linspace( 1.0, 2.5, 7 )
+    cbar_levels = np.linspace( 0.5, 2.5, 31 )
+    cbar_ticks  = np.linspace( 0.5, 2.5, 7 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
                           filename='pressure',
@@ -190,8 +190,8 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
     
-    cbar_levels = np.linspace(0.020,0.090,36)
-    cbar_ticks  = np.linspace(0.020,0.090,8)
+    cbar_levels = np.linspace(0.000,0.090,36)
+    cbar_ticks  = np.linspace(0.000,0.090,8)
     plot_wall_projection( xx, zz, p_fluc/p_ref,
                           separation="separationline_xz.pkl", 
                           filename='pressure_fluc',
@@ -216,8 +216,8 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
 
-    cbar_levels = np.linspace( 1.0, 2.25, 26 )
-    cbar_ticks  = np.linspace( 1.0, 2.25, 6 )
+    cbar_levels = np.linspace( 0.5, 2.25, 26 )
+    cbar_ticks  = np.linspace( 0.5, 2.25, 6 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz_periodic.pkl",
                           filename='pressure_periodic',
