@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 '''
 @File    :   plt_streamwise_vars.py
-@Time    :   2024/03/05 
+@Time    :   2024/08/16 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   plotting streamwise variables for different ridge heights cases
+@Desc    :   plotting streamwise variable comparison for different Re cases
 '''
 
 import os
@@ -19,41 +19,34 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line        import LineData
-from   vista.plot_tools  import PlotDataframe
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/averaged_streamwise_vars"
+OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/averaged_streamwise_vars"
 
-# sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
-# sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
-# sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
+data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-
-datalist = [data1,   data2,   data3, data4]   #, data5 ]
-color    = ['black',  'black', 'black','black'] #, 'green' ]
-label    = ['0.05',   '0.1',  '0.2', 'smooth_awall','smooth_iwall']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), 'dashed', 'dotted']
-width    = [4.0,      4.0,    4.0 , 4.0, 4.0 ]
+datalist = [data0,   data1,   data2 ]
+color    = ['gray', 'red', 'blue'] 
+label    = ['lowRe_smooth', 'lowRe_rough','midRe_rough']
+lstyle   = ['--',     '-.',  ':']
+width    = [4.0,      4.0,    4.0]
 lines = []
 
 plt_pwfluc = True
 plt_pw     = True
 plt_Cf     = True
 
-figsizes = [9,8]
+figsizes = [15,8]
 
 pure = False
 
-fmt =  'square.pdf' # or '.png'
+fmt =  '.pdf' # or '.png'
 
 # - read in data files
 
@@ -63,17 +56,11 @@ for i, datafile in enumerate( datalist ):
     
     with open(datafile,'rb') as f:  line.df = pickle.load( f )
     line.color  = color[i]
-    line.label  = r'$\mathrm{H/\delta_0=}$' + label[i]
+    line.label  = label[i]
     line.lstyle = lstyle[i]
     line.width  = width[i]
     
     lines.append( line )
-
-# d0_pwfluc = PlotDataframe(sw_pfluc_file)
-# d0_pw     = PlotDataframe(sw_Cp_file)
-# d0_f      = PlotDataframe(sw_Cf_file)
-# d0_f.shift_x( 50.4, 5.2 )
-# d0_pw.shift_x( 50.4, 5.2 )
 
 os.chdir(OutPath)
 
@@ -85,7 +72,7 @@ os.chdir(OutPath)
 #
 # History
 #
-# 2023/10/05  - created
+# 2024/08/16  - created
 #
 # Desc
 #
@@ -103,13 +90,6 @@ if plt_pwfluc:
                  ls = line.lstyle,
                  label = line.label,
                  linewidth = line.width)
-
-    # ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
-    #         d0_pwfluc.df['<p`>_'],
-    #         'gray', 
-    #         label=r'$smooth$', 
-    #         ls   ='--',
-    #         linewidth=4)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
@@ -165,7 +145,7 @@ if plt_pwfluc:
 #
 # History
 #
-# 2023/10/05  - created
+# 2024/08/16  - created
 #
 # Desc
 #
@@ -183,13 +163,6 @@ if plt_pw:
                 ls = line.lstyle,
                 label = line.label,
                 linewidth = line.width)
-
-    # ax.plot( d0_pw.df['x_s'], 
-    #         d0_pw.df['Cp'],
-    #         'gray', 
-    #         label=r'$smooth$', 
-    #         ls   ='--',
-    #         linewidth=4)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
@@ -245,7 +218,7 @@ if plt_pw:
 #
 # History
 #
-# 2023/10/05  - created
+# 2024/08/16  - created
 #
 # Desc
 #
@@ -264,13 +237,6 @@ if plt_Cf:
                 label = line.label,
                 linewidth = line.width)
 
-    # ax.plot( d0_f.df['x_s'], 
-    #         d0_f.df['Cf']*1000,
-    #         'gray', 
-    #         label=r'$smooth$', 
-    #         ls   ='--',
-    #         linewidth=4)
-    
     ax.plot( [-20,12],
              [0,0],
              'black',
