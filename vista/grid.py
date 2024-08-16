@@ -143,7 +143,7 @@ class GridData:
         
         file.seek( self.pos )
         
-        self.bl_num = read_int_bin( file.read(sin), sin )
+        self.n_bl = read_int_bin( file.read(sin), sin )
         self.pos += sin
         
         self.pos += 4
@@ -155,7 +155,7 @@ class GridData:
             
             print(f"grid_file_format: {self.grid_file_format}")
             print(f"grid with solver: {self.grid_with_solver}")
-            print(f"number of blocks: {self.bl_num}")
+            print(f"number of blocks: {self.n_bl}")
 
 # ----------------------------------------------------------------------
 # >>> Read Grid File Body                                       ( 1-2 )
@@ -235,7 +235,7 @@ class GridData:
         bl_index = list()
         
         # get lx0,ly0,lz0 and bl_index lists
-        for i in range(self.bl_num):
+        for i in range(self.n_bl):
             
             lx0.append(self.g[i].lx0)
             ly0.append(self.g[i].ly0)
@@ -654,6 +654,69 @@ class GridData:
         for gblock in self.g:
             gblock.compute_point()
 
+
+# ----------------------------------------------------------------------
+# >>> group blocks by their range           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/08/16  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def group_by_range( self, grp_type, block_list=None ):
+        
+        """
+        group blocks by their range
+        
+        grp_type : 'xy'('yx'), 'yz'('zy'), or 'zx'('xz)
+        block_list : list of block numbers that to be grouped.
+        
+        return : a list of grouped blocks numbers.
+        """
+
+# ----- if block_list is None, then group all blocks        
+        if block_list is None:
+            block_list = [i for i in range(1, self.n_bl+1)]
+
+# ----- read in grid blocks into pandas dataframe
+
+        df = pd.DataFrame(columns=['lx0','lx1','ly0','ly1','lz0','lz1','bl_num'])
+        
+        for bl_num in block_list:
+            
+            bl = self.g[bl_num-1]
+            df.loc[len(df)] = [bl.lx0, bl.lx1, bl.ly0, bl.ly1, bl.lz0, bl.lz1, bl_num]
+        
+        df['bl_num'] = df['bl_num'].astype(int)
+            
+# ----- group blocks by their range
+
+        if grp_type == 'xy' or grp_type == 'yx':
+            grouped = df.groupby(['lx0','lx1','ly0','ly1']).agg(list).reset_index()
+            grouped.sort_values(by=['ly0','lx0'], inplace=True)
+            
+        elif grp_type == 'yz' or grp_type == 'zy':
+            grouped = df.groupby(['ly0','ly1','lz0','lz1']).agg(list).reset_index()
+            grouped.sort_values(by=['lz0','ly0'], inplace=True)
+            
+        elif grp_type == 'zx' or grp_type == 'xz':
+            grouped = df.groupby(['lz0','lz1','lx0','lx1']).agg(list).reset_index()
+            grouped.sort_values(by=['lx0','lz0'], inplace=True)
+        
+        grouped_block_list = grouped['bl_num'].tolist()
+        
+        # pd.set_option('display.max_rows', None)
+        # print(grouped)
+        
+        return grouped_block_list
+    
+
 # ----------------------------------------------------------------------
 # >>> Class Block Grid                                          ( 2-0 )
 # ----------------------------------------------------------------------
@@ -1070,13 +1133,13 @@ class GridBlock:
 
 def Testing():
 
-    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/results/inca_grid.bin'
+    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
     
     grd = GridData( filename )
     
 #    grd.grid_file = filename
     
-    grd.verbose = True
+    grd.verbose = False
     
     grd.read_grid()
     
@@ -1084,7 +1147,10 @@ def Testing():
         g = grd.g[i]
         print( f"block number: {g.num},lx0={g.lx0},lx1={g.lx1},ly0={g.ly0},ly1={g.ly1},lz0={g.lz0},lz1={g.lz1}" )
     
+    blocklist = grd.select_blockgrids([-999,999,-10,0,-999,999], mode='within')
+    group_list = grd.group_by_range('xz', block_list=blocklist)
 
+    print( group_list )
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
