@@ -321,6 +321,7 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     case=2 : 220926 case, D/delta = 1
     case=3 : 220825 case, D/delta = 0.5
     case=4 : 220927 case, D/delta = 0.25
+             231124 case, D/delta = 0.25, Re_tau = 1226
     case=5 : 221221 case, D/delta = 0.125
     case=6 : 240211 case, D/delta = 0.25, A = 0.13
     case=7 : 240210 case, D/delta = 0.25, A = 0.52
@@ -341,6 +342,7 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
         elif casecode == '240211': Case=6
         elif casecode == '240210': Case=7
         elif casecode == 'smooth': Case=0
+        elif casecode == '231124': Case=4
         
     
     if   Case == 1:   D = 10.4
