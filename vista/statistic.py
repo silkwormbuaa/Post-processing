@@ -986,17 +986,25 @@ class StatisticData:
         Need data chunk with u,mu,wd ready.\n
         Only applicable to geometry with homogeneous shape along x
         """
+
+# ----- initialize a list of dataframes containing groups of blocks' projection
         
+        # a group of blocks defined as blocks sharing same x-z projection plane
         grouped_blocks = G.group_by_range( 'xz', block_list=block_list )
-        
-        f_visc_grp_ls = []
-        
+        f_visc_grp_ls = []   
+
+# ----- loop over each group of blocks
+     
         for group in grouped_blocks:
+            
+            # initialize a group of blocks' projection
             
             npx = G.g[group[0]-1].nx + buff*2
             npz = G.g[group[0]-1].nz + buff*2
             
             f_visc_grp = np.zeros( (npx,npz), dtype='f' )
+            
+# --------- loop over each block in the group
             
             for num in group:
             
@@ -1027,18 +1035,17 @@ class StatisticData:
                 
                 for k in range( buff+1, g.nz+buff+1 ):
                     
-                    print(k)
-                    
                     # get a cut cell group dataframe
                     try:
                         df = cc_group.get_group((buff+1,k))
                     except:
-                        print(f"block {num}, point ({buff+1},{k}) no cut cell")
+                        # if there is no cut cell at this (x,z) location, skip and continue
+                        # print(f"block {num}, point ({buff+1},{k}) no cut cell")
                         continue
                         
                     for i in range( buff+1, g.nx+buff+1 ):
                         
-                        # when i == 1, find the interpolation stencil points
+                        # when i == buff+1, find the interpolation stencil points
                         # (therefore, this code is just applicable to geometry
                         # with homogeneous shape in x direction.)
                         
@@ -1088,29 +1095,32 @@ class StatisticData:
                                 kl_prj.append(kl)
                                 kr_prj.append(kr)
 
-                        # compute interpolated u, then friction
+                        # compute interpolated u, then friction of cut-cells 
+                        # sharing the same x-z coordinate
                         
                         for cc_j in range( len(df) ):
                             
                             j = df['j'].iloc[cc_j]
                             
                             f = np.array([u[kl_prj[cc_j],jl_prj[cc_j],i],
-                                            u[kr_prj[cc_j],jl_prj[cc_j],i],
-                                            u[kl_prj[cc_j],jr_prj[cc_j],i],
-                                            u[kr_prj[cc_j],jr_prj[cc_j],i]])
+                                          u[kr_prj[cc_j],jl_prj[cc_j],i],
+                                          u[kl_prj[cc_j],jr_prj[cc_j],i],
+                                          u[kr_prj[cc_j],jr_prj[cc_j],i]])
                             
                             u_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
-                                                        g.gz[kr_prj[cc_j]],
-                                                        g.gy[jl_prj[cc_j]],
-                                                        g.gy[jr_prj[cc_j]],
-                                                        f,
-                                                        z_prj[cc_j], y_prj[cc_j])                        
+                                                      g.gz[kr_prj[cc_j]],
+                                                      g.gy[jl_prj[cc_j]],
+                                                      g.gy[jr_prj[cc_j]],
+                                                      f,
+                                                      z_prj[cc_j], y_prj[cc_j])                        
                             
                             # if geometry is fully 3D, extra term 4./3.u_norm 
                             # should be considered to add
                             
                             f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h[cc_j] \
                                                 * fay[cc_j] / len_ratio[cc_j]
+
+# ------------- add frictions on each block of the group to compose the group's frictions
 
                 print(f"block {num} has mean friction {np.mean(f_visc)}.\n")
                 f_visc_grp += f_visc
@@ -1168,13 +1178,18 @@ class StatisticData:
         Need data chunk with <p> <pp> ready.\n
         Only applicable to geometry with homogeneous shape along x
         """
+
+# ----- initialize a list of dataframes containing groups of blocks' projection
         
         grouped_blocks = G.group_by_range( 'xz', block_list=block_list )
-        
-        var_grp_ls = []
-        
+        vars_grp_ls = []
+
+# ----- loop over each group of blocks
+
         for group in grouped_blocks:
         
+            # initialize a group of blocks' projection
+            
             npx = G.g[group[0]-1].nx + buff*2
             npz = G.g[group[0]-1].nz + buff*2
             
@@ -1182,7 +1197,9 @@ class StatisticData:
             pp_grp  = np.zeros( (npx,npz), dtype='f' )
             mu_grp  = np.zeros( (npx,npz), dtype='f' )
             rho_grp = np.zeros( (npx,npz), dtype='f' )
-            
+
+# --------- loop over each block in the group
+         
             for num in group:
                 
 # ------------- get cut cell dataframe and grid of this block 
@@ -1198,15 +1215,6 @@ class StatisticData:
                 
 # ------------- prepare block data chunk
 
-                data_df = self.bl[num-1].df
-                
-                p   = np.array( data_df['p' ] ).reshape( npz, npy, npx )
-                pp  = np.array( data_df['pp'] ).reshape( npz, npy, npx )
-                mu  = np.array( data_df['mu'] ).reshape( npz, npy, npx )
-                rho = np.array( data_df['rho'] ).reshape( npz, npy, npx )
-                
-# ------------- loop over each cut cell group
-
                 # !!! i,j,k follow Fortran index, starting from 1.
                 
                 p_plane   = np.zeros( (npx,npz), dtype='f' )
@@ -1214,13 +1222,23 @@ class StatisticData:
                 mu_plane  = np.zeros( (npx,npz), dtype='f' )
                 rho_plane = np.zeros( (npx,npz), dtype='f' )
                 
+                data_df = self.bl[num-1].df
+                
+                p   = np.array( data_df['p' ]  ).reshape( npz, npy, npx )
+                pp  = np.array( data_df['pp']  ).reshape( npz, npy, npx )
+                mu  = np.array( data_df['mu']  ).reshape( npz, npy, npx )
+                rho = np.array( data_df['rho'] ).reshape( npz, npy, npx )
+                
+# ------------- loop over each cut cell group
+
                 for k in range( buff+1, g.nz+buff+1 ):
                     
                     # get a cut cell group dataframe
                     try:
                         df = cc_group.get_group((buff+1,k))
                     except:
-                        print(f"block {num}, point ({buff+1},{k}) no cut cell")
+                        # if there is no cut cell at this (x,z) location, skip and continue
+                        #print(f"block {num}, point ({buff+1},{k}) no cut cell")
                         continue
                         
                     for i in range( buff+1, g.nx+buff+1 ):
@@ -1239,10 +1257,8 @@ class StatisticData:
                             
                             for cc_j in range( len(df) ):
                                 
-                                j = df['j'].iloc[cc_j]
-                                                            
-                                fay.append( df['fay1'].iloc[cc_j]
-                                        - df['fay0'].iloc[cc_j])
+                                fay.append( df['fay1'].iloc[cc_j] 
+                                          - df['fay0'].iloc[cc_j])
 
                         # compute interpolated pressure and pressure fluctuation
                         
@@ -1276,11 +1292,11 @@ class StatisticData:
             # compute pressure fluctuation
             df_wall_grp['p`'] = np.sqrt( np.array( df_wall_grp['pp']-df_wall_grp['p']**2 ))
             
-            var_grp_ls.append( df_wall_grp )
+            vars_grp_ls.append( df_wall_grp )
             
 # --------- save wall vars into StatisticsData.df_wall (a single pd.DataFrame)
 
-        self.df_wall = pd.concat( var_grp_ls )
+        self.df_wall = pd.concat( vars_grp_ls )
         self.df_wall.reset_index( drop=True, inplace=True )
         self.df_wall.sort_values( by=['z','x'],inplace=True )
         
