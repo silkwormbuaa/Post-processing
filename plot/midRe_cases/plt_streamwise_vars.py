@@ -45,8 +45,9 @@ plt_Cf     = True
 figsizes = [15,8]
 
 pure = False
+show_label = True
 
-fmt =  '.pdf' # or '.png'
+fmt =  '.png' # or '.png'
 
 # - read in data files
 
@@ -127,8 +128,9 @@ if plt_pwfluc:
 
         ax.set_ylabel(r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$" )
         ax.tick_params(axis='y', pad=10)
-
-#        ax.legend( ) 
+        
+        if show_label:
+            ax.legend( ) 
         
     # set the bounding box of axes
     ax.spines[:].set_color('black')
@@ -201,7 +203,8 @@ if plt_pw:
         ax.set_ylabel("$<p_w>/p_{\infty}$")
         ax.tick_params(axis='y', pad=10)
 
-#        ax.legend( ) 
+        if show_label:
+            ax.legend( ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
@@ -281,7 +284,8 @@ if plt_Cf:
         ax.set_ylabel(r"$C_f \times 10^3$")
         ax.tick_params(axis='y', pad=10)
 
-#        ax.legend( ) 
+        if show_label:
+            ax.legend( ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')

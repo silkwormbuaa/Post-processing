@@ -1271,7 +1271,7 @@ class StatisticData:
                             mu_plane[i-1,k-1]  += mu[k-1,j-1,i-1]  * fay[cc_j]
                             rho_plane[i-1,k-1] += rho[k-1,j-1,i-1] * fay[cc_j]
 
-                print(f"block {num} has mean p {np.mean(p_plane)},",end='')
+                print(f"block {num} has mean p {np.mean(p_plane)}")
                 p_grp   += p_plane
                 pp_grp  += pp_plane
                 mu_grp  += mu_plane
