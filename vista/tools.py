@@ -213,9 +213,9 @@ def point_in_box( xyz, box ):
     box: [xmin,ymin,zmin,xmax,ymax,zmax] of the 3D box
     """
     
-    if ( xyz[0] >= box[0] ) and ( xyz[0] < box[3] ) and \
-       ( xyz[1] >= box[1] ) and ( xyz[1] < box[4] ) and \
-       ( xyz[2] >= box[2] ) and ( xyz[2] < box[5] ):
+    if ( xyz[0] >= box[0] ) and ( xyz[0] <= box[3] ) and \
+       ( xyz[1] >= box[1] ) and ( xyz[1] <= box[4] ) and \
+       ( xyz[2] >= box[2] ) and ( xyz[2] <= box[5] ):
         
         return True
     

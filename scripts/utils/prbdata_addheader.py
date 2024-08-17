@@ -61,9 +61,9 @@ if opt == 1:
 
 elif opt == 2:
     
-    casepath = '/media/wencanwu/Seagate Expansion Drive1/temp/240210'
+    casepath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124'
     
-    case = Directories( casepath)
+    case = Directories( casepath )
     
     probes = ProbeFile( case.set_prb )
     grid   = GridData( case.grid )

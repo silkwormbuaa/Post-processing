@@ -571,13 +571,15 @@ class GridData:
             
             if (grd.lx0 <= xyz[0] < grd.lx1 and
                 grd.ly0 <= xyz[1] < grd.ly1 and
-                grd.lz0 <= xyz[2] < grd.lz1):
+                grd.lz0 <= xyz[2] <= grd.lz1):
                 
                 i,j,k = grd.point_index( xyz, buff )
                 bl_num = grd.num
                 
                 break
-        
+            
+            
+                
         return bl_num, [i, j, k]
                 
 
@@ -1150,7 +1152,11 @@ def Testing():
     blocklist = grd.select_blockgrids([-999,999,-10,0,-999,999], mode='within')
     group_list = grd.group_by_range('xz', block_list=blocklist)
 
-    print( group_list )
+    #print( group_list )
+    
+    xyz_prb = [76,0,10.4]
+    
+    print(grd.find_probe_xyz( xyz_prb ))
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
