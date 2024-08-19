@@ -734,9 +734,9 @@ class StatisticData:
                 v = np.sum( np.array(df_temp[var])*vol_fra*vol ) / vol_total
                 buff.append(v)
                 
-                if abs(y) < 0.2 and var == 'u':
-                    totalval = np.sum( np.array(df_temp[var])*vol_fra*vol )
-                    print(f"{y:12.4f}, {totalval:12.4f}, {vol_total:12.4f},{totalval/vol_total:12.4f}")
+                # if abs(y) < 0.2 and var == 'u':
+                #     totalval = np.sum( np.array(df_temp[var])*vol_fra*vol )
+                #     print(f"{y:12.4f}, {totalval:12.4f}, {vol_total:12.4f},{totalval/vol_total:12.4f}")
             
             if data_chunk is None: data_chunk = [buff]
             else: data_chunk.append( buff )

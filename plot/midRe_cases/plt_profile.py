@@ -48,7 +48,7 @@ fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/upstream_profiles/'
+OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/upstream_profile/'
 
 data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/upstream_profile'
@@ -112,6 +112,7 @@ lineDNS.color = 'black'
 lineDNS.lstyle = 's'
 lineDNS.marker = markers.MarkerStyle(marker='s')
 
+print( OutPath)
 os.chdir( OutPath )
 
 
@@ -157,7 +158,7 @@ if plt_u_vd :
                    length=10,
                    width=1.5)
     
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     ax.set_ylim( [0,23] )
     
     x_minor = matplotlib.ticker.LogLocator( 
@@ -234,7 +235,7 @@ if plt_u :
                    length=5,
                    width=1.5)
     
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     ax.set_ylim( [0,23] )
     
     x_minor = matplotlib.ticker.LogLocator( 
@@ -299,7 +300,7 @@ if plt_RS_uu:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     ax.set_ylim( [-1,8]   )
 
     ax.minorticks_on()
@@ -363,7 +364,7 @@ if plt_RS_vv:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     ax.set_ylim( [-0.1,1.5]   )
 
     ax.minorticks_on()
@@ -426,7 +427,7 @@ if plt_RS_ww:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     ax.set_ylim( [-0.1,2]   )
 
     ax.minorticks_on()
@@ -503,7 +504,7 @@ if plt_RS_uv:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     ax.set_ylim( [-1,0.2] )
 
     ax.minorticks_on()
@@ -585,7 +586,7 @@ if plt_rho :
     ax.set_ylabel( r"$\rho$" )
     ax.tick_params( axis='y' )
     
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0) )
@@ -641,7 +642,7 @@ if plt_T :
     ax.set_ylabel( r'$T/T_{\infty}$' )
     ax.tick_params( axis='y' )
     
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0) )
@@ -683,7 +684,7 @@ if plt_Mt :
     ax.set_ylabel( r'$M_t$' )
     ax.tick_params( axis='y' )
     
-    ax.set_xlim( [1,1000] )
+    ax.set_xlim( [1,2000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0) )

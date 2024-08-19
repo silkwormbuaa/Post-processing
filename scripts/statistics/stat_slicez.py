@@ -62,6 +62,7 @@ p_ref   = float( parameters.get('p_ref') )
 u_ref   = float( parameters.get('u_ref') )
 casecode =  str( parameters.get('casecode') )
 target_dir = '/home/wencanwu/my_simulation/temp/DataPost/contour/'+casecode+'/'
+create_folder( target_dir )
 
 locs = [ 0.0, 0.5*float( parameters.get('D')) ]
 

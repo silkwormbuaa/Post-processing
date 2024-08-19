@@ -87,3 +87,7 @@ with timer('Computing PSD '):
     
     print(f"\n ridge:{n_ridge}, valley:{n_valley}, others:{n_others}.\n")
 
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+sys.stdout.flush()   

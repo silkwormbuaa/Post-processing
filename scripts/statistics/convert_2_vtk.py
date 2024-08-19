@@ -20,11 +20,12 @@ from  vista.grid         import GridData
 from  vista.timer        import timer
 from  vista.directories  import create_folder
 
-output_path = 'xxxx'
-stat_file = 'xxxx/statistics.bin'
-grid_file = 'xxxx/grid.bin'
-box  = [-999,999,-999,999,-999,999]
+output_path = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/vtk/'
+stat_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/statistics.bin'
+grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+box  = [-100,100,-999,10,-0,999]
 vars = ['u']
+filename = 'st_u.vtm'
 
 # - read in grid data
 
@@ -54,4 +55,4 @@ S.grid3d = G
 
 with timer("write vtm"):
     create_folder( output_path ); os.chdir( output_path )
-    S.write_vtm( 'statistics.vtm', vars, block_list )
+    S.write_vtm( filename, vars, block_list )

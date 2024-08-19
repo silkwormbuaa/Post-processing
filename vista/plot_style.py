@@ -866,7 +866,7 @@ def plot_slicex_stat( zz, yy, v,
                       extreme_loc=None,
                       x_lim=None,
                       y_lim=None,
-                      pure=True):
+                      pure=False):
     
     """
     zz,yy are required to be equally spaced by streamplot

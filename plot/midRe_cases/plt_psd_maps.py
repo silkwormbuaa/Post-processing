@@ -46,7 +46,7 @@ label    = ['lowRe_smooth',  'lowRe_rough', 'midRe_rough']
 
 fig = plt.figure( figsize=(15, 20) )
 gs = GridSpec(3,10)
-ax_range = [0,0,0]
+ax_range = [1,1,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs = list()
 
@@ -111,7 +111,7 @@ for i in range(3):
     ylabel = r'$St = fL_{sep}/u_{\infty}$'
     ax.set_ylabel(ylabel)
     
-    if i%4 != 3:
+    if i%3 != 2:
         ax.xaxis.set_ticklabels([])
     else:
         xlabel = r'$(x-x_{imp})/\delta_0$'
@@ -122,10 +122,9 @@ for i in range(3):
     ax.spines[:].set_linewidth(2)
     
     axs.append(ax)
-    
-        
-axs[3].set_xlim([-15.0, 10.0])
 
+axs[2].set_xlim([-15.0, 10.0])
+    
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
 cbar_ticks = np.linspace(0, 0.3, 7)
 cbar_ax = fig.add_subplot([0.4,0.05,0.6,0.1],visible=False)
@@ -140,4 +139,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( outpath )
-plt.savefig( 'psd_4maps.png' )
+plt.savefig( 'psd_3maps.png' )
