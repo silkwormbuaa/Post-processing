@@ -35,9 +35,9 @@ datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/pr
 datapaths = [datapaths, datapath1, datapath2]
 
 # separation range in normalized unit
-x_separs = [-8.42  , -10.65744, -8.8888 ]
-x_reatts = [1.06795, 2.468831,  2.55555 ]
-x_ppmaxs = [-7.3333, -10.0611,  -10.0000 ]
+x_separs = [-8.42  , -10.65744, -9.96 ]
+x_reatts = [1.06795, 2.468831,  2.86 ]
+x_ppmaxs = [-7.3333, -10.0611,  -11.58 ]
 
 # labels
 label    = ['lowRe_smooth',  'lowRe_rough', 'midRe_rough']

@@ -23,7 +23,7 @@ import matplotlib.pyplot as     plt
 
 from   vista.timer       import timer
 
-from   vista.psd         import ProbeData
+from   vista.probe       import ProbeData
 
 
 # Option zone

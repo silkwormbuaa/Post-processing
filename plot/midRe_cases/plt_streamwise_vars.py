@@ -12,6 +12,7 @@
 import os
 import sys
 import pickle
+import pandas            as     pd
 import matplotlib.pyplot as     plt
 import matplotlib.ticker as     ticker
 
@@ -31,6 +32,12 @@ data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postproc
 data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
+sw_iw_pw_file = '/media/wencanwu/Seagate Expansion Drive1/temp/data_luis/midRe_streamwise/pw_SBLI_B2.dat'
+sw_iw_pwrms_file = '/media/wencanwu/Seagate Expansion Drive1/temp/data_luis/midRe_streamwise/pw_rms_SBLI_B2.dat'
+sw_iw_Cf_file = '/media/wencanwu/Seagate Expansion Drive1/temp/data_luis/midRe_streamwise/Cf_SBLI_B2.dat'
+
+add_sw_luis = True
+
 datalist = [data0,   data1,   data2 ]
 color    = ['gray', 'red', 'blue'] 
 label    = ['lowRe_smooth', 'lowRe_rough','midRe_rough']
@@ -38,8 +45,8 @@ lstyle   = ['--',     '-.',  ':']
 width    = [4.0,      4.0,    4.0]
 lines = []
 
-plt_pwfluc = True
-plt_pw     = True
+plt_pwfluc = False
+plt_pw     = False
 plt_Cf     = True
 
 figsizes = [15,8]
@@ -47,7 +54,7 @@ figsizes = [15,8]
 pure = False
 show_label = True
 
-fmt =  '.png' # or '.png'
+fmt =  'sw.png' # or '.png'
 
 # - read in data files
 
@@ -91,6 +98,15 @@ if plt_pwfluc:
                  ls = line.lstyle,
                  label = line.label,
                  linewidth = line.width)
+    
+    if add_sw_luis:
+        swdf = pd.read_csv(sw_iw_pwrms_file, delimiter=r'\s+')
+        ax.plot( swdf['x']*7.15/5.2, 
+                 swdf['y'],
+                 'black',
+                 ls = '-',
+                 label = 'midRe_smooth',
+                 linewidth = 4.0)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
@@ -130,7 +146,7 @@ if plt_pwfluc:
         ax.tick_params(axis='y', pad=10)
         
         if show_label:
-            ax.legend( ) 
+            ax.legend( fontsize=30 ) 
         
     # set the bounding box of axes
     ax.spines[:].set_color('black')
@@ -166,6 +182,15 @@ if plt_pw:
                 label = line.label,
                 linewidth = line.width)
 
+    if add_sw_luis:
+        swdf = pd.read_csv(sw_iw_pw_file, delimiter=r'\s+')
+        ax.plot( swdf['x']*7.15/5.2, 
+                 swdf['y'],
+                 'black',
+                 ls = '-',
+                 label = 'midRe_smooth',
+                 linewidth = 4.0)
+        
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
 
@@ -204,7 +229,7 @@ if plt_pw:
         ax.tick_params(axis='y', pad=10)
 
         if show_label:
-            ax.legend( ) 
+            ax.legend( fontsize=30 ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
@@ -240,12 +265,21 @@ if plt_Cf:
                 label = line.label,
                 linewidth = line.width)
 
+    if add_sw_luis:
+        swdf = pd.read_csv(sw_iw_Cf_file, delimiter=r'\s+')
+        ax.plot( swdf['x']*7.15/5.2, 
+                 swdf['y']*1000.0,
+                 'black',
+                 ls = '-',
+                 label = 'midRe_smooth',
+                 linewidth = 4.0)
+
     ax.plot( [-20,12],
              [0,0],
              'black',
              ls = '--',
              linewidth=2 )
-
+    
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
 
@@ -285,7 +319,7 @@ if plt_Cf:
         ax.tick_params(axis='y', pad=10)
 
         if show_label:
-            ax.legend( ) 
+            ax.legend( fontsize=30 ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
