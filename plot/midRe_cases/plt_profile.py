@@ -30,7 +30,6 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = True
 plt_u_vd    = True
 plt_u       = True
 plt_RS_uu   = True
@@ -158,14 +157,13 @@ if plt_u_vd :
                    length=10,
                    width=1.5)
     
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     ax.set_ylim( [0,23] )
     
-    x_minor = matplotlib.ticker.LogLocator( 
-                        base=10.0, subs = np.arange(1.0,10.0) )
+    x_minor = ticker.LogLocator( base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
     ax.xaxis.set_minor_locator( x_minor )
-
+    ax.xaxis.set_minor_formatter(ticker.NullFormatter())
 
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #            linestyle='--',linewidth=0.2)
@@ -235,11 +233,11 @@ if plt_u :
                    length=5,
                    width=1.5)
     
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     ax.set_ylim( [0,23] )
     
     x_minor = matplotlib.ticker.LogLocator( 
-                        base=10.0, subs = np.arange(1.0,10.0) )
+                        base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
     ax.xaxis.set_minor_locator( x_minor )
 
@@ -300,7 +298,7 @@ if plt_RS_uu:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     ax.set_ylim( [-1,8]   )
 
     ax.minorticks_on()
@@ -315,7 +313,7 @@ if plt_RS_uu:
                     length=10,
                     width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
-                        base = 10.0, subs = np.arange(1.0,10.0) )
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
     ax.xaxis.set_minor_locator( x_minor )
 
     # set spacing between major tickers.
@@ -364,7 +362,7 @@ if plt_RS_vv:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     ax.set_ylim( [-0.1,1.5]   )
 
     ax.minorticks_on()
@@ -379,7 +377,7 @@ if plt_RS_vv:
                     length=10,
                     width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
-                        base = 10.0, subs = np.arange(1.0,10.0) )
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
     ax.xaxis.set_minor_locator( x_minor )
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
@@ -427,7 +425,7 @@ if plt_RS_ww:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     ax.set_ylim( [-0.1,2]   )
 
     ax.minorticks_on()
@@ -442,7 +440,7 @@ if plt_RS_ww:
                     length=10,
                     width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
-                        base = 10.0, subs = np.arange(1.0,10.0) )
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
     ax.xaxis.set_minor_locator( x_minor )
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
@@ -504,7 +502,7 @@ if plt_RS_uv:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     ax.set_ylim( [-1,0.2] )
 
     ax.minorticks_on()
@@ -519,7 +517,7 @@ if plt_RS_uv:
                     length=10,
                     width=1.5)
     x_minor = matplotlib.ticker.LogLocator( 
-                        base = 10.0, subs = np.arange(1.0,10.0) )
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
     ax.xaxis.set_minor_locator( x_minor )
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
 
@@ -586,10 +584,10 @@ if plt_rho :
     ax.set_ylabel( r"$\rho$" )
     ax.tick_params( axis='y' )
     
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
-                        base=10.0, subs = np.arange(1.0,10.0) )
+                        base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
     ax.xaxis.set_minor_locator( x_minor )
 
@@ -642,10 +640,10 @@ if plt_T :
     ax.set_ylabel( r'$T/T_{\infty}$' )
     ax.tick_params( axis='y' )
     
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
-                        base=10.0, subs = np.arange(1.0,10.0) )
+                        base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
     ax.xaxis.set_minor_locator( x_minor )
 
@@ -684,10 +682,10 @@ if plt_Mt :
     ax.set_ylabel( r'$M_t$' )
     ax.tick_params( axis='y' )
     
-    ax.set_xlim( [1,2000] )
+    ax.set_xlim( [1,3000] )
     
     x_minor = matplotlib.ticker.LogLocator( 
-                        base=10.0, subs = np.arange(1.0,10.0) )
+                        base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
     ax.xaxis.set_minor_locator( x_minor )
 
