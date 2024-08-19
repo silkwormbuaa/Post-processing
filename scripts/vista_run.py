@@ -18,11 +18,11 @@ sys.path.append( source_dir )
 
 from vista.timer         import timer
 
-from vista.pytecio       import get_zonegrp
+from vista.io_tecplot       import get_zonegrp
 
-from vista.pytecio       import read_zonelist
+from vista.io_tecplot       import read_zonelist
 
-from vista.pytecio       import ave_block_ib
+from vista.io_tecplot       import ave_block_ib
 
 
 folderpath = "/media/wencanwu/Seagate Expansion Drive/temp/221221/TP_stat"

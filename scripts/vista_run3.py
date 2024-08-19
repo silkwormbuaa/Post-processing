@@ -18,9 +18,9 @@ sys.path.append( source_dir )
 
 from   vista.timer         import timer
 
-from   vista.pytecio       import get_xline
+from   vista.io_tecplot       import get_xline
 
-from   vista.pytecio       import read_zonelist
+from   vista.io_tecplot       import read_zonelist
 
 
 

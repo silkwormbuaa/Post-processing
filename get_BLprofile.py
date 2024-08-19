@@ -11,9 +11,9 @@ from   ReadIn            import ReadZonegrp
 
 from   BLprofile         import GetLine
 
-from   vista.pytecio     import ave_block
+from   vista.io_tecplot     import ave_block
 
-from   vista.pytecio     import timeave_fbl
+from   vista.io_tecplot     import timeave_fbl
 
 #%% Read plt data from INCA
 """

@@ -24,9 +24,9 @@ from   vista.tools         import get_filelist
 
 from   vista.timer         import timer
 
-from   vista.pytecio       import read_zonelist
+from   vista.io_tecplot       import read_zonelist
 
-from   vista.pytecio       import spanwise_periodic_ave
+from   vista.io_tecplot       import spanwise_periodic_ave
 
 from   plt2pandas          import frame2tec3d
 

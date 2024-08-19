@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-@File    :   vista_pytecio.py
+@File    :   io_tecplot.py
 @Time    :   2022/10/13 
 @Author  :   Wencan WU 
 @Version :   1.0
@@ -9,21 +9,13 @@
 '''
 
 import os 
-
 import tecplot           as     tp
-
 import numpy             as     np 
-
 import pandas            as     pd
-
 from   .timer            import timer 
-
 from   .math_opr         import lin_interpo
-
 from   .tools            import get_filelist
-
 from   .tools            import if_overlap_2d
-
 from   .tools            import if_penetrate
 
 
