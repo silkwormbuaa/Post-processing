@@ -12,6 +12,7 @@
 
 import os
 import sys
+import time
 import pandas            as     pd
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
@@ -74,3 +75,8 @@ with timer('compute bubble volume'):
     vol = stat.compute_bubble_volume( grd, block_list, cc_df=cc_df,  roughwall=roughwall )
 
 print(f"case {dirs.case_dir} bubble volume: {vol}")
+
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+sys.stdout.flush()

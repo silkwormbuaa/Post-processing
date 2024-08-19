@@ -634,7 +634,7 @@ class GridData:
         
         for gblock in self.g:
             
-            gblock.vol = np.array(gblock.cell_volume())
+            gblock.cell_volume()
         
 
 # ----------------------------------------------------------------------
@@ -765,10 +765,12 @@ class GridBlock:
             self.wz = float()
             
             self.vol_fra = None
+            self.vol = None
         
         else: 
             self._init_from_file( file, num, grid_with_solver, verbose )
             self.vol_fra = None
+            self.vol = None
 
     def _init_from_file( self, file, num, grid_with_solver, verbose ):
         
@@ -1116,8 +1118,6 @@ class GridBlock:
         hz = self.hz; npz = self.nz + 2*buff
         
         self.vol = np.outer( hz, np.outer( hy, hx) ).reshape(npz,npy,npx)
-
-        return self.vol
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )

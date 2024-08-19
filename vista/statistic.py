@@ -416,6 +416,9 @@ class StatisticData:
                 if g.vol_fra is not None:
                     self.bl[num-1].df['vol_fra'] = np.ravel( g.vol_fra.T )
             
+                if g.vol is not None:
+                    self.bl[num-1].df['vol'] = np.ravel( g.vol )
+
 
 # ----------------------------------------------------------------------
 # >>> drop ghost cells                                          (Nr.)
@@ -718,16 +721,23 @@ class StatisticData:
             
             df_temp = df[ df['y']==y ]
             
+            # only applicable to uniform grid in x-z plane, otherwise need grid volumes
+            
+            vol     = np.array( df_temp['vol'] )
             vol_fra = np.array( df_temp['vol_fra'] )
-            vol_total = np.sum( vol_fra )
+            vol_total = np.sum( vol_fra*vol )
             if vol_total < 0.0000001: vol_total = float('inf')
             
             buff = [y]
             
             for var in vars:
-                v = np.sum( np.array(df_temp[var])*vol_fra ) / vol_total
+                v = np.sum( np.array(df_temp[var])*vol_fra*vol ) / vol_total
                 buff.append(v)
                 
+                if abs(y) < 0.2 and var == 'u':
+                    totalval = np.sum( np.array(df_temp[var])*vol_fra*vol )
+                    print(f"{y:12.4f}, {totalval:12.4f}, {vol_total:12.4f},{totalval/vol_total:12.4f}")
+            
             if data_chunk is None: data_chunk = [buff]
             else: data_chunk.append( buff )
             

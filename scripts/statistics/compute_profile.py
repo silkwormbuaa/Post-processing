@@ -12,6 +12,7 @@
 
 import os
 import sys
+import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
@@ -35,7 +36,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # option zone
 # =============================================================================
 
-locs = [-110, -79.6, -53.6, -27.6, 76.4, 102.4] 
+locs = [-53.6, -110, -79.6, -53.6, -27.6, 76.4, 102.4] 
 
 ## locs in dimensionless [-31.33, -25, -20,-15, 5, 10 ] 
 
@@ -65,6 +66,8 @@ os.chdir(outpath)
 
 for i, loc in enumerate(locs):
     
+    print(f"Processing extracting profile at location: {loc}.\n")
+    
     bbox    = [ loc-2.5, loc+2.5, -1.2576, 86.0,  -11.0, 11.0]  # bounding box
     wbox    = [ loc-2.5, loc+2.5, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
     wbox_sw = [ loc-2.5, loc+2.5, 0, 1.736953420, -11.0, 11.0]
@@ -80,6 +83,7 @@ for i, loc in enumerate(locs):
         G.verbose = False
 
         G.read_grid()
+        G.cell_volume()
         
         # given a rectangular region, get a list of blocks in the region
         block_list = G.select_blockgrids( bbox )
@@ -230,4 +234,9 @@ for i, loc in enumerate(locs):
         print(clr.bg.red,
             f"Please modify the wall coordinate(y=-{parameters.get('H')}) manually!",
             clr.reset,'\n')
-    
+
+    print(f"Finished extracting profile at location {loc}.\n")
+# print out the time finishing the job
+
+print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+sys.stdout.flush()    
