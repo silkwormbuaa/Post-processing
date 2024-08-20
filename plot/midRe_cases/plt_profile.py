@@ -101,8 +101,6 @@ for i, datapath in enumerate(datalist):
     
     lines.append(line)
     
-lines[0].label = 'smooth'
-
 
 lineDNS = ProfileData( dataDNS )
 lineDNS.df = lineDNS.sparse_log('y+', 0.04)
@@ -181,7 +179,7 @@ if plt_u_vd :
         ax.tick_params( axis='x', pad=15 )
         ax.set_ylabel( r'$\langle u \rangle ^+_{vd}$' )
         ax.tick_params( axis='y', pad=10 )
-#        ax.legend( ) 
+#        ax.legend( fontsize=30 ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')

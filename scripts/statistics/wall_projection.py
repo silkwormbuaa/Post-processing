@@ -180,8 +180,8 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
     
-    cbar_levels = np.linspace( 0.5, 2.5, 31 )
-    cbar_ticks  = np.linspace( 0.5, 2.5, 7 )
+    cbar_levels = np.linspace( 1.0, 2.5, 31 )
+    cbar_ticks  = np.linspace( 1.0, 2.5, 7 )
     plot_wall_projection( xx, zz, p/p_ref, 
                           separation="separationline_xz.pkl",
                           filename='pressure',
@@ -190,8 +190,8 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
     
-    cbar_levels = np.linspace(0.000,0.090,36)
-    cbar_ticks  = np.linspace(0.000,0.090,8)
+    cbar_levels = np.linspace(0.020,0.090,36)
+    cbar_ticks  = np.linspace(0.020,0.090,8)
     plot_wall_projection( xx, zz, p_fluc/p_ref,
                           separation="separationline_xz.pkl", 
                           filename='pressure_fluc',
