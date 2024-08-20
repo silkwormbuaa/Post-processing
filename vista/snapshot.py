@@ -1908,6 +1908,14 @@ class Snapshot:
             py = g.py[buff:-buff]
             pz = g.pz[buff:-buff]
             
+            # modify the grid points arrays based on snapshot type
+            if self.type == 'block':
+                pass
+            elif self.type == 'slice':
+                if self.slic_type   == 'X': px = np.array([0.0])
+                elif self.slic_type == 'Z': pz = np.array([0.0])
+                elif self.slic_type == 'Y' or self.slic_type == 'W': py = np.array([0.0])
+            
             # build one vtk block
             bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
             

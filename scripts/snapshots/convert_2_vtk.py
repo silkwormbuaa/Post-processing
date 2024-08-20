@@ -20,12 +20,12 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.directories import create_folder
 
-output_path = 'xxxx'
-snap_file = 'xxxx/snapshot.bin'
-grid_file = 'xxxx/grid.bin'
-output_filename = 'snapshot_0000.vtm'
+output_path = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/vtk/'
+snap_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot_Y_002.bin'
+grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+output_filename = 'snapshot_02920790_Y_002.vtm'
 box  = [-999,999,-999,999,-999,999]
-vars = ['u']
+vars = ['u','v','w','p']
 
 # - read in grid data
 
