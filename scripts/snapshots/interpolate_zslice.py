@@ -8,6 +8,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Interpolate z slice type snapshot and dump the data into pkl files
              for faster plotting.
+             slice_3dsnapshot -> interpolate_zslice -> zslice_from_pkl
 '''
 
 import os
