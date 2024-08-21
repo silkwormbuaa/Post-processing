@@ -260,7 +260,6 @@ class Snapshot:
                 if self.pos >= self.fsize: end_of_file = True
                 
 
-
 # ----- Inform user
 
         print( f'\n{self.n_bl} blocks were read ',end='')

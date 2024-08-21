@@ -641,13 +641,17 @@ def bilin_interp(x1,x2,y1,y2,f,x,y):
 def find_indices( arr, target, mode='bisection' ):
     
     """
-    arr    : 1D list or numpy array
+    arr    : 1D list or numpy array, must monotically increase
     target : target value
     mode   : 'bisection' or 'sequential'  
     
     return : left and right indices 
     """
-    
+
+    # check if the target is out of bound
+    if target < arr[0] or target > arr[-1]:
+        raise ValueError("The target value is out of bound.")
+ 
     if mode == 'bisection':
     
         left, right = 0, len(arr) - 1
@@ -674,6 +678,7 @@ def find_indices( arr, target, mode='bisection' ):
             left += 1
         
         return left -1 , left
+
 
 # ----------------------------------------------------------------------
 # >>> convert image format                                       (Nr.)

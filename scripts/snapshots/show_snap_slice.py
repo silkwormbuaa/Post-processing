@@ -62,6 +62,10 @@ dataset.set_active_scalars('grad_rho')
 p = pv.Plotter()
 print(dataset)
 p.add_mesh(dataset, opacity=1.0, clim=[0,0.5], above_color='red', below_color='blue', show_scalar_bar=True)
+p.show_axes()
+axes_actor = pv.CubeAxesActor(p.camera)
+axes_actor.bounds = dataset.bounds
+actor, property = p.add_actor( axes_actor)
 p.show()
 
 
