@@ -43,7 +43,7 @@ snapshot.read_snapshot()
 
 # - slicing vector
 
-dataset = snapshot.create_vtk_multiblock( vars )
+dataset = pv.MultiBlock(snapshot.create_vtk_multiblock( vars ))
 
 dataset.set_active_scalars('u')
 
