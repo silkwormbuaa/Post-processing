@@ -233,6 +233,11 @@ class Snapshot:
                 self.bl_nums.append( self.snap_data[-1].num )
                 self.pos_var_start.append(self.snap_data[-1].pos_var_start)
                 
+                # append grid to snap_data
+                
+                if self.grid3d is not None:
+                    self.snap_data[-1].g = self.grid3d.g[self.bl_nums[-1]-1]
+                
                 # count the number of blocks in the snapshot file
                 self.n_bl += 1
                 

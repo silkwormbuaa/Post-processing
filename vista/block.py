@@ -8,6 +8,7 @@
 @Desc    :   Class block
 '''
 
+import warnings
 import numpy             as     np
 import pandas            as     pd
 
@@ -151,7 +152,8 @@ class BlockData:
 # ----- check if the block is filled
 
         if self.df.empty:
-            raise ValueError(f"BlockData {self.num} is empty.")
+            warnings.warn(f"drop_ghost: BlockData {self.num} is empty." +
+                          f"x,y,z = {self.g.lx0},{self.g.ly0},{self.g.lz0}")
         
 # ----- check if the block is 3D or 2D, if 2D, which type
 
