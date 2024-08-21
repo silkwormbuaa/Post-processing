@@ -1539,7 +1539,6 @@ class StatisticData:
         
         else:
             G = self.grid3d
-            G.compute_point()
 
 # ----- drop ghost cells
 

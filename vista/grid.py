@@ -90,9 +90,12 @@ class GridData:
             self.read_grid_header( f )
             
             self.read_grid_body( f )
-        
-        print( f"finish read grid file ...{self.grid_file[-50:]} \n" )
 
+        print( f"finish read grid file ...{self.grid_file[-50:]} \n" )
+        
+        # compute the grid point coordinates
+                
+        self.compute_point()
 
 
 # ----------------------------------------------------------------------

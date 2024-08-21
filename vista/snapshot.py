@@ -1894,7 +1894,6 @@ class Snapshot:
         
         else: 
             G = self.grid3d
-            G.compute_point() 
         
 # ----- drop ghost cells
 
@@ -2000,7 +1999,6 @@ def Testing():
     G = GridData( grid_file )
 
     G.read_grid()
-    G.compute_point()
     
     snapshot1 = Snapshot( snapshot_file )
     snapshot1.grid3d = G    

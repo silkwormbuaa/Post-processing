@@ -58,9 +58,6 @@ gridfile = datapath.split('/snapshots')[0] + '/results/inca_grid.bin'
 
 grid3d = GridData( gridfile )
 grid3d.read_grid()
-
-for g in grid3d.g:
-    g.compute_point()
     
 #print(g.px, g.py, g.pz)
 
