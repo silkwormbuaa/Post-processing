@@ -18,6 +18,7 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.tools       import find_indices
@@ -30,6 +31,7 @@ xrange = [-10.0, 5.0]
 
 snapshotpath = 'path/to/snapshots'
 gridfile = 'path/to/inca_grid.bin'
+outpath = 'path/to/output'
 
 # =============================================================================
 
@@ -52,6 +54,9 @@ times   = list()
 x_shock = list()
 
 # - loop over the snapshot files
+
+os.chdir( outpath )
+clock = timer("Tracking the shock location")
 
 for i, snap_file in enumerate(snap_files):
     
@@ -113,9 +118,9 @@ for i, snap_file in enumerate(snap_files):
     times.append( snap.itime )        
     x_shock.append( prbdf.iloc[idmax]['x'] )
     
-    print(f"{i+1}/{len(snap_files)} is done.")
+    progress = (i+1)/len(snap_files)
+    print(f"{i+1}/{len(snap_files)} is done. " + clock.remainder(progress))
     print("------------------\n")
 
 result = pd.DataFrame( {'time':times, 'x_shock':x_shock} )
 result.to_csv('shock_tracking.csv', index=False)
-
