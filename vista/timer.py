@@ -12,10 +12,11 @@ class timer():
 
     def __init__(self, message):
         self.message = message
-
-    def __enter__(self):
         self.start = time.time()
-        return self
+
+    # def __enter__(self):
+    #     self.start = time.time()
+    #     return self
 
     def __exit__(self, *args):
         # self.end = time.time()
@@ -25,4 +26,13 @@ class timer():
         print("%s took: %02d:%02d:%02d" % (self.message, hours, minutes, seconds))
         print("=====================\n")
 
-
+    def remainder(self, current_progress):
+        
+        elapse = time.time() - self.start
+        lefttime = elapse * (1 - current_progress) / current_progress
+        hours, _         = divmod(lefttime, 3600)
+        minutes, seconds = divmod(_, 60)
+        
+        output = "Time left: %02d:%02d:%02d."%(hours, minutes, seconds)
+        
+        return output

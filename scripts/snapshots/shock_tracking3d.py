@@ -12,6 +12,7 @@
 
 import os
 import sys
+import pickle
 import pandas            as     pd
 import numpy             as     np
 import matplotlib.pyplot as     plt
@@ -19,6 +20,7 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.tools       import find_indices
@@ -27,10 +29,11 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 y0 = 10.4
-xrange = [-10.0, 5.0]
+xrange = [-8.0, 5.0]
 
 snapshotpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots'
 gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+outputpath = '/home/wencanwu/temp/'
 
 # =============================================================================
 
@@ -49,17 +52,20 @@ print("==================\n")
 
 # - initialize a list to store the x location of the shock
 
-times   = list()
-x_shock = list()
+times      = list()
+shocklines = list()
 
 # - loop over the snapshot files
+
+os.chdir( outputpath )
+clock = timer("Tracking the shock front")
 
 for i, snap_file in enumerate(snap_files):
     
     # - read snapshot file
 
     snap = Snapshot( snap_file )
-    snap.verbose = True
+    snap.verbose = False
     snap.grid3d = grd
     snap.read_snapshot(block_list=blocklist)
     snap.compute_gradients(block_list=blocklist)
@@ -105,20 +111,40 @@ for i, snap_file in enumerate(snap_files):
     prbdf = prbdf.sort_values(by=['z','x'])
     prbdf = prbdf.reset_index(drop=True)
 
-    #
+    # compose the schlieren plane
+    
     npz = len(np.unique(prbdf['z']))
     npx = len(np.unique(prbdf['x']))
     xx = np.array(prbdf['x']).reshape(npz,npx)
     zz = np.array(prbdf['z']).reshape(npz,npx)
     grad_rho = np.array(prbdf['grad_rho']).reshape(npz,npx)
     
-    ax.contourf( xx, zz, grad_rho, cmap='RdBu_r', levels=31)
-#        plt.savefig(f'snap_{snap.itstep}.png')
+    # tracking the shock front line where max grad_rho is located
+    
+    idmax = grad_rho.argmax(axis=1)
+    
+    x_shock   = xx[np.arange(npz),idmax]
+    z_shock   = zz[np.arange(npz),idmax]
+    shockline = pd.DataFrame( {'x':x_shock, 'z':z_shock} )
+    
+    # plot the schlieren plane
+    
+    clevels = np.linspace(0,0.36,37)
+    
+    ax.contourf( xx, zz, grad_rho, cmap='Greys', levels=clevels, extend='both' )
+    ax.plot( x_shock, z_shock, 'r', ls=':' )
+    ax.set_title(f"t ={snap.itime:8.2f} s")
 
-    plt.show()    
+    plt.savefig(f'snap_{snap.itstep:08d}.png')
     plt.close()
 
-    times.append( snap.itime )        
+    times.append( snap.itime )
+    shocklines.append( shockline )
     
-    print(f"{i+1}/{len(snap_files)} is done.")
+    progress = (i+1)/len(snap_files)
+    print(f"{i+1}/{len(snap_files)} is done. " + clock.remainder(progress))
     print("------------------\n")
+
+with open('shock_tracking3d.pkl', 'wb') as f:
+    pickle.dump( times, f )
+    pickle.dump( shocklines, f )
