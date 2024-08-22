@@ -29,11 +29,17 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 y0 = 10.4
-xrange = [-8.0, 5.0]
+xrange = [-8.0, 6.0]
 
-snapshotpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots'
-gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
-outputpath = '/home/wencanwu/temp/'
+inputpath    = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/'
+outputpath   = '/home/wencanwu/temp/'
+
+snapshotpath = inputpath + 'snapshots/'
+gridfile     = inputpath + 'results/inca_grid.bin'
+
+tolerance = 3.0     # max distance between max_grad_rho and mean shock location
+
+half_width = 1.5    # half width of the subdomain to search for the shock front
 
 # =============================================================================
 
@@ -54,6 +60,7 @@ print("==================\n")
 
 times      = list()
 shocklines = list()
+x_last_shock = None
 
 # - loop over the snapshot files
 
@@ -104,14 +111,14 @@ for i, snap_file in enumerate(snap_files):
 
             prbdf = pd.concat( [prbdf, new_data], ignore_index=True )        
 
-    # drop outside data and sort the dataframe
+    # - drop outside data and sort the dataframe
     
     prbdf.drop( prbdf[(prbdf['x'] < xrange[0]) | (prbdf['x'] > xrange[1])].index, 
                 inplace=True )
     prbdf = prbdf.sort_values(by=['z','x'])
     prbdf = prbdf.reset_index(drop=True)
 
-    # compose the schlieren plane
+    # - compose the schlieren plane
     
     npz = len(np.unique(prbdf['z']))
     npx = len(np.unique(prbdf['x']))
@@ -119,15 +126,38 @@ for i, snap_file in enumerate(snap_files):
     zz = np.array(prbdf['z']).reshape(npz,npx)
     grad_rho = np.array(prbdf['grad_rho']).reshape(npz,npx)
     
-    # tracking the shock front line where max grad_rho is located
+    # - tracking the shock front line where max grad_rho is located
     
     idmax = grad_rho.argmax(axis=1)
     
     x_shock   = xx[np.arange(npz),idmax]
-    z_shock   = zz[np.arange(npz),idmax]
+    
+# - check if any element of x_shock is 'tolerance' away from x_last_shock
+# ------------------------------------------------------------------------------    
+    
+    if x_last_shock is None: x_last_shock = np.mean(x_shock)
+    
+    if any( abs(x_shock - x_last_shock)  > tolerance ):
+        print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
+    
+        indx_s,_     = find_indices(xx[0,:], x_last_shock-half_width)
+        indx_e,_     = find_indices(xx[0,:], x_last_shock+half_width)
+        sub_grad_rho = grad_rho[:,indx_s:indx_e]
+        sub_xx       = xx[:,indx_s:indx_e]
+        sub_zz       = zz[:,indx_s:indx_e]
+        
+        idmax        = sub_grad_rho.argmax(axis=1)
+    
+        x_shock   = sub_xx[np.arange(npz),idmax]
+        
+# ------------------------------------------------------------------------------
+    
+    z_shock   = zz[:,0]
     shockline = pd.DataFrame( {'x':x_shock, 'z':z_shock} )
     
-    # plot the schlieren plane
+    x_last_shock = np.mean(x_shock)
+    
+    # - plot the schlieren plane
     
     clevels = np.linspace(0,0.36,37)
     
@@ -137,6 +167,8 @@ for i, snap_file in enumerate(snap_files):
 
     plt.savefig(f'snap_{snap.itstep:08d}.png')
     plt.close()
+
+    # - output 
 
     times.append( snap.itime )
     shocklines.append( shockline )

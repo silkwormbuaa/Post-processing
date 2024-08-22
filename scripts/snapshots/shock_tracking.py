@@ -27,11 +27,17 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 y0 = 10.4
-xrange = [-10.0, 5.0]
+xrange = [-8.0, 6.0]
 
-snapshotpath = 'path/to/snapshots'
-gridfile = 'path/to/inca_grid.bin'
-outpath = 'path/to/output'
+inputpath    = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/'
+outputpath   = '/home/wencanwu/temp/'
+
+snapshotpath = inputpath + 'snapshots/'
+gridfile     = inputpath + 'results/inca_grid.bin'
+
+tolerance = 3.0     # max distance between max_grad_rho and mean shock location
+
+half_width = 1.5    # half width of the subdomain to search for the shock front
 
 # =============================================================================
 
@@ -50,12 +56,13 @@ print("==================\n")
 
 # - initialize a list to store the x location of the shock
 
-times   = list()
-x_shock = list()
+times        = list()
+x_shocks     = list()
+x_last_shock = None
 
 # - loop over the snapshot files
 
-os.chdir( outpath )
+os.chdir( outputpath )
 clock = timer("Tracking the shock location")
 
 for i, snap_file in enumerate(snap_files):
@@ -106,17 +113,47 @@ for i, snap_file in enumerate(snap_files):
     # find the maximum of the gradient
     
     idmax = prbdf['grad_rho'].idxmax()
+    
+    x_shock = prbdf.iloc[idmax]['x']
+    grad_rho_max = prbdf.iloc[idmax]['grad_rho']
 
+# -----------------------------------------------------------------------------
+# - check if the maximum is at the boundary
+    
     if idmax == 0 or idmax == len(prbdf)-1:
-        
         print("The maximum is at the boundary! Please have a check!")
-        ax.plot( prbdf['x'], prbdf['grad_rho'], label='grad_rho' )
-        plt.savefig(f'snap_{snap.itstep}.png')
+
+# - check if x_shock is 'tolerance' away from x_last_shock
+
+    if x_last_shock is None: x_last_shock = x_shock
+
+    if abs(x_shock - x_last_shock) > tolerance:
+        print("Warning: the shock front is not continuous! Special treatment will be applied!")
+
+        indx_s,_ = find_indices( prbdf['x'], x_shock-half_width )
+        indx_e,_ = find_indices( prbdf['x'], x_shock+half_width )
+        sub_df   = prbdf.iloc[indx_s:indx_e]
+        sub_x    = sub_df['x']
+
+        idmax = sub_df['grad_rho'].idxmax()
+        
+        x_shock = sub_df.iloc[idmax]['x']
+        grad_rho_max = sub_df.iloc[idmax]['grad_rho']
+        
+# -----------------------------------------------------------------------------
+    
+    ax.plot( prbdf['x'], prbdf['grad_rho'], label='grad_rho' )
+    ax.plot( x_shock, grad_rho_max, 'ro' )
+    
+    ax.set_xlim( xrange )
+    ax.set_ylim( [-0.05, 0.5] )
+    
+    plt.savefig(f'snap_Z_{snap.itstep:08d}.png')
     
     plt.close()
 
     times.append( snap.itime )        
-    x_shock.append( prbdf.iloc[idmax]['x'] )
+    x_shocks.append( x_shock )
     
     progress = (i+1)/len(snap_files)
     print(f"{i+1}/{len(snap_files)} is done. " + clock.remainder(progress))
