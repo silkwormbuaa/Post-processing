@@ -103,14 +103,14 @@ for i, snap_file in enumerate(snap_files):
 
             prbdf = pd.concat( [prbdf, new_data], ignore_index=True )        
 
-    # drop outside data and sort the dataframe
+    # - drop outside data and sort the dataframe
     
     prbdf.drop( prbdf[(prbdf['x'] < xrange[0]) | (prbdf['x'] > xrange[1])].index, 
                 inplace=True )
     prbdf = prbdf.sort_values(by='x')
     prbdf = prbdf.reset_index(drop=True)
 
-    # find the maximum of the gradient
+    # - find the maximum of the gradient
     
     idmax = prbdf['grad_rho'].idxmax()
     
@@ -141,6 +141,8 @@ for i, snap_file in enumerate(snap_files):
         
 # -----------------------------------------------------------------------------
     
+    # - plot the grad_rho on the probe line
+    
     ax.plot( prbdf['x'], prbdf['grad_rho'], label='grad_rho' )
     ax.plot( x_shock, grad_rho_max, 'ro' )
     
@@ -150,7 +152,10 @@ for i, snap_file in enumerate(snap_files):
     plt.savefig(f'snap_Z_{snap.itstep:08d}.png')
     
     plt.close()
+    
+    # - output
 
+    x_last_shock = x_shock
     times.append( snap.itime )        
     x_shocks.append( x_shock )
     
