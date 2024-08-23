@@ -163,5 +163,5 @@ for i, snap_file in enumerate(snap_files):
     print(f"{i+1}/{len(snap_files)} is done. " + clock.remainder(progress))
     print("------------------\n")
 
-result = pd.DataFrame( {'time':times, 'x_shock':x_shock} )
-result.to_csv('shock_tracking.csv', index=False)
+result = pd.DataFrame( {'time':times, 'x_shock':x_shocks} )
+result.to_csv('shock_tracking2d.csv', index=False)
