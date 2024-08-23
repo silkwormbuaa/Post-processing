@@ -15,12 +15,12 @@ from   scipy             import signal
 def psd_hann( data, fs, n_seg, overlap, nfft=None ):
     
     """
-    data: input signal
-    fs: sampling frequency
-    n_seg: number of segments
-    overlap: overlap ratio
+    data: input signal\n
+    fs: sampling frequency\n
+    n_seg: number of segments\n
+    overlap: overlap ratio\n
     nfft: int, Length of the FFT used, if a zero padded FFT is desired. 
-          If None, the FFT length is nperseg. Defaults to None.
+    If None, the FFT length is nperseg. Defaults to None.\n
     
     return: freqency array, psd
     """        
@@ -38,12 +38,12 @@ def psd_hann( data, fs, n_seg, overlap, nfft=None ):
 def pre_multi_psd( data, fs, n_seg, overlap, nfft=None ):
     
     """
-    data: input signal
-    fs: sampling frequency
-    n_seg: number of segments
-    overlap: overlap ratio
+    data: input signal\n
+    fs: sampling frequency\n
+    n_seg: number of segments\n
+    overlap: overlap ratio\n
     nfft: int, Length of the FFT used, if a zero padded FFT is desired. 
-          If None, the FFT length is nperseg. Defaults to None.
+    If None, the FFT length is nperseg. Defaults to None.\n
     
     return: freqency array, psd
     """        
