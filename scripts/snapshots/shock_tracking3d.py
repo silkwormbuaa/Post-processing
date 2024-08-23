@@ -77,7 +77,7 @@ for i, snap_file in enumerate(snap_files):
     snap.read_snapshot(block_list=blocklist)
     snap.compute_gradients(block_list=blocklist)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10,6))
 
     # - initialize a pandas dataframe to store the grad_rho on the probe line
 

@@ -25,7 +25,7 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    figpath = '/home/wencanwu/temp/1221/figures_DS'
+    figpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/shock_tracking/2d/figs'
 #    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
     os.chdir( figpath )
@@ -84,6 +84,13 @@ def create_video_from_images(image_paths, output_video_path, fps=25):
         if i%10 == 0: print(f"{i} image loaded.")
     
     height, width, layers = img[1].shape
+    
+    # Ensure all images have the same dimensions
+    height, width, layers = img[0].shape
+    for i in range(1, len(img)):
+        if img[i].shape != (height, width, layers):
+            print(f"Error: Image {image_paths[i]} has different dimensions.")
+            return
     
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video  = cv2.VideoWriter(output_video_path, fourcc, fps, (width,height)) 
