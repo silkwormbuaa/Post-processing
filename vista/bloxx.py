@@ -338,15 +338,24 @@ class Mesh_bloxx:
 def Testing():
 
     # Example usage:
-    file_path = '/home/wencanwu/test/smooth_adiabatic/grid_full'
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/smooth-adiabtic/grid_ascii'
     
-    os.chdir('/home/wencanwu/test/smooth_adiabatic/grid')
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/smooth-adiabtic/grid_awall')
     
     mesh = Mesh_bloxx(file_path)
     
-    mesh.grids = mesh.select_blocks((-119, -0.8, -0.1, -101, 2.0, 5.3))
+#    mesh.grids = mesh.select_blocks((-119, -0.8, -0.1, -101, 2.0, 5.3))
     
-    mesh.sort_grids()
+#    mesh.sort_grids()
+
+    for grid in mesh.grids:
+        
+#        print(grid.LY,grid.BC)
+        
+        if grid.LY[0] == 0.0:
+            grid.variables['BY1'] = 'AWALL     '
+            print(grid.BC)
+
     
     mesh.save_grid('./')
 
