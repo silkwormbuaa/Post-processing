@@ -601,7 +601,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def drop_ghost( self, buff=3 ):
+    def drop_ghost( self, block_list=None, buff=3 ):
 
         """
         self.snap_data will be replaced by self.snap_cleandata
@@ -619,9 +619,15 @@ class Snapshot:
         else:
             
             # Clean data(with out ghost cells)
-            self.snap_cleandata = []  
+            self.snap_cleandata = []
+            
+            if block_list is None:
+                block_list = self.bl_nums
             
             for block in self.snap_data:
+                
+                if block.num not in block_list:
+                    continue
                 
                 block.drop_ghost(buff)
                 self.snap_cleandata.append( block )
@@ -630,7 +636,10 @@ class Snapshot:
             
         del self.snap_data
         
+        # update list of block numbers
         # count total number of cells in the snapshots after dropping ghost
+        
+        self.bl_nums = block_list
         
         self.n_cells = 0
         for bl in self.snap_cleandata:
@@ -1877,7 +1886,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, vars, buff=3 ):
+    def create_vtk_multiblock( self, vars, block_list=None, buff=3 ):
         
         """
         write snapshot into vtm file (multiblock vtk)
@@ -1885,7 +1894,12 @@ class Snapshot:
         filename : filename of output snapshot
         vars     : list of variables to be written
         """
-        
+
+# ----- check block list, if None, write all blocks
+
+        if block_list is None:
+            block_list = self.bl_nums
+            
 # ----- check if grid data is ready
         
         if self.grid3d is None:
@@ -1896,13 +1910,16 @@ class Snapshot:
         
 # ----- drop ghost cells
 
-        self.drop_ghost( buff=buff )
+        self.drop_ghost( block_list=block_list, buff=buff )
         
 # ----- setup vtk file
         
         vtk_blocks = list()
         
         for snap_bl in self.snap_cleandata:
+            
+            if snap_bl.num not in block_list:
+                continue
             
             bl_num = snap_bl.num
             g = G.g[bl_num-1]
@@ -1955,7 +1972,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def write_vtm( self, filename, vars, buff=3 ):
+    def write_vtm( self, filename, vars, block_list=None, buff=3 ):
         
         """
         write snapshot into vtm file (multiblock vtk)
@@ -1965,7 +1982,7 @@ class Snapshot:
         """
 
 # ----- build the multiple blocks dataset
-        dataset = self.create_vtk_multiblock(vars, buff=buff)
+        dataset = self.create_vtk_multiblock(vars, block_list=block_list, buff=buff)
         
         write_vtm_file( filename, dataset )
         
