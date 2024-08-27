@@ -25,7 +25,7 @@ from   vista.timer       import timer
 
 # =============================================================================
 
-snapshotfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot_Z_001.bin'
+snapshotfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot_Y_003.bin'
 gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
 
 # =============================================================================
@@ -34,7 +34,6 @@ gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_gr
 
 grd = GridData( gridfile )
 grd.read_grid()
-block_list = grd.select_blockgrids([-999,999,0,999,0.01,0.1])
 
 # - read snapshot file
 

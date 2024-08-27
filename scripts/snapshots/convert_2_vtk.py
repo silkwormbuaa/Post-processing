@@ -20,17 +20,18 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.directories import create_folder
 
-output_path = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/vtk/'
-snap_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot_Y_002.bin'
+output_path = '/home/wencanwu/test/231124'
+snap_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot.bin'
 grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
-output_filename = 'snapshot_02920790_Y_002.vtm'
-box  = [-999,999,-999,999,-999,999]
-vars = ['u','v','w','p']
+output_filename = 'snapshot_02920790.vtm'
+box  = [-30,999,-999.0,31.0,0.0,999]     # box should also within the snapshot's range
+vars = ['u','p','T']
 
 # - read in grid data
 
 G = GridData( grid_file )
 G.read_grid()
+blocks_list = G.select_blockgrids( box, mode='within' )
 
 # - read in snapshot
 
@@ -39,11 +40,12 @@ with timer("read in snapshot"):
     snapshot = Snapshot( snap_file )
     snapshot.grid3d = G
     snapshot.verbose = False
-
-    snapshot.read_snapshot( var_read=vars )
+    snapshot.read_snapshot( block_list=blocks_list, var_read=vars )
+    
+    snapshot.compute_gradients( block_list=blocks_list )
 
 # - output
 
 with timer("write vtm"):
     create_folder( output_path ); os.chdir( output_path )
-    snapshot.write_vtm( output_filename, vars )
+    snapshot.write_vtm( output_filename, vars+['grad_rho'], block_list=blocks_list )

@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 '''
 @File    :   snap_isosurface.py
-@Time    :   2023/09/16 
+@Time    :   2024/08/26
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   visualise the isosurface of shock and vortices
 '''
 
 

@@ -104,15 +104,19 @@ if analyse3d:
         x_shocks.append( x_shock.mean() )
         x_shocks_mid.append( x_shock[int(len(x_shock)/2)] )
         
-    
-    print( len(x_shocks) )
+    x_mean = np.mean(x_shocks)
+    x_fluc = x_shocks - x_mean
+    rms3d  = np.sqrt( np.mean( x_fluc**2 ) )
     
     # - plot shock motion
     
     fig, ax = plt.subplots( figsize=(12,6) )
     
-    ax.plot( times, x_shocks,'b' )
-    ax.plot( times, x_shocks_mid,'r', ls=':' )
+    times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/7.15)
+    
+    ax.plot( times, np.array(x_shocks)/7.15,'b' )
+    ax.plot( times, np.array(x_shocks_mid)/7.15,'r', ls=':' )
+    ax.set_ylim( -0.4, 0.4 )
     ax.set_title('Spanwise averaged shock location')
  
     plt.show()
@@ -124,6 +128,8 @@ if analyse3d:
     
     fig, ax = plt.subplots(figsize=(12, 6))
     
+    
+    f3d = f3d * 66.664 / 507.0
     ax.plot(f3d, psd3d, label='3d shock tracking')
     
     ax.set_xscale('log')

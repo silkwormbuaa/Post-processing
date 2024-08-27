@@ -36,7 +36,7 @@ n_procs = comm.Get_size()
 
 
 slic_type   = 'Y'
-loc         = 0.0
+loc         = 10.4
 output_file = '/snapshot_Y_003.bin'
 
 # --- Root gets all the files and broadcast to other processors
