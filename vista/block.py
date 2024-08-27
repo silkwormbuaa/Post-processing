@@ -262,7 +262,7 @@ class BlockData:
         
         """
         grads: list of strings, choose from 
-        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2']
+        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div']
         """
         
         df = self.df
@@ -492,6 +492,24 @@ class BlockData:
                         
             df['lambda2'] = eigs[1,:,:,:].flatten()   
 
+# ----- compute the divergence of velocity
+
+        if 'div' in grads:
+            
+            if block_type != 'block':
+                raise ValueError("div is only for block type!")
+            
+            u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
+            v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
+            w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
+            
+            du_dx = np.gradient( u, g.gx, axis=2 )
+            dv_dy = np.gradient( v, g.gy, axis=1 )
+            dw_dz = np.gradient( w, g.gz, axis=0 )
+            
+            div = du_dx + dv_dy + dw_dz
+            
+            df['div'] = div.flatten()
 
 # ----- update dataframe
 

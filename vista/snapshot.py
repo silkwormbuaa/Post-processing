@@ -569,7 +569,7 @@ class Snapshot:
         block_list: list of blocks that are going to compute gradients;
                     if None, all blocks will compute gradients.
         grads: list of strings, choose from 
-        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2'],
+        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div'],
         default is ['schlieren']
         """
         
