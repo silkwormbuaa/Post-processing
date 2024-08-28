@@ -563,14 +563,14 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def compute_gradients( self, block_list=None, grads=['schlieren'], buff=3 ):
+    def compute_gradients( self, block_list=None, grads=['grad_rho'], buff=3 ):
         
         """
         block_list: list of blocks that are going to compute gradients;
                     if None, all blocks will compute gradients.
         grads: list of strings, choose from 
-        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div'],
-        default is ['schlieren']
+        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div'],
+        default is ['grad_rho']
         """
         
         if block_list is None:

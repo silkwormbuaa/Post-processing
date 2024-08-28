@@ -43,7 +43,7 @@ snap.read_snapshot( )
 
 # compute gradients in the snapshot
 
-snap.compute_gradients( grads=['schlieren','grad_p'] )
+snap.compute_gradients( grads=['grad_rho','grad_p'] )
 
 print( max([max(bl.df['grad_p']) for bl in snap.snap_data]) )
 

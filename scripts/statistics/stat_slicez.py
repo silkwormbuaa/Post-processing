@@ -113,7 +113,7 @@ for i, loc in enumerate( locs ):
                 S.compute_vars( block_list, ['mach','RS','p`'] )
                 
                 S.compute_gradients( block_list, 
-                                    ['schlieren','shadowgraph','grad_p'])
+                                    ['grad_rho','shadowgraph','grad_p'])
                 
         with timer("Get slice dataframe "):
             

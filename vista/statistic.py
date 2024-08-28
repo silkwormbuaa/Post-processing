@@ -557,7 +557,7 @@ class StatisticData:
         """
         block_list: list of blocks that are going to compute gradients\n
         grads: list of str representing gradients from
-        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div']\n
+        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div']\n
         """
         
         for num in block_list:

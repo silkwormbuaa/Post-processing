@@ -39,7 +39,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 slic_type = 'Z'
 loc       = 0.0
-grads     = ['schlieren']
+grads     = ['grad_rho']
 # =============================================================================
 # read in grid file and snapshot file, then get slice dataframe
 # =============================================================================

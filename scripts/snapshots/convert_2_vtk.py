@@ -25,7 +25,7 @@ snap_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snap
 grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
 output_filename = 'snapshot_02920790.vtm'
 box  = [-30,999,-999.0,31.0,0.0,999]     # box should also within the snapshot's range
-vars = ['u','p','T']
+vars = ['u','v','w','p','T']
 
 # - read in grid data
 
@@ -42,10 +42,10 @@ with timer("read in snapshot"):
     snapshot.verbose = False
     snapshot.read_snapshot( block_list=blocks_list, var_read=vars )
     
-    snapshot.compute_gradients( block_list=blocks_list )
+    snapshot.compute_gradients( block_list=blocks_list, grads=['grad_rho','div'] )
 
 # - output
 
 with timer("write vtm"):
     create_folder( output_path ); os.chdir( output_path )
-    snapshot.write_vtm( output_filename, vars+['grad_rho'], block_list=blocks_list )
+    snapshot.write_vtm( output_filename, ['u','p','grad_rho','div'], block_list=blocks_list )

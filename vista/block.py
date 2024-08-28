@@ -262,7 +262,7 @@ class BlockData:
         
         """
         grads: list of strings, choose from 
-        ['schlieren', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div']
+        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div']
         """
         
         df = self.df
@@ -285,7 +285,7 @@ class BlockData:
 
 # ----- compute magnitude of density gradient
 
-        if 'schlieren' in grads:
+        if 'grad_rho' in grads:
             
             rho = np.array( df['rho'] )
             
@@ -325,7 +325,7 @@ class BlockData:
         if 'laplacian' in grads:
             
             if 'grad_rho' not in df.columns:
-                raise ValueError("Include 'schlieren' first!")
+                raise ValueError("Include 'grad_rho' first!")
             
             if block_type == 'block':
                 
