@@ -78,9 +78,9 @@ for i in range(3):
                           cmap='Greys',
                           norm=colornorm)
     
-    ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=1.0)
-    ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=1.0)
-    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=1.0)
+    ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=2.0)
+    ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=2.0)
+    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=2.0)
     
     ax.text( 4.0, 0.02, label[i] )
     
