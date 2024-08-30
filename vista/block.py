@@ -406,6 +406,7 @@ class BlockData:
                 df['w1'] = w1.flatten()
                 df['w2'] = w2.flatten()
                 df['w3'] = w3.flatten()
+                df['vorticity'] = np.sqrt( w1**2 + w2**2 + w3**2 ).flatten()
             
             if block_type == 'X':
                 v = np.array( df['v'] ).reshape( self.npz, self.npy )
@@ -510,6 +511,23 @@ class BlockData:
             div = du_dx + dv_dy + dw_dz
             
             df['div'] = div.flatten()
+
+# ----- compute modified grad_rho
+
+        if 'grad_rho_mod' in grads:
+            
+            grad_rho = np.array( df['grad_rho'] )
+            div = np.array( df['div'] )
+            w1 = np.array( df['w1'])
+            w2 = np.array( df['w2'])
+            w3 = np.array( df['w3'])
+            
+            sensor = div / (np.array(df['vorticity']) + 1e-10)
+
+            grad_rho[np.where( sensor > -1.0 )] = 0.0
+
+            df['grad_rho_mod'] = grad_rho
+            df['sensor'] = sensor
 
 # ----- update dataframe
 

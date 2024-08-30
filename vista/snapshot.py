@@ -11,8 +11,9 @@
 '''
 
 import os
+import gc
 import sys
-import vtk
+import copy
 
 import numpy             as     np
 import pandas            as     pd
@@ -618,6 +619,8 @@ class Snapshot:
         
         else:
             
+            del self.snap_cleandata
+            gc.collect()
             # Clean data(with out ghost cells)
             self.snap_cleandata = []
             
@@ -629,12 +632,14 @@ class Snapshot:
                 if block.num not in block_list:
                     continue
                 
-                block.drop_ghost(buff)
-                self.snap_cleandata.append( block )
+                block_clean = copy.deepcopy(block)
+                block_clean.drop_ghost(buff)
+                self.snap_cleandata.append( block_clean )
+
+        # Release memory occupied by snap_data (in this way, memory will not be 
+        # released because blocks in snap_cleandata take it.)
             
-        # Release memory occupied by snap_data
-            
-        del self.snap_data
+#        del self.snap_data
         
         # update list of block numbers
         # count total number of cells in the snapshots after dropping ghost
@@ -1825,27 +1830,36 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def write_snapshot_szplt( self, filename ):
+    def write_snapshot_szplt( self, filename, vars=None, block_list=None, buff=3 ):
         
         """
         filename : filename of output snapshot
         
         tbd: output wall distance as well
         """
+
+   
+# ----- check block list, if None, write all blocks
+
+        if block_list is None:
+            block_list = self.bl_nums
         
-        # check if self.snap_cleandata is ready
+# ----- drop ghost cells
+
+        self.drop_ghost( block_list=block_list, buff=buff )        
         
-        if len(self.snap_cleandata) == 0:
-            raise ValueError("Please clean data first!")
-        
-        # setupt tecplot file
+# ----- check the variables to be written
+
+        if vars is None:
+            vars = self.snap_cleandata[0].df.columns.tolist()
+            
+# ----- setupt tecplot file
         
         tp.new_layout()
         frame = tp.active_frame()
-        self.vars_name = self.snap_cleandata[0].df.columns.tolist()
-        dataset = frame.create_dataset('snapshot',['x','y','z']+self.vars_name)
+        dataset = frame.create_dataset('snapshot',['x','y','z'] + vars)
         
-        for i in range( self.n_bl ):
+        for i in range( len(self.snap_cleandata) ):
             
             bl_data = self.snap_cleandata[i]
             
@@ -1886,13 +1900,13 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, vars, block_list=None, buff=3 ):
+    def create_vtk_multiblock( self, vars=None, block_list=None, buff=3 ):
         
         """
         write snapshot into vtm file (multiblock vtk)
         
-        filename : filename of output snapshot
-        vars     : list of variables to be written
+        vars       : list of variables to be written
+        block_list : block numbers of which blocks to be written
         """
 
 # ----- check block list, if None, write all blocks
@@ -1911,7 +1925,12 @@ class Snapshot:
 # ----- drop ghost cells
 
         self.drop_ghost( block_list=block_list, buff=buff )
-        
+
+# ----- check the variables to be written
+
+        if vars is None:
+            vars = self.snap_cleandata[0].df.columns.tolist()
+            
 # ----- setup vtk file
         
         vtk_blocks = list()

@@ -42,10 +42,10 @@ with timer("read in snapshot"):
     snapshot.verbose = False
     snapshot.read_snapshot( block_list=blocks_list, var_read=vars )
     
-    snapshot.compute_gradients( block_list=blocks_list, grads=['grad_rho','div'] )
+    snapshot.compute_gradients( block_list=blocks_list, grads=['grad_rho','vorticity','grad_rho_mod','div'] )
 
 # - output
 
 with timer("write vtm"):
     create_folder( output_path ); os.chdir( output_path )
-    snapshot.write_vtm( output_filename, ['u','p','grad_rho','div'], block_list=blocks_list )
+    snapshot.write_vtm( output_filename, ['u','p','grad_rho_mod','div'], block_list=blocks_list )
