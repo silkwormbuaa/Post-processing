@@ -1825,7 +1825,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def write_snapshot_szplt( self, filename, vars=None, block_list=None, buff=3 ):
+    def write_szplt( self, filename, vars=None, block_list=None, buff=3 ):
         
         """
         filename : filename of output snapshot

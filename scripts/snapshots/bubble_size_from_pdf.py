@@ -76,7 +76,7 @@ with timer("compute bubble size"):
 # write the PDF file into tecplot szplt format.
 
 snapshot_container.drop_ghost()
-snapshot_container.write_snapshot_szplt( 'pdf_sep_test.szplt' )
+snapshot_container.write_szplt( 'pdf_sep_test.szplt' )
 
 
 
