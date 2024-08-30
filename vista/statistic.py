@@ -9,6 +9,7 @@
 '''
 
 import os
+import gc
 import pickle
 import numpy             as     np
 import pandas            as     pd
@@ -72,7 +73,12 @@ class StatisticData:
         
         # list of blocks
         self.bl = []
-               
+        self.bl_clean = []
+
+        # list of block numbers
+        self.bl_nums = []
+        self.bl_nums_clean = []
+        
         # Verbose ? 
         self.verbose = False
         
@@ -308,6 +314,10 @@ class StatisticData:
             self.pos = self.pos + self.bl[-1].size
                                     
             if self.pos >= self.fsize: end_of_file = True
+            
+        # get list of block numbers
+        
+        self.bl_nums = [block.num for block in self.bl]
 
 
 # ----------------------------------------------------------------------
@@ -441,12 +451,30 @@ class StatisticData:
         block_list : list of blocks that are going to drop ghost cells \n
         
         """
-        
-        for num in block_list:
+# ----- check if data is available
+
+        if len(self.bl) == 0:
+            raise ValueError('No data in the statistics.')
+
+# ----- drop ghost cells and store data in the self.bl_clean[]
+
+        else:
             
-            self.bl[num-1].drop_ghost(buff)
+            del self.bl_clean
+            gc.collect()
             
-        print('Ghost cells in selected blocks are dropped.')
+            self.bl_clean = []
+            
+            for block in self.bl:
+                
+                if block.num not in block_list:
+                    continue
+                
+                self.bl_clean.append( block.drop_ghost(buff) )
+
+            self.bl_nums_clean = [block.num for block in self.bl_clean]
+
+            print('Ghost cells in selected blocks are dropped.')
         
 
 # ----------------------------------------------------------------------

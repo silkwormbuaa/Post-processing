@@ -155,6 +155,10 @@ class BlockData:
             warnings.warn(f"drop_ghost: BlockData {self.num} is empty." +
                           f"x,y,z = {self.g.lx0},{self.g.ly0},{self.g.lz0}")
         
+# ----- init a cleaned block
+
+        bl_clean = BlockData()
+        
 # ----- check if the block is 3D or 2D, if 2D, which type
 
         if any(x==1 for x in (self.npx,self.npy,self.npz)):
@@ -178,18 +182,18 @@ class BlockData:
         if self.g is not None:
             
             if block_type == 'block':
-                self.g.gx = self.g.gx[buff:-buff]
-                self.g.gy = self.g.gy[buff:-buff]
-                self.g.gz = self.g.gz[buff:-buff]
+                bl_clean.g.gx = self.g.gx[buff:-buff]
+                bl_clean.g.gy = self.g.gy[buff:-buff]
+                bl_clean.g.gz = self.g.gz[buff:-buff]
             elif block_type == 'X':
-                self.g.gy = self.g.gy[buff:-buff]
-                self.g.gz = self.g.gz[buff:-buff]
+                bl_clean.g.gy = self.g.gy[buff:-buff]
+                bl_clean.g.gz = self.g.gz[buff:-buff]
             elif block_type == 'Y':
-                self.g.gx = self.g.gx[buff:-buff]
-                self.g.gz = self.g.gz[buff:-buff]
+                bl_clean.g.gx = self.g.gx[buff:-buff]
+                bl_clean.g.gz = self.g.gz[buff:-buff]
             elif block_type == 'Z':
-                self.g.gx = self.g.gx[buff:-buff]
-                self.g.gy = self.g.gy[buff:-buff]
+                bl_clean.g.gx = self.g.gx[buff:-buff]
+                bl_clean.g.gy = self.g.gy[buff:-buff]
 
         # drop ghost cells
         # Notice the binary data storage order [n_var, Z, Y, X]
@@ -238,11 +242,14 @@ class BlockData:
         
         # Append to snap_data_clean
         
-        self.npx = Nx
-        self.npy = Ny
-        self.npz = Nz
-        self.df = df
+        bl_clean.num = self.num
+        bl_clean.npx = Nx
+        bl_clean.npy = Ny
+        bl_clean.npz = Nz
+        bl_clean.np  = Nx*Ny*Nz
+        bl_clean.df = df
         
+        return bl_clean
 
 # ----------------------------------------------------------------------
 # >>> compute gradients                                      (Nr.)

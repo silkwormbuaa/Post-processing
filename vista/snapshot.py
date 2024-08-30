@@ -153,6 +153,7 @@ class Snapshot:
         # List of blocks numbers (of blocks in binary files)
         
         self.bl_nums = []
+        self.bl_nums_clean = []
         
         # Verbose
   
@@ -607,7 +608,7 @@ class Snapshot:
         """
         self.snap_data will be replaced by self.snap_cleandata
         
-        self.n_cells (number of cell after dropping ghost) will be updated
+        self.n_cells_clean (number of cell after dropping ghost) will be updated
         """
         
         # Check if data is available
@@ -621,6 +622,7 @@ class Snapshot:
             
             del self.snap_cleandata
             gc.collect()
+            
             # Clean data(with out ghost cells)
             self.snap_cleandata = []
             
@@ -632,23 +634,16 @@ class Snapshot:
                 if block.num not in block_list:
                     continue
                 
-                block_clean = copy.deepcopy(block)
-                block_clean.drop_ghost(buff)
-                self.snap_cleandata.append( block_clean )
+                self.snap_cleandata.append( block.drop_ghost(buff) )
 
-        # Release memory occupied by snap_data (in this way, memory will not be 
-        # released because blocks in snap_cleandata take it.)
-            
-#        del self.snap_data
-        
         # update list of block numbers
         # count total number of cells in the snapshots after dropping ghost
         
-        self.bl_nums = block_list
+        self.bl_nums_clean = [bl.num for bl in self.snap_cleandata]
         
-        self.n_cells = 0
+        self.n_cells_clean = 0
         for bl in self.snap_cleandata:
-            self.n_cells += bl.npx * bl.npy * bl.npz
+            self.n_cells_clean += bl.npx * bl.npy * bl.npz
         
         print(f"Snapshot {self.itstep} dropped ghost cells.")
         
@@ -840,7 +835,7 @@ class Snapshot:
             
             # Compose long vectors of solutions
                        
-            sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
+            sol_bl = np.zeros( (len(vars),self.n_cells_clean), dtype=np.float32 )
         
             pos_s = 0
             
@@ -887,7 +882,7 @@ class Snapshot:
                 
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells_clean), dtype=np.float32 )
                 
                 pos_s = 0 
                 
@@ -933,7 +928,7 @@ class Snapshot:
 
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (len(vars),self.n_cells ), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells_clean ), dtype=np.float32 )
                 
                 pos_s = 0 
                 
@@ -978,7 +973,7 @@ class Snapshot:
 
                 # Compose long vectors of solutions
                 
-                sol_bl = np.zeros( (len(vars),self.n_cells), dtype=np.float32 )
+                sol_bl = np.zeros( (len(vars),self.n_cells_clean), dtype=np.float32 )
                 
                 pos_s = 0 
                 

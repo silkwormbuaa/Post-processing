@@ -49,3 +49,6 @@ with timer("read in snapshot"):
 with timer("write vtm"):
     create_folder( output_path ); os.chdir( output_path )
     snapshot.write_vtm( output_filename, ['u','p','grad_rho_mod','div'], block_list=blocks_list )
+#    snapshot.drop_ghost(block_list=blocks_list)
+with timer("write szplt"):
+    snapshot.write_snapshot_szplt( 'snapshot.szplt', block_list=blocks_list )
