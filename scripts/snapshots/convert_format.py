@@ -22,14 +22,14 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-output_path = '/home/wencanwu/test/231124'
-snap_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot.bin'
-grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
-output_filename = 'snapshot_02920790'
+output_path = '/home/wencanwu/test/00699936'
+snap_file = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936/snapshot.bin'
+grid_file = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
+output_filename = 'snapshot_00699936'
 box  = [-30,999,-999.0,31.0,0.0,999]     # box should also within the snapshot's range
 vars_in = ['u','v','w','p','T']
-vars_out =  ['u','grad_rho','vorticity','grad_rho_mod','div']
-vtk   = False
+vars_out =  ['u','Q_cr','vorticity','grad_rho_mod','div']
+vtk   = True
 szplt = False
 
 # =============================================================================
@@ -49,7 +49,7 @@ with timer("read in snapshot"):
     snapshot.verbose = False
     snapshot.read_snapshot( block_list=blocks_list, var_read=vars_in )
     
-    snapshot.compute_gradients( block_list=blocks_list, grads=['grad_rho','vorticity','grad_rho_mod','div'] )
+    snapshot.compute_gradients( block_list=blocks_list, grads=['grad_rho','vorticity','grad_rho_mod','div','Q_cr'] )
 
 # - output
 

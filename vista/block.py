@@ -269,7 +269,7 @@ class BlockData:
         
         """
         grads: list of strings, choose from 
-        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div']
+        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div','grad_rho_mod']
         """
         
         df = self.df
@@ -529,12 +529,15 @@ class BlockData:
             w2 = np.array( df['w2'])
             w3 = np.array( df['w3'])
             
+            # shock region, div should be negative, and vorticity should be quite small;
+            # in boundary layer region, div fluctuates but vorticity is relatively large.
+            # so, we can use 'sensor' to filter out the boundary layer region.
+            
             sensor = div / (np.array(df['vorticity']) + 1e-10)
 
-            grad_rho[np.where( sensor > -1.0 )] = 0.0
+            grad_rho[np.where( sensor > -0.8 )] = 0.0
 
             df['grad_rho_mod'] = grad_rho
-            df['sensor'] = sensor
 
 # ----- update dataframe
 
