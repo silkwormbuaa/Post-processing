@@ -14,6 +14,8 @@ import os
 import sys
 import time
 import pyvista           as     pv
+import matplotlib.pyplot as     plt
+from   mpi4py            import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -21,53 +23,104 @@ sys.path.append( source_dir )
 from   vista.timer       import timer
 from   vista.grid        import GridData
 from   vista.snapshot    import Snapshot
-from   vista.plane_analy import save_sonic_line
-from   vista.plane_analy import save_separation_line
-from   vista.plane_analy import shift_coordinates
-from   vista.log         import Logger
-sys.stdout = Logger( os.path.basename(__file__) )
+from   vista.tools       import get_filelist
+from   vista.tools       import distribute_mpi_work
+
+# - build MPI communication environment
+
+comm    = MPI.COMM_WORLD
+rank    = comm.Get_rank()
+n_procs = comm.Get_size()
 
 # =============================================================================
 # option 
 # =============================================================================
 
-loc       = 0.0
-grads     = ['grad_rho']
-bbox = [-50.00, 125.0, 0.0, 50.0, -11.0, 11.0]
+bbox  = [-30,999,-999.0,31.0,0.0,999]
+gradients = ['grad_rho','vorticity','grad_rho_mod','div','Q_cr']
+vars_out =  ['u','Q_cr','vorticity','grad_rho_mod','div']
+
+snaps_dir = '/home/wencanwu/test/snapshots_220927'
+gridfile = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
 
 # =============================================================================
-# read in grid file and snapshot file, then get slice dataframe
-# =============================================================================
 
-datapath = os.getcwd()
-snapshotfile = datapath + '/snapshot.bin'
+# - get snapshot file list/grid and distribute the tasks
 
-# - read in grid file
+snapfiles = None
+grid3d    = GridData()
 
-gridfile = datapath.split('/snapshots')[0] + '/results/inca_grid.bin'
-grid3d = GridData( gridfile )
-grid3d.read_grid()
+if rank == 0:
     
+    snapfiles = get_filelist( snaps_dir, 'snapshot.bin' )
+    print(f"I am root, just found {len(snapfiles)} snapshot files.")
+    
+    grid3d = GridData( gridfile )
+    grid3d.read_grid()
+    
+snapfiles = comm.bcast( snapfiles, root=0 )
+grid3d    = comm.bcast( grid3d,    root=0 )
+
+n_snaps = len( snapfiles )
+i_start, i_end = distribute_mpi_work(n_snaps, n_procs, rank)
+snapfiles = snapfiles[i_start:i_end]
+
+print(f"I am processor {rank:05d}, I take {len(snapfiles):05d} tasks.")
+sys.stdout.flush()
+
+comm.barrier()
+
+# - read in snapshots and compute the gradients
+
 block_list = grid3d.select_blockgrids( bbox, mode='within' )
+clock = timer("show isosurface")
 
-# - read in 3D snapshot file
-
-with timer("read in 3d snapshot "):
-
-    snap3d = Snapshot( snapshotfile )
+for i,snapfile in enumerate(snapfiles):
+    
+    snap3d = Snapshot( snapfile )
     snap3d.verbose = False
     snap3d.grid3d = grid3d
     snap3d.read_snapshot( block_list )
-    snap3d.compute_gradients( block_list, grads )
+    snap3d.compute_gradients( block_list, gradients )
 
-# - generate the vtk dataset
+# -- generate the vtk dataset
 
-snap3d.create_vtk_multiblock( vars=grads, block_list=block_list )
+    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list ))
 
-# =============================================================================
-
-
-
-print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    dataset.set_active_scalars('u')
+    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,0.05])
+    uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
     
-sys.stdout.flush()       
+    point_data = dataset.cell_data_to_point_data().combine()
+
+    sep_bubble = point_data.contour( [0.0] )
+    
+    point_data.set_active_scalars('grad_rho_mod')
+    shock_front = point_data.contour( [0.2] )
+    
+    point_data.set_active_scalars('Q_cr')
+    vortices = point_data.contour( [50000.0] )
+
+# -- plot
+
+    p = pv.Plotter()
+    cmapu = plt.get_cmap('RdBu_r',51)
+    p.add_mesh(uslicez, opacity=1.0, show_scalar_bar=True, cmap=cmapu)
+    p.add_mesh(uslicey, opacity=1.0, show_scalar_bar=True, cmap=cmapu)
+    p.add_mesh(sep_bubble)
+    p.add_mesh(shock_front, color='grey', opacity=0.5)
+    p.add_mesh(vortices, color='red', opacity=0.5)
+    
+    p.view_vector([-0.8,0.3,1],viewup=[0,0,0])
+    p.add_axes()
+    p.show()
+    
+    progress = (i+1)/len(snapfiles)
+    print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
+    print("------------------\n")
+
+
+if rank == 0:
+
+    print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    sys.stdout.flush()       
