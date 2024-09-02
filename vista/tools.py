@@ -728,8 +728,8 @@ def convert_image_format(input_file,
         plt.axis('off')
         
         # convert and save figure
-        plt.savefig( output_file,dpi=300 )
-        print(f"{input_file}Successfully converted as {output_file}")
+        plt.savefig( output_file, dpi=1000 )
+        print(f"{input_file} has been converted as {output_file}")
 
     except Exception as e:
         print(f"Convert failed:{e}")
