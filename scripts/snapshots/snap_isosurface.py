@@ -25,7 +25,6 @@ from   vista.grid        import GridData
 from   vista.snapshot    import Snapshot
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
-from   vista.tools       import convert_image_format
 
 # - build MPI communication environment
 
@@ -37,12 +36,12 @@ n_procs = comm.Get_size()
 # option 
 # =============================================================================
 
-bbox  = [-30,999,-999.0,31.0,0.0,999]
+bbox  = [-30,999,-1.0,31.0,-999,999]
 gradients = ['grad_rho','vorticity','grad_rho_mod','div','Q_cr']
 vars_out =  ['u','Q_cr','vorticity','grad_rho_mod','div']
 
-snaps_dir = '/home/wencanwu/test/snapshots_220927'
-gridfile = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
+snaps_dir = '/home/wencanwu/test/snapshots_231124'
+gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
 
 # =============================================================================
 
@@ -77,7 +76,7 @@ os.chdir( snaps_dir )
 block_list = grid3d.select_blockgrids( bbox, mode='within' )
 clock = timer("show isosurface")
 
-for i,snapfile in enumerate(snapfiles[2:]):
+for i,snapfile in enumerate(snapfiles):
     
     snap3d = Snapshot( snapfile )
     snap3d.verbose = False
@@ -90,7 +89,7 @@ for i,snapfile in enumerate(snapfiles[2:]):
     dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list ))
 
     dataset.set_active_scalars('u')
-    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,0.05])
+    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,-10.35])
     uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
     
     point_data = dataset.cell_data_to_point_data().combine()
@@ -106,49 +105,40 @@ for i,snapfile in enumerate(snapfiles[2:]):
 
 # -- plot
 
-    p = pv.Plotter()
+# -- add figures elements
+    
+    # set the off_screen=True to avoid the interactive window
+    # interactive window is not supported on remote servers, also there is a bug 
+    # in vtk 9.x.x that the interactive window cannot be closed.
+    
+    p = pv.Plotter(off_screen=True)
     cmapu = plt.get_cmap('RdBu_r',84)
     p.add_mesh(uslicez, opacity=1.0, clim=[-320,510],show_scalar_bar=True, cmap=cmapu)
     p.add_mesh(uslicey, opacity=1.0, clim=[-320,510],show_scalar_bar=True, cmap=cmapu)
     p.add_mesh(sep_bubble)
     p.add_mesh(shock_front, color='grey', opacity=0.5)
     p.add_mesh(vortices, cmap=cmapu, clim=[-320,510], show_scalar_bar=True)
+    p.add_axes()    # add a vtk axes widget to the scene
     
-#    p.view_vector([-0.4,0.3,1.2],viewup=[0.17,0.94,-0.17])
+# -- camera setting
+
     p.view_vector([0,0,0],viewup=[0.19,0.98,-0.18])
     p.camera.position = (-100,61,120)
     p.camera.focal_point = (37.8,8.8,-12.3)
-    p.add_axes()
     
-    def cpos_callback():
-        
-        pfv = p.camera_position.to_list()
-        pos = [f"{float(num):5.2f}" for num in pfv[0]]
-        foc = [f"{float(num):5.2f}" for num in pfv[1]]
-        vup = [f"{float(num):5.2f}" for num in pfv[2]]
-        print(f"Camera position: {pos}")
-        print(f"Camera focus: {foc}")
-        print(f"Camera viewup: {vup}")
-        print("======")
+# -- save the figure with matplotlib
 
-        return
-
-    p.add_key_event("p", cpos_callback)
-    
     figname = f"isosurface_{snap3d.itstep:08d}"
     
+    p.show(screenshot=figname + ".png")
     
-    p.render()
-    window = p.render_window
-    
-    p.save_graphic(figname + ".eps")
-    
-#    p.close()
-    # pv.RenderWindowInteractor.close()
-    
-#    convert_image_format(figname + ".eps", figname, 'png')
-    
-#    p.show()
+    plt.imshow(p.image)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.savefig(figname + ".png", dpi=600)
+    plt.close()
+
+# - print the progress
     
     progress = (i+1)/len(snapfiles)
     print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
