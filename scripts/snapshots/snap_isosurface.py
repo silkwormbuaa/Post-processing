@@ -36,7 +36,7 @@ n_procs = comm.Get_size()
 # option 
 # =============================================================================
 
-bbox  = [-30,999,-1.0,31.0,-999,999]
+bbox  = [-30,999,-1.0,31.0,0.0,5.2]
 gradients = ['grad_rho','vorticity','grad_rho_mod','div','Q_cr']
 vars_out =  ['u','Q_cr','vorticity','grad_rho_mod','div']
 
@@ -89,7 +89,7 @@ for i,snapfile in enumerate(snapfiles):
     dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list ))
 
     dataset.set_active_scalars('u')
-    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,-10.35])
+    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,0.05])
     uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
     
     point_data = dataset.cell_data_to_point_data().combine()
@@ -135,7 +135,7 @@ for i,snapfile in enumerate(snapfiles):
     plt.imshow(p.image)
     plt.axis('off')
     plt.tight_layout()
-    plt.savefig(figname + ".png", dpi=600)
+    plt.savefig(figname + ".png", dpi=1200)
     plt.close()
 
 # - print the progress
