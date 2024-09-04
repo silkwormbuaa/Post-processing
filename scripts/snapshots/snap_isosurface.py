@@ -11,6 +11,7 @@
 
 
 import os
+import gc
 import sys
 import time
 import pyvista           as     pv
@@ -37,8 +38,8 @@ n_procs = comm.Get_size()
 # =============================================================================
 
 bbox  = [-30,999,-1.0,31.0,0.0,5.2]
-gradients = ['grad_rho','vorticity','grad_rho_mod','div','Q_cr']
-vars_out =  ['u','Q_cr','vorticity','grad_rho_mod','div']
+gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod','Ducros']
+vars_out =  ['u','Q_cr','div','vorticity','grad_rho','grad_rho_mod','Ducros','sensor']
 
 snaps_dir = '/home/wencanwu/test/snapshots_231124'
 gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
@@ -83,7 +84,8 @@ for i,snapfile in enumerate(snapfiles):
     snap3d.grid3d = grid3d
     snap3d.read_snapshot( block_list )
     snap3d.compute_gradients( block_list, gradients )
-
+    snap3d.write_szplt( "test.szplt", vars=vars_out, block_list=block_list )
+    break
 # -- generate the vtk dataset
 
     dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list ))
@@ -143,6 +145,9 @@ for i,snapfile in enumerate(snapfiles):
     progress = (i+1)/len(snapfiles)
     print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
     print("------------------\n")
+    
+    del snap3d, dataset, p
+    gc.collect()
 
 
 if rank == 0:

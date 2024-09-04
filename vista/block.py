@@ -269,7 +269,8 @@ class BlockData:
         
         """
         grads: list of strings, choose from 
-        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div','grad_rho_mod']
+        ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div',
+        'grad_rho_mod','Ducros']
         """
         
         df = self.df
@@ -292,7 +293,7 @@ class BlockData:
 
 # ----- compute magnitude of density gradient
 
-        if 'grad_rho' in grads:
+        if 'grad_rho' in grads or 'grad_rho_mod' in grads:
             
             rho = np.array( df['rho'] )
             
@@ -396,19 +397,67 @@ class BlockData:
                 grad_p = np.sqrt( dp_dx**2 + dp_dy**2 )
                 
             df['grad_p'] = grad_p.flatten()
+            
+# -- if vorticity, div, or Ducros are selected, compute velocity gradient first
 
+        gradV = ['vorticity','Q_cr','lambda2','div','grad_rho_mod','Ducros']
+        if any(_ in grads for _ in gradV):
+
+            if block_type == 'block':
+                
+                u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
+                v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
+                w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
+                
+                du_dx = np.gradient( u, g.gx, axis=2 )
+                du_dy = np.gradient( u, g.gy, axis=1 )
+                du_dz = np.gradient( u, g.gz, axis=0 )
+                dv_dx = np.gradient( v, g.gx, axis=2 )
+                dv_dy = np.gradient( v, g.gy, axis=1 )
+                dv_dz = np.gradient( v, g.gz, axis=0 )
+                dw_dx = np.gradient( w, g.gx, axis=2 )
+                dw_dy = np.gradient( w, g.gy, axis=1 )
+                dw_dz = np.gradient( w, g.gz, axis=0 )
+            
+            elif block_type == 'X':
+                
+                v = np.array( df['v'] ).reshape( self.npz, self.npy )
+                w = np.array( df['w'] ).reshape( self.npz, self.npy )
+                
+                dv_dy = np.gradient( v, g.gy, axis=1 )
+                dv_dz = np.gradient( v, g.gz, axis=0 )
+                dw_dy = np.gradient( w, g.gy, axis=1 )
+                dw_dz = np.gradient( w, g.gz, axis=0 )
+
+            elif block_type == 'Y':
+                
+                u = np.array( df['u'] ).reshape( self.npz, self.npx )
+                w = np.array( df['w'] ).reshape( self.npz, self.npx )
+                
+                du_dx = np.gradient( u, g.gx, axis=1 )
+                du_dz = np.gradient( u, g.gz, axis=0 )
+                dw_dx = np.gradient( w, g.gx, axis=1 )
+                dw_dz = np.gradient( w, g.gz, axis=0 )
+            
+            elif block_type == 'Z':
+                
+                u = np.array( df['u'] ).reshape( self.npy, self.npx )
+                v = np.array( df['v'] ).reshape( self.npy, self.npx )
+                
+                du_dx = np.gradient( u, g.gx, axis=1 )
+                du_dy = np.gradient( u, g.gy, axis=0 )
+                dv_dx = np.gradient( v, g.gx, axis=1 )
+                dv_dy = np.gradient( v, g.gy, axis=0 )
+            
 # ----- compute vorticity
 
         if 'vorticity' in grads:
             
             if block_type == 'block':
-                u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
-                v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
-                w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
                 
-                w1 = np.gradient(w,g.gy,axis=1) - np.gradient(v,g.gz,axis=0)
-                w2 = np.gradient(u,g.gz,axis=0) - np.gradient(w,g.gx,axis=2)
-                w3 = np.gradient(v,g.gx,axis=2) - np.gradient(u,g.gy,axis=1)
+                w1 = dw_dy - dv_dz
+                w2 = du_dz - dw_dx
+                w3 = dv_dx - du_dy
                 
                 df['w1'] = w1.flatten()
                 df['w2'] = w2.flatten()
@@ -416,21 +465,15 @@ class BlockData:
                 df['vorticity'] = np.sqrt( w1**2 + w2**2 + w3**2 ).flatten()
             
             if block_type == 'X':
-                v = np.array( df['v'] ).reshape( self.npz, self.npy )
-                w = np.array( df['w'] ).reshape( self.npz, self.npy )
-                w1 = np.gradient(w,g.gy,axis=1) - np.gradient(v,g.gz,axis=0)
+                w1 = dw_dy - dv_dz
                 df['w1'] = w1.flatten()
             
             if block_type == 'Y':
-                u = np.array( df['u'] ).reshape( self.npz, self.npx )
-                w = np.array( df['w'] ).reshape( self.npz, self.npx )
-                w2 = np.gradient(u,g.gz,axis=0) - np.gradient(w,g.gx,axis=1)
+                w2 = du_dz - dw_dx
                 df['w2'] = w2.flatten()
             
             if block_type == 'Z':
-                u = np.array( df['u'] ).reshape( self.npy, self.npx )
-                v = np.array( df['v'] ).reshape( self.npy, self.npx )
-                w3 = np.gradient(v,g.gx,axis=1) - np.gradient(u,g.gy,axis=0)
+                w3 = dv_dx - du_dy
                 df['w3'] = w3.flatten()
                 
 # ----- compute Q-cr
@@ -440,25 +483,12 @@ class BlockData:
             if block_type != 'block':
                 raise ValueError("Q_cr is only for block type!")
             
-            u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
-            v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
-            w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
-            
-            du_dx = np.gradient( u, g.gx, axis=2 )
-            du_dy = np.gradient( u, g.gy, axis=1 )
-            du_dz = np.gradient( u, g.gz, axis=0 )
-            dv_dx = np.gradient( v, g.gx, axis=2 )
-            dv_dy = np.gradient( v, g.gy, axis=1 )
-            dv_dz = np.gradient( v, g.gz, axis=0 )
-            dw_dx = np.gradient( w, g.gx, axis=2 )
-            dw_dy = np.gradient( w, g.gy, axis=1 )
-            dw_dz = np.gradient( w, g.gz, axis=0 )
             t_comp= 1/3*(du_dx + dv_dy + dw_dz)
 
-            Q_cr = -0.5*( (du_dx-t_comp)**2 
-                        + (dv_dy-t_comp)**2 
-                        + (dw_dz-t_comp)**2 ) \
-                 - du_dy*dv_dx - du_dz*dw_dx - dv_dz*dw_dy
+            Q_cr = -0.5*( (du_dx-t_comp)**2 +
+                          (dv_dy-t_comp)**2 +
+                          (dw_dz-t_comp)**2 ) \
+                   - (du_dy*dv_dx + du_dz*dw_dx + dv_dz*dw_dy)
             
             df['Q_cr'] = Q_cr.flatten()  
 
@@ -469,20 +499,6 @@ class BlockData:
             if block_type != 'block':
                 raise ValueError("lambda2 is only for block type!")
             
-            u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
-            v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
-            w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
-            
-            du_dx = np.gradient( u, g.gx, axis=2 )
-            du_dy = np.gradient( u, g.gy, axis=1 )
-            du_dz = np.gradient( u, g.gz, axis=0 )
-            dv_dx = np.gradient( v, g.gx, axis=2 )
-            dv_dy = np.gradient( v, g.gy, axis=1 )
-            dv_dz = np.gradient( v, g.gz, axis=0 )
-            dw_dx = np.gradient( w, g.gx, axis=2 )
-            dw_dy = np.gradient( w, g.gy, axis=1 )
-            dw_dz = np.gradient( w, g.gz, axis=0 )
-
             J = np.array([[du_dx,du_dy,du_dz],
                           [dv_dx,dv_dy,dv_dz],
                           [dw_dx,dw_dy,dw_dz]])
@@ -506,38 +522,43 @@ class BlockData:
             
             if block_type != 'block':
                 raise ValueError("div is only for block type!")
-            
-            u = np.array( df['u'] ).reshape( self.npz, self.npy, self.npx )
-            v = np.array( df['v'] ).reshape( self.npz, self.npy, self.npx )
-            w = np.array( df['w'] ).reshape( self.npz, self.npy, self.npx )
-            
-            du_dx = np.gradient( u, g.gx, axis=2 )
-            dv_dy = np.gradient( v, g.gy, axis=1 )
-            dw_dz = np.gradient( w, g.gz, axis=0 )
-            
+
             div = du_dx + dv_dy + dw_dz
-            
             df['div'] = div.flatten()
 
 # ----- compute modified grad_rho
 
         if 'grad_rho_mod' in grads:
+
+            if block_type != 'block':
+                raise ValueError("grad_rho_mod is only for block type!")
             
             grad_rho = np.array( df['grad_rho'] )
-            div = np.array( df['div'] )
-            w1 = np.array( df['w1'])
-            w2 = np.array( df['w2'])
-            w3 = np.array( df['w3'])
-            
+            div      = np.array( df['div']      )
+                        
             # shock region, div should be negative, and vorticity should be quite small;
             # in boundary layer region, div fluctuates but vorticity is relatively large.
             # so, we can use 'sensor' to filter out the boundary layer region.
             
-            sensor = div / (np.array(df['vorticity']) + 1e-10)
+            sensor = div / ( np.array(df['vorticity']) + 1e-10)
 
             grad_rho[np.where( sensor > -0.8 )] = 0.0
 
+            df['sensor'] = sensor
             df['grad_rho_mod'] = grad_rho
+            
+# ----- compute Ducros sensor
+
+        if 'Ducros' in grads:
+
+            if block_type != 'block':
+                raise ValueError("Ducros is only for block type!")
+            
+            div     = du_dx + dv_dy + dw_dz
+            curl_sq = (dw_dy-dv_dz)**2 + (du_dz-dw_dx)**2 + (dv_dx - du_dy)**2
+            Ducros  = div**2 / ( div**2 + curl_sq**2 + 1e-30)
+
+            df['Ducros'] = Ducros.flatten()
 
 # ----- update dataframe
 
