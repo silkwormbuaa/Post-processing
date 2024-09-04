@@ -1874,7 +1874,7 @@ class Snapshot:
             zone.values('y')[:] = yy.ravel()
             zone.values('z')[:] = zz.ravel()
             
-            for var in bl_data.df.columns:
+            for var in vars:
                 zone.values(var)[:] = np.array(bl_data.df[var]).reshape(npz,npy,npx).T.ravel()
             
         tp.data.save_tecplot_szl( filename )
