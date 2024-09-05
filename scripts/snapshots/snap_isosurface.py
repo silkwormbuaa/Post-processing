@@ -9,6 +9,10 @@
 @Desc    :   visualise the isosurface of shock and vortices
 '''
 
+# need to install xvfbwrapper, and update libstdc++.so.6 to have LIBGLIBCXX_3.4.30
+from xvfbwrapper import Xvfb
+vdisplay = Xvfb(width=1920, height=1080)
+vdisplay.start()
 
 import os
 import gc
@@ -37,12 +41,13 @@ n_procs = comm.Get_size()
 # option 
 # =============================================================================
 
-bbox  = [-30,999,-1.0,31.0,0.0,5.2]
-gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod','Ducros']
-vars_out =  ['u','Q_cr','div','vorticity','grad_rho','grad_rho_mod','Ducros','sensor']
+bbox      = [-30,999,-1.0,31.0,-999,999]
+gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
+vars_out  = ['u','Q_cr','div','vorticity','grad_rho_mod']
 
 snaps_dir = '/home/wencanwu/test/snapshots_231124'
-gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+gridfile  = '/path/to/inca_grid.bin'
+outdir    = '/home/wencanwu/test/snapshots_231124/output'
 
 # =============================================================================
 
@@ -73,7 +78,7 @@ comm.barrier()
 
 # - read in snapshots and compute the gradients
 
-os.chdir( snaps_dir )
+os.chdir( outdir )
 block_list = grid3d.select_blockgrids( bbox, mode='within' )
 clock = timer("show isosurface")
 
@@ -84,14 +89,15 @@ for i,snapfile in enumerate(snapfiles):
     snap3d.grid3d = grid3d
     snap3d.read_snapshot( block_list )
     snap3d.compute_gradients( block_list, gradients )
-    snap3d.write_szplt( "test.szplt", vars=vars_out, block_list=block_list )
-    break
+#    snap3d.write_szplt( "test.szplt", vars=vars_out, block_list=block_list )
+
 # -- generate the vtk dataset
 
     dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list ))
+    sys.stdout.flush()
 
     dataset.set_active_scalars('u')
-    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,0.05])
+    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,-10.35])
     uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
     
     point_data = dataset.cell_data_to_point_data().combine()
@@ -137,7 +143,7 @@ for i,snapfile in enumerate(snapfiles):
     plt.imshow(p.image)
     plt.axis('off')
     plt.tight_layout()
-    plt.savefig(figname + ".png", dpi=1200)
+    plt.savefig(figname + ".png", dpi=600)
     plt.close()
 
 # - print the progress
