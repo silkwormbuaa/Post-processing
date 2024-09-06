@@ -37,20 +37,20 @@ from   vista.timer       import timer
 #sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
+
 roughwall = False
+dirs  = '/path/to/the/case'
+
 # =============================================================================
 
-
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
+comm    = MPI.COMM_WORLD
+rank    = comm.Get_rank()
 n_procs = comm.Get_size()
 
-dirs = os.getcwd()
-
-grd = None
-wd_snap = None
+grd           = None
+wd_snap       = None
 snapshotfiles = None
-cc_df = None
+cc_df         = None
 
 print(f"Rank {rank} is working on {dirs}.")
 sys.stdout.flush()
@@ -63,7 +63,7 @@ if rank == 0:
     print(f"I am root, now at {dirs}.")
     sys.stdout.flush()
 
-    grid_file = dirs + '/inca_grid.bin'
+    grid_file = dirs + '/results/inca_grid.bin'
     ccfile    = dirs + '/cutcells_setup.dat'
 
     if roughwall:
@@ -111,14 +111,13 @@ n_snaps = len( snapshotfiles )
 i_start, i_end = distribute_mpi_work( n_snaps, n_procs, rank )
 
 snapshot_index = np.zeros(n_snaps, dtype=int)
-bubble_volume = np.zeros(n_snaps, dtype=float)
+snapshot_time  = np.zeros(n_snaps, dtype=float)
+bubble_volume  = np.zeros(n_snaps, dtype=float)
 
 
 # compute bubble size
 
 for i,snapshotfile in enumerate(snapshotfiles[i_start:i_end]):
-    
-    snapshot_index[i_start+i] = int(snapshotfile[-21:-13])
     
     with timer(f'load snapshot data ...{snapshotfile[-15:]}'):
         
@@ -134,13 +133,16 @@ for i,snapshotfile in enumerate(snapshotfiles[i_start:i_end]):
         
         print(f"snapshot ...{snapshotfile[-25:]} bubble size:{vol:15.4f}")
     
-    bubble_volume[i_start+i] = vol
+    snapshot_index[i_start+i] = snap.itstep
+    snapshot_time[i_start+i]  = snap.itime
+    bubble_volume[i_start+i]  = vol
     sys.stdout.flush()
     
     
 # wait for all the processors to finish computing bubble size
 
 snapshot_index = comm.reduce( snapshot_index, root=0, op=MPI.SUM )
+snapshot_time  = comm.reduce( snapshot_time,  root=0, op=MPI.SUM )
 bubble_volume  = comm.reduce( bubble_volume, root=0, op=MPI.SUM )
 
 
@@ -150,7 +152,7 @@ if rank == 0:
     
     with open('bubble_size.dat','w') as f:
         
-        f.write("snapshot_index bubble_volume\n")
+        f.write("itstep itime bubble_volume\n")
         for i in range(n_snaps):
-            f.write(f"{snapshot_index[i]:10d}{bubble_volume[i]:15.4f}\n")
+            f.write(f"{snapshot_index[i]:10d}{snapshot_time[i]:15.3f}{bubble_volume[i]:15.4f}\n")
 
