@@ -8,10 +8,11 @@
 @Desc    :   None
 '''
 import re
+import pickle
 import numpy             as     np
 import pandas            as     pd
 import matplotlib.pyplot as     plt
-import pickle
+from   vista.timer       import timer
 from   vista.colors      import colors as col
 from   .psd              import pre_multi_psd
 from   .psd              import psd_hann
@@ -235,7 +236,7 @@ class ProbeFile:
 
 class ProbeData:
     
-    def __init__( self, filename=None, withT=False ):
+    def __init__( self, filename=None, withT=False, step=1 ):
         
         """
         filename: probe data file
@@ -263,7 +264,7 @@ class ProbeData:
         # probe index
         self.probe_index = 0
         
-        if filename: self.read( filename )
+        if filename: self.read( filename, step=step )
 
 
 # ----------------------------------------------------------------------
@@ -280,7 +281,7 @@ class ProbeData:
 #
 # ----------------------------------------------------------------------
 
-    def read( self, filename ):
+    def read( self, filename, step=1 ):
         
         """
         filename: probe data file, [-9,-4] need to be probe index
@@ -304,7 +305,7 @@ class ProbeData:
             
             row = None
             
-            for i in range( 1, len(lines) ):
+            for i in range( 1, len(lines), step):
                 
                 cleanl = lines[i].strip().split()
                 cleanl = [ parse_float(item,i,self.probe_index) for item in cleanl ]
@@ -645,15 +646,16 @@ def Testing():
     
     filename = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/start_x/probe_00052.dat'
 
-    probe = ProbeData( filename, withT=False )
+    with timer("Read probe data"):
+        probe = ProbeData( filename, withT=False, step=20 )
     
     probe.cleandata(20.0)
     
-    probe.get_fluc(['p'])
+#    probe.get_fluc(['p'])
     
-    probe.pre_multi_psd('p_fluc', 8, 0.5)
+#    probe.pre_multi_psd('p_fluc', 8, 0.5)
     
-    print(probe.psd_df)
+#    print(probe.psd_df)
     
     
 # ----------------------------------------------------------------------
@@ -672,5 +674,5 @@ def Testing():
 
 if __name__ == "__main__":
 
-    #Testing()
-    WriteProbe()
+    Testing()
+    #WriteProbe()
