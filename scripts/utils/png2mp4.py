@@ -10,6 +10,7 @@
 '''
 
 import os
+import gc
 import sys
 import cv2
 from   moviepy.editor           import VideoFileClip, concatenate_videoclips
@@ -25,7 +26,7 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    figpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/shock_tracking/2d/figs'
+    figpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/3d_shock/fig'
 #    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
     os.chdir( figpath )
@@ -101,6 +102,8 @@ def create_video_from_images(image_paths, output_video_path, fps=25):
     
     cv2.destroyAllWindows()
     video.release()
+    
+    del img; gc.collect()
 
 
 # ----------------------------------------------------------------------

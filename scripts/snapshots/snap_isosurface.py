@@ -9,7 +9,8 @@
 @Desc    :   visualise the isosurface of shock and vortices
 '''
 
-# need to install xvfbwrapper, and update libstdc++.so.6 to have LIBGLIBCXX_3.4.30
+# need to install xvfbwrapper, and update 
+# /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 from xvfbwrapper import Xvfb
 vdisplay = Xvfb(width=1920, height=1080)
 vdisplay.start()
