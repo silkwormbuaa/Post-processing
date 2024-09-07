@@ -52,6 +52,30 @@ def cpos_callback( p:pv.Plotter ):
 
     return
 
+
+# ----------------------------------------------------------------------
+# >>> set plt style                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/09/07  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def set_plt_style():
+
+    plt.rcParams["text.usetex"] = True
+    plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+    plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
+    plt.rcParams['font.family'] = "Times New Roman"
+    plt.rcParams['font.size']   = 40
+    
+    
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------

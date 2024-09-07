@@ -12,22 +12,25 @@
 import os
 import sys
 import pickle
-import numpy             as     np
-import matplotlib.pyplot as     plt
+import numpy              as     np
+import matplotlib.pyplot  as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.timer       import timer
-from   vista.probe       import ProbeData
-from   vista.probe       import ProbeFile
-from   vista.directories import Directories
-from   vista.directories import create_folder
-from   vista.tools       import read_case_parameter
+from   vista.timer        import timer
+from   vista.probe        import ProbeData
+from   vista.probe        import ProbeFile
+from   vista.directories  import Directories
+from   vista.directories  import create_folder
+from   vista.tools        import read_case_parameter
+from   vista.plot_setting import set_plt_style
 
 # =============================================================================
 
-case_dir = '/media/wencanwu/Seagate Expansion Drive1/temp/220927'
+case_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/220927' 
+plot_all  = False
+plot_stat = True
 
 # =============================================================================
 
@@ -87,21 +90,25 @@ if not os.path.exists( 'pressure_ridge.pkl' ):
         with open( 'pressure_ridge.pkl', 'wb' ) as f:
             
             pickle.dump( [times, x_locs, pres], f )
-        
-    
-with timer("plot data"):
-    
-    with open( 'pressure_ridge.pkl', 'rb' ) as f:
-        times, x_locs, pres = pickle.load( f )
-    
-    pres = np.array( pres )
-    n_locs, n_time = pres.shape
-    x_locs = (np.array(x_locs) - x_imp) / delta_0
-    
-    print(f"there are {n_locs} probes at the ridge, and {n_time} time frames.")
-    
-    print(x_locs[0], x_locs[-1])
 
+
+# -- plot instantaneous pressure distribution at the ridge
+
+with open( 'pressure_ridge.pkl', 'rb' ) as f:
+    times, x_locs, pres = pickle.load( f )
+
+pres = np.array( pres )
+n_locs, n_time = pres.shape
+x_locs = (np.array(x_locs) - x_imp) / delta_0
+
+print(f"there are {n_locs} probes at the ridge, and {n_time} time frames.")
+
+set_plt_style()
+
+if plot_all:
+    
+    os.chdir( create_folder('./all_pressures') )
+    
     for i in range( len(times) ):
         
         fig, ax = plt.subplots( figsize=(15, 8) )
@@ -116,7 +123,22 @@ with timer("plot data"):
         plt.savefig( f"pressure_{i:06d}.png" )
         plt.close()
     
+if plot_stat:
     
+    df = pickle.load( open(dirs.pp_wall_proj+'/streamwise_vars.pkl', 'rb') )
+    
+    fig, ax = plt.subplots( figsize=(15, 8) )
+    
+    for i in range( len(times) ):
+        
+        ax.plot( x_locs, pres[:,i]/p_ref, alpha=0.05, color='gray' )
+    
+    ax.plot( df['x'], df['Cp'], label='avg', color='red' )
+    ax.set_xlim(-12.5,12)
+    ax.set_ylim(0.8, 2.5)
+    plt.show()   
+    plt.savefig( f"pressure_stat.png" )
+    plt.close()
     
         
         
