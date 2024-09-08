@@ -28,7 +28,7 @@ from   vista.plot_setting import set_plt_style
 
 # =============================================================================
 
-case_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/220927' 
+case_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic' 
 plot_all  = False
 plot_stat = True
 
@@ -129,15 +129,15 @@ if plot_stat:
     
     fig, ax = plt.subplots( figsize=(15, 8) )
     
-    for i in range( len(times) ):
+    for i in range( 0, len(times), 2 ):
         
-        ax.plot( x_locs, pres[:,i]/p_ref, alpha=0.05, color='gray' )
+        ax.plot( x_locs[:-2], pres[:-2,i]/p_ref, alpha=0.01, color='gray' )
     
     ax.plot( df['x'], df['Cp'], label='avg', color='red' )
-    ax.set_xlim(-12.5,12)
+    ax.set_xlim(-15,12)
     ax.set_ylim(0.8, 2.5)
+    plt.savefig( f"pressure_stat_every5.png" )
     plt.show()   
-    plt.savefig( f"pressure_stat.png" )
     plt.close()
     
         
