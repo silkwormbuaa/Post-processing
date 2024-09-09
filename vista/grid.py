@@ -9,8 +9,8 @@
              GridBlock is the data structure class within the range of a block.
 '''
 
-
 import os
+import math
 import numpy             as np
 import pandas            as pd
 
@@ -892,9 +892,34 @@ class GridBlock:
         
         self.size += slg*6
         if self.verbose: print( 'transx1 = ', self.transx1 )
-        
+
+
+# sanity check for len_specname
+# ------------------------------------------------------------------------------        
         # read fluid names: char(len=15) for each one
         # after INCA 5b66ccd, 7th Feb 2023, fluid names are 19 characters
+        
+        # try len_specname=15 firs, if the fortran buffer after specname is 
+        # abnormal, then len_specname=19
+        
+        def is_num_in_normal_range(num, threshold_min=1e-10, threshold_max=1e6):
+            if not math.isfinite(num):
+                return False
+            return threshold_min < abs(num) < threshold_max
+        
+        try:
+            file.seek( 6*len_specname, 1 )
+            temp = read_int_bin( file.read(4), sin )
+            if not is_num_in_normal_range( temp ):
+                raise ValueError('len_specname is not 15.')
+        except:
+            file.seek( -(6*len_specname+4), 1 )
+            len_specname = 19
+
+        else:
+            file.seek( -(6*len_specname+4), 1)
+# ------------------------------------------------------------------------------
+        
         self.fluidx1 = read_char_bin( file.read(len_specname) )
         self.fluidx2 = read_char_bin( file.read(len_specname) )
         self.fluidy1 = read_char_bin( file.read(len_specname) )
@@ -905,7 +930,7 @@ class GridBlock:
         self.size += len_specname*6
         if self.verbose: print( 'fluidx1 = ', self.fluidx1 )
         
-        # read extra space after 'write'
+        # read extra num of size after 'write'
         file.read(4)
         self.size += 4    
         
@@ -916,7 +941,7 @@ class GridBlock:
             pass
         
         
-        # read extra space before 'write'
+        # read extra num of size before 'write'
         file.read(4)
         self.size += 4
         
