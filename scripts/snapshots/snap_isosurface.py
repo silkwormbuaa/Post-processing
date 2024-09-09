@@ -11,9 +11,13 @@
 
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
-from xvfbwrapper import Xvfb
-vdisplay = Xvfb(width=1920, height=1080)
-vdisplay.start()
+
+off_screen = False
+
+if off_screen:
+    from xvfbwrapper import Xvfb
+    vdisplay = Xvfb(width=1920, height=1080)
+    vdisplay.start()
 
 import os
 import gc
@@ -26,11 +30,12 @@ from   mpi4py            import MPI
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.timer       import timer
 from   vista.grid        import GridData
+from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
+from   vista.directories import create_folder
 
 # - build MPI communication environment
 
@@ -46,9 +51,9 @@ bbox      = [-30,999,-1.0,31.0,-999,999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','div','vorticity','grad_rho_mod']
 
-snaps_dir = '/home/wencanwu/test/snapshots_231124'
+snaps_dir = '/home/wencanwu/test/snapshots_220927'
 gridfile  = '/path/to/inca_grid.bin'
-outdir    = '/home/wencanwu/test/snapshots_231124/output'
+outdir    = '/home/wencanwu/test/snapshots_220927/output'
 
 # =============================================================================
 
@@ -79,7 +84,7 @@ comm.barrier()
 
 # - read in snapshots and compute the gradients
 
-os.chdir( outdir )
+create_folder(outdir); os.chdir( outdir )
 block_list = grid3d.select_blockgrids( bbox, mode='within' )
 clock = timer("show isosurface")
 
@@ -94,7 +99,7 @@ for i,snapfile in enumerate(snapfiles):
 
 # -- generate the vtk dataset
 
-    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list ))
+    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3 ))
     sys.stdout.flush()
 
     dataset.set_active_scalars('u')
@@ -120,7 +125,7 @@ for i,snapfile in enumerate(snapfiles):
     # interactive window is not supported on remote servers, also there is a bug 
     # in vtk 9.x.x that the interactive window cannot be closed.
     
-    p = pv.Plotter(off_screen=True)
+    p = pv.Plotter(off_screen=off_screen)
     cmapu = plt.get_cmap('RdBu_r',84)
     p.add_mesh(uslicez, opacity=1.0, clim=[-320,510],show_scalar_bar=True, cmap=cmapu)
     p.add_mesh(uslicey, opacity=1.0, clim=[-320,510],show_scalar_bar=True, cmap=cmapu)
@@ -141,12 +146,15 @@ for i,snapfile in enumerate(snapfiles):
     
     p.show(screenshot=figname + ".png")
     
-    plt.imshow(p.image)
-    plt.axis('off')
-    plt.tight_layout()
-    plt.savefig(figname + ".png", dpi=600)
-    plt.close()
+    if off_screen:
+        plt.imshow(p.image)
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(figname + ".png", dpi=600)
+        plt.close()
 
+    p.close()
+    
 # - print the progress
     
     progress = (i+1)/len(snapfiles)
