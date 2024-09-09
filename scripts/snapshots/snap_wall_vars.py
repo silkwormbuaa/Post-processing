@@ -38,7 +38,7 @@ snap3d.grid3d = grid3d
 # snap3d.verbose = True
 snap3d.read_snapshot( block_list=block_list, var_read=vars_in )
 
-dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in,block_list=block_list))
+dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in,block_list=block_list,buff=2))
 
 point_data = dataset.cell_data_to_point_data().combine()
 point_data.set_active_scalars('wd')

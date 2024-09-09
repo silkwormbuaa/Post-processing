@@ -24,7 +24,11 @@ from   vista.probe        import ProbeFile
 from   vista.directories  import Directories
 from   vista.directories  import create_folder
 from   vista.tools        import read_case_parameter
+from   vista.tools        import create_linear_interpolator
+from   vista.plot_setting import set_plt_rcparams
 from   vista.plot_setting import set_plt_style
+
+set_plt_rcparams()
 
 # =============================================================================
 
@@ -51,6 +55,11 @@ p_ref   = float( parameters.get('p_ref') )
 h       = float( parameters.get('H') )
 x_imp   = float( parameters.get('x_imp') )
 delta_0 = float( parameters.get('delta_0') )
+# the following parameters are normalized by delta_0
+x_sep   = float( parameters.get('x_sep') )
+x_att   = float( parameters.get('x_att') )
+x_pfmax = float( parameters.get('x_pfmax') )
+
 prb_withT = True if parameters.get('prb_withT').lower() == 'true' else False
 
 # -- create output directories
@@ -103,22 +112,20 @@ x_locs = (np.array(x_locs) - x_imp) / delta_0
 
 print(f"there are {n_locs} probes at the ridge, and {n_time} time frames.")
 
-set_plt_style()
-
 if plot_all:
     
     os.chdir( create_folder('./all_pressures') )
     
     for i in range( len(times) ):
         
-        fig, ax = plt.subplots( figsize=(15, 8) )
+        fig, ax = plt.subplots()
+        
+        set_plt_style( case='wall_pressure', ax=ax, fig=fig )
         
         pre = pres[:,i] / p_ref
         
         ax.plot( x_locs, pre )
         ax.set_title( f"Pressure distribution at t={times[i]:.2f}s" )
-        ax.set_xlim(-12.5,12)
-        ax.set_ylim(0.8, 2.5)
         
         plt.savefig( f"pressure_{i:06d}.png" )
         plt.close()
@@ -127,15 +134,21 @@ if plot_stat:
     
     df = pickle.load( open(dirs.pp_wall_proj+'/streamwise_vars.pkl', 'rb') )
     
-    fig, ax = plt.subplots( figsize=(15, 8) )
+    fig, ax = plt.subplots( )
     
-    for i in range( 0, len(times), 2 ):
+    set_plt_style( case='wall_pressure', ax=ax, fig=fig )
+    
+    for i in range( 0, len(times), 3 ):
         
         ax.plot( x_locs[:-2], pres[:-2,i]/p_ref, alpha=0.01, color='gray' )
     
     ax.plot( df['x'], df['Cp'], label='avg', color='red' )
-    ax.set_xlim(-15,12)
-    ax.set_ylim(0.8, 2.5)
+    
+    f = create_linear_interpolator( df['x'], df['Cp'] )
+    
+    ax.plot([x_sep, x_att],[f(x_sep), f(x_att)], color='blue', marker='p',markersize=10,ls='')
+    ax.plot([x_pfmax],[f(x_pfmax)], color='red', marker='p',markersize=10,ls='')
+
     plt.savefig( f"pressure_stat_every5.png" )
     plt.show()   
     plt.close()
