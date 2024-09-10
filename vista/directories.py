@@ -137,7 +137,9 @@ def create_folder( path ):
         print(f"Folder created at path: {path}")
     except FileExistsError:
         print(f"Folder already exists at path: {path}")
-     
+    
+    return path
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
