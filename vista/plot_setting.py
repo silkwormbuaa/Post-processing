@@ -9,8 +9,8 @@
              related to pyvista and matplotlib
 '''
 
-import pyvista           as pv
-import matplotlib.pyplot as plt
+import pyvista           as     pv
+import matplotlib.pyplot as     plt
 import matplotlib.ticker as     ticker
 
 

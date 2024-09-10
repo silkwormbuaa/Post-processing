@@ -12,16 +12,18 @@
 import os
 import sys
 import pickle
-import numpy             as     np
-import pandas            as     pd
-import matplotlib.pyplot as     plt
-from   scipy.signal      import correlate
+import numpy              as     np
+import pandas             as     pd
+import matplotlib.pyplot  as     plt
+from   scipy.signal       import correlate
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.tools       import get_filelist
+from   vista.tools        import get_filelist
+from   vista.plot_setting import set_plt_rcparams
 
+#set_plt_rcparams()
 # =============================================================================
 
 shockpath3d = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/shock_tracking/3d'
@@ -71,7 +73,7 @@ bb_size_fluc = bb_size - bb_size_mean
 
 # - plot shock motion
 
-fig, ax = plt.subplots( figsize=(12,6) )
+fig, ax = plt.subplots( figsize=(15,8) )
 
 times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/7.15)
 
@@ -79,7 +81,7 @@ norm_shock = 0.5*(np.array(x_fluc).max() - np.array(x_fluc).min())
 ax.plot( times, np.array(x_fluc)/norm_shock,'b' )
 
 norm_bbsize = 0.5*(np.array(bb_size_fluc).max() - np.array(bb_size_fluc).min())
-ax.plot( times, bb_size_fluc/norm_bbsize,'r', ls=':' )
+ax.plot( times, -bb_size_fluc/norm_bbsize,'r', ls=':' )
 
 #ax.plot( times, np.array(x_shocks_mid)/7.15,'r', ls=':' )
 ax.set_ylim( -1.1, 1.1 )

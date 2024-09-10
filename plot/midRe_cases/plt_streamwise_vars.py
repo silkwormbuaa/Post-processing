@@ -46,8 +46,8 @@ width    = [4.0,      4.0,    4.0]
 lines = []
 
 plt_pwfluc = False
-plt_pw     = False
-plt_Cf     = True
+plt_pw     = True
+plt_Cf     = False
 
 figsizes = [15,8]
 
