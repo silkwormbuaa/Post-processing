@@ -47,13 +47,13 @@ n_procs = comm.Get_size()
 # option 
 # =============================================================================
 
-bbox      = [-30,999,-1.0,31.0,-999,999]
+bbox      = [-30, 999, -1.0, 31.0, 5.2, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','div','vorticity','grad_rho_mod']
 
-snaps_dir = '/home/wencanwu/test/snapshots_220927'
-gridfile  = '/path/to/inca_grid.bin'
-outdir    = '/home/wencanwu/test/snapshots_220927/output'
+snaps_dir = '/home/wencanwu/test/snapshots_231124'
+gridfile  = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+outdir    = '/home/wencanwu/test/snapshots_231124/output'
 
 # =============================================================================
 
@@ -84,7 +84,7 @@ comm.barrier()
 
 # - read in snapshots and compute the gradients
 
-create_folder(outdir); os.chdir( outdir )
+os.chdir( create_folder(outdir) )
 block_list = grid3d.select_blockgrids( bbox, mode='within' )
 clock = timer("show isosurface")
 
@@ -99,11 +99,11 @@ for i,snapfile in enumerate(snapfiles):
 
 # -- generate the vtk dataset
 
-    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3 ))
+    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3, mode='symmetry' ))
     sys.stdout.flush()
 
     dataset.set_active_scalars('u')
-    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,-10.35])
+    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,5.3])
     uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
     
     point_data = dataset.cell_data_to_point_data().combine()

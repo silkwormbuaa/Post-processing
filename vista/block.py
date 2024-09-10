@@ -147,7 +147,12 @@ class BlockData:
 #
 # ----------------------------------------------------------------------
 
-    def drop_ghost( self, buff=3 ):
+    def drop_ghost( self, buff=3, mode='symmetry' ):
+        
+        """
+        buff: number of ghost layers to be dropped \n
+        mode: 'symmetry' or 'oneside'
+        """
         
 # ----- check if the block is filled
 
@@ -177,23 +182,29 @@ class BlockData:
         N3 = self.npz
         n_var = len( self.df.columns )
         
+        # decide buffer based on mode
+        
+        if mode == 'symmetry':  buffl = buff; buffr = buff
+        
+        elif mode == 'oneside': buffl = buff; buffr = buff-1
+        
         # drop ghost cell coordinates
         
         if self.g is not None:
             
             if block_type == 'block':
-                bl_clean.g.gx = self.g.gx[buff:-buff]
-                bl_clean.g.gy = self.g.gy[buff:-buff]
-                bl_clean.g.gz = self.g.gz[buff:-buff]
+                bl_clean.g.gx = self.g.gx[buffl:-buffr]
+                bl_clean.g.gy = self.g.gy[buffl:-buffr]
+                bl_clean.g.gz = self.g.gz[buffl:-buffr]
             elif block_type == 'X':
-                bl_clean.g.gy = self.g.gy[buff:-buff]
-                bl_clean.g.gz = self.g.gz[buff:-buff]
+                bl_clean.g.gy = self.g.gy[buffl:-buffr]
+                bl_clean.g.gz = self.g.gz[buffl:-buffr]
             elif block_type == 'Y':
-                bl_clean.g.gx = self.g.gx[buff:-buff]
-                bl_clean.g.gz = self.g.gz[buff:-buff]
+                bl_clean.g.gx = self.g.gx[buffl:-buffr]
+                bl_clean.g.gz = self.g.gz[buffl:-buffr]
             elif block_type == 'Z':
-                bl_clean.g.gx = self.g.gx[buff:-buff]
-                bl_clean.g.gy = self.g.gy[buff:-buff]
+                bl_clean.g.gx = self.g.gx[buffl:-buffr]
+                bl_clean.g.gy = self.g.gy[buffl:-buffr]
 
         # drop ghost cells
         # Notice the binary data storage order [n_var, Z, Y, X]
@@ -201,38 +212,38 @@ class BlockData:
         
         if block_type == 'block':
             
-            Nx = N1 - buff*2
-            Ny = N2 - buff*2
-            Nz = N3 - buff*2
+            Nx = N1 - (buffl+buffr)
+            Ny = N2 - (buffl+buffr)
+            Nz = N3 - (buffl+buffr)
             
             sol_buff = (self.df.values).T.reshape( n_var, N3, N2, N1 )
-            sol_buff = sol_buff[ :, buff:-buff, buff:-buff, buff:-buff ]
+            sol_buff = sol_buff[ :, buffl:-buffr, buffl:-buffr, buffl:-buffr ]
 
         elif block_type == 'X':
             
             Nx = 1
-            Ny = N2 - buff*2
-            Nz = N3 - buff*2
+            Ny = N2 - (buffl+buffr)
+            Nz = N3 - (buffl+buffr)
             
             sol_buff = (self.df.values).T.reshape( n_var, N3, N2 )
-            sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+            sol_buff = sol_buff[ :, buffl:-buffr, buffl:-buffr ]
 
         elif block_type == 'Y':
             
-            Nx = N1 - buff*2
+            Nx = N1 - (buffl+buffr)
             Ny = 1
-            Nz = N3 - buff*2
+            Nz = N3 - (buffl+buffr)
 
             sol_buff = (self.df.values).T.reshape( n_var, N3, N1 )
-            sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+            sol_buff = sol_buff[ :, buffl:-buffr, buffl:-buffr ]
             
         elif block_type == 'Z':
-            Nx = N1 - buff*2
-            Ny = N2 - buff*2
+            Nx = N1 - (buffl+buffr)
+            Ny = N2 - (buffl+buffr)
             Nz = 1
         
             sol_buff = (self.df.values).T.reshape( n_var, N2, N1 )
-            sol_buff = sol_buff[ :, buff:-buff, buff:-buff ]
+            sol_buff = sol_buff[ :, buffl:-buffr, buffl:-buffr ]
         
         # Reshape the matrix ( no matter 2D or 3D) to long vectors
                 
@@ -265,7 +276,7 @@ class BlockData:
 #
 # ----------------------------------------------------------------------
 
-    def compute_gradients_block( self, grads:list, buff=3 ):
+    def compute_gradients_block( self, grads:list ):
         
         """
         grads: list of strings, choose from 

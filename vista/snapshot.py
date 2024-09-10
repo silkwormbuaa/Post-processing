@@ -565,7 +565,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def compute_gradients( self, block_list=None, grads=['grad_rho'], buff=3 ):
+    def compute_gradients( self, block_list=None, grads=['grad_rho'] ):
         
         """
         block_list: list of blocks that are going to compute gradients;
@@ -578,13 +578,13 @@ class Snapshot:
         if block_list is None:
             
             for snap_bl in self.snap_data:
-                snap_bl.compute_gradients_block( grads, buff=buff )
+                snap_bl.compute_gradients_block( grads )
         
         else:
             
             for num in block_list:
                 snap_bl = self.snap_data[self.bl_nums.index(num)]
-                snap_bl.compute_gradients_block( grads, buff=buff )
+                snap_bl.compute_gradients_block( grads )
             
         print(f"Snapshot {self.itstep} gradients ({grads}) are computed.\n")
              
@@ -603,10 +603,11 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def drop_ghost( self, block_list=None, buff=3 ):
+    def drop_ghost( self, block_list=None, buff=3, mode='symmetry' ):
 
         """
         self.snap_data will be replaced by self.snap_cleandata
+        mode: 'symmetry' or 'oneside'
         
         self.n_cells_clean (number of cell after dropping ghost) will be updated
         """
@@ -634,7 +635,7 @@ class Snapshot:
                 if block.num not in block_list:
                     continue
                 
-                self.snap_cleandata.append( block.drop_ghost(buff) )
+                self.snap_cleandata.append( block.drop_ghost(buff=buff,mode=mode) )
 
         # update list of block numbers
         # count total number of cells in the snapshots after dropping ghost
@@ -1895,13 +1896,14 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, vars=None, block_list=None, buff=3 ):
+    def create_vtk_multiblock( self, vars=None, block_list=None, buff=3, mode='symmetry' ):
         
         """
-        write snapshot into vtm file (multiblock vtk)
-        
-        vars       : list of variables to be written
-        block_list : block numbers of which blocks to be written
+        write snapshot into vtm file (multiblock vtk)\n        
+        vars       : list of variables to be written\n
+        block_list : block numbers of which blocks to be written\n
+        buff       : number of ghost layers\n
+        mode       : 'symmetry' or 'oneside'
         """
 
 # ----- check block list, if None, write all blocks
@@ -1919,7 +1921,10 @@ class Snapshot:
         
 # ----- drop ghost cells
 
-        self.drop_ghost( block_list=block_list, buff=buff )
+        self.drop_ghost( block_list=block_list, buff=buff, mode=mode )
+        
+        if mode == 'symmetry':  buffl = buff; buffr = buff
+        elif mode == 'oneside': buffl = buff; buffr = buff-1
 
 # ----- check the variables to be written
 
@@ -1938,9 +1943,9 @@ class Snapshot:
             bl_num = snap_bl.num
             g = G.g[bl_num-1]
             
-            px = g.px[buff:-buff]
-            py = g.py[buff:-buff]
-            pz = g.pz[buff:-buff]
+            px = g.px[buffl:-buffr]
+            py = g.py[buffl:-buffr]
+            pz = g.pz[buffl:-buffr]
             
             # modify the grid points arrays based on snapshot type
             if self.type == 'block':

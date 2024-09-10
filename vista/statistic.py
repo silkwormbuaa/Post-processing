@@ -444,12 +444,13 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def drop_ghost( self, block_list, buff=3 ):
+    def drop_ghost( self, block_list, buff=3, mode='symmetry' ):
         
         """
-        Only applicable to 3D statistics data. \n
         block_list : list of blocks that are going to drop ghost cells \n
-        
+        buff       : number of buffer layers \n
+        mode       : 'symmetry' or 'oneside' \n
+        return     : self.bl_clean[]
         """
 # ----- check if data is available
 
@@ -470,7 +471,7 @@ class StatisticData:
                 if block.num not in block_list:
                     continue
                 
-                self.bl_clean.append( block.drop_ghost(buff) )
+                self.bl_clean.append( block.drop_ghost(buff=buff,mode=mode) )
 
             self.bl_nums_clean = [block.num for block in self.bl_clean]
 
@@ -1551,7 +1552,7 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, block_list, vars, buff=3 ):
+    def create_vtk_multiblock( self, block_list, vars, buff=3, mode='symmetry' ):
         
         """
         write statistics into vtm file (multiblock vtk)
@@ -1570,7 +1571,7 @@ class StatisticData:
 
 # ----- drop ghost cells
 
-        self.drop_ghost( block_list, buff=buff )
+        self.drop_ghost( block_list, buff=buff, mode=mode )
 
 # ----- setup vtk file
 
