@@ -27,11 +27,11 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 30
 
-outpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/psd'
+outpath = '/media/wencan/Expansion/temp/DataPost/midRe/psd'
 
-datapaths = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/probes/psd_ridge'
-datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/probes/psd_ridge'
+datapaths = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
+datapath1 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
+datapath2 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
 datapaths = [datapaths, datapath1, datapath2]
 
 # separation range in normalized unit

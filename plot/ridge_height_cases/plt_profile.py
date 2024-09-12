@@ -48,12 +48,12 @@ fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/upstream_profiles/DLES14_black_white'
+OutPath  = '/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height/upstream_profiles/DLES14_black_white'
 
-data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/statistics/upstream_profile'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/upstream_profile'
-data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/statistics/upstream_profile'
+data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
+data1 = '/media/wencan/Expansion/temp/240211/postprocess/statistics/upstream_profile'
+data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
+data3 = '/media/wencan/Expansion/temp/240210/postprocess/statistics/upstream_profile'
 
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'

@@ -26,8 +26,8 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 
-shockpath2d = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/shock_tracking/2d'
-shockpath3d = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/shock_tracking/3d'
+shockpath2d = '/media/wencan/Expansion/temp/231124/postprocess/shock_tracking/2d'
+shockpath3d = '/media/wencan/Expansion/temp/231124/postprocess/shock_tracking/3d'
 
 fs = 100
 n_seg = 8

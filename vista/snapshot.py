@@ -2024,9 +2024,9 @@ def Testing():
     # test writing snapshot into vtm
     
     
-    test_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/snapshots/snapshot_00773347'
+    test_dir  = '/media/wencan/Expansion/temp/smooth_awallrs_test/snapshots/snapshot_00773347'
     snapshot_file = test_dir + '/snapshot.bin'
-    grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_awallrs_test/results/inca_grid.bin'
+    grid_file = '/media/wencan/Expansion/temp/smooth_awallrs_test/results/inca_grid.bin'
     vars = ['u','v','w','p','T']
     
     os.chdir( test_dir )

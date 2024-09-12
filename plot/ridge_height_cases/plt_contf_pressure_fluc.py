@@ -33,10 +33,10 @@ plt.rcParams['font.size']   = 40
 # setting parameters
 # =============================================================================
 
-output_dir = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/xy_plane/'
+output_dir = '/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height/xy_plane/'
 casename   = ['smooth_adiabatic','240211','220927','240210']
 
-df_dirs  = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/statistics/xy_planes' for case in casename]
+df_dirs  = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/xy_planes' for case in casename]
 
 label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
 

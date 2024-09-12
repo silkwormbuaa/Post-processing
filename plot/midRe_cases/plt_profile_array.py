@@ -25,12 +25,12 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size']   = 40
 
-data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/profile_array'
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/profile_array'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/statistics/profile_array'
+data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_array'
+data1 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_array'
+data2 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/profile_array'
 datapath = [data0, data1, data2 ]
 
-outputpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/profile_array'
+outputpath = '/media/wencan/Expansion/temp/DataPost/midRe/profile_array'
 
 cases = ['smooth', '220927', '231124']
 

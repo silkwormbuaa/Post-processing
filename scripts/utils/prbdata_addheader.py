@@ -33,9 +33,9 @@ opt = 2          # add header from inca_probe.inp file ()
 
 if opt == 1:
 
-    source_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/probes' 
-    target_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/probes'
-    outputpath  = '/media/wencanwu/Seagate Expansion Drive1/temp/test/output'
+    source_dir  = '/media/wencan/Expansion/temp/240211/probes' 
+    target_dir  = '/media/wencan/Expansion/temp/240210/probes'
+    outputpath  = '/media/wencan/Expansion/temp/test/output'
 
     sourcefiles = get_filelist( source_dir, 'probe_' )
     targetfiles = get_filelist( target_dir, 'probe_' )
@@ -61,7 +61,7 @@ if opt == 1:
 
 elif opt == 2:
     
-    casepath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124'
+    casepath = '/media/wencan/Expansion/temp/231124'
     
     case = Directories( casepath )
     

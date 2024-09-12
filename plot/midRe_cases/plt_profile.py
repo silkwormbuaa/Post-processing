@@ -47,11 +47,11 @@ fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/upstream_profile/'
+OutPath  = '/media/wencan/Expansion/temp/DataPost/midRe/upstream_profile/'
 
-data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/upstream_profile'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/statistics/upstream_profile'
+data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
+data1 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
+data2 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/upstream_profile'
 
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'

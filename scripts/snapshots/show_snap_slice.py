@@ -25,8 +25,8 @@ from   vista.timer       import timer
 
 # =============================================================================
 
-snapshotfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/snapshots/snapshot_02920790/snapshot_Y_003.bin'
-gridfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+snapshotfile = '/media/wencan/Expansion/temp/231124/snapshots/snapshot_02920790/snapshot_Y_003.bin'
+gridfile = '/media/wencan/Expansion/temp/231124/results/inca_grid.bin'
 
 # =============================================================================
 

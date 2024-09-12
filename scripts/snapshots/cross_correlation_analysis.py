@@ -26,8 +26,8 @@ from   vista.plot_setting import set_plt_rcparams
 #set_plt_rcparams()
 # =============================================================================
 
-shockpath3d = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/shock_tracking/3d'
-bubblepath  = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/bubble_size/bubble_size.dat'
+shockpath3d = '/media/wencan/Expansion/temp/231124/postprocess/shock_tracking/3d'
+bubblepath  = '/media/wencan/Expansion/temp/231124/postprocess/bubble_size/bubble_size.dat'
 
 # =============================================================================
 

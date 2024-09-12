@@ -23,8 +23,8 @@ from   vista.snapshot    import Snapshot
 
 # =============================================================================
 
-snap_file = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/supplements/wall_dist/snapshot_01329504/snapshot.bin'
-grid_file = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/results/inca_grid.bin'
+snap_file = '/media/wencan/Expansion/temp/220927/supplements/wall_dist/snapshot_01329504/snapshot.bin'
+grid_file = '/media/wencan/Expansion/temp/220927/results/inca_grid.bin'
 bbox      = [-30,999,-3,31.0, 0,999]
 vars_in   = ['u','p','wd']
 # =============================================================================

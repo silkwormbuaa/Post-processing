@@ -25,19 +25,19 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/averaged_streamwise_vars"
+OutPath  = "/media/wencan/Expansion/temp/DataPost/lowRe/averaged_streamwise_vars"
 
 # sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 # sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
 # sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data2 = '/media/wencan/Expansion/temp/220926/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data3 = '/media/wencan/Expansion/temp/220825/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data4 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data5 = '/media/wencan/Expansion/temp/221221/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 datalist = [data1,   data2,   data3,                   data4,        data5,  data6]
 dy       = [0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]

@@ -52,7 +52,7 @@ gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','div','vorticity','grad_rho_mod']
 
 snaps_dir = '/home/wencanwu/test/snapshots_231124'
-gridfile  = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+gridfile  = '/media/wencan/Expansion/temp/231124/results/inca_grid.bin'
 outdir    = '/home/wencanwu/test/snapshots_231124/output'
 
 # =============================================================================

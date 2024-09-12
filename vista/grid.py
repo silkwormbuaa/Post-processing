@@ -1163,7 +1163,7 @@ class GridBlock:
 
 def Testing():
 
-    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/results/inca_grid.bin'
+    filename = '/media/wencan/Expansion/temp/231124/results/inca_grid.bin'
     
     grd = GridData( filename )
     

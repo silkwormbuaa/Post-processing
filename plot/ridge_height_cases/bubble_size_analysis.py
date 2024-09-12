@@ -20,12 +20,12 @@ sys.path.append( source_dir )
 from   vista.line        import LineData
 from   vista.psd         import pre_multi_psd
 
-file0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/bubble_size/bubble_size.dat'
-file1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/postprocess/bubble_size/bubble_size.dat'
-file2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/bubble_size/bubble_size.dat'
-file3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/postprocess/bubble_size/bubble_size.dat'
+file0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/bubble_size/bubble_size.dat'
+file1 = '/media/wencan/Expansion/temp/240211/postprocess/bubble_size/bubble_size.dat'
+file2 = '/media/wencan/Expansion/temp/220927/postprocess/bubble_size/bubble_size.dat'
+file3 = '/media/wencan/Expansion/temp/240210/postprocess/bubble_size/bubble_size.dat'
 
-outputpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/bubble_size'
+outputpath = '/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height/bubble_size'
 
 files = [file0, file1, file2, file3]
 tags  = ['smooth_adiabatic', 'H/delta=0.05', 'H/delta=0.1', 'H/delta=0.2'] 

@@ -25,13 +25,13 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/averaged_streamwise_vars/smoothwall"
+OutPath  = "/media/wencan/Expansion/temp/DataPost/lowRe/averaged_streamwise_vars/smoothwall"
 
 # sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 # sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
 # sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
-data6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 datalist = [ data6]
 dy       = [0.0]

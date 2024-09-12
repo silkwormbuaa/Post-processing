@@ -26,15 +26,15 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/averaged_streamwise_vars"
+OutPath  = "/media/wencan/Expansion/temp/DataPost/midRe/averaged_streamwise_vars"
 
-data0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data1 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data2 = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data1 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data2 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-sw_iw_pw_file = '/media/wencanwu/Seagate Expansion Drive1/temp/data_luis/midRe_streamwise/pw_SBLI_B2.dat'
-sw_iw_pwrms_file = '/media/wencanwu/Seagate Expansion Drive1/temp/data_luis/midRe_streamwise/pw_rms_SBLI_B2.dat'
-sw_iw_Cf_file = '/media/wencanwu/Seagate Expansion Drive1/temp/data_luis/midRe_streamwise/Cf_SBLI_B2.dat'
+sw_iw_pw_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_SBLI_B2.dat'
+sw_iw_pwrms_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_rms_SBLI_B2.dat'
+sw_iw_Cf_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/Cf_SBLI_B2.dat'
 
 add_sw_luis = True
 

@@ -18,11 +18,11 @@ sys.path.append( source_dir )
 
 from   vista.line        import ProfileData
 
-outpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/profile_arrays'
+outpath = '/media/wencan/Expansion/temp/DataPost/lowRe/profile_arrays'
 
 cases = ['smooth_adiabatic', '221014', '220926', '220825', '220927',  '221221']
 
-datapaths = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/statistics/profile_array' for case in cases]
+datapaths = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/profile_array' for case in cases]
 
 dy       = [0,  0.494, 0.468, 0.416, 0.312, 0.26]
 u_ref = 507.0

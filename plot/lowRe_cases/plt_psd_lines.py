@@ -32,7 +32,7 @@ plt.rcParams['font.size']   = 30
 
 loc = 'sep'
 independent_len = True
-outpath         = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/psd'
+outpath         = '/media/wencan/Expansion/temp/DataPost/lowRe/psd'
 figname         = 'psd_lines_034'
 fmt             = '.png'
 cases           = [0,3,4]
@@ -68,7 +68,7 @@ colors     = ['gray', 'green',  'blue',
 withTs     = [True,  False, False, 
               False, False, True, 
               False]
-datapaths  = ['/media/wencanwu/Seagate Expansion Drive1/temp/'+casecode+'/probes/' 
+datapaths  = ['/media/wencan/Expansion/temp/'+casecode+'/probes/' 
              for casecode in casescodes]
 
 # =============================================================================

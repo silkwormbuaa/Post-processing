@@ -27,8 +27,8 @@ plt.rcParams['font.size'] = 40
 
 # =============================================================================
 
-Datapath = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height"
-outpath = "/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/statistics"
+Datapath = "/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height"
+outpath = "/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height/statistics"
 
 
 DataFile = "statistic_compare"

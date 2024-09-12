@@ -263,8 +263,8 @@ class Solution:
 
 def Testing():
 
-    filename = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/results/results.bin'
-    gfile = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/results/inca_grid.bin'
+    filename = '/media/wencan/Expansion/temp/240210/results/results.bin'
+    gfile = '/media/wencan/Expansion/temp/240210/results/inca_grid.bin'
     
     bbox = [-200,200,-2,100,-12,12]
     

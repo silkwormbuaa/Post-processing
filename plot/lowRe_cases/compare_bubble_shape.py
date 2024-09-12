@@ -23,11 +23,11 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-output_dir = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/xy_plane/'
+output_dir = '/media/wencan/Expansion/temp/DataPost/lowRe/xy_plane/'
 
 casename = ['smooth_adiabatic', '221014', '220926', '220825', '220927',  '221221']
 
-df_dirs  = [f'/media/wencanwu/Seagate Expansion Drive1/temp/{case}/postprocess/statistics/xy_planes/' for case in casename]
+df_dirs  = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/xy_planes/' for case in casename]
 
 color    = ['gray','green', 'blue', 'black',                  'red',        'purple']
 lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-']

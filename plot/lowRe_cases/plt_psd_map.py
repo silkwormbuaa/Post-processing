@@ -33,15 +33,15 @@ pure      = True
 # =============================================================================
 
 
-datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_isothermal/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/221014/postprocess/probes/psd_ridge'
-datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220926/postprocess/probes/psd_ridge'
-datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/220825/postprocess/probes/psd_ridge'
-datapath4 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/postprocess/probes/psd_ridge'
-datapath5 = '/media/wencanwu/Seagate Expansion Drive1/temp/221221/postprocess/probes/psd_ridge'
-datapath6 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
+datapath0 = '/media/wencan/Expansion/temp/smooth_isothermal/postprocess/probes/psd_ridge'
+datapath1 = '/media/wencan/Expansion/temp/221014/postprocess/probes/psd_ridge'
+datapath2 = '/media/wencan/Expansion/temp/220926/postprocess/probes/psd_ridge'
+datapath3 = '/media/wencan/Expansion/temp/220825/postprocess/probes/psd_ridge'
+datapath4 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
+datapath5 = '/media/wencan/Expansion/temp/221221/postprocess/probes/psd_ridge'
+datapath6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
 
-outpath    = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe/psd'
+outpath    = '/media/wencan/Expansion/temp/DataPost/lowRe/psd'
 
 
 if output_nr == 0:

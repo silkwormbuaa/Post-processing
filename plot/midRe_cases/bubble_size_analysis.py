@@ -21,9 +21,9 @@ from   vista.line        import LineData
 from   vista.psd         import pre_multi_psd
 from   vista.directories import create_folder
 
-file = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/bubble_size/bubble_size.dat'
+file = '/media/wencan/Expansion/temp/231124/postprocess/bubble_size/bubble_size.dat'
 
-outputpath = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/midRe/bubble_size'
+outputpath = '/media/wencan/Expansion/temp/DataPost/midRe/bubble_size'
 
 files = [file]
 tags  = ['midRe_rough'] 

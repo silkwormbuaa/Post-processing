@@ -31,7 +31,7 @@ from   vista.tools       import get_filelist
 y0 = 10.4
 xrange = [-8.0, 6.0]
 
-inputpath    = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/'
+inputpath    = '/media/wencan/Expansion/temp/231124/'
 outputpath   = '/home/wencanwu/temp/'
 
 snapshotpath = inputpath + 'snapshots/'

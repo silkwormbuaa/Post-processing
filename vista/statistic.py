@@ -1659,8 +1659,8 @@ class StatisticData:
 
 if __name__ == "__main__":
     
-    path = "/media/wencanwu/Seagate Expansion Drive1/temp/231124/results"
-    outpath = "/media/wencanwu/Seagate Expansion Drive1/temp/231124/vtk"
+    path = "/media/wencan/Expansion/temp/231124/results"
+    outpath = "/media/wencan/Expansion/temp/231124/vtk"
     
     os.chdir(path)
     

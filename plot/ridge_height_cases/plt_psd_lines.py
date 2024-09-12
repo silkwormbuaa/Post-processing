@@ -38,12 +38,12 @@ pure      = False
 # =============================================================================
 
 
-datapath0 = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/probes'
-datapath1 = '/media/wencanwu/Seagate Expansion Drive1/temp/240211/probes/'
-datapath2 = '/media/wencanwu/Seagate Expansion Drive1/temp/220927/probes/'
-datapath3 = '/media/wencanwu/Seagate Expansion Drive1/temp/240210/probes/'
+datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/probes'
+datapath1 = '/media/wencan/Expansion/temp/240211/probes/'
+datapath2 = '/media/wencan/Expansion/temp/220927/probes/'
+datapath3 = '/media/wencan/Expansion/temp/240210/probes/'
 
-outpath  = '/media/wencanwu/Seagate Expansion Drive1/temp/DataPost/lowRe_ridge_height/psd'
+outpath  = '/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height/psd'
 
 
 # smooth wall
