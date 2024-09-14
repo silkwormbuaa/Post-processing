@@ -19,17 +19,41 @@ import matplotlib.pyplot  as     plt
 source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
+from   vista.directories  import Directories
+from   vista.directories  import create_folder
 from   vista.tools        import get_filelist
-from   vista.plot_setting import set_plt_rcparams
+from   vista.tools        import read_case_parameter
+from   vista.tools        import create_linear_interpolator
 
 #set_plt_rcparams()
 # =============================================================================
 
-shockpath3d = '/media/wencan/Expansion/temp/231124/postprocess/shock_tracking/3d'
-bubblepath  = '/media/wencan/Expansion/temp/231124/postprocess/bubble_size/bubble_size.dat'
+case_dir = '/media/wencan/Expansion/temp/231124'
 
+shockpath3d  = case_dir + '/postprocess/shock_tracking/3d'
+bubblepath   = case_dir + '/postprocess/bubble_size/bubble_size.dat'
+pressurepath = case_dir + '/postprocess/probes/pre_ridge/pressure_ridge.pkl'
+
+outputpath   = case_dir + '/postprocess/joint_analysis'
+os.chdir( create_folder( outputpath ) )
+
+dirs = Directories( case_dir )
 # =============================================================================
 
+# -----------------------------------------------------------------------------
+# - read in case parameters
+# -----------------------------------------------------------------------------
+parameters = read_case_parameter( dirs.case_para_file )
+p_ref   = float( parameters.get('p_ref') )
+h       = float( parameters.get('H') )
+x_imp   = float( parameters.get('x_imp') )
+delta_0 = float( parameters.get('delta_0') )
+# the following parameters are normalized by delta_0
+x_sep   = float( parameters.get('x_sep') )
+x_att   = float( parameters.get('x_att') )
+x_pfmax = float( parameters.get('x_pfmax') )
+
+# -----------------------------------------------------------------------------
 # - read in the shock motion data
 # -----------------------------------------------------------------------------
 
@@ -58,7 +82,6 @@ x_mean = np.mean(x_shocks)
 x_fluc = np.array(x_shocks - x_mean)
 
 # -----------------------------------------------------------------------------
-
 # - read in the bubble size data ['itstep', 'itime', 'bubble_volume']
 # -----------------------------------------------------------------------------
 
@@ -70,21 +93,67 @@ bb_size = np.array(bubble_df['bubble_volume'])
 bb_size_mean = bb_size.mean()
 bb_size_fluc = bb_size - bb_size_mean
 
-# - plot shock motion
-
-fig, ax = plt.subplots( figsize=(15,8) )
-
+physical_time = times.copy()
 times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/7.15)
 
 norm_shock = 0.5*(np.array(x_fluc).max() - np.array(x_fluc).min())
-ax.plot( times, np.array(x_fluc)/norm_shock,'b' )
-
 norm_bbsize = 0.5*(np.array(bb_size_fluc).max() - np.array(bb_size_fluc).min())
-ax.plot( times, bb_size_fluc/norm_bbsize,'r', ls=':' )
 
-#ax.plot( times, np.array(x_shocks_mid)/7.15,'r', ls=':' )
-ax.set_ylim( -1.1, 1.1 )
-ax.set_title('Spanwise averaged shock location')
+# -----------------------------------------------------------------------------
+# - read in the streamwise pressure data
+# -----------------------------------------------------------------------------
 
-plt.show()
-plt.close()
+with open(pressurepath, 'rb') as f:
+    times, x_locs, pres = pickle.load( f )
+
+pres = np.array( pres )
+n_locs, n_time = pres.shape
+x_locs = (np.array(x_locs) - 50.4) / 5.2
+
+# - exclude two probes accidentially placed at the ridge
+pres   = pres[:-2,:]
+x_locs = x_locs[:-2]
+
+# -----------------------------------------------------------------------------
+# - read in the mean pressure data
+# -----------------------------------------------------------------------------
+
+df = pickle.load( open(dirs.pp_wall_proj+'/streamwise_vars.pkl', 'rb') )
+
+# -----------------------------------------------------------------------------
+# - plot bubble size, shock motion and instantenous pressure
+# -----------------------------------------------------------------------------
+
+# - plot shock motion
+
+fin = create_linear_interpolator( df['x'], df['Cp'] )
+
+for i in range( 1 ): 
+
+    fig, axs = plt.subplots( 3, 1, figsize=(10,20) )
+    
+    axs[0].plot( times, x_fluc/norm_shock,'b' )
+    axs[1].plot( times, bb_size_fluc/norm_bbsize,'r', ls=':' )
+
+    #ax.plot( times, np.array(x_shocks_mid)/7.15,'r', ls=':' )
+    axs[0].set_ylim( -1.1, 1.1 )
+    axs[0].set_title('Spanwise averaged shock location')
+    axs[1].set_ylim( -1.1, 1.1 )
+    axs[1].set_title('bubble size')
+
+    # add dot of the current time
+    
+    axs[0].plot( times[i], x_fluc[i]/norm_shock, 'ro' )
+    axs[1].plot( times[i], bb_size_fluc[i]/norm_bbsize, 'ro' )
+
+    # - plot pressure distribution
+    axs[2].plot( x_locs, pres[:,i]/p_ref, '--' )
+    axs[2].plot( df['x'], df['Cp'], color='red' )
+    axs[2].plot([x_sep, x_att],[fin(x_sep), fin(x_att)], color='blue', marker='p',markersize=10,ls='')
+    axs[2].plot([x_pfmax],[fin(x_pfmax)], color='red', marker='p',markersize=10,ls='')
+    
+    fig.suptitle( f"t={times[i]:.2f}s" )
+    
+    plt.savefig( f"joint_analysis_{i:06d}.png" )   
+    plt.show()
+    plt.close()
