@@ -85,7 +85,7 @@ if not os.path.exists( 'pressure_ridge.pkl' ):
             if not(abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001):
                 continue
             
-            prb_data = ProbeData( prb_files[i], withT=prb_withT, step=40 )
+            prb_data = ProbeData( prb_files[i], withT=prb_withT )
             prb_data.cleandata( t_start=20.0 )
             
             x_locs.append( xyz[0] )

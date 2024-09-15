@@ -507,6 +507,58 @@ class ProbeData:
 
 
 # ----------------------------------------------------------------------
+# >>> time_index                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/09/15  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def time_index( self, ts: np.array ) -> np.array:
+        
+        """
+        ts: array of CONSECUTIVE time points\n
+        
+        return: array of index corresponding to nearest time points
+        """
+        
+# ----- check if the give time range is within the probe data range
+
+        t_min = self.df['time'].min()
+        t_max = self.df['time'].max()
+        
+        buff = 0.001
+        
+        if (t_min-buff) > t_min or (t_max+buff) < t_max:
+            raise ValueError(f"Time range {ts} is out of probe data range [{t_min},{t_max}].")
+        
+        timep = np.array( self.df['time'] )
+        
+        index = list()
+        i = 0
+        
+        for t in ts:
+            
+            while timep[i] >= t:
+                print(timep[i],i)
+                i += 1
+                
+                if i == len(timep): 
+                    index.append(i-1);break
+            
+            print(t,i)
+            index.append(i)
+        
+        return np.array(index)
+        
+
+# ----------------------------------------------------------------------
 # >>> read psd                                                (Nr.)
 # ----------------------------------------------------------------------
 #
@@ -644,12 +696,21 @@ def WriteProbe():
 
 def Testing():
     
-    filename = '/home/wencanwu/my_simulation/temp/220927_lowRe/probes/start_x/probe_00052.dat'
+    filename = '/home/wencanwu/test/probe_find_index/probe_00880.dat'
 
     with timer("Read probe data"):
-        probe = ProbeData( filename, withT=False, step=20 )
+        probe = ProbeData( filename, withT=True )
     
     probe.cleandata(20.0)
+    
+    ts = np.linspace(20.0, 61.0, 4001)
+    index = probe.time_index( ts )
+    
+    df = pd.DataFrame({'ts':ts, 'index':index})
+    
+    df.to_csv('/home/wencanwu/test/probe_find_index/index.csv', index=False)
+    
+    
     
 #    probe.get_fluc(['p'])
     
