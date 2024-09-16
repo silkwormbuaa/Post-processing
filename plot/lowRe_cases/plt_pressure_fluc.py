@@ -12,12 +12,12 @@
 
 import os
 import sys
+import numpy             as     np
+import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
-import numpy             as     np
-import matplotlib.pyplot as     plt
 from   vista.timer       import timer
 from   vista.probe       import ProbeData
 
