@@ -32,7 +32,7 @@ set_plt_rcparams()
 
 # =============================================================================
 
-case_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/' 
+case_dir  = '/home/wencan/temp/231124/' 
 plot_all  = False
 plot_stat = True
 
