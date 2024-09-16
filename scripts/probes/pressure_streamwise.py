@@ -32,7 +32,7 @@ set_plt_rcparams()
 
 # =============================================================================
 
-case_dir  = '/media/wencan/Expansion/temp/smooth_adiabatic' 
+case_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/smooth_adiabatic/' 
 plot_all  = False
 plot_stat = True
 
@@ -76,6 +76,14 @@ if not os.path.exists( 'pressure_ridge.pkl' ):
     
     with timer("Reading pressure data"):
         
+# ----- first get the index of probes signals at snapshot time points.
+
+        prb_data = ProbeData( prb_files[0], withT=prb_withT )
+        prb_data.cleandata( t_start=20.0 )
+        index = prb_data.time_index( np.linspace(20.0, 61.0, 4101) )
+        
+# ----- read pressure data at the ridge probe by probe
+
         for i in range( len(probes.probes) ):
             
             probe = probes.probes[i]
@@ -87,7 +95,8 @@ if not os.path.exists( 'pressure_ridge.pkl' ):
             
             prb_data = ProbeData( prb_files[i], withT=prb_withT )
             prb_data.cleandata( t_start=20.0 )
-            
+            prb_data.df = prb_data.df.iloc[index]
+             
             x_locs.append( xyz[0] )
             pres.append( np.array(prb_data.df['p']) )
             

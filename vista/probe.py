@@ -520,7 +520,7 @@ class ProbeData:
 #
 # ----------------------------------------------------------------------
 
-    def time_index( self, ts: np.array ) -> np.array:
+    def time_index( self, ts: np.array, buff=0.001 ) -> np.array:
         
         """
         ts: array of CONSECUTIVE time points\n
@@ -533,28 +533,32 @@ class ProbeData:
         t_min = self.df['time'].min()
         t_max = self.df['time'].max()
         
-        buff = 0.001
-        
-        if (t_min-buff) > t_min or (t_max+buff) < t_max:
-            raise ValueError(f"Time range {ts} is out of probe data range [{t_min},{t_max}].")
+        if (t_min-buff) > ts[0] or (t_max+buff) < ts[1]:
+            raise ValueError(f"Time range {ts} is out of probe data covered range [{t_min},{t_max}].")
+
+# ----- prepare data
         
         timep = np.array( self.df['time'] )
-        
         index = list()
         i = 0
         
+# ----- loop over every snapshot time point
+
         for t in ts:
+
+            # if (timep[i] < t) is put forward, the index will overfloat
+            # so we need to check if i is out of range first.
+            while i < len(timep) and timep[i] < t : i += 1
             
-            while timep[i] >= t:
-                print(timep[i],i)
-                i += 1
+            # probe data may not cover the last time point, but the buffer 
+            # already ensures the last time point is within the probe data range
+            # so we just need to add the last index.
+            if   i == len(timep): 
+                index.append(i-1)
                 
-                if i == len(timep): 
-                    index.append(i-1);break
-            
-            print(t,i)
-            index.append(i)
-        
+            elif timep[i] >= t:    
+                index.append(i)
+                
         return np.array(index)
         
 
@@ -703,14 +707,18 @@ def Testing():
     
     probe.cleandata(20.0)
     
-    ts = np.linspace(20.0, 61.0, 4001)
+    ts = np.linspace(20.0, 61.0, 4101)
     index = probe.time_index( ts )
     
     df = pd.DataFrame({'ts':ts, 'index':index})
     
     df.to_csv('/home/wencanwu/test/probe_find_index/index.csv', index=False)
     
+    # extract the data at given time points
     
+    df_extract = probe.df.iloc[index]
+    df_extract.reset_index(drop=True,inplace=True)
+    print(df_extract)
     
 #    probe.get_fluc(['p'])
     
