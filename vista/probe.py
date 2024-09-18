@@ -354,6 +354,33 @@ class ProbeData:
         
 
 # ----------------------------------------------------------------------
+# >>> add_data                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/09/18  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def add_data( self, varname, dataarray ):
+
+        """
+        varname: name of the variable
+        dataarray: array of data
+        
+        add data to the dataframe
+        """
+        
+        self.var_list.append( varname )
+        self.df[varname] = dataarray
+        
+
+# ----------------------------------------------------------------------
 # >>> get fluctuation                                            (Nr.)
 # ----------------------------------------------------------------------
 #

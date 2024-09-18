@@ -12,17 +12,19 @@
 import os
 import sys
 import time
+import numpy             as     np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
 from   vista.probe       import ProbeData
-from   vista.directories import Directories
 from   vista.probe       import ProbeFile
 from   vista.timer       import timer
 from   vista.colors      import colors as col
-from   vista.directories import create_folder
+from   vista.directories import Directories
 from   vista.tools       import read_case_parameter
+from   vista.material    import get_visc
+from   vista.directories import create_folder
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -42,6 +44,11 @@ print(f"We have got {n_data:5d} probes data.\n")
 
 parameters = read_case_parameter( dirs.case_para_file )
 h = float( parameters.get('H') )
+u_ref   = float(parameters.get('u_ref'))
+rho_ref = float(parameters.get('rho_ref'))
+delta   = float(parameters.get('delta_0'))
+lsep    = float(parameters.get('Lsep'))
+p_dyn   = 0.5 * rho_ref * u_ref**2
 prb_withT = True if parameters.get('prb_withT').lower() == 'true' else False
 
 # -- check if number of probe data and number of probes are consistent
@@ -77,8 +84,24 @@ with timer('Computing PSD '):
         
         probedata = ProbeData( prb_data[i], withT=prb_withT )
         probedata.cleandata( t_start=20.0 )
-        probedata.get_fluc( 'p' )
-        probedata.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+        
+        # -- compute cf first
+        
+        if os.getcwd() == dirs.pp_psd_ridge:
+            walldist = probedata.xyz[1]
+        elif os.getcwd() == dirs.pp_psd_valley:
+            walldist = abs( h + probedata.xyz[1] )
+        else: walldist = probedata.xyz[1]
+        
+        ts      = np.array( probedata.df['T'] )
+        u       = np.array( probedata.df['u'] )
+        mu      = get_visc( ts )
+        cf      = mu*u/walldist/p_dyn
+        
+        probedata.add_data( 'cf', cf )
+        probedata.get_fluc( ['cf','p'] )
+        probedata.pre_multi_psd( 'cf_fluc', n_seg=8, overlap=0.5 )
+        probedata.pre_multi_psd( 'p_fluc',  n_seg=8, overlap=0.5 )
         probedata.write_psd()
         
         t_1 = time.time()
