@@ -143,7 +143,7 @@ for i,snapshotfile in enumerate(snapshotfiles[i_start:i_end]):
 
 snapshot_index = comm.reduce( snapshot_index, root=0, op=MPI.SUM )
 snapshot_time  = comm.reduce( snapshot_time,  root=0, op=MPI.SUM )
-bubble_volume  = comm.reduce( bubble_volume, root=0, op=MPI.SUM )
+bubble_volume  = comm.reduce( bubble_volume,  root=0, op=MPI.SUM )
 
 
 # root processor write the bubble size to file
