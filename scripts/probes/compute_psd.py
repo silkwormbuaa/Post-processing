@@ -93,7 +93,13 @@ with timer('Computing PSD '):
             walldist = abs( h + probedata.xyz[1] )
         else: walldist = probedata.xyz[1]
         
-        ts      = np.array( probedata.df['T'] )
+        # in case the old cases that not having T in the probe data
+        
+        try:
+            ts  = np.array( probedata.df['T'] )
+        except:
+            ts  = np.array(probedata.df['p']/probedata.df['rho']/287.05)
+        
         u       = np.array( probedata.df['u'] )
         mu      = get_visc( ts )
         cf      = mu*u/walldist/p_dyn
