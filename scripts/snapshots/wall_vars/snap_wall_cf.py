@@ -6,8 +6,11 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   using pyvista to extract variables at the wall
+@Desc    :   using pyvista to visualise cf at the wall
 '''
+
+# need to install xvfbwrapper, and update 
+# /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
 off_screen = False
 
@@ -19,76 +22,153 @@ if off_screen:
 import os
 import gc
 import sys
-import numpy             as     np
-import pyvista           as     pv
-import matplotlib.pyplot as     plt
+import time
+import numpy              as     np
+import pyvista            as     pv
+import matplotlib.pyplot  as     plt
+from   mpi4py             import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.grid        import GridData
-from   vista.snapshot    import Snapshot
-from   vista.material    import get_visc
+from   vista.grid         import GridData
+from   vista.timer        import timer
+from   vista.snapshot     import Snapshot
+from   vista.directories  import Directories
+from   vista.tools        import get_filelist
+from   vista.tools        import read_case_parameter
+from   vista.tools        import distribute_mpi_work
+from   vista.material     import get_visc
+from   vista.directories  import create_folder
+from   vista.plot_setting import cpos_callback
+
+# - build MPI communication environment
+
+comm    = MPI.COMM_WORLD
+rank    = comm.Get_rank()
+n_procs = comm.Get_size()
 
 # =============================================================================
+# option
+# =============================================================================
 
-wd_file   = '/media/wencan/Expansion/temp/220927/supplements/wall_dist/snapshot_01329504/snapshot.bin'
-snap_file = '/media/wencan/Expansion/temp/220927/supplements/wall_dist/snapshot_01329504/snapshot.bin'
-grid_file = '/media/wencan/Expansion/temp/220927/results/inca_grid.bin'
-bbox      = [-30.0,0.0,-3.0,2.0, 0.0,99.0]
+case_dir  = '/media/wencan/Expansion/temp/220927'
+out_dir   = '/media/wencan/Expansion/temp/220927/postprocess/cf_wall'
+bbox      = [-30.0,110.0,-3.0,30.0, -99.0,99.0]
 vars_in   = ['u','T']
 
 # =============================================================================
 
-grid3d = GridData( grid_file )
-grid3d.read_grid()
-block_list = grid3d.select_blockgrids( bbox, mode='within' )
+dirs       = Directories( case_dir )
+wd_file    = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
 
-wd_snap = Snapshot( wd_file )
-wd_snap.read_snapshot( block_list, var_read=['wd'] )
+p_dyn      = None
+snapfiles  = None
+block_list = None
+grid3d     = GridData()
+wd_snap    = Snapshot()
 
-snap3d = Snapshot( snap_file )
-snap3d.grid3d = grid3d
-# snap3d.verbose = True
-snap3d.read_snapshot( block_list=block_list, var_read=vars_in )
+if rank == 0:
+    
+    create_folder( out_dir )
+    
+    params  = read_case_parameter( dirs.case_para_file )
+    u_ref   = float(params.get('u_ref'))
+    rho_ref = float(params.get('rho_ref'))
+    p_dyn   = 0.5 * rho_ref * u_ref**2
+    
+    snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
+    print(f"I am root, just found {len(snapfiles)} snapshot files.")
+    
+    grid3d = GridData( dirs.grid )
+    grid3d.read_grid()
+    block_list = grid3d.select_blockgrids( bbox, mode='within' )
+    
+    wd_snap = Snapshot( wd_file )
+    wd_snap.read_snapshot( block_list, var_read=['wd'] )
 
-snap3d.copy_var_from( wd_snap, ['wd'] )
+p_dyn      = comm.bcast( p_dyn,      root=0 )
+snapfiles  = comm.bcast( snapfiles,  root=0 )
+block_list = comm.bcast( block_list, root=0 )
+grid3d     = comm.bcast( grid3d,     root=0 )
+wd_snap    = comm.bcast( wd_snap,    root=0 )
 
-for bl in snap3d.snap_data:
+n_snaps   = len( snapfiles )
+i_s, i_e  = distribute_mpi_work(n_snaps, n_procs, rank)
+snapfiles = snapfiles[i_s:i_e]
 
-    if bl.num in block_list:
-        bl.df['mu'] = get_visc( np.array(bl.df['T']) )
+print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
+sys.stdout.flush()
+
+os.chdir( out_dir)
+clock = timer("show cf")
+
+for i, snap_file in enumerate(snapfiles):
+
+    snap3d = Snapshot( snap_file )
+    snap3d.grid3d = grid3d
+    snap3d.read_snapshot( block_list=block_list, var_read=vars_in )
+
+    itstep  = snap3d.itstep
+    figname = f'cf_{itstep:06d}.png'
+    
+    snap3d.copy_var_from( wd_snap, ['wd'] )
+
+    print(snap3d.vars_name)
+
+    for bl in snap3d.snap_data:
+
+        if bl.num in block_list:
+            bl.df['mu'] = get_visc( np.array(bl.df['T']) )
 
 # =============================================================================
 # visualization
 # =============================================================================
 
-dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in,block_list=block_list,mode='oneside'))
+    dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in+['wd','mu'],block_list=block_list,mode='oneside') )
 
-point_data = dataset.cell_data_to_point_data().combine()
-point_data.set_active_scalars('wd')
+    point_data = dataset.cell_data_to_point_data().combine()
+    point_data.set_active_scalars('wd')
 
-wallsurface = point_data.contour( [0.001] )
-wallsurface.set_active_scalars('u')
-
-print( wallsurface )
-
-p = pv.Plotter(off_screen=off_screen)
-cmap = plt.get_cmap('coolwarm',51)
-
-p.add_mesh( wallsurface, cmap=cmap, show_scalar_bar=True)
-p.add_axes()
-p.show('test.png')
-
-if off_screen:
-    plt.imshow(p.image)
-    plt.axis('off')
-    plt.tight_layout()
-    plt.savefig("test.png", dpi=600)
-    plt.close()
-
-p.close()
-
-gc.collect()
+    wallsurface = point_data.contour( [0.02] )
 
 
+    print( wallsurface )
+    print( wallsurface['mu'])
+
+    friction = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
+
+    wallsurface['cf'] = friction / p_dyn
+    wallsurface.set_active_scalars('cf')
+
+    p = pv.Plotter(off_screen=off_screen)
+    cmap = plt.get_cmap('coolwarm',51)
+
+    p.add_mesh( wallsurface, cmap=cmap, show_scalar_bar=True)
+    p.add_axes()
+    p.view_vector([-105.0,160.0,100.0],viewup=[0.29,0.73,-0.62])
+#    cpos_callback( p )
+    p.show(figname)
+
+    if off_screen:
+        plt.imshow(p.image)
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(figname, dpi=600)
+        plt.close()
+
+    p.close()
+
+    del snap3d,p,dataset,point_data,wallsurface,friction
+    gc.collect()
+
+# - print the progress
+    
+    progress = (i+1)/len(snapfiles)
+    print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
+    print("------------------\n")
+
+if rank == 0:
+
+    print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    sys.stdout.flush() 

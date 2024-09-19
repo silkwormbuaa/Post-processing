@@ -49,7 +49,7 @@ def cpos_callback( p:pv.Plotter ):
         
         return
     
-    p.add_key_event( "p", cpos_print(p) )
+    p.add_key_event( "p", lambda: cpos_print(p) )
 
     return
 

@@ -110,7 +110,7 @@ class Directories:
         folders = [ item for item in items if os.path.isdir( os.path.join( self.snp_dir, item ) ) ]
         return os.listdir( folders )
     
-    # snapshots
+    # probes list
     @property
     def probes( self ):
         return get_filelist( self.prb_dir, '.dat' )
