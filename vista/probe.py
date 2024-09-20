@@ -296,10 +296,14 @@ class ProbeData:
             
             # regular expression to read probe location
             
-            x = float( re.search(r'x =(.*?),',lines[0]).group(1) )
-            y = float( re.search(r'y =(.*?),',lines[0]).group(1) )
-            z = float( re.search(r'z =(.*?)(?:\n)',lines[0]).group(1) )
-            self.xyz = [ x, y, z ]
+            try:
+                x = float( re.search(r'x =(.*?),',lines[0]).group(1) )
+                y = float( re.search(r'y =(.*?),',lines[0]).group(1) )
+                z = float( re.search(r'z =(.*?)(?:\n)',lines[0]).group(1) )
+                self.xyz = [ x, y, z ]
+            
+            except:
+                raise ValueError(f"Probe {self.probe_index:05d}: Cannot find probe location.")
             
             # read in the data body
             
@@ -308,6 +312,9 @@ class ProbeData:
             for i in range( 1, len(lines), step):
                 
                 cleanl = lines[i].strip().split()
+                
+                if cleanl[0].startswith('#'): continue
+                
                 cleanl = [ parse_float(item,i,self.probe_index) for item in cleanl ]
 
                 if row is None: 
@@ -345,6 +352,9 @@ class ProbeData:
         """
 
         timelist = np.array( self.df['time'] )
+        
+        if t_start > timelist[-1]:
+            raise ValueError(f"Probe {self.probe_index:05d}: Start time {t_start} is out of probe data range.")
         
         for i in range( len(timelist) ):
             if timelist[i] >= t_start:
@@ -727,13 +737,16 @@ def WriteProbe():
 
 def Testing():
     
-    filename = '/home/wencanwu/test/probe_find_index/probe_00880.dat'
+    filename = '/home/wencanwu/temp/probe/probe_00001.dat'
 
     with timer("Read probe data"):
         probe = ProbeData( filename, withT=True )
     
-    probe.cleandata(20.0)
-    
+    probe.cleandata(15.0)
+
+"""
+# test finding index from given time points
+
     ts = np.linspace(20.0, 61.0, 4101)
     index = probe.time_index( ts )
     
@@ -746,6 +759,8 @@ def Testing():
     df_extract = probe.df.iloc[index]
     df_extract.reset_index(drop=True,inplace=True)
     print(df_extract)
+
+"""    
     
 #    probe.get_fluc(['p'])
     
