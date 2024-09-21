@@ -8,19 +8,15 @@
 @Desc    :   None
 '''
 
-import sys
-
 import os
+import sys
+import numpy             as     np
+from   stl               import mesh
 
 source_dir = os.path.realpath(__file__).split('vista')[0] 
 sys.path.append( source_dir + 'vista/lib/form' )
 
-import numpy             as     np
-
-from   stl               import mesh
-
 from   .math_opr         import unitize_L2
-
 from   .lib.form         import geo
 
 
@@ -131,7 +127,6 @@ def point_in_triangle_b( p, p1, p2, p3 ):
         flag = ( u >= 0.0 and v >= 0.0 and u + v <= d )
     elif( d < 0.0 ):
         flag = ( u <= 0.0 and v <= 0.0 and u + v >= d )
-    
     
     return flag
 

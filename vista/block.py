@@ -15,10 +15,9 @@ import pandas            as     pd
 from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_3Dflt_bin
-from   .io_binary        import read_log_bin
 
-from   .grid             import GridBlock
 from   .grid             import GridData
+from   .grid             import GridBlock
 
 
 # ----------------------------------------------------------------------
@@ -49,7 +48,7 @@ class BlockData:
     def __init__( self, file=None, block_list=None, n_var=None, vars=None, var_indx=None, verbose=False ):
         
         """
-        can initialized as void or ...
+        can initialized as void or from a binary file
         
         file       : opened file object
         block_list : list of blocks's numbers
@@ -57,6 +56,7 @@ class BlockData:
         vars       : list of selected variable name strings
         var_indx   : list of indexes of selected variables in data chunk
         """
+        
         if file is None:
             self.g = GridBlock()
         
@@ -72,19 +72,19 @@ class BlockData:
         self.verbose = verbose
         
         # start position of file pointer
-        
+
         pos_start = file.tell()
         
         # size of this BlockData (in bytes)
-        
+
         self.size = 0
         
         # number of variables
-        
+
         self.n_var = n_var
         
         # empty list for future use
-        
+
         self.df = pd.DataFrame(columns=vars)
         
         # matrix of friction projection on x-z plane
@@ -92,7 +92,7 @@ class BlockData:
         self.df_fric = None
         
         # read global block number(index) and block dimensions
-        
+
         self.num = read_int_bin( file.read(self.sin), self.sin )
         self.npx = read_int_bin( file.read(self.sin), self.sin )
         self.npy = read_int_bin( file.read(self.sin), self.sin )
@@ -134,7 +134,7 @@ class BlockData:
 
 
 # ----------------------------------------------------------------------
-# >>> Drop ghost cells                                       (Nr.)
+# >>> Drop ghost cells                                             ( 2 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -258,12 +258,12 @@ class BlockData:
         bl_clean.npy = Ny
         bl_clean.npz = Nz
         bl_clean.np  = Nx*Ny*Nz
-        bl_clean.df = df
+        bl_clean.df  = df
         
         return bl_clean
 
 # ----------------------------------------------------------------------
-# >>> compute gradients                                      (Nr.)
+# >>> compute gradients                                            ( 3 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -311,30 +311,30 @@ class BlockData:
             if block_type == 'block':
             
                 rho = rho.reshape( self.npz, self.npy, self.npx )
-                drho_dz = np.gradient(rho, g.gz, axis=0)
-                drho_dy = np.gradient(rho, g.gy, axis=1)
-                drho_dx = np.gradient(rho, g.gx, axis=2)
+                drho_dz  = np.gradient(rho, g.gz, axis=0)
+                drho_dy  = np.gradient(rho, g.gy, axis=1)
+                drho_dx  = np.gradient(rho, g.gx, axis=2)
                 grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 + drho_dz**2 )
             
             elif block_type == 'X':
                 
-                rho = rho.reshape( self.npz, self.npy )
-                drho_dz = np.gradient(rho, g.gz, axis=0)
-                drho_dy = np.gradient(rho, g.gy, axis=1)
+                rho      = rho.reshape( self.npz, self.npy )
+                drho_dz  = np.gradient(rho, g.gz, axis=0)
+                drho_dy  = np.gradient(rho, g.gy, axis=1)
                 grad_rho = np.sqrt( drho_dy**2 + drho_dz**2 )
                 
             elif block_type == 'Y':
                 
-                rho = rho.reshape( self.npz, self.npx )
-                drho_dz = np.gradient(rho, g.gz, axis=0)
-                drho_dx = np.gradient(rho, g.gx, axis=1)
+                rho      = rho.reshape( self.npz, self.npx )
+                drho_dz  = np.gradient(rho, g.gz, axis=0)
+                drho_dx  = np.gradient(rho, g.gx, axis=1)
                 grad_rho = np.sqrt( drho_dx**2 + drho_dz**2 )
                 
             elif block_type == 'Z':
                 
-                rho = rho.reshape( self.npy, self.npx )
-                drho_dy = np.gradient(rho, g.gy, axis=0)
-                drho_dx = np.gradient(rho, g.gx, axis=1)
+                rho      = rho.reshape( self.npy, self.npx )
+                drho_dy  = np.gradient(rho, g.gy, axis=0)
+                drho_dx  = np.gradient(rho, g.gx, axis=1)
                 grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 )
                 
             df['grad_rho'] = grad_rho.flatten()
@@ -380,31 +380,31 @@ class BlockData:
             
             if block_type == 'block':
                 
-                p = p.reshape( self.npz, self.npy, self.npx )
-                dp_dz = np.gradient(p, g.gz, axis=0)
-                dp_dy = np.gradient(p, g.gy, axis=1)
-                dp_dx = np.gradient(p, g.gx, axis=2)
+                p      = p.reshape( self.npz, self.npy, self.npx )
+                dp_dz  = np.gradient(p, g.gz, axis=0)
+                dp_dy  = np.gradient(p, g.gy, axis=1)
+                dp_dx  = np.gradient(p, g.gx, axis=2)
                 grad_p = np.sqrt( dp_dx**2 + dp_dy**2 + dp_dz**2 )
             
             elif block_type == 'X':
                 
-                p = p.reshape( self.npz, self.npy )
-                dp_dz = np.gradient(p, g.gz, axis=0)
-                dp_dy = np.gradient(p, g.gy, axis=1)
+                p      = p.reshape( self.npz, self.npy )
+                dp_dz  = np.gradient(p, g.gz, axis=0)
+                dp_dy  = np.gradient(p, g.gy, axis=1)
                 grad_p = np.sqrt( dp_dy**2 + dp_dz**2 )
                 
             elif block_type == 'Y':
                 
-                p = p.reshape( self.npz, self.npx )
-                dp_dz = np.gradient(p, g.gz, axis=0)
-                dp_dx = np.gradient(p, g.gx, axis=1)
+                p      = p.reshape( self.npz, self.npx )
+                dp_dz  = np.gradient(p, g.gz, axis=0)
+                dp_dx  = np.gradient(p, g.gx, axis=1)
                 grad_p = np.sqrt( dp_dx**2 + dp_dz**2 )
                 
             elif block_type == 'Z':
                 
-                p = p.reshape( self.npy, self.npx )
-                dp_dy = np.gradient(p, g.gy, axis=0)
-                dp_dx = np.gradient(p, g.gx, axis=1)
+                p      = p.reshape( self.npy, self.npx )
+                dp_dy  = np.gradient(p, g.gy, axis=0)
+                dp_dx  = np.gradient(p, g.gx, axis=1)
                 grad_p = np.sqrt( dp_dx**2 + dp_dy**2 )
                 
             df['grad_p'] = grad_p.flatten()
@@ -494,12 +494,12 @@ class BlockData:
             if block_type != 'block':
                 raise ValueError("Q_cr is only for block type!")
             
-            t_comp= 1/3*(du_dx + dv_dy + dw_dz)
+            t_comp = 1/3*(du_dx + dv_dy + dw_dz)
 
-            Q_cr = -0.5*( (du_dx-t_comp)**2 +
-                          (dv_dy-t_comp)**2 +
-                          (dw_dz-t_comp)**2 ) \
-                   - (du_dy*dv_dx + du_dz*dw_dx + dv_dz*dw_dy)
+            Q_cr   = -0.5*( (du_dx-t_comp)**2 +
+                            (dv_dy-t_comp)**2 +
+                            (dw_dz-t_comp)**2 ) \
+                     - (du_dy*dv_dx + du_dz*dw_dx + dv_dz*dw_dy)
             
             df['Q_cr'] = Q_cr.flatten()  
 
@@ -555,7 +555,7 @@ class BlockData:
 
             grad_rho[np.where( sensor > -0.8 )] = 0.0
 
-            df['sensor'] = sensor
+            df['sensor']       = sensor
             df['grad_rho_mod'] = grad_rho
             
 # ----- compute Ducros sensor
@@ -573,13 +573,12 @@ class BlockData:
 
 # ----- update dataframe
 
-        self.df = df
+        self.df    = df
         self.n_var = len( df.columns )
         
         
-        
 # ----------------------------------------------------------------------
-# >>> Define a subclass SnapBlock                                 (Nr.)
+# >>> Define a subclass SnapBlock                                  ( 4 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -676,7 +675,7 @@ class SnapBlock(BlockData):
         if self.num == 0:
             raise ValueError(f"Found a block with num==0 at {pos_start}.")
         
-        dim = read_int_bin( file.read(3*self.sin), self.sin )
+        dim      = read_int_bin( file.read(3*self.sin), self.sin )
         self.npx = dim[0]
         self.npy = dim[1]
         self.npz = dim[2]
@@ -693,15 +692,15 @@ class SnapBlock(BlockData):
         if snap_with_gx and type == 'block':
             
             self.g.gx = read_3Dflt_bin( pos, file, self.npx, 1, 1, kind )
-            pos += self.npx*kind
+            pos      += self.npx*kind
             
             self.g.gy = read_3Dflt_bin( pos, file, 1, self.npy, 1, kind )
-            pos += self.npy*kind
+            pos      += self.npy*kind
             
             self.g.gz = read_3Dflt_bin( pos, file, 1, 1, self.npz, kind )
-            pos += self.npz*kind
+            pos      += self.npz*kind
             
-            n_grid = self.npx + self.npy + self.npz
+            n_grid    = self.npx + self.npy + self.npz
         
         if snap_with_gx and type == 'slice':
             
@@ -712,40 +711,40 @@ class SnapBlock(BlockData):
                 self.g.gx = None
                 
                 self.g.gy = read_3Dflt_bin( pos, file, 1,self.npy,1, kind )
-                pos += self.npy*kind
+                pos      += self.npy*kind
 
                 self.g.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
-                pos += self.npz*kind
+                pos      += self.npz*kind
                 
-                n_grid = self.npy + self.npz
+                n_grid    = self.npy + self.npz
 
             # slic_type == 'Y' or 'W'
             
             elif self.npy == 1:
 
                 self.g.gx = read_3Dflt_bin( pos, file, self.npx,1,1, kind )
-                pos += self.npx*kind
+                pos      += self.npx*kind
                 
                 self.g.gy = None
 
                 self.g.gz = read_3Dflt_bin( pos, file, 1,1,self.npz, kind )
-                pos += self.npz*kind
+                pos      += self.npz*kind
                 
-                n_grid = self.npx + self.npz
+                n_grid    = self.npx + self.npz
             
             # slic_type == 'Z'
             
             elif self.npz == 1:
                 
                 self.g.gx = read_3Dflt_bin( pos, file, self.npx,1,1,kind )
-                pos += self.npx*kind
+                pos      += self.npx*kind
 
                 self.g.gy = read_3Dflt_bin( pos, file, 1,self.npy,1,kind )
-                pos += self.npy*kind
+                pos      += self.npy*kind
                 
                 self.g.gz = None
                 
-                n_grid = self.npx + self.npy
+                n_grid    = self.npx + self.npy
 
 # ----- record the starting position of variable chunk
             
@@ -767,7 +766,7 @@ class SnapBlock(BlockData):
             for var in vars:
             
                 if var in var_read:
-                    buff = read_flt_bin( file.read(self.np*kind), kind )
+                    buff         = read_flt_bin( file.read(self.np*kind), kind )
                     self.df[var] = buff
                 
                 else:
@@ -888,7 +887,7 @@ class SolutionBlock(BlockData):
         self.num = read_int_bin( fs.read(self.sin), self.sin )
         print(self.num)
         
-        self.g = G.g[self.num-1]
+        self.g   = G.g[self.num-1]
         
         self.npx = self.g.nx + 6
         self.npy = self.g.ny + 6
@@ -905,9 +904,12 @@ class SolutionBlock(BlockData):
         
         # read in data into dataframe
         if self.to_fill:
+            
             for var in vars:
-                pos = pos_start + self.sin + vars.index(var)*self.np*self.sfl
+                
+                pos  = pos_start + self.sin + vars.index(var)*self.np*self.sfl
                 fs.seek( pos )
+                
                 buff = read_flt_bin( fs.read(self.np*self.sfl), self.sfl )
                 self.df[var] = buff
         

@@ -14,6 +14,11 @@ import pandas            as     pd
 from   .tools            import get_filelist
 
 class Grid_bloxx:
+
+    """
+    file_path: path to the grid file
+    """
+
     def __init__(self, file_path):
         self.variables = self._read_grid_file(file_path)
         self.filename  = file_path.split('/')[-1]
@@ -57,7 +62,7 @@ class Grid_bloxx:
     def write_to_file(self, output_file_path=None):
         
         """
-        output_file_path: output file path
+        output_file_path: output file path \n
         Write the grid to a file.
         """
 
@@ -144,7 +149,7 @@ class Grid_bloxx:
         return self.BX + self.BY + self.BZ
 
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> class of Mesh_bloxx                                          ( 0 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -161,17 +166,19 @@ class Mesh_bloxx:
     
     def __init__(self, folder):
         
-        self.folder =  folder
-        self.grid_files = get_filelist(folder, 'inca_grid')
+        self.folder     = folder
+        self.grid_files = get_filelist( folder, 'inca_grid' )
         
         self.grids = []
+        
         for file in self.grid_files:
+            
             grid = Grid_bloxx(file)
             self.grids.append(grid)
         
         
 # ----------------------------------------------------------------------
-# >>> check_boundary_conditions                                  (Nr.)
+# >>> check_boundary_conditions                                  ( 1 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -191,6 +198,7 @@ class Mesh_bloxx:
         """
         
         # Initialize a dictionary to count boundary conditions
+        
         boundary_conditions = {
             'CYC': 0,
             'DF_INFLOW': 0,
@@ -211,7 +219,7 @@ class Mesh_bloxx:
     
 
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> sort_grids                                                ( 2 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -255,7 +263,7 @@ class Mesh_bloxx:
 
 
 # ----------------------------------------------------------------------
-# >>> save grids                                               (Nr.)
+# >>> save grids                                                   ( 3 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -269,6 +277,10 @@ class Mesh_bloxx:
 # ----------------------------------------------------------------------
 
     def save_grid(self, output_folder):
+        
+        """
+        output_folder: output folder path
+        """
         
         if len(self.grids) == 0:
             
@@ -287,7 +299,7 @@ class Mesh_bloxx:
             print(f"\033[92mGrids are saved to {output_folder} \033[0m")
             
 # ----------------------------------------------------------------------
-# >>> Select blocks in a given box                                (Nr.)
+# >>> Select blocks in a given box                                ( 4 )
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -303,7 +315,7 @@ class Mesh_bloxx:
     def select_blocks(self, box):
         
         """
-        box: a tuple of 6 floats (x1, y1, z1, x2, y2, z2)
+        box: a tuple of 6 floats (x1, y1, z1, x2, y2, z2) \n
         select blocks in the box
         """
         

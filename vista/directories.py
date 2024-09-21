@@ -8,7 +8,6 @@
 @Desc    :   Module of input/output directories names
 '''
 
-
 import os
 from   pathlib           import Path
 from   .tools            import get_filelist
@@ -18,8 +17,7 @@ class Directories:
     def __init__(self, case_dir):
         
         """
-        case_dir: str, path to the case directory
-        
+        case_dir: str, path to the case directory\n
         generate static directories under current case directory
         """
         

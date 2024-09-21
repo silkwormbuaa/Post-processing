@@ -125,7 +125,7 @@ class GridData:
         # final check of length of output. So spaces should be skipped
         # when reading binary data.
         
-        self.pos = 0
+        self.pos  = 0
         
         self.pos += 4        
         file.seek( self.pos )
@@ -189,8 +189,6 @@ class GridData:
         
         i = 1
         
-#        self.g.append( GridBlock( file, 0,self.grid_with_solver))
-        
         while not end_of_file:
             
             # read in block grid one by one
@@ -230,11 +228,11 @@ class GridData:
         if len(self.g) == 0:
             raise ValueError('Please read grid blocks first!')
         
-        lx0 = list()
-        ly0 = list()
-        lx1 = list()
-        ly1 = list()
-        lz0 = list()
+        lx0      = list()
+        ly0      = list()
+        lx1      = list()
+        ly1      = list()
+        lz0      = list()
         bl_index = list()
         
         # get lx0,ly0,lz0 and bl_index lists
@@ -352,8 +350,8 @@ class GridData:
         indx_slic    = []
         
         if bbox is None: 
-            min = float('-inf')
-            max = float('inf')
+            min  = float('-inf')
+            max  = float('inf')
             bbox = [min,max,min,max,min,max]
         
         within_bbox_bls = self.select_blockgrids( bbox, mode='within' )
@@ -454,8 +452,8 @@ class GridData:
         indx_probe   = []
 
         if bbox is None: 
-            min = float('-inf')
-            max = float('inf')
+            min  = float('-inf')
+            max  = float('inf')
             bbox = [min,max,min,max,min,max]
         
         within_bbox_bls = self.select_blockgrids( bbox, mode='within' )
@@ -576,7 +574,7 @@ class GridData:
                 grd.ly0 <= xyz[1] < grd.ly1 and
                 grd.lz0 <= xyz[2] <= grd.lz1):
                 
-                i,j,k = grd.point_index( xyz, buff )
+                i,j,k  = grd.point_index( xyz, buff )
                 bl_num = grd.num
                 
                 break
@@ -768,12 +766,12 @@ class GridBlock:
             self.wz = float()
             
             self.vol_fra = None
-            self.vol = None
+            self.vol     = None
         
         else: 
             self._init_from_file( file, num, grid_with_solver, verbose )
             self.vol_fra = None
-            self.vol = None
+            self.vol     = None
 
     def _init_from_file( self, file, num, grid_with_solver, verbose ):
         
@@ -781,7 +779,7 @@ class GridBlock:
         sfl = 8
         slg = 4
         
-        self.verbose = verbose
+        self.verbose          = verbose
         self.grid_with_solver = grid_with_solver
         
         len_specname = 15      # should be 19, after INCA 5b66ccd, 7th Feb 2023 
@@ -832,7 +830,7 @@ class GridBlock:
         self.paramy = read_flt_bin( file.read(3*sfl), sfl )
         self.paramz = read_flt_bin( file.read(3*sfl), sfl )
         
-        self.size += 9*sfl
+        self.size  += 9*sfl
         if self.verbose: print( 'paramx = ', self.paramx )
         
         # read shapes of grids: char(len=10) for each direction
@@ -840,27 +838,27 @@ class GridBlock:
         self.shapey = read_char_bin( file.read(10) )
         self.shapez = read_char_bin( file.read(10) )
         
-        self.size += 30
+        self.size  += 30
         if self.verbose: print( 'shapex = ', self.shapex )
         
         # read boundary values: char(len=10)*2 for each direction
-        self.bx1 = read_char_bin( file.read(10) )
-        self.bx2 = read_char_bin( file.read(10) )
-        self.by1 = read_char_bin( file.read(10) )
-        self.by2 = read_char_bin( file.read(10) )
-        self.bz1 = read_char_bin( file.read(10) )
-        self.bz2 = read_char_bin( file.read(10) )
+        self.bx1   = read_char_bin( file.read(10) )
+        self.bx2   = read_char_bin( file.read(10) )
+        self.by1   = read_char_bin( file.read(10) )
+        self.by2   = read_char_bin( file.read(10) )
+        self.bz1   = read_char_bin( file.read(10) )
+        self.bz2   = read_char_bin( file.read(10) )
         
         self.size += 60
         if self.verbose: print( 'bx1 = ', self.bx1 )
         
         # read boundary parameters: int*3 for each one
-        self.px1 = read_int_bin( file.read(3*sin), sin )
-        self.px2 = read_int_bin( file.read(3*sin), sin )
-        self.py1 = read_int_bin( file.read(3*sin), sin )
-        self.py2 = read_int_bin( file.read(3*sin), sin )
-        self.pz1 = read_int_bin( file.read(3*sin), sin )
-        self.pz2 = read_int_bin( file.read(3*sin), sin )
+        self.px1   = read_int_bin( file.read(3*sin), sin )
+        self.px2   = read_int_bin( file.read(3*sin), sin )
+        self.py1   = read_int_bin( file.read(3*sin), sin )
+        self.py2   = read_int_bin( file.read(3*sin), sin )
+        self.pz1   = read_int_bin( file.read(3*sin), sin )
+        self.pz2   = read_int_bin( file.read(3*sin), sin )
         
         self.size += sin*3*6
         if self.verbose: print( 'px1 = ', self.px1 )
@@ -890,7 +888,7 @@ class GridBlock:
         self.transz1 = read_log_bin( file.read(slg), slg )
         self.transz2 = read_log_bin( file.read(slg), slg )
         
-        self.size += slg*6
+        self.size   += slg*6
         if self.verbose: print( 'transx1 = ', self.transx1 )
 
 
@@ -927,12 +925,12 @@ class GridBlock:
         self.fluidz1 = read_char_bin( file.read(len_specname) )
         self.fluidz2 = read_char_bin( file.read(len_specname) )
         
-        self.size += len_specname*6
+        self.size   += len_specname*6
         if self.verbose: print( 'fluidx1 = ', self.fluidx1 )
         
         # read extra num of size after 'write'
         file.read(4)
-        self.size += 4    
+        self.size   += 4    
         
         
         # check if grid_with_solver, if so, extra info should be read
@@ -943,7 +941,7 @@ class GridBlock:
         
         # read extra num of size before 'write'
         file.read(4)
-        self.size += 4
+        self.size   += 4
         
         # read grid geometric parameters
         # geometric parameters include ghost cells
