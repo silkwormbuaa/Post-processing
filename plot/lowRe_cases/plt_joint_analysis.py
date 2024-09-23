@@ -29,7 +29,7 @@ from   vista.tools        import create_linear_interpolator
 #set_plt_rcparams()
 # =============================================================================
 
-case_dir = '/media/wencan/Expansion/temp/smooth_adiabatic'
+case_dir = '/media/wencan/Expansion/temp/220927'
 
 #shockpath3d  = case_dir + '/postprocess/shock_tracking/3d'
 bubblepath   = case_dir + '/postprocess/bubble_size/bubble_size.dat'

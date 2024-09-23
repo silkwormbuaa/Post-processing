@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = False
+off_screen = True
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -54,7 +54,7 @@ n_procs = comm.Get_size()
 
 case_dir  = '/media/wencan/Expansion/temp/220927'
 out_dir   = '/media/wencan/Expansion/temp/220927/postprocess/cf_wall'
-bbox      = [-30.0,110.0,-3.0,30.0, -99.0,99.0]
+bbox      = [-30.0,110.0,-3.0,6.0, -99.0,99.0]
 vars_in   = ['u','T']
 
 # =============================================================================
@@ -110,6 +110,7 @@ for i, snap_file in enumerate(snapfiles):
     snap3d.read_snapshot( block_list=block_list, var_read=vars_in )
 
     itstep  = snap3d.itstep
+    itime   = snap3d.itime
     figname = f'cf_{itstep:06d}.png'
     
     snap3d.copy_var_from( wd_snap, ['wd'] )
@@ -132,27 +133,32 @@ for i, snap_file in enumerate(snapfiles):
 
     wallsurface = point_data.contour( [0.02] )
 
-
-    print( wallsurface )
-    print( wallsurface['mu'])
-
     friction = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
 
     wallsurface['cf'] = friction / p_dyn
     wallsurface.set_active_scalars('cf')
 
-    p = pv.Plotter(off_screen=off_screen)
-    cmap = plt.get_cmap('coolwarm',51)
+    
+    p = pv.Plotter(off_screen=off_screen, window_size=[1920,1080])
+    cmap = plt.get_cmap('RdBu_r',51)
 
-    p.add_mesh( wallsurface, cmap=cmap, show_scalar_bar=True)
-    p.add_axes()
-    p.view_vector([-105.0,160.0,100.0],viewup=[0.29,0.73,-0.62])
+    p.add_mesh( wallsurface,    cmap=cmap, clim=[-0.005, 0.005],show_scalar_bar=True, 
+                lighting=False)
+    p.view_vector([0.0,1.0,0.0],viewup=[0.0,0.0,-1.0])
+    camera_pos = [(40.0,150.0,0.0),(40.0,0.0,0.0),(0.0,0.0,-1.0)]
+    p.camera_position = camera_pos
 #    cpos_callback( p )
+    
+    p.add_axes()
+    
     p.show(figname)
 
     if off_screen:
+        plt.figure(figsize=(16,9))
         plt.imshow(p.image)
-        plt.axis('off')
+        plt.plot([0.0,0.0],[10.0,10.0])
+        plt.title(f"time={itime:6.2f} s")
+        plt.axis('off')                  # image axis, pixel count
         plt.tight_layout()
         plt.savefig(figname, dpi=600)
         plt.close()
