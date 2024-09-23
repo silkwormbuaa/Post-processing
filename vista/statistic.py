@@ -14,20 +14,16 @@ import pickle
 import numpy             as     np
 import pandas            as     pd
 
-from   .block            import BlockData
-
 from   .grid             import GridData
-
+from   .block            import BlockData
+from   .tools            import find_indices
+from   .io_vtk           import write_vtm_file
+from   .io_vtk           import create_multiblock_dataset
+from   .io_vtk           import add_var_vtkRectilinearGrid
+from   .io_vtk           import create_3d_vtkRectilinearGrid
 from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_log_bin
-
-from   .io_vtk           import create_3d_vtkRectilinearGrid
-from   .io_vtk           import add_var_vtkRectilinearGrid
-from   .io_vtk           import create_multiblock_dataset
-from   .io_vtk           import write_vtm_file
-
-from   .tools            import find_indices
 
 from   .lib.form         import phy
 from   .lib.form         import mth

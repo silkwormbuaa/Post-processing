@@ -13,34 +13,31 @@
 import os
 import gc
 import sys
-import copy
+import pickle
 
 import numpy             as     np
 import pandas            as     pd
-import pyvista           as     pv
 import tecplot           as     tp
 from   tecplot.constant  import FieldDataType
 from   copy              import deepcopy
 
+from   .grid             import GridData
+from   .block            import SnapBlock
+from   .timer            import timer
+from   .tools            import find_indices
+from   .io_vtk           import write_vtm_file
+from   .io_vtk           import create_multiblock_dataset
+from   .io_vtk           import add_var_vtkRectilinearGrid
+from   .io_vtk           import create_3d_vtkRectilinearGrid
 from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_log_bin
-from   .io_binary        import read_3Dflt_bin
-
 from   .io_binary        import write_flt_bin
 from   .io_binary        import write_int_bin
 from   .io_binary        import write_log_bin
 
-from   .io_vtk           import create_3d_vtkRectilinearGrid
-from   .io_vtk           import add_var_vtkRectilinearGrid
-from   .io_vtk           import create_multiblock_dataset
-from   .io_vtk           import write_vtm_file
+from   .lib.form         import mth
 
-from   .grid             import GridData
-
-from   .block            import SnapBlock
-
-from   .timer            import timer
 
 class Snapshot:
 
@@ -108,35 +105,21 @@ class Snapshot:
         # Characteristics
   
         self.kind          = 4
-  
         self.itstep        = 0
-  
         self.itstep_check  = -1
-  
         self.itime         = 0.0
-  
         self.n_species     = 0
   
         self.snap_lean     = False
-  
         self.compressible  = False
-  
         self.snap_with_gx  = False
-  
         self.snap_with_tp  = False
-  
         self.snap_with_vp  = False
-  
         self.snap_with_cp  = False
-  
         self.snap_with_mu  = False
-  
         self.snap_with_wd  = False
-  
         self.snap_with_cf  = False
-  
         self.snap_with_bg  = False
-  
   
         # Number of variables
   
@@ -167,6 +150,9 @@ class Snapshot:
         
         self.filled = 0
 
+        # dataframe of friction projection
+        
+        self.df_fric = None
 
 # ----------------------------------------------------------------------
 # >>> Read snapshot                                              ( 1 )
@@ -1469,6 +1455,202 @@ class Snapshot:
         df_probe.reset_index( drop=True, inplace=True )
         
         return df_probe
+
+
+# ----------------------------------------------------------------------
+# >>> friction_projection                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/09/23  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def friction_projection( self,         block_list:list,
+                             G:GridData,   cc_df:pd.DataFrame,
+                             outfile=None, buff=3):
+        
+        """
+        block_list : list of selected blocks' numbers\n
+        G          : GridData object\n
+        cc_df      : cutcell dataframe from cutcells_setup.dat\n
+        outfile    : output file name. If None, using 'df_fric_{itstep:08d}.pkl'
+        
+        results    : self.df_fric\n
+        
+        - Copy form StatisticData, compute the instantaneous friction distribution. \n
+        - Need dataframe with u, mu, wd ready. \n
+        - Only applicable to geometry with homogeneous shape in x direction.
+        - Return a dataframe and output a file.\n
+        """
+
+
+# ----- initialize a list of dataframes containing groups of blocks' projection
+        
+        # a group of blocks defined as blocks sharing same x-z projection plane
+        grouped_blocks = G.group_by_range( 'xz', block_list=block_list )
+        f_visc_grp_ls = []   
+
+# ----- loop over each group of blocks
+     
+        for group in grouped_blocks:
+            
+            # initialize a group of blocks' projection
+            
+            npx = G.g[group[0]-1].nx + buff*2
+            npz = G.g[group[0]-1].nz + buff*2
+            
+            f_visc_grp = np.zeros( (npx,npz), dtype='f' )
+            
+# --------- loop over each block in the group
+            
+            for num in group:
+                
+                g = G.g[num-1]
+                
+# ------------- get cut cell dataframe and grid of this block 
+
+                cc_df_block = cc_df[ cc_df['block_number'] == num ]
+                cc_group    = cc_df_block.groupby(['i','k'])
+                
+                g   = G.g[num-1]
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
+                
+# ------------- prepare block data chunk
+
+                # !!! i,j,k follow Fortran index, starting from 1.
+                
+                f_visc  = np.zeros( (npx,npz), dtype='f' )
+                
+                data_df = self.snap_data[self.bl_nums.index(num)].df
+                
+                u  = np.array( data_df['u' ] ).reshape( npz, npy, npx )
+                mu = np.array( data_df['mu'] ).reshape( npz, npy, npx )
+                wd = np.array( data_df['wd'] ).reshape( npz, npy, npx )
+                
+# ------------- loop over each cut cell group
+                
+                for k in range( buff+1, g.nz+buff+1 ):
+                    
+                    # get a cut cell group dataframe
+                    try:
+                        df = cc_group.get_group((buff+1,k))
+                    except:
+                        # if there is no cut cell at this (x,z) location, skip and continue
+                        # print(f"block {num}, point ({buff+1},{k}) no cut cell")
+                        continue
+                        
+                    for i in range( buff+1, g.nx+buff+1 ):
+                        
+                        # when i == buff+1, find the interpolation stencil points
+                        # (therefore, this code is just applicable to geometry
+                        # with homogeneous shape in x direction.)
+                        
+                        if i == buff + 1:
+                            
+                            wd_cc  = [];   h         = []
+                            y_cc   = [];   z_cc      = []
+                            ny_cc  = [];   nz_cc     = []
+                            fay    = [];   len_ratio = []
+                            y_prj  = [];   z_prj     = []
+                            jl_prj = [];   jr_prj    = []
+                            kl_prj = [];   kr_prj    = []
+                            
+                            # loop over all cut cells sharing same x-z
+                            
+                            for cc_j in range( len(df) ):
+                                
+                                j = df['j'].iloc[cc_j]
+                                
+                                wd_cc.append( wd[k-1,j-1,i-1] )
+                                y_cc .append( df['y'].iloc[cc_j])
+                                z_cc .append( df['z'].iloc[cc_j])
+                                ny_cc.append( df['ny'].iloc[cc_j])
+                                nz_cc.append( df['nz'].iloc[cc_j])
+                                
+                                h.append( 0.50*np.sqrt((g.hy[buff]*ny_cc[cc_j])**2
+                                                        +(g.hz[buff]*nz_cc[cc_j])**2))
+                                
+                                fay  .append( df['fay1'].iloc[cc_j]
+                                            - df['fay0'].iloc[cc_j])
+                                
+                                len_ratio.append( ny_cc[cc_j] / np.sqrt( 
+                                                    ny_cc[cc_j]**2 + nz_cc[cc_j]**2 ))
+                                
+                                # projection point coordinates
+                                y_prj.append( y_cc[cc_j] 
+                                            + (h[cc_j]-wd_cc[cc_j])*ny_cc[cc_j])
+                                z_prj.append( z_cc[cc_j] 
+                                            + (h[cc_j]-wd_cc[cc_j])*nz_cc[cc_j])
+                                
+                                # indices of interpolation stencil points
+                                jl, jr = find_indices( g.gy, y_prj[cc_j] )
+                                kl, kr = find_indices( g.gz, z_prj[cc_j] )
+                                
+                                jl_prj.append(jl)
+                                jr_prj.append(jr)
+                                kl_prj.append(kl)
+                                kr_prj.append(kr)
+
+                        # compute interpolated u, then friction of cut-cells 
+                        # sharing the same x-z coordinate
+                        
+                        for cc_j in range( len(df) ):
+                            
+                            j = df['j'].iloc[cc_j]
+                            
+                            f = np.array([u[kl_prj[cc_j],jl_prj[cc_j],i],
+                                          u[kr_prj[cc_j],jl_prj[cc_j],i],
+                                          u[kl_prj[cc_j],jr_prj[cc_j],i],
+                                          u[kr_prj[cc_j],jr_prj[cc_j],i]])
+                            
+                            u_prj = mth.bilin_interp( g.gz[kl_prj[cc_j]],
+                                                      g.gz[kr_prj[cc_j]],
+                                                      g.gy[jl_prj[cc_j]],
+                                                      g.gy[jr_prj[cc_j]],
+                                                      f,
+                                                      z_prj[cc_j], y_prj[cc_j])                        
+                            
+                            # if geometry is fully 3D, extra term 4./3.u_norm 
+                            # should be considered to add
+                            
+                            f_visc[i-1,k-1] += mu[k-1,j-1,i-1] * u_prj / h[cc_j] \
+                                                * fay[cc_j] / len_ratio[cc_j]
+
+# ------------- add frictions on each block of the group to compose the group's frictions
+
+#                print(f"block {num} has mean friction {np.mean(f_visc)}.\n")
+                f_visc_grp += f_visc
+                
+# --------- match with coordinates
+            
+            xx,zz = np.meshgrid( g.gx, g.gz )
+            
+            df_fric_grp         = pd.DataFrame(columns=['x','z','fric'])
+            df_fric_grp['x']    = xx[buff:-buff,buff:-buff].flatten()
+            df_fric_grp['z']    = zz[buff:-buff,buff:-buff].flatten()
+            df_fric_grp['fric'] = f_visc_grp[buff:-buff,buff:-buff].T.flatten()
+                
+            f_visc_grp_ls.append( df_fric_grp )
+            
+# --------- save friction into StatisticsData.df_fric (a single pd.DataFrame)
+
+        self.df_fric = pd.concat( f_visc_grp_ls )
+        self.df_fric.reset_index( drop=True, inplace=True )
+        self.df_fric.sort_values( by=['z','x'],inplace=True )
+        
+        if outfile is None: outfile = f'df_fric_{self.itstep:08d}.pkl'
+        
+        with open( outfile, 'wb' ) as f:
+            pickle.dump( self.df_fric, f )
+
 
 
 # ----------------------------------------------------------------------

@@ -60,7 +60,7 @@ class Directories:
         self.wall_dist = os.path.join( self.sup_dir, 'wall_dist' )
         self.case_para_file = os.path.join( self.sup_dir, 'case_parameters' )
 
-        # post processing directoris
+# - post processing directoris
         
         self.pp_statistics   = os.path.join( self.pos_dir, 'statistics' )
         self.pp_probes       = os.path.join( self.pos_dir, 'probes' )
@@ -68,19 +68,25 @@ class Directories:
         self.pp_snapshots    = os.path.join( self.pos_dir, 'snapshots' )
         self.pp_DMD          = os.path.join( self.pos_dir, 'DMD' )
         
-        # pp_statistics subdirectories
+# --- pp_statistics subdirectories
         
         self.pp_wall_proj     = os.path.join( self.pp_statistics, 'wall_projection' )
         self.pp_profile_array = os.path.join( self.pp_statistics, 'profile_array' )
         self.pp_integral      = os.path.join( self.pp_statistics, 'integral' )
         
-        # pp_probes subdirectories
+# --- pp_probes subdirectories
         
         self.pp_psd_ridge  = os.path.join( self.pp_probes, 'psd_ridge'  )
         self.pp_psd_valley = os.path.join( self.pp_probes, 'psd_valley' )
         self.pp_psd_others = os.path.join( self.pp_probes, 'psd_others' )
         self.pp_pre_ridge  = os.path.join( self.pp_probes, 'pre_ridge'  )
         self.pp_pre_valley = os.path.join( self.pp_probes, 'pre_valley' )
+      
+# --- pp_snapshots subdirectories
+
+        self.pp_snp_fricpv  = os.path.join( self.pp_snapshots, 'fricpv'  )
+        self.pp_snp_fricprj = os.path.join( self.pp_snapshots, 'fricprj' )
+        
         
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)

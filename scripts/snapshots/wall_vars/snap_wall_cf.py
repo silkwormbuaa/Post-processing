@@ -58,6 +58,8 @@ bbox      = [-30.0,110.0,-3.0,6.0, -99.0,99.0]
 vars_in   = ['u','T']
 
 # =============================================================================
+# preparation
+# =============================================================================
 
 dirs       = Directories( case_dir )
 wd_file    = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
@@ -102,6 +104,8 @@ sys.stdout.flush()
 
 os.chdir( out_dir)
 clock = timer("show cf")
+
+# -- loop over the snapshots
 
 for i, snap_file in enumerate(snapfiles):
 
@@ -173,6 +177,8 @@ for i, snap_file in enumerate(snapfiles):
     progress = (i+1)/len(snapfiles)
     print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
     print("------------------\n")
+
+comm.barrier()
 
 if rank == 0:
 
