@@ -29,7 +29,7 @@ file2 = '/home/wencan/temp/231124/probes/probe_00067.dat'
 file3 = '/home/wencan/temp/231124/probes/probe_00221.dat'
 file4 = '/home/wencan/temp/data_luis/midRe_streamwise/probe_at_separation/probe_00182.dat'
 
-outpath = '/home/wencan/temp/231124/postprocess/probes/pressure_fluc'
+outpath = '/home/wencan/temp/231124/postprocess/probes/u_fluc'
 # =============================================================================
 
 os.chdir( create_folder(outpath) )
@@ -43,16 +43,17 @@ prb2.cleandata( 20.0 )
 prb3.cleandata( 20.0 )
 prb4.cleandata( 20.0 )
 
-fig, ax = plt.subplots( figsize=(15, 10), constrained_layout=True )
+fig, axs = plt.subplots( 3,1,figsize=(10, 15), constrained_layout=True )
 
-ax.plot( prb1.df['time'], prb1.df['p']/45447.289, 'red',   lw=0.1, label='flucmax' )
-ax.plot( prb2.df['time'], prb2.df['p']/45447.289, 'blue',  lw=0.1, label='sep' )
-ax.plot( prb3.df['time'], prb3.df['p']/45447.289, 'black', lw=0.1, label='reatt' )
-ax.plot( prb4.df['time'], prb4.df['p']/45447.289, 'green', lw=0.1, label='sep_smooth' )
+axs[0].plot( prb1.df['time'], prb1.df['u']/507, 'red',   lw=0.1, label='flucmax' )
+axs[1].plot( prb2.df['time'], prb2.df['u']/507, 'blue',  lw=0.1, label='sep' )
+axs[2].plot( prb3.df['time'], prb3.df['u']/507, 'black', lw=0.1, label='reatt' )
+#ax.plot( prb4.df['time'], prb4.df['u']/507, 'green', lw=0.1, label='sep_smooth' )
 
-ax.set_xlabel('time/s')
-ax.set_ylabel(r'$p/p_{\infty}$')
+for ax in axs:
+    ax.set_xlabel('time/s')
+    ax.set_ylabel(r'$u/u_{\infty}$')
 
-plt.savefig( 'pressure_fluc_smooth.png' )
+plt.savefig( 'velocity_fluc_smooth.png' )
 plt.show()
 plt.close()

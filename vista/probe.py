@@ -313,6 +313,7 @@ class ProbeData:
                 
                 cleanl = lines[i].strip().split()
                 
+                # skip headers, if there are.
                 if cleanl[0].startswith('#'): continue
                 
                 cleanl = [ parse_float(item,i,self.probe_index) for item in cleanl ]
@@ -328,6 +329,10 @@ class ProbeData:
   
             self.df = pd.DataFrame( data=row, columns=self.var_list )
     
+            # add T if withT is False
+            
+            if 'T' not in self.var_list:
+                self.add_data( 'T', self.df['p']/(self.df['rho']*287.0508571) )
 
 # ----------------------------------------------------------------------
 # >>> Function Name                                                (Nr.)

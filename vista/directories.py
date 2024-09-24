@@ -88,6 +88,8 @@ class Directories:
         self.pp_snp_fricprj = os.path.join( self.pp_snapshots, 'fricprj' )
         
         
+        self.pp_signals    = os.path.join( self.pp_probes, 'signals'    )
+
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
 # ----------------------------------------------------------------------

@@ -98,7 +98,7 @@ with timer('Computing PSD '):
         try:
             ts  = np.array( probedata.df['T'] )
         except:
-            ts  = np.array(probedata.df['p']/probedata.df['rho']/287.05)
+            ts  = np.array(probedata.df['p']/probedata.df['rho']/287.0508571)
         
         u       = np.array( probedata.df['u'] )
         mu      = get_visc( ts )
