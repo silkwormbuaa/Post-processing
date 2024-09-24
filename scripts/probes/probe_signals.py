@@ -26,7 +26,7 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-casefolder = '/media/wencan/Expansion/temp/231124'
+casefolder = '/media/wencan/Expansion/temp/smooth_adiabtic'
 vars       = ['u','v','w','rho', 'p', 'T']
 colors     = ['black']*len(vars)
 
@@ -49,7 +49,7 @@ prb_data.cleandata( t_start=20.0 )
 index    = prb_data.time_index( np.linspace(20.0, 61.0, 4101) )
 
 clock    = timer("Plot signals from probes")
-for file in prb_files:
+for k, file in enumerate(prb_files):
     
     prb    = ProbeData( file, withT=withT )
     prb.cleandata( 20.0 )
@@ -67,7 +67,7 @@ for file in prb_files:
     print(f"Saved {figname}.")
     plt.close()
 
-    progress = (i+1)/len(prb_files)
-    print(f"{i+1}/{len(prb_files) } is done."+ clock.remainder(progress))
+    progress = (k+1)/len(prb_files)
+    print(f"{k+1}/{len(prb_files) } is done."+ clock.remainder(progress))
     print("---------------------\n")
     sys.stdout.flush()
