@@ -26,7 +26,7 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    figpath = '/media/wencan/Expansion/temp/231124/postprocess/joint_analysis/figs'
+    figpath = '/media/wencan/Expansion/temp/231124/postprocess/cf_wall/figs'
 #    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
     os.chdir( figpath )
@@ -78,32 +78,41 @@ def main():
 
 def create_video_from_images(image_paths, output_video_path, fps=25):
     
-    img = []
+    imgs = []
     
     for i, image in enumerate(image_paths):
-        img.append(cv2.imread(image))
+        
+        img = cv2.imread(image)
+        
+        # resize the image if it is too large
+        height, width, layers = img.shape
+        if width > 1920:
+            img = cv2.resize(img, (1920, 1080))
+            
+        imgs.append(img)
         if i%10 == 0: print(f"{i} image loaded.")
     
-    height, width, layers = img[1].shape
-    
     # Ensure all images have the same dimensions
-    height, width, layers = img[0].shape
-    for i in range(1, len(img)):
-        if img[i].shape != (height, width, layers):
+    height, width, layers = imgs[0].shape
+    
+    print(f"Image dimensions: {height}x{width}x{layers}")
+    
+    for i in range(1, len(imgs)):
+        if imgs[i].shape != (height, width, layers):
             print(f"Error: Image {image_paths[i]} has different dimensions.")
             return
     
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video  = cv2.VideoWriter(output_video_path, fourcc, fps, (width,height)) 
     
-    for i in range(len(img)):
-        video.write(img[i])
-        if i%(len(img)//10) == 0: print(f"Progress : {i/len(img)*100:8.2f}%... ")
+    for i in range(len(imgs)):
+        video.write(imgs[i])
+        if i%(len(imgs)//10) == 0: print(f"Progress : {i/len(imgs)*100:8.2f}%... ")
     
     cv2.destroyAllWindows()
     video.release()
     
-    del img; gc.collect()
+    del imgs; gc.collect()
 
 
 # ----------------------------------------------------------------------

@@ -52,9 +52,10 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/media/wencan/Expansion/temp/220927'
-out_dir   = '/media/wencan/Expansion/temp/220927/postprocess/cf_wall'
-bbox      = [-30.0,110.0,-3.0,6.0, -99.0,99.0]
+case_dir  = '/media/wencan/Expansion/temp/231124'
+out_dir   = '/media/wencan/Expansion/temp/231124/postprocess/cf_wall'
+bbox      = [-30.0,110.0,-3.0, 0.5, -99.0,99.0]
+walldist  = 0.005
 vars_in   = ['u','T']
 
 # =============================================================================
@@ -135,7 +136,7 @@ for i, snap_file in enumerate(snapfiles):
     point_data = dataset.cell_data_to_point_data().combine()
     point_data.set_active_scalars('wd')
 
-    wallsurface = point_data.contour( [0.02] )
+    wallsurface = point_data.contour( [walldist] )
 
     friction = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
 
@@ -158,13 +159,13 @@ for i, snap_file in enumerate(snapfiles):
     p.show(figname)
 
     if off_screen:
-        plt.figure(figsize=(16,9))
+        plt.figure(figsize=(6.4,3.6))
         plt.imshow(p.image)
         plt.plot([0.0,0.0],[10.0,10.0])
         plt.title(f"time={itime:6.2f} s")
         plt.axis('off')                  # image axis, pixel count
         plt.tight_layout()
-        plt.savefig(figname, dpi=600)
+        plt.savefig(figname, dpi=300)
         plt.close()
 
     p.close()
@@ -177,6 +178,7 @@ for i, snap_file in enumerate(snapfiles):
     progress = (i+1)/len(snapfiles)
     print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
     print("------------------\n")
+    sys.stdout.flush()
 
 comm.barrier()
 
