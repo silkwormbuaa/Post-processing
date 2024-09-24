@@ -25,14 +25,15 @@ from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.tools       import find_indices
 from   vista.tools       import get_filelist
+from   vista.directories import create_folder
 
 # =============================================================================
 
 y0 = 10.4
-xrange = [-8.0, 6.0]
+xrange = [-8.0, 10.0]
 
-inputpath    = '/media/wencan/Expansion/temp/231124/'
-outputpath   = '/home/wencanwu/temp/'
+inputpath    = '/home/wencanwu/test/220927/'
+outputpath   = '/home/wencanwu/test/220927/shock_tracking'
 
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
@@ -64,7 +65,7 @@ x_last_shock = None
 
 # - loop over the snapshot files
 
-os.chdir( outputpath )
+os.chdir( create_folder(outputpath) )
 clock = timer("Tracking the shock front")
 
 for i, snap_file in enumerate(snap_files):
@@ -79,9 +80,9 @@ for i, snap_file in enumerate(snap_files):
 
     fig, ax = plt.subplots(figsize=(10,6))
 
-    # - initialize a pandas dataframe to store the grad_rho on the probe line
+    # - initialize a pandas dataframe list to store all blocks' df on the probe line
 
-    prbdf = pd.DataFrame( columns=['x','z','grad_rho'] )
+    prbdf_list = list()
 
     # - loop over the blocks to extract the grad_rho on the probe line
     
@@ -108,8 +109,11 @@ for i, snap_file in enumerate(snap_files):
             gx = np.ravel(gx)
             
             new_data = pd.DataFrame( {'z':gz,'x':gx, 'grad_rho':plane} )
-
-            prbdf = pd.concat( [prbdf, new_data], ignore_index=True )        
+            prbdf_list.append( new_data )
+    
+    # - concatenate the dataframes
+    
+    prbdf = pd.concat( [df for df in prbdf_list], ignore_index=True )        
 
     # - drop outside data and sort the dataframe
     
