@@ -807,6 +807,64 @@ def create_linear_interpolator(x, y):
 
 
 # ----------------------------------------------------------------------
+# >>> crop image (RGB image only)                                            
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/09/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def crop_border(image, border_color='white'):
+    
+    """
+    detect and crop the border (white or black) of an image
+
+    params:
+    - image: NumPy array, shape should be (height, width, 3)
+    - border_color: str indicating color 'white'(default) or 'black'
+
+    return:
+    - cropped image(numpy array)
+    """
+    
+    # check if the image is RGB (3-channel)
+    assert image.ndim == 3 and image.shape[2] == 3, "image must be (height, width, 3) RGB image"
+    
+    # set the color to crop
+    if border_color in ('white', 'w'):
+        color_to_crop = [255, 255, 255]
+    elif border_color in ('black', 'b'):
+        color_to_crop = [0, 0, 0]
+    else:
+        raise ValueError("only 'white' or 'black' are supported for border_color")
+
+    # find which pixels are not the border color
+    mask = np.all(image != color_to_crop, axis=-1)
+
+    # get the border of the non-border color
+    coords = np.argwhere(mask)
+
+    # return the original image if no border is found
+    if coords.shape[0] == 0:
+        return image
+
+    # get the bounding box of the non-border color
+    y_min, x_min = coords.min(axis=0)
+    y_max, x_max = coords.max(axis=0)
+
+    # crop the image
+    cropped_image = image[y_min:y_max, x_min:x_max]
+
+    return cropped_image
+
+
+# ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
 #
