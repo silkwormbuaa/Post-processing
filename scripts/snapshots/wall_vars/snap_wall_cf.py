@@ -52,10 +52,10 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/media/wencan/Expansion/temp/231124'
-out_dir   = '/media/wencan/Expansion/temp/231124/postprocess/cf_wall'
+case_dir  = '/home/wencanwu/test/220927'
+out_dir   = '/home/wencanwu/test/220927/postprocess/cf_wall'
 bbox      = [-30.0,110.0,-3.0, 0.5, -99.0,99.0]
-walldist  = 0.005
+walldist  = 0.01
 vars_in   = ['u','T']
 
 # =============================================================================

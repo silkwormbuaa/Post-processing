@@ -112,7 +112,7 @@ for i, snap_file in enumerate(snapfiles):
     
     snap3d = Snapshot( snap_file )
     snap3d.grid3d = grid3d
-    snap3d.verbose = True
+#    snap3d.verbose = True
     snap3d.read_snapshot( block_list=block_list, var_read=['u','T'] )
 
     itstep  = snap3d.itstep
@@ -165,11 +165,12 @@ for i, snap_file in enumerate(snapfiles):
 
     save_isolines( xx, zz, fric, 1.0, "separationline_xz.pkl")
     
-    cbar_levels = np.linspace(-5.0,10.0,31)
-    cbar_ticks  = np.linspace(-5.0,10.0,4)
+    cbar_levels = np.linspace(-5.0,5.0,41)
+    cbar_ticks  = np.linspace(-5.0,5.0,5)
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation="separationline_xz.pkl",
-                          filename='fric',
+                          filename=figname,
+                          col_map='RdBu_r',
                           cbar_label=r'$C_f\times 10^3$',
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,

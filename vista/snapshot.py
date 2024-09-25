@@ -2078,14 +2078,16 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, vars=None, block_list=None, buff=3, mode='symmetry' ):
+    def create_vtk_multiblock( self, vars=None, block_list=None, buff=3, 
+                               mode='symmetry', rescale=[0.0,0.0,0.0,1.0,1.0,1.0] ):
         
         """
         write snapshot into vtm file (multiblock vtk)\n        
         vars       : list of variables to be written\n
         block_list : block numbers of which blocks to be written\n
         buff       : number of ghost layers\n
-        mode       : 'symmetry' or 'oneside'
+        mode       : 'symmetry' or 'oneside'\n
+        rescale    : rescale the grid points. [x_shift, y_shift, z_shift, x_norm, y_norm, z_norm]
         """
 
 # ----- check block list, if None, write all blocks
@@ -2125,9 +2127,9 @@ class Snapshot:
             bl_num = snap_bl.num
             g = G.g[bl_num-1]
             
-            px = g.px[buffl:-buffr]
-            py = g.py[buffl:-buffr]
-            pz = g.pz[buffl:-buffr]
+            px = (g.px[buffl:-buffr]+rescale[0])/rescale[3]
+            py = (g.py[buffl:-buffr]+rescale[1])/rescale[4]
+            pz = (g.pz[buffl:-buffr]+rescale[2])/rescale[5]
             
             # modify the grid points arrays based on snapshot type
             if self.type == 'block':

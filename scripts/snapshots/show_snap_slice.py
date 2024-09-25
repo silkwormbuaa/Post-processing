@@ -25,8 +25,8 @@ from   vista.timer       import timer
 
 # =============================================================================
 
-snapshotfile = '/media/wencan/Expansion/temp/231124/snapshots/snapshot_02920790/snapshot_Y_003.bin'
-gridfile = '/media/wencan/Expansion/temp/231124/results/inca_grid.bin'
+snapshotfile = '/home/wencanwu/test/220927/snapshots/snapshot_01327770/snapshot_Z_001.bin'
+gridfile = '/home/wencanwu/test/220927/results/inca_grid.bin'
 
 # =============================================================================
 
@@ -45,26 +45,33 @@ snap.read_snapshot( )
 
 snap.compute_gradients( grads=['grad_rho','grad_p'] )
 
-print( max([max(bl.df['grad_p']) for bl in snap.snap_data]) )
-
 # pass snapshot to pyvista
 
 vars = ['u','v','w','p','T','grad_rho','grad_p']
-dataset = pv.MultiBlock(snap.create_vtk_multiblock( vars ))
-
-print( type(dataset) )
+rescale = [0.0,.0,.0,1.0,1.0,1.0]
+# pv.global_theme.font.color = 'white'
+# pv.global_theme.font.size  = 10
+dataset = pv.MultiBlock( snap.create_vtk_multiblock( vars, mode='symmetry', rescale=rescale ) )
 
 dataset.set_active_scalars('grad_rho')
 
-# grad_p [0,50000]
-
 p = pv.Plotter()
 print(dataset)
-p.add_mesh(dataset, opacity=1.0, clim=[0,0.5], above_color='red', below_color='blue', show_scalar_bar=True)
+print(dataset.bounds)
+p.add_mesh(dataset, opacity=1.0, clim=[0.0,0.6],above_color='red', below_color='blue', show_scalar_bar=True)
+# p.set_background('black')
+
+p.show_bounds(  dataset, 
+              bounds=[-116,120,0,80,0,0],
+              axes_ranges=[-116,120,0,80,0,0],
+               ticks='both', show_zaxis=False,
+               xtitle=r'$(x-x_{imp})/\delta_0$',
+               ytitle=r'$y/\delta_0$',
+               font_size=10)
+
+p.view_vector([0.0,0.0,1.0],viewup=[0.0,1.0,0.0])
+
 p.show_axes()
-axes_actor = pv.CubeAxesActor(p.camera)
-axes_actor.bounds = dataset.bounds
-actor, property = p.add_actor( axes_actor)
 p.show()
 
 
