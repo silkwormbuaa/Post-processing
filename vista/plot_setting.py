@@ -68,7 +68,7 @@ def cpos_callback( p:pv.Plotter ):
 #
 # ----------------------------------------------------------------------
 
-def set_plt_rcparams(preamble='stix'):
+def set_plt_rcparams(preamble='stix', fontsize=40):
 
     plt.rcParams["text.usetex"] = True
     
@@ -78,7 +78,7 @@ def set_plt_rcparams(preamble='stix'):
         plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
         
     plt.rcParams['font.family'] = "Times New Roman"
-    plt.rcParams['font.size']   = 40
+    plt.rcParams['font.size']   = fontsize
 
 
 # ----------------------------------------------------------------------

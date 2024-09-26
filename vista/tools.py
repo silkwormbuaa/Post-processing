@@ -859,7 +859,7 @@ def crop_border(image, border_color='white'):
     y_max, x_max = coords.max(axis=0)
 
     # crop the image
-    cropped_image = image[y_min:y_max, x_min:x_max]
+    cropped_image = image[y_min:y_max+1, x_min:x_max+1]
 
     return cropped_image
 
