@@ -52,10 +52,9 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/home/wencanwu/test/220927'
-out_dir   = '/home/wencanwu/test/220927/postprocess/cf_wall'
-bbox      = [-30.0,110.0,-3.0, 0.5, -99.0,99.0]
-walldist  = 0.01
+case_dir  = '/home/wencan/temp/smooth_adiabatic'
+bbox      = [-30.0,110.0,-3.0, 5, -99.0,99.0]
+walldist  = 0.019
 vars_in   = ['u','T']
 
 # =============================================================================
@@ -63,11 +62,12 @@ vars_in   = ['u','T']
 # =============================================================================
 
 dirs       = Directories( case_dir )
-wd_file    = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
+out_dir    = dirs.pp_snp_fricpv
 
 p_dyn      = None
 snapfiles  = None
 block_list = None
+roughwall  = True
 grid3d     = GridData()
 wd_snap    = Snapshot()
 
@@ -75,10 +75,11 @@ if rank == 0:
     
     create_folder( out_dir )
     
-    params  = read_case_parameter( dirs.case_para_file )
-    u_ref   = float(params.get('u_ref'))
-    rho_ref = float(params.get('rho_ref'))
-    p_dyn   = 0.5 * rho_ref * u_ref**2
+    params    = read_case_parameter( dirs.case_para_file )
+    u_ref     = float(params.get('u_ref'))
+    rho_ref   = float(params.get('rho_ref'))
+    p_dyn     = 0.5 * rho_ref * u_ref**2
+    roughwall = True if str(params.get('rough_wall')).lower() == 'true' else False
     
     snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
@@ -87,8 +88,10 @@ if rank == 0:
     grid3d.read_grid()
     block_list = grid3d.select_blockgrids( bbox, mode='within' )
     
-    wd_snap = Snapshot( wd_file )
-    wd_snap.read_snapshot( block_list, var_read=['wd'] )
+    if roughwall:
+        wd_file    = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
+        wd_snap = Snapshot( wd_file )
+        wd_snap.read_snapshot( block_list, var_read=['wd'] )
 
 p_dyn      = comm.bcast( p_dyn,      root=0 )
 snapfiles  = comm.bcast( snapfiles,  root=0 )
@@ -103,7 +106,7 @@ snapfiles = snapfiles[i_s:i_e]
 print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
 sys.stdout.flush()
 
-os.chdir( out_dir)
+os.chdir( out_dir )
 clock = timer("show cf")
 
 # -- loop over the snapshots
@@ -116,9 +119,10 @@ for i, snap_file in enumerate(snapfiles):
 
     itstep  = snap3d.itstep
     itime   = snap3d.itime
-    figname = f'cf_{itstep:06d}.png'
+    figname = f'cf_{itstep:08d}.png'
     
-    snap3d.copy_var_from( wd_snap, ['wd'] )
+    if roughwall:
+        snap3d.copy_var_from( wd_snap, ['wd'] )
 
     print(snap3d.vars_name)
 
@@ -131,14 +135,20 @@ for i, snap_file in enumerate(snapfiles):
 # visualization
 # =============================================================================
 
-    dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in+['wd','mu'],block_list=block_list,mode='oneside') )
-
+    vars_in += ['mu']
+    if roughwall: vars_in += ['wd']
+    
+    dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in,block_list=block_list,mode='oneside') )
     point_data = dataset.cell_data_to_point_data().combine()
-    point_data.set_active_scalars('wd')
+    
+    if roughwall:
+        point_data.set_active_scalars('wd')
+        wallsurface = point_data.contour( [walldist] )
+        friction = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
 
-    wallsurface = point_data.contour( [walldist] )
-
-    friction = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
+    else:
+        wallsurface = point_data.slice( normal=[0.0,1.0,0.0], origin=[0.0,walldist,0.0] )
+        friction = wallsurface['mu']*wallsurface['u']/walldist
 
     wallsurface['cf'] = friction / p_dyn
     wallsurface.set_active_scalars('cf')
@@ -162,7 +172,7 @@ for i, snap_file in enumerate(snapfiles):
         plt.figure(figsize=(6.4,3.6))
         plt.imshow(p.image)
         plt.plot([0.0,0.0],[10.0,10.0])
-        plt.title(f"time={itime:6.2f} s")
+        plt.title(f"time={itime:6.2f} ms")
         plt.axis('off')                  # image axis, pixel count
         plt.tight_layout()
         plt.savefig(figname, dpi=300)

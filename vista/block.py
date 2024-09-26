@@ -90,6 +90,7 @@ class BlockData:
         # matrix of friction projection on x-z plane
 
         self.df_fric = None
+        self.df_wall = None
         
         # read global block number(index) and block dimensions
 
@@ -667,6 +668,7 @@ class SnapBlock(BlockData):
         # matrix of friction projection on x-z plane
 
         self.df_fric = None
+        self.df_wall = None
         
 # ----- read global block number and block dimensions
         
@@ -811,6 +813,7 @@ class SnapBlock(BlockData):
         # matrix of friction projection on x-z plane
 
         self.df_fric = None
+        self.df_wall = None
         
         # remember the kind
         
@@ -881,6 +884,7 @@ class SolutionBlock(BlockData):
         
         # matrix of friction projection on x-z plane
         self.df_fric = None
+        self.df_wall = None
         
         # read global block number(index)
         
