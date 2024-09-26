@@ -13,7 +13,7 @@ import os
 import gc
 import sys
 import cv2
-from   moviepy.editor           import VideoFileClip, concatenate_videoclips
+from   moviepy.editor    import VideoFileClip, concatenate_videoclips
 
 #https://stackoverflow.com/questions/63829991/qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it
 os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
@@ -26,7 +26,7 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    figpath = '/media/wencan/Expansion/temp/231124/postprocess/cf_wall/figs'
+    figpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/snapshotZ'
 #    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
     os.chdir( figpath )
@@ -107,7 +107,8 @@ def create_video_from_images(image_paths, output_video_path, fps=25):
     
     for i in range(len(imgs)):
         video.write(imgs[i])
-        if i%(len(imgs)//10) == 0: print(f"Progress : {i/len(imgs)*100:8.2f}%... ")
+        if len(imgs)>10 and i%(len(imgs)//10) == 0: 
+            print(f"Progress : {i/len(imgs)*100:8.2f}%... ")
     
     cv2.destroyAllWindows()
     video.release()
