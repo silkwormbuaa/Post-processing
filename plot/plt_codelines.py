@@ -21,9 +21,9 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size']   = 20
 
-months = ["2022-12","2023-05","2023-08","2023-10","2023-11"]
+months = ["2022-12","2023-05","2023-08","2023-10","2023-11","2024-5","2024-09"]
 
-lines = [6489, 13712, 18022,22558,24876]
+lines = [6489, 13712, 18022,22558,24876,33427,39916]
 
 date_objects = [datetime.strptime(month, "%Y-%m") for month in months]
 
