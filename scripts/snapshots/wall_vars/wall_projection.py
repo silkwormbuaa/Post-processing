@@ -92,6 +92,7 @@ if rank == 0:
 
     
 p_dyn      = comm.bcast( p_dyn,      root=0 )
+roughwall  = comm.bcast( roughwall,  root=0 )
 snapfiles  = comm.bcast( snapfiles,  root=0 )
 block_list = comm.bcast( block_list, root=0 )
 params     = comm.bcast( params,     root=0 )
@@ -105,6 +106,8 @@ snapfiles  = snapfiles[i_s:i_e]
 
 print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
 sys.stdout.flush()
+
+comm.barrier()
 
 os.chdir( outpath )
 clock = timer("show cf")

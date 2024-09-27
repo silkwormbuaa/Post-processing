@@ -94,6 +94,7 @@ if rank == 0:
         wd_snap.read_snapshot( block_list, var_read=['wd'] )
 
 p_dyn      = comm.bcast( p_dyn,      root=0 )
+roughwall  = comm.bcast( roughwall,  root=0 )
 snapfiles  = comm.bcast( snapfiles,  root=0 )
 block_list = comm.bcast( block_list, root=0 )
 grid3d     = comm.bcast( grid3d,     root=0 )
@@ -105,6 +106,8 @@ snapfiles = snapfiles[i_s:i_e]
 
 print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
 sys.stdout.flush()
+
+comm.barrier()
 
 os.chdir( out_dir )
 clock = timer("show cf")
