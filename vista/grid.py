@@ -338,6 +338,9 @@ class GridData:
     def select_sliced_blockgrids( self, slic_type, loc, bbox=None, buff=3 ):
         
         """
+        - !!! Note: when slicing location is on the cell interface, better add
+              a small margin to avoid numerical error.
+        
         input:\n
         slic_type : 'X', 'Y', or 'Z' ( normal direction of slice) \n
         loc       : coordinate \n
@@ -1161,7 +1164,7 @@ class GridBlock:
 
 def Testing():
 
-    filename = '/media/wencan/Expansion/temp/231124/results/inca_grid.bin'
+    filename = '/home/wencan/temp/smooth_mid/results/inca_grid.bin'
     
     grd = GridData( filename )
     
@@ -1175,14 +1178,28 @@ def Testing():
         g = grd.g[i]
         print( f"block number: {g.num},lx0={g.lx0},lx1={g.lx1},ly0={g.ly0},ly1={g.ly1},lz0={g.lz0},lz1={g.lz1}" )
     
-    blocklist = grd.select_blockgrids([-999,999,-10,0,-999,999], mode='within')
-    group_list = grd.group_by_range('xz', block_list=blocklist)
+    blocklist,cut_index = grd.select_sliced_blockgrids('Z',0.01)
+    
+    k = 0
+    
+    for i, bl_num in enumerate(blocklist):
+        
+        if  cut_index[i] == 26:
+            index = bl_num - 1
+            print(i, blocklist[i], grd.g[index].lx0, grd.g[index].lx1, grd.g[index].ly0, grd.g[index].ly1, grd.g[index].lz0, grd.g[index].lz1)
+            k +=1
+    
+    print(k)
+    
+
+#    blocklist = grd.select_blockgrids([-999,999,-10,0,-999,999], mode='within')
+#    group_list = grd.group_by_range('xz', block_list=blocklist)
 
     #print( group_list )
     
-    xyz_prb = [76,0,10.4]
+#    xyz_prb = [76,0,10.4]
     
-    print(grd.find_probe_xyz( xyz_prb ))
+#    print(grd.find_probe_xyz( xyz_prb ))
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
