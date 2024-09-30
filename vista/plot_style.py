@@ -1164,6 +1164,7 @@ def plot_wall_projection( xx, zz, v,
                           cbar_levels=None,
                           cbar_ticks=None,
                           label=None,
+                          title=None,
                           pure=False):
     
     """
@@ -1187,6 +1188,7 @@ def plot_wall_projection( xx, zz, v,
     cs = ax.contourf( xx, zz, v,
                       levels=cbar_levels,
                       cmap=col_map,
+                      extend='both',
                       norm=colors.CenteredNorm())
 
     if separation is not None:
@@ -1230,6 +1232,8 @@ def plot_wall_projection( xx, zz, v,
         ax.spines[:].set_linewidth(1.5)
         
         ax.text(5,-1,label)
+        
+        plt.title(title,fontsize=30,pad=200)
         
         # set axises stay with contour and x,y unit length equal
         

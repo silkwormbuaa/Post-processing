@@ -183,7 +183,8 @@ for i, snap_file in enumerate(snapfiles):
                           col_map='RdBu_r',
                           cbar_label=r'$C_f\times 10^3$',
                           cbar_levels=cbar_levels,
-                          cbar_ticks=cbar_ticks)
+                          cbar_ticks=cbar_ticks,
+                          title=f"t = {itime:8.2f} ms")
     
     os.remove(f"sep_line_{itstep:08d}.pkl")
     
@@ -207,6 +208,7 @@ for i, snap_file in enumerate(snapfiles):
     progress = (i+1)/len(snapfiles)
     print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
     print("------------------\n")
+    sys.stdout.flush()
 
 
 # print out the time finishing the job
