@@ -6,7 +6,8 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   Plot instantaneous pressure or Cf signals from probes 
+             in streamwise direction at snapshot time points.
 '''
 
 import os

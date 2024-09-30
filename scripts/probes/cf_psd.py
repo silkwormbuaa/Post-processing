@@ -6,7 +6,7 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   Analyse the Cf at the ridges
+@Desc    :   Analyse a signal probe's signal
 '''
 
 import os

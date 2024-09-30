@@ -35,7 +35,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-bbox = [ -120.0, 108.0, 0, 1.736953420, -11.0, 11.0]
+bbox = [ -120.0, 108.0, 0, 0.001, -11.0, 11.0]
 
 # =============================================================================
 
@@ -63,7 +63,7 @@ if not os.path.exists(pres_file) :
         G = GridData( grid_file )
         G.read_grid()
         
-        block_list = G.select_blockgrids( bbox, mode='within' )
+        block_list = G.select_blockgrids( bbox, mode='overlap' )
 #        block_list = [885,870,855,840,825,810,795,780]  #upstream blocks
 
     with timer("read statistics"):
@@ -109,7 +109,7 @@ with timer("plotting"):
     S.df_wall = shift_coordinates( S.df_wall, delta, h_ridge, h_md, x_imp)
     
     # drop points that before -20.0 delta or after 10.0 delta
-    S.df_wall = S.df_wall[ (S.df_wall['xs']>=-32) &(S.df_wall['xs']<= 10.01)]
+    S.df_wall = S.df_wall[ (S.df_wall['xs']>=-20.01) &(S.df_wall['xs']<= 10.01)]
 
     xx     = np.array( S.df_wall['xs'] )
     zz     = np.array( S.df_wall['zs'] )

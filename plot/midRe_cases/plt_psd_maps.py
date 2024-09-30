@@ -21,6 +21,7 @@ sys.path.append( source_dir )
 
 from   vista.probe       import ProbeData
 from   vista.tools       import get_filelist
+from   vista.directories import create_folder
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
@@ -29,28 +30,29 @@ plt.rcParams['font.size']   = 30
 
 outpath = '/media/wencan/Expansion/temp/DataPost/midRe/psd'
 
-datapaths = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
-datapath2 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
-datapaths = [datapaths, datapath1, datapath2]
+datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
+datapath1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/probes/psd_ridge'
+datapath2 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
+datapath3 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
+datapaths = [datapath0, datapath1, datapath2, datapath3]
 
 # separation range in normalized unit
-x_separs = [-8.42  , -10.65744, -9.96 ]
-x_reatts = [1.06795, 2.468831,  2.86 ]
-x_ppmaxs = [-7.3333, -10.0611,  -11.58 ]
+x_separs = [-8.42  , -7.33, -10.84,  -9.96 ]
+x_reatts = [1.06795, 1.89,  2.45,    2.86 ]
+x_ppmaxs = [-7.3333, -8.53, -10.06,  -11.58 ]
 
 # labels
-label    = ['lowRe_smooth',  'lowRe_rough', 'midRe_rough']
+label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough']
 
 # subplots position and size
 
-fig = plt.figure( figsize=(15, 20) )
-gs = GridSpec(3,10)
-ax_range = [1,1,0]
+fig = plt.figure( figsize=(15, 25) )
+gs = GridSpec(4,10)
+ax_range = [1,1,1,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs = list()
 
-for i in range(3):
+for i in range(4):
     
     psdfilelist = get_filelist( datapaths[i] )
     
@@ -64,7 +66,7 @@ for i in range(3):
         probe.read_psd( psdfile )
         st_probe = np.array( probe.psd_df['freq'] )*5.2/507.0
         x_probe  = [(probe.xyz[0]-50.4)/5.2]*len(st_probe)
-        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
+        pmpsd_probe = np.array( probe.psd_df['pmpsd_cf_fluc'] )
 
         x.append( x_probe )
         st.append( st_probe )
@@ -78,9 +80,9 @@ for i in range(3):
                           cmap='Greys',
                           norm=colornorm)
     
-    ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=2.0)
-    ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=2.0)
-    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=2.0)
+    ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=3.0)
+    ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=3.0)
+    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=3.0)
     
     ax.text( 4.0, 0.02, label[i] )
     
@@ -111,7 +113,7 @@ for i in range(3):
     ylabel = r'$St = fL_{sep}/u_{\infty}$'
     ax.set_ylabel(ylabel)
     
-    if i%3 != 2:
+    if i%4 != 3:
         ax.xaxis.set_ticklabels([])
     else:
         xlabel = r'$(x-x_{imp})/\delta_0$'
@@ -123,7 +125,7 @@ for i in range(3):
     
     axs.append(ax)
 
-axs[2].set_xlim([-15.0, 10.0])
+axs[3].set_xlim([-15.0, 10.0])
     
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
 cbar_ticks = np.linspace(0, 0.3, 7)
@@ -138,5 +140,5 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
-os.chdir( outpath )
-plt.savefig( 'psd_3maps.png' )
+os.chdir( create_folder(outpath) )
+plt.savefig( 'psd_4maps_cf.png' )

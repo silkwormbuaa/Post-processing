@@ -50,20 +50,21 @@ fmt = '.png'
 OutPath  = '/media/wencan/Expansion/temp/DataPost/midRe/upstream_profile/'
 
 data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
-data1 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
-data2 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/upstream_profile'
+data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/upstream_profile'
+data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
+data3 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/upstream_profile'
 
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
 dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
-datalist = [data0, data1,   data2 ]
-dy       = [0,     0.312,   0.312]
-color    = ['gray','red',  'blue']
-label    = ['lowRe_smooth', 'lowRe_rough',   'midRe_rough']
-lstyle   = ['--',  '-.',     ':' ]
-width    = [4.0,   4.0,      4.0 ]
+datalist = [data0, data1,   data2, data3 ]
+dy       = [0.0,     0.0,     0.312, 0.312]
+color    = ['gray', 'blue', 'gray',  'blue']
+label    = ['lowRe_smooth', 'midRe_smoth','lowRe_rough',   'midRe_rough']
+lstyle   = ['--',  '--',     '-.',  '-.']
+width    = [4.0,   4.0,      4.0,   4.0 ]
 lines = []
 
 # ----------------------------------------------------------------------
@@ -156,7 +157,7 @@ if plt_u_vd :
                    width=1.5)
     
     ax.set_xlim( [1,3000] )
-    ax.set_ylim( [0,23] )
+    ax.set_ylim( [0,26] )
     
     x_minor = ticker.LogLocator( base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
@@ -232,7 +233,7 @@ if plt_u :
                    width=1.5)
     
     ax.set_xlim( [1,3000] )
-    ax.set_ylim( [0,23] )
+    ax.set_ylim( [0,25] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
@@ -297,7 +298,7 @@ if plt_RS_uu:
 
 
     ax.set_xlim( [1,3000] )
-    ax.set_ylim( [-1,8]   )
+    ax.set_ylim( [-1,10]   )
 
     ax.minorticks_on()
     ax.tick_params(which='major',
@@ -424,7 +425,7 @@ if plt_RS_ww:
 
 
     ax.set_xlim( [1,3000] )
-    ax.set_ylim( [-0.1,2]   )
+    ax.set_ylim( [-0.1,2.4]   )
 
     ax.minorticks_on()
     ax.tick_params(which='major',
@@ -440,7 +441,7 @@ if plt_RS_ww:
     x_minor = matplotlib.ticker.LogLocator( 
                         base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
     ax.xaxis.set_minor_locator( x_minor )
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
 
 
 #    ax.grid(visible=True, which='both',axis='both',color='gray',

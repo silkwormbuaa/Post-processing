@@ -70,7 +70,7 @@ for i, loc in enumerate(locs):
     
     bbox    = [ loc-2.5, loc+2.5, -1.2576, 86.0,  -11.0, 11.0]  # bounding box
     wbox    = [ loc-2.5, loc+2.5, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
-    wbox_sw = [ loc-2.5, loc+2.5, 0, 1.736953420, -11.0, 11.0]
+    wbox_sw = [ loc-2.5, loc+2.5, 0.0,     0.01,  -11.0, 11.0]
 
     outfile  = f'profile_mean_{i:02d}.dat'
     wall_stat_file = f'wall_statistics_{i:02d}.dat'

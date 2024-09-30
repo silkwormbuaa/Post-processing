@@ -577,7 +577,7 @@ class StatisticData:
 #   - need to be improved when dealing with near-wall cells
 # ----------------------------------------------------------------------
                 
-    def compute_gradients( self, block_list:list, grads:list, buff=3):
+    def compute_gradients( self, block_list:list, grads:list ):
         
         """
         block_list: list of blocks that are going to compute gradients\n
@@ -589,7 +589,7 @@ class StatisticData:
             
             block = self.bl[num-1]
             
-            block.compute_gradients_block( grads, buff=buff )
+            block.compute_gradients_block( grads )
         
         print(f"Gradients {grads} are computed.\n")
 
