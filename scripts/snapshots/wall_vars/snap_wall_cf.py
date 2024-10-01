@@ -68,6 +68,7 @@ p_dyn      = None
 snapfiles  = None
 block_list = None
 roughwall  = True
+params     = None
 grid3d     = GridData()
 wd_snap    = Snapshot()
 
@@ -89,16 +90,19 @@ if rank == 0:
     block_list = grid3d.select_blockgrids( bbox, mode='within' )
     
     if roughwall:
-        wd_file    = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
+        wd_file = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
         wd_snap = Snapshot( wd_file )
         wd_snap.read_snapshot( block_list, var_read=['wd'] )
 
+params     = comm.bcast( params,     root=0 )
 p_dyn      = comm.bcast( p_dyn,      root=0 )
 roughwall  = comm.bcast( roughwall,  root=0 )
 snapfiles  = comm.bcast( snapfiles,  root=0 )
 block_list = comm.bcast( block_list, root=0 )
 grid3d     = comm.bcast( grid3d,     root=0 )
 wd_snap    = comm.bcast( wd_snap,    root=0 )
+Re_ref     = float(params.get('Re_ref'))
+visc_law   = params.get('visc_law')
 
 n_snaps   = len( snapfiles )
 i_s, i_e  = distribute_mpi_work(n_snaps, n_procs, rank)
@@ -132,7 +136,7 @@ for i, snap_file in enumerate(snapfiles):
     for bl in snap3d.snap_data:
 
         if bl.num in block_list:
-            bl.df['mu'] = get_visc( np.array(bl.df['T']) )
+            bl.df['mu'] = get_visc( np.array(bl.df['T']), Re_ref, law=visc_law )
 
 # =============================================================================
 # visualization

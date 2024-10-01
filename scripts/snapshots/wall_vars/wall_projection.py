@@ -10,6 +10,7 @@
 '''
 
 
+import gc
 import os
 import sys
 import pickle
@@ -30,6 +31,7 @@ from   vista.tools       import distribute_mpi_work
 from   vista.tools       import read_case_parameter
 from   vista.material    import get_visc
 from   vista.plot_style  import plot_wall_projection
+from   vista.plot_style  import plot_spanwise_variables
 from   vista.directories import create_folder
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
@@ -100,6 +102,9 @@ grid3d     = comm.bcast( grid3d,     root=0 )
 wd_snap    = comm.bcast( wd_snap,    root=0 )
 cc_df      = comm.bcast( cc_df,      root=0 )
 
+Re_ref     = float( params.get('Re_ref') )
+visc_law   = params.get('visc_law')
+
 n_snaps    = len( snapfiles )
 i_s, i_e   = distribute_mpi_work(n_snaps, n_procs, rank)
 snapfiles  = snapfiles[i_s:i_e]
@@ -114,16 +119,14 @@ clock = timer("show cf")
 
 # - loop over the snapshots
 
-for i, snap_file in enumerate(snapfiles):
+for i, snap_file in enumerate(snapfiles[:1]):
     
     snap3d = Snapshot( snap_file )
     snap3d.grid3d = grid3d
-#    snap3d.verbose = True
     snap3d.read_snapshot( block_list=block_list, var_read=['u','p','rho','T'] )
 
     itstep  = snap3d.itstep
     itime   = snap3d.itime
-    df_file = f'df_fric_{itstep:08d}.pkl'
     figname = f'cf_{itstep:08d}.png'
     
     if roughwall:
@@ -132,7 +135,7 @@ for i, snap_file in enumerate(snapfiles):
     for bl in snap3d.snap_data:
 
         if bl.num in block_list:
-            bl.df['mu'] = get_visc( np.array(bl.df['T']) )
+            bl.df['mu'] = get_visc( np.array(bl.df['T']), Re_ref, law=visc_law )
 
 # --- wall projection
 
@@ -163,6 +166,8 @@ for i, snap_file in enumerate(snapfiles):
     xx       = np.array( df_wall['xs'] )
     zz       = np.array( df_wall['zs'] )
     fric     = np.array( df_wall['fric'] )
+    u        = np.array( df_wall['u'] )
+    mu       = np.array( df_wall['mu'] )
 
     npx      = len( np.unique(xx) )
     npz      = len( np.unique(zz) )
@@ -170,7 +175,9 @@ for i, snap_file in enumerate(snapfiles):
     xx       = xx.reshape( npz, npx )
     zz       = zz.reshape( npz, npx )
     fric     = fric.reshape( npz, npx )
-
+    u        = u.reshape( npz, npx )
+    mu       = mu.reshape( npz, npx )   
+    
 # --- save original wall projection results
 
     save_isolines( xx, zz, fric, 0.0, f"sep_line_{itstep:08d}.pkl")
@@ -185,25 +192,13 @@ for i, snap_file in enumerate(snapfiles):
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           title=f"t = {itime:8.2f} ms")
-    
+
     os.remove(f"sep_line_{itstep:08d}.pkl")
-    
-# --- output separation area ratio and length ratio distribution
-
-    # print(f"separation ratio {compute_separation_ratio(fric):10.5f}.")
-
-    # fric_mean   = np.mean( fric/dyn_p*1000.0, axis=0 )
-
-    # df_streamwise = pd.DataFrame(columns=['x','Cf'])
-    # df_streamwise['x']  = np.unique( xx )
-    # df_streamwise['Cf'] = np.array( fric_mean )
-    
-    # df_streamwise.to_string('streamwise_vars.dat',
-    #                         index=False,
-    #                         float_format='%15.7f',
-    #                         justify='left')
 
 # - print the progress
+
+    del snap3d, df_wall
+    gc.collect()
     
     progress = (i+1)/len(snapfiles)
     print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))

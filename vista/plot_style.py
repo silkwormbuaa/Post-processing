@@ -1291,7 +1291,7 @@ def plot_spanwise_variables( z, v, ylabel, figname ):
     
     ax.grid(which='both',visible=True)
     ax.set_xlim([0,2])
-    ax.set_ylim([0,10])
+#    ax.set_ylim([0,10])
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(2)
     

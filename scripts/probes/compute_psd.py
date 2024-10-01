@@ -43,13 +43,15 @@ print(f"We are in directory:{dirs.prb_dir}\n")
 print(f"We have got {n_data:5d} probes data.\n")
 
 parameters = read_case_parameter( dirs.case_para_file )
-h = float( parameters.get('H') )
-u_ref   = float(parameters.get('u_ref'))
-rho_ref = float(parameters.get('rho_ref'))
-delta   = float(parameters.get('delta_0'))
-lsep    = float(parameters.get('Lsep'))
-p_dyn   = 0.5 * rho_ref * u_ref**2
-prb_withT = True if parameters.get('prb_withT').lower() == 'true' else False
+h          = float( parameters.get('H') )
+u_ref      = float(parameters.get('u_ref'))
+rho_ref    = float(parameters.get('rho_ref'))
+delta      = float(parameters.get('delta_0'))
+lsep       = float(parameters.get('Lsep'))
+Re_ref     = float(parameters.get('Re_ref'))
+visc_law   = parameters.get('visc_law')
+prb_withT  = True if parameters.get('prb_withT').lower() == 'true' else False
+p_dyn      = 0.5 * rho_ref * u_ref**2
 
 # -- check if number of probe data and number of probes are consistent
 
@@ -101,7 +103,7 @@ with timer('Computing PSD '):
             ts  = np.array(probedata.df['p']/probedata.df['rho']/287.0508571)
         
         u       = np.array( probedata.df['u'] )
-        mu      = get_visc( ts )
+        mu      = get_visc( ts, Re_ref, law= visc_law )
         cf      = mu*u/walldist/p_dyn
         
         probedata.add_data( 'cf', cf )

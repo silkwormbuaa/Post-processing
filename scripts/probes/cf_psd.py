@@ -36,12 +36,14 @@ outpath = dirpath + '/postprocess/cf_psd/'
 dirs = Directories( dirpath )
 os.chdir( create_folder(outpath) )
 
-params  = read_case_parameter( dirs.case_para_file )
-u_ref   = float(params.get('u_ref'))
-rho_ref = float(params.get('rho_ref'))
-delta   = float(params.get('delta_0'))
-lsep    = float(params.get('Lsep'))
-p_dyn   = 0.5 * rho_ref * u_ref**2
+params   = read_case_parameter( dirs.case_para_file )
+u_ref    = float(params.get('u_ref'))
+rho_ref  = float(params.get('rho_ref'))
+delta    = float(params.get('delta_0'))
+lsep     = float(params.get('Lsep'))
+Re_ref   = float(params.get('Re_ref'))
+visc_law = params.get('visc_law')
+p_dyn    = 0.5 * rho_ref * u_ref**2
 
 prb = ProbeData( file, withT=True )
 prb.cleandata( 20.0 )
@@ -51,7 +53,7 @@ walldist = prb.xyz[1]
 time    = np.array( prb.df['time'] )
 ts      = np.array( prb.df['T'] )
 u       = np.array( prb.df['u'] )
-mu      = get_visc( ts )
+mu      = get_visc( ts, Re_ref, law= visc_law )
 cf      = mu*u/walldist/p_dyn
 
 prb.add_data( 'cf', cf )

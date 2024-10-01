@@ -1717,6 +1717,7 @@ class Snapshot:
             df_wall = pd.DataFrame(columns=['x','z','p','mu','rho','fric'])
             df_wall['x']    =        xx[buff:-buff,buff:-buff].flatten()
             df_wall['z']    =        zz[buff:-buff,buff:-buff].flatten()
+            df_wall['u']    =   u_plane[buff:-buff,buff:-buff].flatten()
             df_wall['p']    =   p_plane[buff:-buff,buff:-buff].flatten()
             df_wall['mu']   =  mu_plane[buff:-buff,buff:-buff].flatten()
             df_wall['rho']  = rho_plane[buff:-buff,buff:-buff].flatten()

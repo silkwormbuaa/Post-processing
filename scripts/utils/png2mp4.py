@@ -26,7 +26,7 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    figpath = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/snapshotZ'
+    figpath = '/home/wencan/temp/220927/postprocess/snapshots/fricprj/figs'
 #    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
     os.chdir( figpath )
@@ -86,8 +86,8 @@ def create_video_from_images(image_paths, output_video_path, fps=25):
         
         # resize the image if it is too large
         height, width, layers = img.shape
-        if width > 1920:
-            img = cv2.resize(img, (1920, 1080))
+        # if width > 1920:
+        #     img = cv2.resize(img, (1920, 1080))
             
         imgs.append(img)
         if i%10 == 0: print(f"{i} image loaded.")

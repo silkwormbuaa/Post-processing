@@ -25,13 +25,15 @@ import numpy             as     np
 #
 # ----------------------------------------------------------------------
 
-def get_visc( ts, law='P07', case='midRe' ):
+def get_visc( ts, Re_ref, law='P07' ):
     
     """
-    ts     : static temperature
+    - Note : reference values are used for Wencan's STBLI cases.
     
+    ts     : static temperature
+    Re_ref : reference Reynolds number
     law    : 'sutherlands', 'P05', or 'P07
-    case   : 'lowRe' or 'midRe'
+    
     return : mu
     """
     
@@ -42,9 +44,6 @@ def get_visc( ts, law='P07', case='midRe' ):
     T_ref_sl   = 273.15
     mu_ref_sl  = 17.16e-6
     S_ref_sl   = 110.4
-    
-    if case == 'lowRe':   Re_ref = 2230.0
-    elif case == 'midRe': Re_ref = 9636.0
     
     visc_ref = rho_ref * l_ref * u_ref / Re_ref
 
@@ -113,9 +112,9 @@ def Testing():
     law  = 'P05'
     case = 'lowRe'
     
-    print( get_visc( t1, law=law, case=case ) )
-    print( get_visc( t2, law=law, case=case ) )
-    print( get_visc( t3, law=law, case=case ) )
+    print( get_visc( t1, 2230, law=law ) )
+    print( get_visc( t2, 2230, law=law ) )
+    print( get_visc( t3, 2230, law=law ) )
 
 
 
