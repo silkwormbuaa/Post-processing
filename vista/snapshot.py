@@ -1645,11 +1645,6 @@ class Snapshot:
         self.df_fric = pd.concat( f_visc_grp_ls )
         self.df_fric.reset_index( drop=True, inplace=True )
         self.df_fric.sort_values( by=['z','x'],inplace=True )
-        
-        if outfile is None: outfile = f'df_fric_{self.itstep:08d}.pkl'
-        
-        with open( outfile, 'wb' ) as f:
-            pickle.dump( self.df_fric, f )
 
         return self.df_fric
 

@@ -45,8 +45,8 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-casepath = '/home/wencan/temp/smooth_adiabatic' 
-bbox     = [ -30.0, 108.0, -1.3, 5.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
+casepath = '/home/wencan/temp/231124' 
+bbox     = [ -30.0, 108.0, -1.3, 0.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
 
 # =============================================================================
 # preparation
@@ -55,7 +55,7 @@ bbox     = [ -30.0, 108.0, -1.3, 5.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax
 dirs      = Directories( casepath )
 grid_file = dirs.grid
 ccfile    = dirs.cc_setup
-outpath   = dirs.pp_snp_fricprj
+outpath   = dirs.pp_snp_fricprj + '/figs'
 
 snapfiles  = None
 block_list = None
@@ -119,7 +119,7 @@ clock = timer("show cf")
 
 # - loop over the snapshots
 
-for i, snap_file in enumerate(snapfiles[:1]):
+for i, snap_file in enumerate(snapfiles):
     
     snap3d = Snapshot( snap_file )
     snap3d.grid3d = grid3d
@@ -166,8 +166,6 @@ for i, snap_file in enumerate(snapfiles[:1]):
     xx       = np.array( df_wall['xs'] )
     zz       = np.array( df_wall['zs'] )
     fric     = np.array( df_wall['fric'] )
-    u        = np.array( df_wall['u'] )
-    mu       = np.array( df_wall['mu'] )
 
     npx      = len( np.unique(xx) )
     npz      = len( np.unique(zz) )
@@ -175,15 +173,13 @@ for i, snap_file in enumerate(snapfiles[:1]):
     xx       = xx.reshape( npz, npx )
     zz       = zz.reshape( npz, npx )
     fric     = fric.reshape( npz, npx )
-    u        = u.reshape( npz, npx )
-    mu       = mu.reshape( npz, npx )   
     
 # --- save original wall projection results
 
     save_isolines( xx, zz, fric, 0.0, f"sep_line_{itstep:08d}.pkl")
     
-    cbar_levels = np.linspace(-5.0,5.0,41)
-    cbar_ticks  = np.linspace(-5.0,5.0,5)
+    cbar_levels = np.linspace(-6.0,6.0,41)
+    cbar_ticks  = np.linspace(-6.0,6.0,5)
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation=f"sep_line_{itstep:08d}.pkl",
                           filename=figname,
