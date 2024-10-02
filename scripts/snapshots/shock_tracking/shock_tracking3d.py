@@ -30,10 +30,12 @@ from   vista.directories import create_folder
 # =============================================================================
 
 y0 = 10.4
-xrange = [-8.0, 10.0]
+xrange = [8.0,24.0]     
 
-inputpath    = '/home/wencanwu/test/220927/'
-outputpath   = '/home/wencanwu/test/220927/shock_tracking'
+# [-8,10] for 231124
+
+inputpath    = '/home/wencan/temp/smooth_mid/'
+outputpath   = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking'
 
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
