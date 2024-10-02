@@ -130,8 +130,8 @@ for i, snap_file in enumerate(snap_files):
     if abs(x_shock - x_last_shock) > tolerance:
         print("Warning: the shock front is not continuous! Special treatment will be applied!")
 
-        indx_s,_ = find_indices( prbdf['x'], x_last_shock-half_width )
-        indx_e,_ = find_indices( prbdf['x'], x_last_shock+half_width )
+        indx_s,_ = find_indices( np.array(prbdf['x']), x_last_shock-half_width )
+        indx_e,_ = find_indices( np.array(prbdf['x']), x_last_shock+half_width )
         sub_df   = prbdf.iloc[indx_s:indx_e].copy()
 
         idmax = sub_df['grad_rho'].idxmax()
@@ -147,7 +147,7 @@ for i, snap_file in enumerate(snap_files):
     ax.plot( x_shock, grad_rho_max, 'ro' )
     
     ax.set_xlim( xrange )
-    ax.set_ylim( [-0.05, 0.5] )
+    ax.set_ylim( [-0.05, 0.8] )
     
     plt.savefig(f'snap_Z_{snap.itstep:08d}.png')
     
