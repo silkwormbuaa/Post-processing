@@ -1648,6 +1648,140 @@ class Snapshot:
 
         return self.df_fric
 
+
+# ----------------------------------------------------------------------
+# >>> wall_vars_projection                                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/10/02  - created
+#
+# Desc
+#    - project pressure distritbution on a x-z plane
+#    - return a dataframe
+# ----------------------------------------------------------------------
+
+    def wall_vars_projection( self,         block_list:list,
+                              G:GridData,   cc_df:pd.DataFrame, 
+                              buff=3  ):
+        
+        """
+        block_list : list of selected blocks' numbers\n
+        G          : GridData object\n
+        cc_df      : cutcell dataframe from cutcells_setup.dat\n
+        
+        return     : dataframe of x-z plane data with coordinates and vars\n
+        
+        Need data chunk with p ready.\n
+        Only applicable to geometry with homogeneous shape along x
+        """
+        
+
+# ----- initialize a list of dataframes containing groups of blocks' projection
+        
+        grouped_blocks = G.group_by_range( 'xz', block_list=block_list )
+        vars_grp_ls = []
+
+# ----- loop over each group of blocks
+
+        for group in grouped_blocks:
+        
+            # initialize a group of blocks' projection
+            
+            npx = G.g[group[0]-1].nx + buff*2
+            npz = G.g[group[0]-1].nz + buff*2
+            
+            p_grp   = np.zeros( (npx,npz), dtype='f' )
+
+# --------- loop over each block in the group
+         
+            for num in group:
+                
+# ------------- get cut cell dataframe and grid of this block 
+
+                cc_df_block = cc_df[ cc_df['block_number'] == num ]
+                cc_group = cc_df_block.groupby(['i','k'])
+                
+                g = G.g[num-1]
+                
+                npx = g.nx + buff*2
+                npy = g.ny + buff*2
+                npz = g.nz + buff*2
+                
+# ------------- prepare block data chunk
+
+                # !!! i,j,k follow Fortran index, starting from 1.
+                
+                p_plane   = np.zeros( (npx,npz), dtype='f' )
+                
+                data_df = self.snap_data[self.bl_nums.index(num)].df
+                
+                p   = np.array( data_df['p' ]  ).reshape( npz, npy, npx )
+                
+# ------------- loop over each cut cell group
+
+                for k in range( buff+1, g.nz+buff+1 ):
+                    
+                    # get a cut cell group dataframe
+                    try:
+                        df = cc_group.get_group((buff+1,k))
+                    except:
+                        # if there is no cut cell at this (x,z) location, skip and continue
+                        #print(f"block {num}, point ({buff+1},{k}) no cut cell")
+                        continue
+                        
+                    for i in range( buff+1, g.nx+buff+1 ):
+                        
+                        # when i == 1, find the interpolation stencil points
+                        # (therefore, this code is just applicable to geometry
+                        # with homogeneous shape in x direction.)
+                        # Pressure and pressure fluctuation can use value on 
+                        # cut cell directly, instead of interpolation.
+                        
+                        if i == buff + 1:
+                            
+                            fay    = []
+
+                            # loop over all cut cells sharing same x-z
+                            
+                            for cc_j in range( len(df) ):
+                                
+                                fay.append( df['fay1'].iloc[cc_j] 
+                                          - df['fay0'].iloc[cc_j])
+
+                        # compute interpolated pressure and pressure fluctuation
+                        
+                        for cc_j in range( len(df) ):
+                            
+                            j = df['j'].iloc[cc_j]
+                            
+                            p_plane[i-1,k-1]   += p[k-1,j-1,i-1]   * fay[cc_j]
+
+                # print(f"block {num} has mean p {np.mean(p_plane)}")
+                p_grp   += p_plane
+
+# --------- match with coordinates
+            
+            xx,zz = np.meshgrid( g.gx, g.gz )
+            
+            df_wall_grp = pd.DataFrame(columns=['x','z','p'])
+            df_wall_grp['x']   =        xx[buff:-buff,buff:-buff].flatten()
+            df_wall_grp['z']   =        zz[buff:-buff,buff:-buff].flatten()
+            df_wall_grp['p']   =     p_grp[buff:-buff,buff:-buff].T.flatten()
+            
+            vars_grp_ls.append( df_wall_grp )
+            
+# --------- save wall vars into StatisticsData.df_wall (a single pd.DataFrame)
+
+        self.df_wall = pd.concat( vars_grp_ls )
+        self.df_wall.reset_index( drop=True, inplace=True )
+        self.df_wall.sort_values( by=['z','x'],inplace=True )
+
+        return self.df_wall
+
 # ----------------------------------------------------------------------
 # >>> extract wall varibles of smooth wall                     (Nr.)
 # ----------------------------------------------------------------------

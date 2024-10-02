@@ -32,7 +32,7 @@ from   vista.snapshot    import Snapshot
 
 snap_file = '/media/wencan/Expansion/temp/220927/supplements/wall_dist/snapshot_01329504/snapshot.bin'
 grid_file = '/media/wencan/Expansion/temp/220927/results/inca_grid.bin'
-bbox      = [-30.0,110.0,-3.0,2.0, -99.0,99.0]
+bbox      = [-30.0,110.0,-3.0,0.5, -99.0,99.0]
 vars_in   = ['u','p','wd']
 
 # =============================================================================
@@ -61,7 +61,12 @@ wallsurface.set_active_scalars('p')
 p = pv.Plotter(off_screen=off_screen)
 cmap = plt.get_cmap('coolwarm',51)
 
-p.add_mesh( wallsurface, cmap=cmap, show_scalar_bar=True)
+p.add_mesh( wallsurface, cmap=cmap, show_scalar_bar=True, lighting=False)
+
+p.view_vector([0.0,1.0,0.0],viewup=[0.0,0.0,-1.0])
+camera_pos = [(40.0,150.0,0.0),(40.0,0.0,0.0),(0.0,0.0,-1.0)]
+p.camera_position = camera_pos
+    
 p.add_axes()
 p.show('test.png')
 

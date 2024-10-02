@@ -1165,7 +1165,9 @@ def plot_wall_projection( xx, zz, v,
                           cbar_ticks=None,
                           label=None,
                           title=None,
-                          pure=False):
+                          extend='both',
+                          use_norm=False,
+                          pure=False,):
     
     """
     only applicable to the ridge type smooth wall case setting.
@@ -1188,9 +1190,9 @@ def plot_wall_projection( xx, zz, v,
     cs = ax.contourf( xx, zz, v,
                       levels=cbar_levels,
                       cmap=col_map,
-                      extend='both',
-                      norm=colors.CenteredNorm())
-
+                      extend=extend,
+                      norm=colors.CenteredNorm() if use_norm else None)
+    
     if separation is not None:
         
         with open(separation,'rb') as f:
