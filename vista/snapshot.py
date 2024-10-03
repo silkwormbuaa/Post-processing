@@ -1877,22 +1877,29 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def copy_var_from( self, snap_source, varnames:list):
+    def copy_var_from( self, snap_source, varnames:list, blocklist=None ):
 
         """
         snap_source: Snapshot instance where data is copied from
         varname    : name of variable to be copied
         """
         
+        # if blocklist is not give, copy to all blocks in the snapshots (including not filled.)
+        
+        if blocklist is None:
+            blocklist = self.bl_nums
+        
         for snap_bl in self.snap_data:
             
             bl_num = snap_bl.num
             
-            bl_src_indx = snap_source.bl_nums.index(bl_num)
-            bl_src = snap_source.snap_data[bl_src_indx]
+            if bl_num in blocklist:
             
-            for var in varnames:
-                snap_bl.df[var] = bl_src.df[var]
+                bl_src_indx = snap_source.bl_nums.index(bl_num)
+                bl_src      = snap_source.snap_data[bl_src_indx]
+                
+                for var in varnames:
+                    snap_bl.df[var] = bl_src.df[var]
 
         print(f"copied variables {varnames} from snapshot {snap_source.itstep} to snapshot {self.itstep}.\n")
 
