@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = False
+off_screen = True
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -52,8 +52,8 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/home/wencan/temp/220927'
-bbox      = [-30.0,110.0,-3.0, 5.0, -99.0,99.0]
+case_dir  = '/home/wencanwu/test/220927'
+bbox      = [-30.0,110.0,-3.0, 0.01, -99.0,99.0]
 walldist  = 0.019
 vars_in   = ['u','T']
 
@@ -105,6 +105,10 @@ wd_snap    = comm.bcast( wd_snap,    root=0 )
 Re_ref     = float(params.get('Re_ref'))
 visc_law   = params.get('visc_law')
 
+vars_out   = vars_in
+if roughwall : vars_out += ['mu','wd']
+else         : vars_out += ['mu']
+
 n_snaps   = len( snapfiles )
 i_s, i_e  = distribute_mpi_work(n_snaps, n_procs, rank)
 snapfiles = snapfiles[i_s:i_e]
@@ -130,7 +134,7 @@ for i, snap_file in enumerate(snapfiles):
     figname = f'cf_{itstep:08d}.png'
     
     if roughwall:
-        snap3d.copy_var_from( wd_snap, ['wd'] )
+        snap3d.copy_var_from( wd_snap, ['wd'], block_list )
 
     for bl in snap3d.snap_data:
 
@@ -140,31 +144,27 @@ for i, snap_file in enumerate(snapfiles):
 # =============================================================================
 # visualization
 # =============================================================================
-
-    vars_in += ['mu']
-    if roughwall: vars_in += ['wd']
     
-    dataset = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_in,block_list=block_list,mode='oneside') )
+    dataset    = pv.MultiBlock( snap3d.create_vtk_multiblock(vars=vars_out,block_list=block_list,mode='oneside') )
     point_data = dataset.cell_data_to_point_data().combine()
     
     if roughwall:
         point_data.set_active_scalars('wd')
         wallsurface = point_data.contour( [walldist] )
-        friction = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
+        friction    = wallsurface['mu']*wallsurface['u']/wallsurface['wd']
 
     else:
         wallsurface = point_data.slice( normal=[0.0,1.0,0.0], origin=[0.0,walldist,0.0] )
-        friction = wallsurface['mu']*wallsurface['u']/walldist
+        friction    = wallsurface['mu']*wallsurface['u']/walldist
 
     wallsurface['cf'] = friction / p_dyn
     wallsurface.set_active_scalars('cf')
 
-    
     p = pv.Plotter(off_screen=off_screen, window_size=[1920,1080])
     cmap = plt.get_cmap('RdBu_r',51)
 
     p.add_mesh( wallsurface,    cmap=cmap, clim=[-0.006,0.006], show_scalar_bar=True, 
-                lighting=True)
+                lighting=False)
     
     p.view_vector([0.0,1.0,0.0],viewup=[0.0,0.0,-1.0])
     camera_pos = [(40.0,150.0,0.0),(40.0,0.0,0.0),(0.0,0.0,-1.0)]

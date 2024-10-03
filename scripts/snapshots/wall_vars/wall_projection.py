@@ -138,7 +138,7 @@ for i, snap_file in enumerate(snapfiles):
     itime   = snap3d.itime
     
     if roughwall:
-        snap3d.copy_var_from( wd_snap, ['wd'] )
+        snap3d.copy_var_from( wd_snap, ['wd'], block_list )
 
     for bl in snap3d.snap_data:
 
