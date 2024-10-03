@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = True
+off_screen = False
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -52,8 +52,8 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/home/wencan/temp/smooth_adiabatic'
-bbox      = [-30.0,110.0,-3.0, 5, -99.0,99.0]
+case_dir  = '/home/wencan/temp/220927'
+bbox      = [-30.0,110.0,-3.0, 5.0, -99.0,99.0]
 walldist  = 0.019
 vars_in   = ['u','T']
 
@@ -80,7 +80,7 @@ if rank == 0:
     u_ref     = float(params.get('u_ref'))
     rho_ref   = float(params.get('rho_ref'))
     p_dyn     = 0.5 * rho_ref * u_ref**2
-    roughwall = True if str(params.get('rough_wall')).lower() == 'true' else False
+    roughwall = True if str(params.get('roughwall')).lower() == 'true' else False
     
     snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
@@ -93,6 +93,7 @@ if rank == 0:
         wd_file = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
         wd_snap = Snapshot( wd_file )
         wd_snap.read_snapshot( block_list, var_read=['wd'] )
+        print(f"Wall distance from {wd_file} has been read.\n")
 
 params     = comm.bcast( params,     root=0 )
 p_dyn      = comm.bcast( p_dyn,      root=0 )
@@ -131,8 +132,6 @@ for i, snap_file in enumerate(snapfiles):
     if roughwall:
         snap3d.copy_var_from( wd_snap, ['wd'] )
 
-    print(snap3d.vars_name)
-
     for bl in snap3d.snap_data:
 
         if bl.num in block_list:
@@ -164,8 +163,9 @@ for i, snap_file in enumerate(snapfiles):
     p = pv.Plotter(off_screen=off_screen, window_size=[1920,1080])
     cmap = plt.get_cmap('RdBu_r',51)
 
-    p.add_mesh( wallsurface,    cmap=cmap, clim=[-0.005, 0.005],show_scalar_bar=True, 
-                lighting=False)
+    p.add_mesh( wallsurface,    cmap=cmap, clim=[-0.006,0.006], show_scalar_bar=True, 
+                lighting=True)
+    
     p.view_vector([0.0,1.0,0.0],viewup=[0.0,0.0,-1.0])
     camera_pos = [(40.0,150.0,0.0),(40.0,0.0,0.0),(0.0,0.0,-1.0)]
     p.camera_position = camera_pos
