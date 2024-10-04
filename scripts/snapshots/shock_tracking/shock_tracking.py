@@ -27,7 +27,7 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 y0 = 10.4
-xrange = [-8.0, 6.0]
+xrange = [8.0, 24.0]     # [-8,10] for 231124
 
 inputpath    = '/media/wencan/Expansion/temp/231124/'
 outputpath   = '/home/wencanwu/temp/'

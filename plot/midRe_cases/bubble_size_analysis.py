@@ -21,14 +21,19 @@ from   vista.line        import LineData
 from   vista.psd         import pre_multi_psd
 from   vista.directories import create_folder
 
-file = '/media/wencan/Expansion/temp/231124/postprocess/bubble_size/bubble_size.dat'
+# =============================================================================
 
-outputpath = '/media/wencan/Expansion/temp/DataPost/midRe/bubble_size'
+file       = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble_size/bubble_size.dat'
+outputpath = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble_size'
+lsep       = 47.944
+delta0     = 5.2
 
 files = [file]
-tags  = ['midRe_rough'] 
+tags  = ['midRe_smooth'] 
 color    = ['blue']
 lstyle   = ['-']
+
+# =============================================================================
 
 lines = [LineData(file) for file in files]
 
@@ -46,7 +51,7 @@ with open("bubble_size_analysis.dat",'w') as f:
         std_dev = np.std( line.df['bubble_volume'] )
         std_dev_norm = np.std( line.df['bubble_volume'] )/mean_size
         
-        ax.plot( (np.array(line.df['itime'])- 20.0 ) * 507.0 * (1.0/7.15), 
+        ax.plot( (np.array(line.df['itime'])- 20.0 ) * 507.0 * (1.0/delta0), 
                  (np.array(line.df['bubble_volume'])-mean_size)/mean_size, 
                  color=color[i], 
                  linewidth=1.5)
@@ -69,7 +74,7 @@ for i,line in enumerate(lines):
                                   100, 8, 0.5, 
                                   nfft=len(line.df['bubble_volume']) )
     
-    ax.semilogx( freq*66.664/507, pm_psd, color=color[i], linestyle=lstyle[i], linewidth=1.5 )
+    ax.semilogx( freq*lsep/507, pm_psd, color=color[i], linestyle=lstyle[i], linewidth=1.5 )
     
     
 ax.set_xlabel(r'$St_{L_{sep}}$')

@@ -64,7 +64,7 @@ if rank == 0:
     sys.stdout.flush()
 
     grid_file = dirs + '/results/inca_grid.bin'
-    ccfile    = dirs + '/cutcells_setup.dat'
+    ccfile    = dirs + '/supplements/cutcells_setup.dat'
 
     if roughwall:
         wd_snap_file  = get_filelist( dirs + '/wall_dist', key='snapshot.bin')[0]

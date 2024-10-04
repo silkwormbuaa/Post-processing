@@ -26,8 +26,8 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 
-shockpath2d = '/media/wencan/Expansion/temp/231124/postprocess/shock_tracking/2d'
-shockpath3d = '/media/wencan/Expansion/temp/231124/postprocess/shock_tracking/3d'
+shockpath2d = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/2d'
+shockpath3d = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/3d'
 
 fs = 100
 n_seg = 8
@@ -96,6 +96,8 @@ if analyse3d:
         times = times + time
         shocklines = shocklines + shockline
     
+    print(len(times),len(shocklines))
+    
     x_shocks = list()
     x_shocks_mid = list()
     
@@ -105,6 +107,9 @@ if analyse3d:
         x_shocks_mid.append( x_shock[int(len(x_shock)/2)] )
         
     x_mean = np.mean(x_shocks)
+    
+    print(f"mean shock location is {x_mean}")
+    
     x_fluc = x_shocks - x_mean
     rms3d  = np.sqrt( np.mean( x_fluc**2 ) )
     
@@ -114,8 +119,8 @@ if analyse3d:
     
     times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/7.15)
     
-    ax.plot( times, np.array(x_shocks)/7.15,'b' )
-    ax.plot( times, np.array(x_shocks_mid)/7.15,'r', ls=':' )
+    ax.plot( times, np.array(x_fluc)/7.15,'b' )
+    ax.plot( times, np.array(x_shocks_mid-x_mean)/7.15,'r', ls=':' )
     ax.set_ylim( -0.4, 0.4 )
     ax.set_title('Spanwise averaged shock location')
  
