@@ -63,10 +63,10 @@ ax[0].set_xlabel('Time [ms]')
 ax[0].set_ylabel(r'$p/p_{\infty}$')
 ax[0].grid()
 
-ax[1].plot( tf[:len(time)//2], np.abs(pf[:len(time)//2])/(len(pf)//2)/45447.289, lw=0.2, label='p' )
+ax[1].plot( tf[:len(time)//2]*48/507, np.abs(pf[:len(time)//2])/(len(pf)//2)/45447.289, lw=0.2, label='p' )
 ax[1].set_ylim([-0.001,0.04])
 ax[1].set_xscale('log')
-ax[1].set_xlabel('Frequency [Hz]')
+ax[1].set_xlabel(r'$St_{sep}$')
 ax[1].set_ylabel('Amplitude')
 
 ax[2].plot( time, ph_re/45447.289, 'b', lw=0.2)
