@@ -10,6 +10,7 @@
 
 import os
 import gc
+import sys
 import pickle
 import numpy             as     np
 import pandas            as     pd
@@ -84,6 +85,37 @@ class StatisticData:
         # Dataframe for friction and pressure projection 
         self.df_fric = None
         self.df_wall = None
+        
+
+# ----------------------------------------------------------------------
+# >>> read statistic                                          (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/10/08  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def read_statistic( self, block_list, vars_in ):
+        
+        """
+        block_list : list of selected blocks' numbers \n
+        vars_in    : list of variable names \n
+        """
+        
+        with open( self.file, 'rb' ) as f:
+            
+            self.read_stat_header( f )
+            self.read_stat_body( f, block_list, vars_in )
+
+
+        print(f"\nStatisticData {self.file} is read.\n")
+        sys.stdout.flush()
         
         
 # ----------------------------------------------------------------------
