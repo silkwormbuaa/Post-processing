@@ -47,13 +47,13 @@ n_procs = comm.Get_size()
 # option 
 # =============================================================================
 
-bbox      = [-30, 999, -1.0, 31.0, 5.2, 999]
+bbox      = [-30, 999, -1.0, 31.0, -999, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','div','vorticity','grad_rho_mod']
 
-snaps_dir = '/home/wencanwu/test/snapshots_231124'
-gridfile  = '/media/wencan/Expansion/temp/231124/results/inca_grid.bin'
-outdir    = '/home/wencanwu/test/snapshots_231124/output'
+snaps_dir = '/home/wencan/temp/smooth_mid/snapshots'
+gridfile  = '/home/wencan/temp/smooth_mid/results/inca_grid.bin'
+outdir    = '/home/wencan/temp/smooth_mid/postprocess/snapshots/3d_shocks/'
 
 # =============================================================================
 
@@ -70,6 +70,8 @@ if rank == 0:
     grid3d = GridData( gridfile )
     grid3d.read_grid()
     
+    create_folder(outdir)
+    
 snapfiles = comm.bcast( snapfiles, root=0 )
 grid3d    = comm.bcast( grid3d,    root=0 )
 
@@ -84,7 +86,7 @@ comm.barrier()
 
 # - read in snapshots and compute the gradients
 
-os.chdir( create_folder(outdir) )
+os.chdir( outdir )
 block_list = grid3d.select_blockgrids( bbox, mode='within' )
 clock = timer("show isosurface")
 
@@ -103,7 +105,7 @@ for i,snapfile in enumerate(snapfiles):
     sys.stdout.flush()
 
     dataset.set_active_scalars('u')
-    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,5.3])
+    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,-10.3])
     uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
     
     point_data = dataset.cell_data_to_point_data().combine()

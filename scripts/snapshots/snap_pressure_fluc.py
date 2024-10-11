@@ -9,57 +9,210 @@
 @Desc    :   Compute instantaneous pressure fluctuation and visualise it.
 '''
 
+# need to install xvfbwrapper, and update 
+# /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
+off_screen = True
+
+if off_screen:
+    from xvfbwrapper import Xvfb
+    vdisplay = Xvfb(width=1920, height=1080)
+    vdisplay.start()
+
+import gc
 import os
 import sys
+import time
+import numpy              as     np
+import pyvista            as     pv
+import matplotlib.pyplot  as     plt
+from   mpi4py             import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.grid        import GridData
-from   vista.snapshot    import Snapshot
-from   vista.directories import Directories
-from   vista.statistic   import StatisticData
-from   vista.tools       import get_filelist
+from   vista.grid         import GridData
+from   vista.timer        import timer
+from   vista.snapshot     import Snapshot
+from   vista.directories  import Directories
+from   vista.statistic    import StatisticData
+from   vista.tools        import get_filelist
+from   vista.tools        import read_case_parameter
+from   vista.tools        import distribute_mpi_work
+from   vista.directories  import create_folder
+from   vista.plot_setting import cpos_callback
+
+# - build MPI communication environment
+
+comm    = MPI.COMM_WORLD
+rank    = comm.Get_rank()
+n_procs = comm.Get_size()
 
 # =============================================================================
 # option
 # =============================================================================
 
-bbox      = [-30.0, 999.0, -1.0, 31.0, -999.0, 999.0]
-vars_in   = ['p']
-vars_out  = ['p','p_fluc']
+casedir   = '/home/wencan/temp/231124'
+bbox      = [-15.0, 6.0, -1.3, 3.6, -999.0, 999.0]
+vars_in   = ['u','v', 'w', 'T', 'p']
+vars_out  = ['u','v','w','p','T','p_fluc']
+#gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 
-casedir   = '/home/wencan/temp/smooth_mid'
 
 # =============================================================================
 
-dirs      = Directories( casedir )
-snaps_dir = dirs.snp_dir + '/snapshot_01013869'
-snapfiles = get_filelist( snaps_dir, 'snapshot.bin' )
+dirs       = Directories( casedir )
+out_dir    = dirs.pp_snp_pfmax + '/figs'
 
-grid3d = GridData( dirs.grid )
-grid3d.read_grid()
+params     = None
+snapfiles  = None 
+blocklist  = None
+roughwall  = True
+grid3d     = GridData()
+stat       = None
+snapwd     = Snapshot()
 
-blocklist = grid3d.select_blockgrids( bbox, mode='within' )
+if rank == 0:
+    
+    create_folder( out_dir )
+    
+    params     = read_case_parameter( dirs.case_para_file )
+    roughwall  = True if str(params.get('roughwall')).lower() == 'true' else False
 
-stat = StatisticData( dirs.statistics )
+    snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
+    print(f"I am root, just found {len(snapfiles)} snapshot files.")
+    
+    grid3d = GridData( dirs.grid )
+    grid3d.read_grid()
+    blocklist = grid3d.select_blockgrids( bbox, mode='within' )
 
-stat.read_statistic( blocklist, vars_in )
+    stat = StatisticData( dirs.statistics )
+    stat.read_statistic( blocklist, ['p'] )
+
+    if roughwall:
+        snapwd = Snapshot( get_filelist(dirs.wall_dist, 'snapshot.bin')[0] )
+        snapwd.read_snapshot( block_list=blocklist, var_read=['wd'] )
+        print(f"Read in wall distance data from snapshot_{snapwd.itstep}.\n")
+
+params     = comm.bcast( params,    root=0 )
+roughwall  = comm.bcast( roughwall, root=0 )
+snapfiles  = comm.bcast( snapfiles, root=0 )
+blocklist  = comm.bcast( blocklist, root=0 )
+grid3d     = comm.bcast( grid3d,    root=0 )
+stat       = comm.bcast( stat,      root=0 )
+snapwd     = comm.bcast( snapwd,    root=0 )
+p_ref      = float(params.get('p_ref'))
+u_ref      = float(params.get('u_ref'))
+
+if roughwall: vars_out += ['wd']
+
+x_pfmax    = float(params.get('x_pfmax'))
+x_imp      = float(params.get('x_imp')  )
+delta0     = float(params.get('delta_0'))
+x_pfmax    = x_pfmax*delta0 + x_imp
+
+n_snaps    = len( snapfiles )
+i_s, i_e   = distribute_mpi_work(n_snaps, n_procs, rank)
+snapfiles  = snapfiles[i_s:i_e]
+
+print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
+sys.stdout.flush()
+
+comm.barrier()
+
+os.chdir( out_dir )
+clock = timer("show slice at pressure fluctuation max:")
 
 for i, snapfile in enumerate(snapfiles):
     
-    snap = Snapshot( snapfile )
-    snap.read_snapshot( var_read=vars_in )
-
+    snap        = Snapshot( snapfile )
+    snap.grid3d = grid3d
+    snap.read_snapshot( block_list=blocklist, var_read=vars_in )
+    if roughwall:
+        snap.copy_var_from( snapwd, ['wd'], blocklist=blocklist )
+#    snap.compute_gradients( blocklist, gradients )
+    
     for bl_num in blocklist:
         
         snapblk = snap.snap_data[snap.bl_nums.index(bl_num)]
         statblk = stat.bl[stat.bl_nums.index(bl_num)]
         snapblk.df['p_fluc'] = snapblk.df['p'] - statblk.df['p']
 
-    os.chdir('/home/wencan/temp/smooth_mid/test/')
-    
-    snap.write_szplt( 'snapshot_01013869.szplt',vars_out,block_list=blocklist ) 
-    print(f'Finished processing {snapfile}')
+    itstep  = snap.itstep
+    itime   = snap.itime
+    figname = f'slice_pfmax_{itstep:08d}.png'
 
+    dataset = pv.MultiBlock(snap.create_vtk_multiblock( vars=vars_out, block_list=blocklist, mode='oneside'))
+    sys.stdout.flush()
+    
+    dataset.set_active_scalars('u')
+    point_data = dataset.cell_data_to_point_data().combine()
+
+    uslicez     = point_data.slice(normal=[0,0,1], origin=[0,0,-10.3])
+
+    if roughwall:
+        point_data.set_active_scalars('wd')
+        wallsurface = point_data.contour( [0.01] )
+    else:
+        wallsurface = point_data.slice( normal=[0.0,1.0,0.0], origin=[0.0,0.01,0.0] )
+    
+    wallsurface['p_fluc'] = wallsurface['p_fluc']/p_ref
+    wallsurface.set_active_scalars('p_fluc')
+
+    xslices = []
+    x_slics = [x_pfmax]
+    for j in range(len(x_slics)):
+        xslices.append( point_data.slice( normal=[1,0,0], origin=[x_slics[j],0,0] ))    
+    
+    p = pv.Plotter(off_screen=off_screen,window_size=[1920,1080])
+    p.add_mesh( uslicez, cmap='coolwarm', clim=[-0.8*u_ref,0.8*u_ref], 
+                show_scalar_bar=False)
+    
+    p.add_mesh( wallsurface, cmap='coolwarm', 
+                clim=[-0.4,0.4], show_scalar_bar=True)
+
+    for slice in xslices:
+        slice.set_active_scalars('u')
+        vector2d        = np.zeros((slice.n_points,3))
+        vector2d[:,1]   = slice['v']
+        vector2d[:,2]   = slice['w']
+        vector2d[::5,:] = 0.0
+        slice['vector'] = vector2d
+        p.add_mesh( slice, cmap='coolwarm', clim=[-0.8*u_ref,0.8*u_ref], 
+                    show_scalar_bar=False, lighting=False)
+        p.add_arrows( slice.points, slice['vector'], mag=0.0015, color='black')
+    
+    camera_pos = [(-28,14,12.0),(-11.0,0.0,0.0),(0.38,0.88,-0.28)]
+    p.camera_position = camera_pos
+#    cpos_callback( p )
+    p.add_axes()
+    p.show(figname)
+    
+    if off_screen:
+        plt.figure(figsize=(6.4,3.6))
+        plt.imshow(p.image)
+        plt.plot([0.0,0.0],[10.0,10.0])
+        plt.title(f"time={itime:6.2f} ms")
+        plt.axis('off')                  # image axis, pixel count
+        plt.tight_layout()
+        plt.savefig(figname, dpi=300)
+        plt.close()
+    
+    p.close()
+    
+    del snap, dataset, point_data, wallsurface, uslicez, xslices
+    gc.collect()
+
+# - print the progress
+    
+    progress = (i+1)/len(snapfiles)
+    print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
+    print("------------------\n")
+    sys.stdout.flush()
+
+comm.barrier()
+
+if rank == 0:
+
+    print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    sys.stdout.flush() 

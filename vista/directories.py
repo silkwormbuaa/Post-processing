@@ -86,7 +86,7 @@ class Directories:
 
         self.pp_snp_fricpv  = os.path.join( self.pp_snapshots, 'fricpv'  )
         self.pp_snp_fricprj = os.path.join( self.pp_snapshots, 'fricprj' )
-        
+        self.pp_snp_pfmax   = os.path.join( self.pp_snapshots, 'pfmax'   )
         
         self.pp_signals    = os.path.join( self.pp_probes, 'signals'    )
 
