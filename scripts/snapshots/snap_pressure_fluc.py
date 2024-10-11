@@ -182,7 +182,7 @@ for i, snapfile in enumerate(snapfiles):
                     show_scalar_bar=False, lighting=False)
         p.add_arrows( slice.points, slice['vector'], mag=0.0015, color='black')
     
-    camera_pos = [(-28,14,12.0),(-11.0,0.0,0.0),(0.38,0.88,-0.28)]
+    camera_pos = [(x_pfmax-20.0,14.0,15.0),(x_pfmax,0.0,0.0),(0.38,0.88,-0.28)]
     p.camera_position = camera_pos
 #    cpos_callback( p )
     p.add_axes()
