@@ -5,8 +5,8 @@ Created on Thu Jun 14 19:04:17 2018
 @author: weibo
 """
 
+import sys
 import time
-
 
 class timer():
 
@@ -36,3 +36,9 @@ class timer():
         output = "Time left: %02d:%02d:%02d."%(hours, minutes, seconds)
         
         return output
+    
+    def print_progress( self, i, size, rank=None):
+        progress = (i+1)/size
+        print(f"Rank {rank}: {i+1}/{size} is done. " + self.remainder(progress))
+        print("------------------\n")
+        sys.stdout.flush()

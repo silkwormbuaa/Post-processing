@@ -26,11 +26,11 @@ import time
 import numpy              as     np
 import pyvista            as     pv
 import matplotlib.pyplot  as     plt
-from   mpi4py             import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.mpi          import MPIenv
 from   vista.grid         import GridData
 from   vista.timer        import timer
 from   vista.snapshot     import Snapshot
@@ -44,16 +44,14 @@ from   vista.plot_setting import cpos_callback
 
 # - build MPI communication environment
 
-comm    = MPI.COMM_WORLD
-rank    = comm.Get_rank()
-n_procs = comm.Get_size()
+mpi = MPIenv()
 
 # =============================================================================
 # option
 # =============================================================================
 
-casedir   = '/home/wencan/temp/231124'
-bbox      = [-15.0, 6.0, -1.3, 3.6, -999.0, 999.0]
+casedir   = '/home/wencan/temp/smooth_mid'
+bbox      = [-15.0, 30.0, -1.3, 3.6, -999.0, 999.0]
 vars_in   = ['u','v', 'w', 'T', 'p']
 vars_out  = ['u','v','w','p','T','p_fluc']
 #gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
@@ -72,7 +70,7 @@ grid3d     = GridData()
 stat       = None
 snapwd     = Snapshot()
 
-if rank == 0:
+if mpi.rank == 0:
     
     create_folder( out_dir )
     
@@ -94,13 +92,13 @@ if rank == 0:
         snapwd.read_snapshot( block_list=blocklist, var_read=['wd'] )
         print(f"Read in wall distance data from snapshot_{snapwd.itstep}.\n")
 
-params     = comm.bcast( params,    root=0 )
-roughwall  = comm.bcast( roughwall, root=0 )
-snapfiles  = comm.bcast( snapfiles, root=0 )
-blocklist  = comm.bcast( blocklist, root=0 )
-grid3d     = comm.bcast( grid3d,    root=0 )
-stat       = comm.bcast( stat,      root=0 )
-snapwd     = comm.bcast( snapwd,    root=0 )
+params     = mpi.comm.bcast( params,    root=0 )
+roughwall  = mpi.comm.bcast( roughwall, root=0 )
+snapfiles  = mpi.comm.bcast( snapfiles, root=0 )
+blocklist  = mpi.comm.bcast( blocklist, root=0 )
+grid3d     = mpi.comm.bcast( grid3d,    root=0 )
+stat       = mpi.comm.bcast( stat,      root=0 )
+snapwd     = mpi.comm.bcast( snapwd,    root=0 )
 p_ref      = float(params.get('p_ref'))
 u_ref      = float(params.get('u_ref'))
 
@@ -111,20 +109,13 @@ x_imp      = float(params.get('x_imp')  )
 delta0     = float(params.get('delta_0'))
 x_pfmax    = x_pfmax*delta0 + x_imp
 
-n_snaps    = len( snapfiles )
-i_s, i_e   = distribute_mpi_work(n_snaps, n_procs, rank)
-snapfiles  = snapfiles[i_s:i_e]
-
-print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
-sys.stdout.flush()
-
-comm.barrier()
+mpi.barrier()
 
 os.chdir( out_dir )
 clock = timer("show slice at pressure fluctuation max:")
 
-for i, snapfile in enumerate(snapfiles):
-    
+def show_slice( snapfile ):
+
     snap        = Snapshot( snapfile )
     snap.grid3d = grid3d
     snap.read_snapshot( block_list=blocklist, var_read=vars_in )
@@ -203,16 +194,30 @@ for i, snapfile in enumerate(snapfiles):
     del snap, dataset, point_data, wallsurface, uslicez, xslices
     gc.collect()
 
-# - print the progress
+# =============================================================================
+
+if mpi.size == 1:
+    print("No workers available. Master should do all tasks.")
     
-    progress = (i+1)/len(snapfiles)
-    print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
-    print("------------------\n")
-    sys.stdout.flush()
+    for i, snapfile in enumerate(snapfiles):
+        show_slice( snapfile )
+        clock.print_progress( i, len(snapfiles) )
+        
+else:
+    if mpi.rank == 0:
+        mpi.master_distribute( snapfiles )
+    else:
+        while True:
+            task_index = mpi.worker_receive()
+            
+            if task_index is None: break
+            else: 
+                show_slice( snapfiles[task_index] )
+                clock.print_progress( task_index, len(snapfiles), rank=mpi.rank )
 
-comm.barrier()
+mpi.barrier()
 
-if rank == 0:
+if mpi.rank == 0:
 
     print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
     sys.stdout.flush() 

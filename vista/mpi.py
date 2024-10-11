@@ -87,14 +87,14 @@ class MPIenv:
                 
                 if task_index < len(tasks): 
                     task = tasks[task_index]
-                    print(f"Master sending task {task} to worker {source}.  {task_index}/{len(tasks)}.")
+                    print(f"Master sending task {task} to worker {source}.  {task_index}/{len(tasks)}.\n")
                     self.comm.send(task_index, dest=source, tag=0)
                     task_index += 1
                 
                 # if no task left, send termination signal to the worker
                 
                 else:
-                    print(f"Master sending termination signal to worker {source}")
+                    print(f"Master sending termination signal to worker {source}\n")
                     self.comm.send(None, dest=source, tag=1) 
                     closed_workers += 1
             
@@ -134,10 +134,10 @@ class MPIenv:
         # if task is None, then exit
         
         if task_index is None:
-            print(f"Worker {self.rank} received termination signal. Exiting.")
+            print(f"Worker {self.rank} received termination signal. Exiting.\n")
         
         else:
-            print(f"Worker {self.rank} is processing task {task_index}")
+            print(f"Worker {self.rank} is processing task {task_index:08d}.\n")
         
         sys.stdout.flush()
         
