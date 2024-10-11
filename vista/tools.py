@@ -481,6 +481,10 @@ def read_case_parameter( filename ):
             
             if line.strip() and not line.startswith("#"):
                 
+                # split from the '#'
+                
+                line = line.split("#")[0]
+                
                 # split from the first '='
                 
                 key, value = line.strip().split("=",1)
