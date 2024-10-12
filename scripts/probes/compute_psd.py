@@ -108,6 +108,8 @@ with timer('Computing PSD '):
         
         probedata.add_data( 'cf', cf )
         probedata.get_fluc( ['cf','p'] )
+        probedata.compute_psd(   'cf_fluc', n_seg=8, overlap=0.5 )
+        probedata.compute_psd(   'p_fluc',  n_seg=8, overlap=0.5 )
         probedata.pre_multi_psd( 'cf_fluc', n_seg=8, overlap=0.5 )
         probedata.pre_multi_psd( 'p_fluc',  n_seg=8, overlap=0.5 )
         probedata.write_psd()
