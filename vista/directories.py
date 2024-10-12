@@ -81,6 +81,7 @@ class Directories:
         self.pp_psd_others = os.path.join( self.pp_probes, 'psd_others' )
         self.pp_pre_ridge  = os.path.join( self.pp_probes, 'pre_ridge'  )
         self.pp_pre_valley = os.path.join( self.pp_probes, 'pre_valley' )
+        self.pp_signals    = os.path.join( self.pp_probes, 'signals'    )
       
 # --- pp_snapshots subdirectories
 
@@ -88,7 +89,6 @@ class Directories:
         self.pp_snp_fricprj = os.path.join( self.pp_snapshots, 'fricprj' )
         self.pp_snp_pfmax   = os.path.join( self.pp_snapshots, 'pfmax'   )
         
-        self.pp_signals    = os.path.join( self.pp_probes, 'signals'    )
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
