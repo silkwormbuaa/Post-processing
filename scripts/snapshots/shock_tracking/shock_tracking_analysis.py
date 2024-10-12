@@ -22,12 +22,16 @@ sys.path.append( source_dir )
 
 from   vista.psd         import pre_multi_psd
 from   vista.tools       import get_filelist
+from   vista.tools       import read_case_parameter
+from   vista.directories import create_folder
 
 # =============================================================================
 
+casedir = '/home/wencan/temp/smooth_mid'
 
-shockpath2d = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/2d'
-shockpath3d = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/3d'
+shockpath2d = casedir + '/postprocess/snapshots/shock_tracking/2d'
+shockpath3d = casedir + '/postprocess/snapshots/shock_tracking/3d'
+outdir      = casedir + '/postprocess/snapshots/shock_tracking'
 
 fs = 100
 n_seg = 8
@@ -38,12 +42,19 @@ analyse3d=True
 
 # =============================================================================
 
+params = read_case_parameter( casedir + '/supplements/case_parameters' )
+Lsep   = float( params.get('Lsep') )
+
+os.chdir( create_folder(shockpath2d) )
+
 if analyse2d:
     shock2d_files = get_filelist( shockpath2d, 'shock_tracking2d' )
 if analyse3d:
     shock3d_files = get_filelist( shockpath3d, 'shock_tracking3d' )
 
 if analyse2d:
+    
+    os.chdir( create_folder(outdir+'/2d') )
     
     # - read the shock motion data into dataframe    
     
@@ -63,7 +74,7 @@ if analyse2d:
     ax.plot( df2d['time'], df2d['x_shock'] )
     ax.set_title('Shock location at Z=0.0 plane')
 
-    plt.show()
+    plt.savefig( 'shock_location_2d.png' )
     plt.close()
         
     # - compute the psd of the shock fluctuation
@@ -78,10 +89,12 @@ if analyse2d:
     ax.set_xlabel('Frequency [Hz]')
     ax.set_ylabel('pmPSD')
 
-    plt.show()
+    plt.savefig( 'shock_psd_2d.png' )
     plt.close()
 
 if analyse3d:
+    
+    os.chdir( create_folder(outdir+'/3d') )
     
     # - read in the shock motion data into dataframe
     
@@ -112,19 +125,25 @@ if analyse3d:
     
     x_fluc = x_shocks - x_mean
     rms3d  = np.sqrt( np.mean( x_fluc**2 ) )
+    rms2d  = np.sqrt( np.mean( np.array(x_shocks_mid)-x_mean)**2 )
+    with open('shock_rms.dat','w') as f:
+        f.write(f"spanwise averaged shock motion rms: {rms3d}\n")
+        f.write(f"mid-span shock motion rms         : {rms2d}\n")
+        f.write("\n=====================================\n")
+        f.write("Note: values are in the original unit.")
     
     # - plot shock motion
     
     fig, ax = plt.subplots( figsize=(12,6) )
     
-    times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/7.15)
+    times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/5.2)
     
-    ax.plot( times, np.array(x_fluc)/7.15,'b' )
-    ax.plot( times, np.array(x_shocks_mid-x_mean)/7.15,'r', ls=':' )
+    ax.plot( times, np.array(x_fluc)/5.2,'b' )
+    ax.plot( times, np.array(x_shocks_mid-x_mean)/5.2,'r', ls=':' )
     ax.set_ylim( -0.4, 0.4 )
     ax.set_title('Spanwise averaged shock location')
  
-    plt.show()
+    plt.savefig( 'shock_location_3d.png' )
     plt.close()
     
     # - compute the psd of mean shock fluctuation
@@ -134,13 +153,13 @@ if analyse3d:
     fig, ax = plt.subplots(figsize=(12, 6))
     
     
-    f3d = f3d * 66.664 / 507.0
+    f3d = f3d * Lsep / 507.0
     ax.plot(f3d, psd3d, label='3d shock tracking')
     
     ax.set_xscale('log')
     ax.set_xlabel('Frequency [Hz]')
     ax.set_ylabel('pmPSD')
     
-    plt.show()
+    plt.savefig( 'shock_pmpsd_3d.png' )
     plt.close()  
     
