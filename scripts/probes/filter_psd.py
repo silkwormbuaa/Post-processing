@@ -179,7 +179,7 @@ for i, psdfile in enumerate( psdfilelist ):
     x_locs.append( (probe.xyz[0]-x_imp)/delta_0 )
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
-ax.plot( x_locs, np.array(rms_psds)/p_ref, 'o-', color='blue', linewidth=2 )
+ax.plot( x_locs, np.array(rms_psds)/p_ref, '-', color='blue', linewidth=2 )
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}/p_{\infty}$" )
 figname = "pressure_fluctuation_rms_psd"
@@ -187,7 +187,7 @@ plt.savefig( figname + '.png' )
 plt.close()
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
-ax.plot( x_locs, np.array(powers)/p_ref**2, 'o-', color='blue', linewidth=2 )
+ax.plot( x_locs, np.array(powers)/p_ref**2, '-', color='blue', linewidth=2 )
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f/p^2_{\infty}$" )
 ax.set_ylim([0,0.006])
@@ -197,7 +197,7 @@ plt.savefig( figname + '.png' )
 plt.close()
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
-ax.plot( x_locs, np.sqrt(powers_lp)/p_ref, 'o-', color='blue', linewidth=2 )
+ax.plot( x_locs, np.sqrt(powers_lp)/p_ref, '-', color='blue', linewidth=2 )
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St<1}/p_{\infty}$" )
 figname = "pressure_fluctuation_power_lp"
@@ -205,7 +205,7 @@ plt.savefig( figname + '.png' )
 plt.close()
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
-ax.plot( x_locs, np.sqrt(powers_hp)/p_ref, 'o-', color='blue', linewidth=2 )
+ax.plot( x_locs, np.sqrt(powers_hp)/p_ref, '-', color='blue', linewidth=2 )
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St>1}/p_{\infty}$" )
 figname = "pressure_fluctuation_power_hp"
@@ -213,7 +213,7 @@ plt.savefig( figname + '.png' )
 plt.close()
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
-ax.plot( x_locs, np.array(powers_lp)/np.array(powers), 'o-', color='blue', linewidth=2 )
+ax.plot( x_locs, np.array(powers_lp)/np.array(powers), '-', color='blue', linewidth=2 )
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f$" )
 ax.set_ylim([0,1])
