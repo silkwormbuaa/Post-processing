@@ -35,7 +35,7 @@ set_plt_rcparams()
 # option zone
 # =============================================================================
 
-case_dir = '/home/wencanwu/test/231124/'
+case_dir = '/home/wencan/temp/231124/'
 
 # =============================================================================
 
@@ -80,7 +80,7 @@ if not os.path.exists( 'streamwise_rms.pkl' ):
         
 # ----- read pressure data at the ridge probe by probe
 
-        for i in range( 337 ):
+        for i in range( 335 ):
             
             probe = probes.probes[i]
             xyz = probe.xyz
@@ -168,7 +168,8 @@ for i, psdfile in enumerate( psdfilelist ):
     probe.read_psd( psdfile )
     freq   = np.array( probe.psd_df['freq'] )
     st     = freq*(x_att-x_sep)*delta_0/u_ref
-    _,i_cr = find_indices( st, 1.0 )
+    _,i_cr = find_indices( st, 1.0 ) 
+#    _,i_cr = find_indices( freq, 10.575 )     # critical frequency St_smooth=1
     
     psd_p_fluc = np.array( probe.psd_df['psd_p_fluc'] )
     power      = np.sum( psd_p_fluc )*freq[1]
