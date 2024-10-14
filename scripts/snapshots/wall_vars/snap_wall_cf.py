@@ -52,10 +52,11 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/home/wencanwu/test/220927'
-bbox      = [-30.0,110.0,-3.0, 0.01, -99.0,99.0]
+case_dir  = '/home/wencan/temp/smooth_mid'
+bbox      = [-30.0,110.0,-3.0, 0.5, -99.0,99.0]
 walldist  = 0.019
-vars_in   = ['u','T']
+vars_in   = ['u','w','T']
+add_vector= True
 
 # =============================================================================
 # preparation
@@ -166,6 +167,24 @@ for i, snap_file in enumerate(snapfiles):
     p.add_mesh( wallsurface,    cmap=cmap, clim=[-0.006,0.006], show_scalar_bar=True, 
                 lighting=False)
     
+    if add_vector:
+        
+        vector2d = np.zeros((wallsurface.n_points,3))
+        vector2d[:,0] = wallsurface['u']
+        vector2d[:,2] = wallsurface['w']
+        wallsurface['vector'] = vector2d
+        streamlines1 = wallsurface.streamlines(
+            pointa=(75,walldist,-10),pointb=(75,walldist,10),
+            n_points=100, max_time=100, integration_direction='both'
+        )
+        # streamlines2 = wallsurface.streamlines(
+        #     pointa=(90,walldist,0.0),pointb=(110,walldist,0.0),
+        #     n_points=100, max_time=100, integration_direction='both'
+        # )
+        p.add_mesh( streamlines1.tube(radius=0.03), color='black', line_width=1.0 )
+#        p.add_mesh( streamlines2.tube(radius=0.03), color='black', line_width=1.0 )
+        # p.add_arrows( wallsurface.points, wallsurface['vector'], mag=0.005, color='black' )
+        
     p.view_vector([0.0,1.0,0.0],viewup=[0.0,0.0,-1.0])
     camera_pos = [(40.0,150.0,0.0),(40.0,0.0,0.0),(0.0,0.0,-1.0)]
     p.camera_position = camera_pos
