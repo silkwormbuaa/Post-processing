@@ -327,7 +327,26 @@ for i, loc in enumerate(locs):
                           title=title)
 
         print(f"vmax = {np.max(v):10.2f} (vmax/u_ref*100 ={np.max(v/u_ref*100):10.2f})")
-        
+
+# ------ spanwise velocity w
+
+        cbar = r'$\frac{\langle w \rangle  \cdot 100}{u_{\infty}}$'
+        cbar_levels = np.linspace(-2.0,2.0,26)
+        cbar_ticks  = np.linspace(-2.0,2.0,5)
+        plot_slicex_stat( zz, yy, w/u_ref*100,
+                          tag=tag,
+                          vectors=[w,v],
+                          arrow=True,
+                          filename=casecode+'_w_'+str(i+1),
+                          cbar_label=cbar,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
+                          col_map='RdBu_r',
+                          title=title)
+
+        print(f"wmax = {np.max(w):10.2f} (wmax/u_ref*100 ={np.max(w/u_ref*100):10.2f})")
+
+
 # ------ turbulent kinetic energy
 
         cbar = r'$\langle tke ^+ \rangle \cdot 100$'

@@ -280,7 +280,8 @@ for i, loc in enumerate( locs ):
                           y_lim=[0,6] )
 
         cbar = 'pressure gradient'
-        
+        cbar_levels = np.linspace(0,12,51)
+        cbar_ticks  = np.linspace(0,12,7)
         plot_slicez_stat( xx,yy,grad_p*delta/p_ref, 
                           separation=seplinefile,
                           shockshape=shockshapefile,
@@ -288,7 +289,11 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_p_grad_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
-                          wall=wall)
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
+                          wall=wall,
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
         
     
 # print out the time finishing the job

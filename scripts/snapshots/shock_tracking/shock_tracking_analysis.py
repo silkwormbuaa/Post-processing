@@ -125,12 +125,12 @@ if analyse3d:
     
     x_fluc = x_shocks - x_mean
     rms3d  = np.sqrt( np.mean( x_fluc**2 ) )
-    rms2d  = np.sqrt( np.mean( np.array(x_shocks_mid)-x_mean)**2 )
+    rms2d  = np.sqrt( np.mean( np.array(x_shocks_mid-x_mean)**2 ) )
     with open('shock_rms.dat','w') as f:
         f.write(f"spanwise averaged shock motion rms: {rms3d}\n")
         f.write(f"mid-span shock motion rms         : {rms2d}\n")
         f.write("\n=====================================\n")
-        f.write("Note: values are in the original unit.")
+        f.write("Note: values are in the original unit.\n")
     
     # - plot shock motion
     
@@ -140,7 +140,7 @@ if analyse3d:
     
     ax.plot( times, np.array(x_fluc)/5.2,'b' )
     ax.plot( times, np.array(x_shocks_mid-x_mean)/5.2,'r', ls=':' )
-    ax.set_ylim( -0.4, 0.4 )
+    ax.set_ylim( -0.5, 0.5 )
     ax.set_title('Spanwise averaged shock location')
  
     plt.savefig( 'shock_location_3d.png' )
