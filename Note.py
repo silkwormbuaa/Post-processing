@@ -1,3 +1,6 @@
+
+# variable list for INCA's output with second order correlation.
+
 '''
 VarList  = ['x',                'y',                    '<u>',                  \
             '<v>',              '<w>',                  '<rho>',                \
@@ -18,9 +21,8 @@ VarList  = ['x',                'y',                    '<u>',                  
             '<T`T`>',           '<T`mu`>',              '<mu`mu`>',             \
             'walldist',         'shocksens',            'entropy']
 '''
-#        print(dataset.num_solution_times)
-#        print(dataset.VariablesNamedTuple)
-#        print(dataset.num_variables)
-#        print(dataset.num_zones)
-#        print(dataset.title)
-#        print(dataset.variable_names)
+
+# compile the fortran library in vista.lib
+
+# >>> cd vista/lib/
+# >>> f2py -m form -c *.f90
