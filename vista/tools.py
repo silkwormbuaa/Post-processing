@@ -884,7 +884,7 @@ def crop_border(image, border_color='white'):
 
 if __name__ == "__main__":
     
-    x,d = lin_grow(0.0,0.02880859375,1.016378315,len=128)
+    x,d = lin_grow(0.0,-0.01045,1.0000,len=96)
     
     print(d)
     

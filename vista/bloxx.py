@@ -166,6 +166,12 @@ class Mesh_bloxx:
     
     def __init__(self, folder):
         
+        """
+        folder: folder path containing grid files
+        
+        read each grid files as Grid_bloxx object and store them in self.grids
+        """
+        
         self.folder     = folder
         self.grid_files = get_filelist( folder, 'inca_grid' )
         
@@ -235,7 +241,7 @@ class Mesh_bloxx:
     def sort_grids(self):
         
         """
-        resort grids in the output folder
+        resort grids in self.grids based on (lx1,ly1,lz1)
         """
         
         lx1 = [grid.LX[1] for grid in self.grids]
@@ -247,15 +253,20 @@ class Mesh_bloxx:
                            'old_filename': old_filename})
         
         # sort grids and reset index
+        
         df = df.sort_values(by=['lx1', 'ly1', 'lz1'])
         df = df.reset_index(drop=True)
         
         print(df)
         
         # generate a dict between filename and index
+        # since the order in dataframe is sorted, but not the grids in self.grids,
+        # so new indexes from dataframe should be assigned to grids.
+        
         new_index = {filename: index for filename, index in zip(df['old_filename'], df.index+1)}
         
         # change grid filename and write to file
+        
         for grid in self.grids:
             grid.filename = f"inca_grid_{new_index[grid.filename]:06d}.inp"
         
@@ -315,7 +326,7 @@ class Mesh_bloxx:
     def select_blocks(self, box):
         
         """
-        box: a tuple of 6 floats (x1, y1, z1, x2, y2, z2) \n
+        box: a tuple of 6 floats (x1, y1, z1, x2, y2, z2)\n
         select blocks in the box
         """
         
@@ -349,27 +360,35 @@ class Mesh_bloxx:
 
 def Testing():
 
-    # Example usage:
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/smooth-adiabtic/grid_ascii'
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/241018/grid'
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/smooth-adiabtic/grid_awall')
+    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/241018/grid_new')
     
     mesh = Mesh_bloxx(file_path)
     
-#    mesh.grids = mesh.select_blocks((-119, -0.8, -0.1, -101, 2.0, 5.3))
-    
-#    mesh.sort_grids()
+#    mesh.grids = mesh.select_blocks((-120.0,-0.30,-11.0,120.0,100.0,11.0))
+    for grid in mesh.grids:
+        if grid.LY[0] == -0.7524:
+            grid.variables['LY']     = ' -0.7843, -0.5016 '
+            grid.variables['SHAPEY'] = ' "LIN"'
+            grid.variables['PARAMY'] = ' 0.99500000e+00  , 0.00000000e+00  , 0.00000000e+00'
+            
+    mesh.sort_grids()
+
+    mesh.save_grid('./')
+
+# Example usages:
+
+"""
+# -- modifiy boundary conditions
 
     for grid in mesh.grids:
-        
-#        print(grid.LY,grid.BC)
         
         if grid.LY[0] == 0.0:
             grid.variables['BY1'] = 'AWALL     '
             print(grid.BC)
-
+"""
     
-    mesh.save_grid('./')
 
 
 # ----------------------------------------------------------------------
