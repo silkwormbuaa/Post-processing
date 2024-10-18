@@ -10,6 +10,7 @@
 
 import os
 import pandas            as     pd
+from   copy              import deepcopy
 
 from   .tools            import get_filelist
 
@@ -367,28 +368,50 @@ def Testing():
     mesh = Mesh_bloxx(file_path)
     
 #    mesh.grids = mesh.select_blocks((-120.0,-0.30,-11.0,120.0,100.0,11.0))
-    for grid in mesh.grids:
-        if grid.LY[0] == -0.7524:
-            grid.variables['LY']     = ' -0.7843, -0.5016 '
-            grid.variables['SHAPEY'] = ' "LIN"'
-            grid.variables['PARAMY'] = ' 0.99500000e+00  , 0.00000000e+00  , 0.00000000e+00'
-            
+    
     mesh.sort_grids()
 
     mesh.save_grid('./')
 
 # Example usages:
 
-"""
-# -- modifiy boundary conditions
+# =============================================================================
 
-    for grid in mesh.grids:
-        
-        if grid.LY[0] == 0.0:
-            grid.variables['BY1'] = 'AWALL     '
-            print(grid.BC)
-"""
+# # -- add two layers of new blocks at the bottom of the domain
+
+#     new_grids = []
+#     i_new     = len( mesh.grids )
     
+#     for grid in mesh.grids:
+        
+#         if grid.LY[0] == -0.7524:
+            
+#             i_new += 1
+#             grid_new = deepcopy(grid)
+#             grid_new.variables['LY'] = ' -1.0032, -0.7524'
+#             grid_new.filename = f'inca_grid_{i_new:06d}.inp'
+#             new_grids.append(grid_new)
+            
+#             i_new += 1
+#             grid_new = deepcopy(grid)
+#             grid_new.variables['LY'] = ' -1.2540, -1.0032'
+#             grid_new.filename = f'inca_grid_{i_new:06d}.inp'
+#             new_grids.append(grid_new)
+        
+#     mesh.grids += new_grids
+
+# =============================================================================
+
+# # -- modifiy boundary conditions
+
+#     for grid in mesh.grids:
+        
+#         if grid.LY[0] == 0.0:
+#             grid.variables['BY1'] = 'AWALL     '
+#             print(grid.BC)
+
+# =============================================================================
+
 
 
 # ----------------------------------------------------------------------
