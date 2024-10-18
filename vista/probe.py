@@ -671,15 +671,16 @@ def parse_float(value, i, index):
 
 def WriteProbe():
 
-    fname = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/inca_probes.inp'
-    outfile = '/home/wencanwu/my_simulation/STBLI_mid_Re/231124/test.inp'
+    outfile  = '/home/wencanwu/my_simulation/STBLI_mid_Re/241018/test.inp'
+    casecode = '241018'
+    y_valley = -1.04     # -0.13674
     probes = ProbeFile()
 #    probes.read( fname )
 #    probes.show()
 
 # --- probes at the ridges
 
-    xs = np.arange( -30.0, 115, 0.43382353 )
+    xs = np.arange( -53.6, 115, 0.43382353 )
     y  = 0.00001
     z  = 0.00001
     
@@ -692,7 +693,7 @@ def WriteProbe():
 # --- probes at the valleys
 
     z  = 0.65
-    y  = -0.52
+    y  = y_valley
 
     for x in xs:
         
@@ -704,7 +705,7 @@ def WriteProbe():
 
     x = -53.6
     zs = np.arange( -10.4, 10.6, 0.2)
-    ys = define_wall_shape( zs, casecode='220927', write=False )
+    ys = define_wall_shape( zs, casecode=casecode, write=False )
     
     for z,y in zip(zs,ys):
         
@@ -722,6 +723,16 @@ def WriteProbe():
         probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe )
 
+# --- a vertical line at (x-x_imp)/delta = -5.0
+
+    x = 24.4
+    z = 0.001
+    ys = np.arange( 0.1, 15.6, 0.2)
+    
+    for y in ys:
+        probe = Probe()
+        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
+        probes.probes.append( probe )
 
     probes.write( outfile )
 
@@ -790,5 +801,5 @@ def Testing():
 
 if __name__ == "__main__":
 
-    Testing()
-    #WriteProbe()
+    #Testing()
+    WriteProbe()
