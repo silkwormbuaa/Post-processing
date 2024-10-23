@@ -58,7 +58,7 @@ class Directories:
         self.cc_setup = os.path.join( self.sup_dir, 'cutcells_setup.dat' )
         self.cc_BSP_setup = os.path.join( self.sup_dir, 'cutcells_BSP_setup.dat' )
         self.wall_dist = os.path.join( self.sup_dir, 'wall_dist' )
-        self.case_para_file = os.path.join( self.sup_dir, 'case_parameters' )
+#        self.case_para_file = os.path.join( self.sup_dir, 'case_parameters' )
 
 # - post processing directoris
         
@@ -120,6 +120,17 @@ class Directories:
     @property
     def probes( self ):
         return get_filelist( self.prb_dir, '.dat' )
+    
+    # parameter files
+    @property
+    def case_para_file( self ):
+        
+        casecode = self.case_dir.split('/')[-1]
+        source_dir = os.path.realpath(__file__).split('vista')[0]
+        case_para_file = source_dir + 'database/case_parameters/' + casecode
+        
+        return case_para_file
+    
     
 
 # ----------------------------------------------------------------------

@@ -47,7 +47,6 @@ h          = params.H
 u_ref      = params.u_ref
 rho_ref    = params.rho_ref
 delta      = params.delta_0
-lsep       = params.Lsep
 Re_ref     = params.Re_ref
 visc_law   = params.visc_law
 prb_withT  = params.prb_withT

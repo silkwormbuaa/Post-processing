@@ -48,10 +48,9 @@ outpath  = dirs.pp_profile_array
 datafile = dirs.statistics
 gridfile = dirs.grid
 ccfile   = dirs.cc_setup
-parametersfile = dirs.case_para_file
 
 # read parameters to check if it is a rough wall case
-params     = Params( parametersfile )
+params     = Params( dirs.case_para_file )
 roughwall  = params.roughwall
 
 if roughwall:

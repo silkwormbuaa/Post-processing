@@ -55,8 +55,6 @@ pres_file = outpath + '/wall_vars_projection.pkl'
 
 snapshotfile = get_filelist( dirs.wall_dist, key='snapshot.bin')[0]
 
-parametersfile = dirs.case_para_file
-
 # - enter outpath
 
 create_folder( outpath )
@@ -131,7 +129,7 @@ else:
 
 with timer("plotting"):
 
-    params   = Params( parametersfile )
+    params   = Params( dirs.case_para_file )
     delta    = params.delta_0
     h_ridge  = params.H
     h_md     = params.H_md

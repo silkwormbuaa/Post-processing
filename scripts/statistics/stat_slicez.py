@@ -49,11 +49,10 @@ dirs = Directories( os.getcwd() )
 datafile = dirs.statistics
 gridfile = dirs.grid
 outpath  = dirs.pp_statistics + outfolder
-parametersfile = dirs.case_para_file
 
 # - read in case parameters
 
-parameters = Params( parametersfile )
+parameters = Params( dirs.case_para_file )
 delta   = parameters.delta_0
 h_ridge = parameters.H
 h_md    = parameters.H_md

@@ -20,9 +20,10 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.params      import Params
+from   vista.directories import Directories
 from   vista.psd         import pre_multi_psd
 from   vista.tools       import get_filelist
-from   vista.params      import Params
 from   vista.directories import create_folder
 
 # =============================================================================
@@ -40,9 +41,11 @@ overlap = 0.5
 analyse2d=False
 analyse3d=True
 
+dirs = Directories( casedir )
+
 # =============================================================================
 
-params = Params( casedir + '/supplements/case_parameters' )
+params = Params( dirs.case_para_file )
 Lsep   = params.Lsep
 
 os.chdir( create_folder(shockpath2d) )

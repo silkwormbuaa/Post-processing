@@ -44,7 +44,6 @@ dirs = Directories( os.getcwd() )
 outpath   = dirs.pp_wall_proj
 stat_file = dirs.statistics
 grid_file = dirs.grid
-parametersfile = dirs.case_para_file
 
 pres_file = outpath + '/wall_vars_projection.pkl'
 
@@ -93,7 +92,7 @@ else:
 
 with timer("plotting"):
 
-    params   = Params( parametersfile )
+    params   = Params( dirs.case_para_file )
     delta    = params.delta_0
     h_ridge  = params.H
     h_md     = params.H_md

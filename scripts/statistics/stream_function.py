@@ -51,11 +51,10 @@ datafile = dirs.statistics
 gridfile = dirs.grid
 ccfile   = dirs.cc_setup
 outpath  = dirs.pp_statistics + outfolder
-parametersfile = dirs.case_para_file
 
 # - read in case paramters
 
-params    = Params( parametersfile )
+params    = Params( dirs.case_para_file )
 delta     = params.delta_0
 h_ridge   = params.H
 h_md      = params.H_md

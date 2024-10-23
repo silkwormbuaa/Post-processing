@@ -236,9 +236,14 @@ class Params:
         return float( self.params.get('x_att') )
     
     @property
-    def Lsep( self ):
+    def lsep( self ):
         """in shifted and normalized coordinate"""
         return self.x_att - self.x_sep
+    
+    @property
+    def Lsep( self ):
+        """in physical unit"""
+        return self.lsep * self.delta_0
 
     @property
     def x_pfmax( self ):

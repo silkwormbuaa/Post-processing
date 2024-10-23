@@ -40,7 +40,7 @@ params   = Params( dirs.case_para_file )
 u_ref    = params.u_ref
 rho_ref  = params.rho_ref
 delta    = params.delta_0
-lsep     = params.Lsep
+Lsep     = params.Lsep
 Re_ref   = params.Re_ref
 visc_law = params.visc_law
 p_dyn    = 0.5 * rho_ref * u_ref**2
@@ -69,7 +69,7 @@ prb.pre_multi_psd( 'cf_fluc',n_seg=8, overlap=0.5 )
 
 fig, ax = plt.subplots( figsize=(15, 10) )
 
-st = prb.psd_df['freq'] / u_ref * lsep
+st = prb.psd_df['freq'] / u_ref * Lsep
 
 df = pd.DataFrame( {'st':st, 'cf':prb.psd_df['pmpsd_cf_fluc']} )
 bin_edges = np.logspace( -2, 2, 41, endpoint=True ) 

@@ -1,5 +1,11 @@
 {
     "cSpell.words": [
         "regionrange"
-    ]
+    ],
+
+    "files.associations": {
+        "*.py": "python",
+        "*.f90": "fortran-modern",
+    }
 }
+

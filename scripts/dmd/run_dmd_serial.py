@@ -33,7 +33,7 @@ parameterfile = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapsho
 
 files = get_filelist( snap_dir )
 
-case_parameters = Params( parameterfile )
+params = Params( parameterfile )
 
 # for file in files: print(file)
 
@@ -80,7 +80,7 @@ with timer("read in data "):
         
 print( "%d snapshots are loaded."%len(p_snap) )
 
-p_snap = np.array(p_snap).T / float(case_parameters.get('u_ref'))
+p_snap = np.array(p_snap).T / params.u_ref
 
 pdmd = pydmd.DMD(svd_rank=-1)
 
@@ -92,16 +92,14 @@ with timer("DMD"):
     
     spdmd.fit(p_snap)
     
-pdmd.original_time['dt'] = float(case_parameters.get('dt_snap'))
+pdmd.original_time['dt'] = params.dt_snap
 # plot eigenvalues
 
 plot_eigens(pdmd.eigs)
 
-Lsep = float( case_parameters.get('Lsep') )
+velocity = params.u_ref
 
-velocity = float( case_parameters.get('u_ref') )
-
-St = pdmd.frequency * Lsep / velocity
+St = pdmd.frequency * params.Lsep / velocity
 
 plot_amp_st( St, 
              np.abs(pdmd.amplitudes), 

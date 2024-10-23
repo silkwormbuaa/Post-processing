@@ -36,11 +36,10 @@ datafile = dirs.statistics
 gridfile = dirs.grid
 
 outpath  = dirs.pos_dir + outfolder
-parametersfile = dirs.case_para_file
 
 # - read in case parameters
 
-parameters = Params( parametersfile )
+parameters = Params( dirs.case_para_file )
 delta      = parameters.delta_0
 casecode   = parameters.casecode
 

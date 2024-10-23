@@ -1,0 +1,39 @@
+# Basic info
+
+casecode = smooth_mid
+tag      = smooth_mid
+roughwall = False
+
+# Flow setup parameters
+
+u_ref     = 507.0
+p_ref     = 45447.289
+rho_ref   = 0.9886
+T_ref     = 160.15
+delta_0   = 5.2
+Re_ref    = 9636.0
+visc_law  = P07
+
+# Numerical setup parameters
+
+dt_snap   = 0.01  
+
+# Geometric setup parametrs
+
+H         = 0.00
+H_md      = 0.00
+x_imp     = 50.4
+
+period    = 9999
+
+D         = 10.4
+
+# Case specific flow conditions
+
+Lsep      = 47.944   # unnormalized
+x_sep     = -7.33    # normalized
+x_att     = 1.89     # normalized
+x_pfmax   = -8.53    # normalized
+
+
+prb_withT = True

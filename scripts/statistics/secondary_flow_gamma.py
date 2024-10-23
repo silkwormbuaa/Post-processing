@@ -45,12 +45,11 @@ datafile = dirs.statistics
 gridfile = dirs.grid
 ccfile   = dirs.cc_setup
 snapshotfile = get_filelist( dirs.wall_dist, key='snapshot.bin')[0]
-parametersfile = dirs.case_para_file
 outpath  = dirs.pp_statistics + outfolder
 
 # - read in case paramters
 
-params   = Params( parametersfile )
+params   = Params( dirs.case_para_file )
 delta    = params.delta_0
 h_ridge  = params.H
 h_md     = params.H_md
