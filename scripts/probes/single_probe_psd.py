@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   cf_psd.py
+@File    :   single_probe_psd.py
 @Time    :   2024/09/18 
 @Author  :   Wencan WU 
 @Version :   1.0
