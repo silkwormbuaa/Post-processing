@@ -23,17 +23,23 @@ dt_snap   = 0.01
 H         = 0.00
 H_md      = 0.00
 x_imp     = 50.4
-
 period    = 9999
-
 D         = 10.4
 
 # Case specific flow conditions
 
-Lsep      = 47.944   # unnormalized
 x_sep     = -7.33    # normalized
 x_att     = 1.89     # normalized
 x_pfmax   = -8.53    # normalized
 
 
 prb_withT = True
+
+# probe groups
+
+prb_ridge_index     = [1..335]
+prb_valley_index    = []
+prb_upspan_index    = []
+prb_downspan_index  = []
+prb_upvline_index   = []
+prb_downvline_index = []

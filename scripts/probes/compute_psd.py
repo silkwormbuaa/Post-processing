@@ -43,14 +43,6 @@ print(f"We are in directory:{dirs.prb_dir}\n")
 print(f"We have got {n_data:5d} probes data.\n")
 
 params     = Params( dirs.case_para_file )
-h          = params.H
-u_ref      = params.u_ref
-rho_ref    = params.rho_ref
-delta      = params.delta_0
-Re_ref     = params.Re_ref
-visc_law   = params.visc_law
-prb_withT  = params.prb_withT
-p_dyn      = 0.5 * rho_ref * u_ref**2
 
 # -- check if number of probe data and number of probes are consistent
 
@@ -83,7 +75,7 @@ with timer('Computing PSD '):
         elif abs(xyz[1] + h) < 0.001 :                  os.chdir( dirs.pp_psd_valley ); n_valley += 1
         else:                                           os.chdir( dirs.pp_psd_others ); n_others += 1
         
-        probedata = ProbeData( prb_data[i], withT=prb_withT )
+        probedata = ProbeData( prb_data[i], withT=params.prb_withT )
         probedata.cleandata( t_start=20.0 )
         
         # -- compute cf first
@@ -102,8 +94,8 @@ with timer('Computing PSD '):
             ts  = np.array(probedata.df['p']/probedata.df['rho']/287.0508571)
         
         u       = np.array( probedata.df['u'] )
-        mu      = get_visc( ts, Re_ref, law= visc_law )
-        cf      = mu*u/walldist/p_dyn
+        mu      = get_visc( ts, params.Re_ref, law=params.visc_law )
+        cf      = mu*u/walldist/params.p_dyn
         
         probedata.add_data( 'cf', cf )
         probedata.get_fluc( ['cf','p'] )

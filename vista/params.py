@@ -11,6 +11,7 @@
 
 
 import os
+import re
 import sys
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
@@ -158,39 +159,10 @@ class Params:
     @property
     def visc_law( self ):
         return self.params.get('visc_law')
-
-
-# ------------------- probe setup parameters --------------------------
-
-    @property
-    def prb_ridge_index( self ):
-        i_s, i_e = self.params.get('prb_ridge_index').split(',')
-        return int(i_s), int(i_e)
-
-    @property
-    def prb_valley_index( self ):
-        i_s, i_e = self.params.get('prb_valley_index').split(',')
-        return int(i_s), int(i_e)
-
-    @property
-    def prb_upspan_index( self ):
-        i_s, i_e = self.params.get('prb_upspan_index').split(',')
-        return int(i_s), int(i_e)
-        
-    @property
-    def prb_downspan_index( self ):
-        i_s, i_e = self.params.get('prb_downspan_index').split(',')
-        return int(i_s), int(i_e)
     
     @property
-    def prb_upvline_index( self ):
-        i_s, i_e = self.params.get('prb_upvline_index').split(',')
-        return int(i_s), int(i_e)
-    
-    @property
-    def prb_downvline_index( self ):
-        i_s, i_e = self.params.get('prb_downvline_index').split(',')
-        return int(i_s), int(i_e)
+    def p_dyn( self ):
+        return 0.5 * self.rho_ref * self.u_ref**2
 
         
 # ------------------- Numerical setup parameters ----------------------
@@ -256,6 +228,66 @@ class Params:
     @property
     def prb_withT( self ):
         return True if self.params.get('prb_withT').lower() == 'true' else False
+
+
+# ------------------- probe setup parameters --------------------------
+
+    def __indexstr_to_list__( indexstr ):
+        
+        def parse_range(range_str):
+            """parse str like '100..105' """
+            if ".." in range_str:
+                start, end = map(int, range_str.split(".."))
+            else:
+                return []
+            return list(range(start, end + 1))
+
+        def parse_list(list_str):
+            """parse str like [20, 30, 40] """
+            # remove the square brackets and split by comma
+            return list(map(int, list_str.strip("[]").split(", ")))
+        
+        merged_list = []
+        
+        # find all the parts with a pair of square brackets
+        parts = re.findall(r'\[.*?\]', indexstr)
+
+        for part in parts:
+            
+            if ".." in part:
+                merged_list.extend( parse_range(part.strip("[]")) )
+            elif '[]' in part:
+                merged_list.extend([])
+            else:
+                merged_list.extend( parse_list(part.strip("[]")) )
+        
+        return sorted(merged_list)
+
+
+    @property
+    def prb_ridge_index( self ):
+        return self.__indexstr_to_list__( self.params.get('prb_ridge_index') )
+    
+    @property
+    def prb_valley_index( self ):
+        return self.__indexstr_to_list__( self.params.get('prb_valley_index') )
+
+    @property
+    def prb_upspan_index( self ):
+        return self.__indexstr_to_list__( self.params.get('prb_upspan_index') )
+        
+    @property
+    def prb_downspan_index( self ):
+        return self.__indexstr_to_list__( self.params.get('prb_downspan_index') )
+    
+    @property
+    def prb_upvline_index( self ):
+        return self.__indexstr_to_list__( self.params.get('prb_upvline_index') )
+    
+    @property
+    def prb_downvline_index( self ):
+        return self.__indexstr_to_list__( self.params.get('prb_downvline_index') )
+
 
 
 # ----------------------------------------------------------------------

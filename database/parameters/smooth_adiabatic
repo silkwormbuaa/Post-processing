@@ -30,10 +30,19 @@ D         = 10.4
 
 # Case specific flow conditions
 
-Lsep      = 49.504
 x_sep     = -8.42
 x_att     = 1.10
 x_pfmax   = -7.136
 
+# INCA version led different setting
 
 prb_withT = True
+
+# probe groups
+
+prb_ridge_index     = [97..239],[380..518]
+prb_valley_index    = []
+prb_upspan_index    = []
+prb_downspan_index  = []
+prb_upvline_index   = [1..96]
+prb_downvline_index = [240..379]

@@ -35,3 +35,12 @@ Lsep      = 68.9832
 # INCA version led different setting
 
 prb_withT = True
+
+# probe groups
+
+prb_ridge_index     = [1..57], [154..296], [437..575]
+prb_valley_index    = []
+prb_upspan_index    = []
+prb_downspan_index  = []
+prb_upvline_index   = [58..153]
+prb_downvline_index = [297..436]
