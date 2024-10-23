@@ -11,8 +11,6 @@
 
 import os
 import sys
-import time
-import pickle
 import numpy             as     np
 import pandas            as     pd
 from   scipy.interpolate import griddata
@@ -20,14 +18,14 @@ from   scipy.interpolate import griddata
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.statistic   import StatisticData
-from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
-from   vista.directories import Directories
 from   vista.timer       import timer
+from   vista.params      import Params
+from   vista.snapshot    import Snapshot
+from   vista.statistic   import StatisticData
+from   vista.directories import Directories
 from   vista.directories import create_folder
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
 
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
@@ -52,16 +50,16 @@ outpath  = dirs.pp_statistics + outfolder
 
 # - read in case paramters
 
-parameters = read_case_parameter( parametersfile )
-delta   = float( parameters.get('delta_0') )
-h_ridge = float( parameters.get('H') )
-h_md    = float( parameters.get('H_md') )
-x_imp   = float( parameters.get('x_imp') )
-p_ref   = float( parameters.get('p_ref') )
-u_ref   = float( parameters.get('u_ref') )
-casecode =  str( parameters.get('casecode') )
-n_period = int( parameters.get('period') )
-tag      = str( parameters.get('tag'))
+params   = Params( parametersfile )
+delta    = params.delta_0
+h_ridge  = params.H
+h_md     = params.H_md
+x_imp    = params.x_imp
+p_ref    = params.p_ref
+u_ref    = params.u_ref
+casecode = params.casecode
+n_period = params.period
+tag      = params.tag
 
 locs = locs_delta*delta + x_imp
 

@@ -11,20 +11,16 @@
 
 
 import os
-
 import sys
-
 import numpy             as     np
-
 import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.grid        import GridData
-
+from   vista.params      import Params
 from   vista.tools       import define_wall_shape
-from   vista.tools       import read_case_parameter
 from   vista.tools       import lin_grow
 
 # =============================================================================
@@ -48,9 +44,9 @@ if From_File:
     gridfile = workpath + '/inca_grid.bin'
     parametersfile = workpath.split('/results')[0] + '/case_parameters'
 
-    parameters = read_case_parameter( parametersfile )
-    casecode = str( parameters.get('casecode') )
-    delta    = float( parameters.get('delta_0') )
+    params   = Params( parametersfile )
+    casecode = params.casecode
+    delta    = params.delta_0
 
     # - read in grid info
 

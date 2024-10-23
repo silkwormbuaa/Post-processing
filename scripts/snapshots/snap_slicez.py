@@ -13,21 +13,20 @@
 import os
 import sys
 import time
+import numpy             as     np
+from   scipy.interpolate import griddata
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-import numpy             as     np
-from   scipy.interpolate import griddata
-
-from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.snapshot    import Snapshot
+from   vista.params      import Params
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_separation_line
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import compute_DS
-from   vista.tools       import read_case_parameter
 from   vista.plot_style  import plot_slicez_stat
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
@@ -84,11 +83,11 @@ with timer("get slice dataframe "):
 
 with timer("Interpolate and plot "):
     
-    parameters = read_case_parameter( parametersfile )
-    delta   = float( parameters.get('delta_0') )
-    h_ridge = float( parameters.get('H') )
-    h_md    = float( parameters.get('H_md') )
-    x_imp   = float( parameters.get('x_imp') )
+    params  = Params( parametersfile )
+    delta   = params.delta_0
+    h_ridge = params.H
+    h_md    = params.H_md
+    x_imp   = params.x_imp
     
     df_slice = shift_coordinates( df_slice, delta, h_ridge, h_md, x_imp )  
     

@@ -448,62 +448,6 @@ def mean_of_list(lst):
 
 def to_dictionary( keys, values ):
     return { key:value for key, value in zip(keys, values) }
-
-
-
-# ----------------------------------------------------------------------
-# >>> Read parameter from file                                   (Nr.)
-# ----------------------------------------------------------------------
-#
-# Wencan Wu : w.wu-3@tudelft.nl
-#
-# History
-#
-# 2023/06/07  - created
-#
-# Desc
-#
-# ----------------------------------------------------------------------
-
-def read_case_parameter( filename ):
-    
-    # create a dictionary for parameter pairs
-    
-    parameters = {}
-
-    if not os.path.exists( filename ):
-        raise FileExistsError("Please set case_parameters file!")
-
-    # read file content line by line
-    
-    with open( filename, 'r') as f:
-        
-        lines = f.readlines()
-
-        for line in lines:
-            
-            # ignore notation line and space line
-            
-            if line.strip() and not line.startswith("#"):
-                
-                # split from the '#'
-                
-                line = line.split("#")[0]
-                
-                # split from the first '='
-                
-                key, value = line.strip().split("=",1)
-                
-                # remove extra space and comma
-                
-                key = key.strip()
-                value = value.strip().rstrip(",")
-                
-                # add parameter pair into the dictionary
-                
-                parameters[key] = value
-    
-    return parameters
                 
 
 # ----------------------------------------------------------------------

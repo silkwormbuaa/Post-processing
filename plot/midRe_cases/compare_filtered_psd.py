@@ -23,10 +23,10 @@ sys.path.append( source_dir )
 from   vista.timer        import timer
 from   vista.probe        import ProbeData
 from   vista.probe        import ProbeFile
+from   vista.params       import Params
 from   vista.directories  import Directories
 from   vista.tools        import find_indices
 from   vista.tools        import get_filelist
-from   vista.tools        import read_case_parameter
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
 
@@ -46,13 +46,13 @@ os.chdir( outdir )
 
 dirs = [ Directories( os.path.join( '/home/wencan/temp', case ) ) for case in cases ]
 
-params  = [ read_case_parameter( dir.case_para_file ) for dir in dirs ]
-x_atts   = [ float( param.get('x_att') ) for param in params ]
-x_seps   = [ float( param.get('x_sep') ) for param in params ]
-x_imp   = float( params[0].get('x_imp') )
-delta_0 = float( params[0].get('delta_0') )
-u_ref   = float( params[0].get('u_ref') )
-p_ref   = float( params[0].get('p_ref') )
+params  = [ Params( dir.case_para_file ) for dir in dirs ]
+x_atts  = [ param.x_att for param in params ]
+x_seps  = [ param.x_sep for param in params ]
+x_imp   = params[0].x_imp
+delta_0 = params[0].delta_0
+u_ref   = params[0].u_ref
+p_ref   = params[0].p_ref
 
 def plot_style():
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))

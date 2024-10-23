@@ -19,18 +19,18 @@ from   scipy.interpolate import griddata
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.statistic   import StatisticData
+from   vista.log         import Logger
 from   vista.grid        import GridData
-from   vista.directories import Directories
 from   vista.timer       import timer
+from   vista.params      import Params
+from   vista.statistic   import StatisticData
+from   vista.directories import Directories
 from   vista.directories import create_folder
 from   vista.tools       import define_wall_shape
-from   vista.tools       import read_case_parameter
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
 from   vista.plot_style  import plot_slicex_stat
-from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
@@ -50,16 +50,16 @@ parametersfile = dirs.case_para_file
 
 # - read in case paramters
 
-parameters = read_case_parameter( parametersfile )
-delta   = float( parameters.get('delta_0') )
-h_ridge = float( parameters.get('H') )
-h_md    = float( parameters.get('H_md') )
-x_imp   = float( parameters.get('x_imp') )
-p_ref   = float( parameters.get('p_ref') )
-u_ref   = float( parameters.get('u_ref') )
-casecode =  str( parameters.get('casecode') )
-n_period = int( parameters.get('period') )
-tag      = str( parameters.get('tag'))
+params  = Params( parametersfile )
+delta    = params.delta_0
+h_ridge  = params.H
+h_md     = params.H_md
+x_imp    = params.x_imp
+p_ref    = params.p_ref
+u_ref    = params.u_ref
+casecode = params.casecode
+n_period = params.period
+tag      = params.tag
 
 locs = locs_delta*delta + x_imp
 

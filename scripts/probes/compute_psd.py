@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   vista_run4.py
+@File    :   compute_psd.py
 @Time    :   2022/11/10 
 @Author  :   Wencan WU 
 @Version :   1.0
@@ -20,9 +20,9 @@ sys.path.append( source_dir )
 from   vista.probe       import ProbeData
 from   vista.probe       import ProbeFile
 from   vista.timer       import timer
+from   vista.params      import Params
 from   vista.colors      import colors as col
 from   vista.directories import Directories
-from   vista.tools       import read_case_parameter
 from   vista.material    import get_visc
 from   vista.directories import create_folder
 from   vista.log         import Logger
@@ -42,15 +42,15 @@ n_data = len( prb_data )
 print(f"We are in directory:{dirs.prb_dir}\n")
 print(f"We have got {n_data:5d} probes data.\n")
 
-parameters = read_case_parameter( dirs.case_para_file )
-h          = float( parameters.get('H') )
-u_ref      = float(parameters.get('u_ref'))
-rho_ref    = float(parameters.get('rho_ref'))
-delta      = float(parameters.get('delta_0'))
-lsep       = float(parameters.get('Lsep'))
-Re_ref     = float(parameters.get('Re_ref'))
-visc_law   = parameters.get('visc_law')
-prb_withT  = True if parameters.get('prb_withT').lower() == 'true' else False
+params     = Params( dirs.case_para_file )
+h          = params.H
+u_ref      = params.u_ref
+rho_ref    = params.rho_ref
+delta      = params.delta_0
+lsep       = params.Lsep
+Re_ref     = params.Re_ref
+visc_law   = params.visc_law
+prb_withT  = params.prb_withT
 p_dyn      = 0.5 * rho_ref * u_ref**2
 
 # -- check if number of probe data and number of probes are consistent

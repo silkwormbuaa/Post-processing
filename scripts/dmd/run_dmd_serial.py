@@ -9,33 +9,21 @@
 @Desc    :   computing DMD in serial
 '''
 
-import os
+# revised on 2024/10/14, maybe not working
 
+import os
 import sys
+import pydmd
+import numpy             as np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
-import numpy             as np
-
-import pandas            as pd
-
-import matplotlib.pyplot as plt
-
-from   pydmd             import DMD, SpDMD
-
-from   pydmd.plotter     import plot_eigs
-
 from   vista.timer       import timer
-
+from   vista.params      import Params
 from   vista.snapshot    import Snapshot
-
 from   vista.tools       import get_filelist
-
-from   vista.tools       import read_case_parameter
-
 from   vista.plot_style  import plot_eigens
-
 from   vista.plot_style  import plot_amp_st
 
 
@@ -45,7 +33,7 @@ parameterfile = '/home/wencanwu/my_simulation/temp/Low_Re_Luis/snapshots/snapsho
 
 files = get_filelist( snap_dir )
 
-case_parameters = read_case_parameter( parameterfile )
+case_parameters = Params( parameterfile )
 
 # for file in files: print(file)
 
@@ -94,9 +82,9 @@ print( "%d snapshots are loaded."%len(p_snap) )
 
 p_snap = np.array(p_snap).T / float(case_parameters.get('u_ref'))
 
-pdmd = DMD(svd_rank=-1)
+pdmd = pydmd.DMD(svd_rank=-1)
 
-spdmd = SpDMD(svd_rank=-1,gamma=150000.0,rho=1.0)
+spdmd = pydmd.SpDMD(svd_rank=-1,gamma=150000.0,rho=1.0)
 
 with timer("DMD"):
     

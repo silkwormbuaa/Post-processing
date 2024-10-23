@@ -20,16 +20,16 @@ sys.path.append( source_dir )
 import pandas            as     pd
 import numpy             as     np
 
-from   vista.statistic   import StatisticData
-from   vista.snapshot    import Snapshot
+from   vista.log         import Logger
 from   vista.grid        import GridData
-from   vista.directories import Directories
 from   vista.timer       import timer
+from   vista.params      import Params
+from   vista.colors      import colors          as    clr
+from   vista.snapshot    import Snapshot
+from   vista.statistic   import StatisticData
+from   vista.directories import Directories
 from   vista.directories import create_folder
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-from   vista.colors      import colors          as    clr
-from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
@@ -51,8 +51,8 @@ ccfile   = dirs.cc_setup
 parametersfile = dirs.case_para_file
 
 # read parameters to check if it is a rough wall case
-parameters = read_case_parameter( parametersfile )
-roughwall  = True if parameters.get('roughwall').lower() == 'true' else False
+params     = Params( parametersfile )
+roughwall  = params.roughwall
 
 if roughwall:
     snapshotfile = get_filelist(dirs.wall_dist,key='snapshot.bin')[0]
@@ -232,7 +232,7 @@ for i, loc in enumerate(locs):
             clr.reset)
     else:
         print(clr.bg.red,
-            f"Please modify the wall coordinate(y=-{parameters.get('H')}) manually!",
+            f"Please modify the wall coordinate(y=-{params.H}) manually!",
             clr.reset,'\n')
 
     print(f"Finished extracting profile at location {loc}.\n")

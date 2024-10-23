@@ -14,24 +14,18 @@
 import os
 import sys
 import time
+import numpy             as     np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
-import numpy             as     np
-
 from   vista.timer       import timer
-
-from   vista.paradmd     import ParaDmd
-
 from   vista.colors      import colors  as col
-
+from   vista.params      import Params
+from   vista.paradmd     import ParaDmd
 from   vista.plot_style  import plot_eigens
 from   vista.plot_style  import plot_amp_st
 from   vista.plot_style  import plot_psi_st
-
-from   vista.tools       import read_case_parameter
-
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -58,7 +52,7 @@ elif len( arguments ) == 3 or len( arguments ) > 3 : # in case >run.out
 
 else: raise ValueError("gamma and rho should be provided!")
 
-case_parameters = read_case_parameter( 'case_parameters' )
+case_parameters = Params( 'case_parameters' )
 
 sys.stdout.flush()
 
@@ -68,10 +62,8 @@ sys.stdout.flush()
 
 # Directory that stores Psq file
 
-Lsep = float( case_parameters.get('Lsep') )
-
-velocity = float( case_parameters.get('u_ref') )
-
+Lsep     = case_parameters.Lsep
+velocity = case_parameters.u_ref
 snap_dir = os.getcwd()
 
 

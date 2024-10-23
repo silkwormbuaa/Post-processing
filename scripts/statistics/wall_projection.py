@@ -21,11 +21,11 @@ sys.path.append( source_dir )
 
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.params      import Params
 from   vista.snapshot    import Snapshot
 from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
 from   vista.plot_style  import plot_wall_projection
 from   vista.plot_style  import plot_spanwise_variables
 from   vista.directories import create_folder
@@ -131,16 +131,16 @@ else:
 
 with timer("plotting"):
 
-    parameters = read_case_parameter( parametersfile )
-    delta   = float( parameters.get('delta_0') )
-    h_ridge = float( parameters.get('H') )
-    h_md    = float( parameters.get('H_md') )
-    x_imp   = float( parameters.get('x_imp') )
-    rho_ref = float( parameters.get('rho_ref') )
-    u_ref   = float( parameters.get('u_ref') )
-    p_ref   = float( parameters.get('p_ref') )
-    period  = int(   parameters.get('period') )
-    casecode = parameters.get('tag')
+    params   = Params( parametersfile )
+    delta    = params.delta_0
+    h_ridge  = params.H
+    h_md     = params.H_md
+    x_imp    = params.x_imp
+    rho_ref  = params.rho_ref
+    u_ref    = params.u_ref
+    p_ref    = params.p_ref
+    period   = params.period
+    casecode = params.tag
     
     dyn_p   = 0.5*rho_ref*u_ref*u_ref
     

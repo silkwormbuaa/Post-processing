@@ -9,20 +9,18 @@
 @Desc    :   Script of probing data along a line
 '''
 
-
 import os
-
 import sys
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.statistic   import StatisticData
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.params      import Params
+from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.directories import create_folder
-from   vista.tools       import read_case_parameter
 
 # =============================================================================
 
@@ -42,9 +40,9 @@ parametersfile = dirs.case_para_file
 
 # - read in case parameters
 
-parameters = read_case_parameter( parametersfile )
-delta   = float( parameters.get('delta_0') )
-casecode =  str( parameters.get('casecode') )
+parameters = Params( parametersfile )
+delta      = parameters.delta_0
+casecode   = parameters.casecode
 
 # - read in grid info
 

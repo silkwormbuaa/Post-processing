@@ -33,11 +33,11 @@ sys.path.append( source_dir )
 from   vista.mpi          import MPIenv
 from   vista.grid         import GridData
 from   vista.timer        import timer
+from   vista.params       import Params
 from   vista.snapshot     import Snapshot
 from   vista.directories  import Directories
 from   vista.statistic    import StatisticData
 from   vista.tools        import get_filelist
-from   vista.tools        import read_case_parameter
 from   vista.tools        import distribute_mpi_work
 from   vista.directories  import create_folder
 from   vista.plot_setting import cpos_callback
@@ -74,8 +74,8 @@ if mpi.rank == 0:
     
     create_folder( out_dir )
     
-    params     = read_case_parameter( dirs.case_para_file )
-    roughwall  = True if str(params.get('roughwall')).lower() == 'true' else False
+    params     = Params( dirs.case_para_file )
+    roughwall  = params.roughwall
 
     snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
@@ -99,14 +99,14 @@ blocklist  = mpi.comm.bcast( blocklist, root=0 )
 grid3d     = mpi.comm.bcast( grid3d,    root=0 )
 stat       = mpi.comm.bcast( stat,      root=0 )
 snapwd     = mpi.comm.bcast( snapwd,    root=0 )
-p_ref      = float(params.get('p_ref'))
-u_ref      = float(params.get('u_ref'))
+p_ref      = params.p_ref
+u_ref      = params.u_ref
 
 if roughwall: vars_out += ['wd']
 
-x_pfmax    = float(params.get('x_pfmax'))
-x_imp      = float(params.get('x_imp')  )
-delta0     = float(params.get('delta_0'))
+x_pfmax    = params.x_pfmax
+x_imp      = params.x_imp
+delta0     = params.delta_0
 x_pfmax    = x_pfmax*delta0 + x_imp
 
 mpi.barrier()

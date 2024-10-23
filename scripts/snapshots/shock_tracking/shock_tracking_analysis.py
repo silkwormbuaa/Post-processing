@@ -22,7 +22,7 @@ sys.path.append( source_dir )
 
 from   vista.psd         import pre_multi_psd
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
+from   vista.params      import Params
 from   vista.directories import create_folder
 
 # =============================================================================
@@ -42,8 +42,8 @@ analyse3d=True
 
 # =============================================================================
 
-params = read_case_parameter( casedir + '/supplements/case_parameters' )
-Lsep   = float( params.get('Lsep') )
+params = Params( casedir + '/supplements/case_parameters' )
+Lsep   = params.Lsep
 
 os.chdir( create_folder(shockpath2d) )
 

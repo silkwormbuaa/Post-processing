@@ -13,21 +13,20 @@
 import os
 import sys
 import time
-
-source_dir = os.path.realpath(__file__).split('scripts')[0]
-sys.path.append( source_dir )
-
 import numpy             as     np
 import pandas            as     pd
 from   scipy.interpolate import griddata
 
+source_dir = os.path.realpath(__file__).split('scripts')[0]
+sys.path.append( source_dir )
+
 from   vista.timer       import timer
-from   vista.snapshot    import Snapshot
-from   vista.paradmd     import ParaDmd
-from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-from   vista.plot_style  import plot_dmd_mode 
 from   vista.colors      import colors    as col
+from   vista.params      import Params
+from   vista.paradmd     import ParaDmd
+from   vista.snapshot    import Snapshot
+from   vista.tools       import get_filelist
+from   vista.plot_style  import plot_dmd_mode 
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -100,7 +99,7 @@ with timer('Get snapshots file list, snapshots info and case parameters'):
         
         snapshot_temp.get_snapshot_struct()
         
-        case_parameters = read_case_parameter( 'case_parameters' )
+        case_parameters = Params( 'case_parameters' )
         
             
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
@@ -134,7 +133,7 @@ with timer('\nRead in all the snapshots'):
     # select which parameter will be chosen to do DMD
     
     paradmd.select = 'p'
-    paradmd.var_norms['p'] = float( case_parameters.get('p_ref') )
+    paradmd.var_norms['p'] = case_parameters.p_ref
     
     for snap_file in snap_files:
         
@@ -146,7 +145,7 @@ with timer('\nRead in all the snapshots'):
 
 # Specify the time interval of snapshots
 
-paradmd.dt = float( case_parameters.get('dt_snap') )
+paradmd.dt = case_parameters.dt_snap
 
 snap1 = np.array(paradmd.snapshots[0])
 

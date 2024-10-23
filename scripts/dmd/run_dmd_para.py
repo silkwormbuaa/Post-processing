@@ -12,27 +12,17 @@
 import os
 import sys 
 import time
+import numpy             as     np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
-import numpy             as     np
-
-import pandas            as     pd
-
-from   mpi4py            import MPI
-
 from   vista.timer       import timer
-
-from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-
+from   vista.params      import Params
 from   vista.paradmd     import ParaDmd
-
 from   vista.snapshot    import Snapshot
-
 from   vista.colors      import colors    as col
-
+from   vista.tools       import get_filelist
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -50,7 +40,7 @@ paradmd = ParaDmd( snap_dir )
 
 snap_files = None
 
-case_parameters = None
+params = None
 
 print(col.bg.green,col.fg.red,"This is rank ",f"{paradmd.rank}",col.reset)
 sys.stdout.flush()
@@ -67,12 +57,12 @@ with timer('Get snapshots file list, snapshots info and case parameters'):
         
         snapshot_temp.get_snapshot_struct()
         
-        case_parameters = read_case_parameter( 'case_parameters' )
+        params = Params( 'case_parameters' )
         
             
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
     
-    case_parameters = paradmd.comm.bcast( case_parameters, root=0 )
+    params = paradmd.comm.bcast( params, root=0 )
 
 sys.stdout.flush()
 
@@ -103,7 +93,7 @@ with timer('\nRead in all the snapshots'):
     # select which parameter will be chosen to do DMD
     
     paradmd.select = 'p'
-    paradmd.var_norms['p'] = float( case_parameters.get('p_ref') )
+    paradmd.var_norms['p'] = params.p_ref
     
     for snap_file in snap_files:
         
@@ -115,7 +105,7 @@ with timer('\nRead in all the snapshots'):
 
 # Specify the time interval of snapshots
 
-paradmd.dt = float( case_parameters.get('dt_snap') )
+paradmd.dt = params.dt_snap
 
 # =============================================================================
 # do parallel dmd

@@ -13,25 +13,18 @@
 import os
 import sys
 import time
+import pickle
+import numpy             as     np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-import pickle
-
-import numpy             as     np
-
 from   vista.timer       import timer
-
-from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-
+from   vista.params      import Params
 from   vista.paradmd     import ParaDmd
-
 from   vista.snapshot    import Snapshot
-
 from   vista.colors      import colors    as col
-
+from   vista.tools       import get_filelist
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -68,7 +61,7 @@ with timer('Get Y snapshots file list, snapshots info and case parameters'):
         
         snapshot_temp.get_snapshot_struct('snap_structY.csv','snap_infoY.dat')
         
-        case_parameters = read_case_parameter( 'case_parameters' )
+        case_parameters = Params( 'case_parameters' )
         
             
     snap_filesY = paradmd.comm.bcast( snap_filesY, root=0 )
@@ -120,7 +113,7 @@ with timer('\nRead in all the snapshots Y'):
     # select which parameter will be chosen to do DMD
     
     paradmd.select = 'p'
-    paradmd.var_norms['p'] = float( case_parameters.get('p_ref') )
+    paradmd.var_norms['p'] = case_parameters.p_ref
     
     for snap_file in snap_filesY:
         
@@ -150,7 +143,7 @@ with timer('\nRead in all the snapshots Z'):
     # select which parameter will be chosen to do DMD
     
     paradmd2.select = 'p'
-    paradmd2.var_norms['p'] = float( case_parameters.get('p_ref') )
+    paradmd2.var_norms['p'] = case_parameters.p_ref
     
     for snap_file in snap_filesZ:
         
@@ -163,7 +156,7 @@ sys.stdout.flush()
 
 # Specify the time interval of snapshots
 
-paradmd.dt = float( case_parameters.get('dt_snap') )
+paradmd.dt = case_parameters.dt_snap
 
 # =============================================================================
 # keep the length of snapshots and pass paradmd2's snapshot Z to paradmd1

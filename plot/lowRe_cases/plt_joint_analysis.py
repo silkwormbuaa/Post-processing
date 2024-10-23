@@ -20,10 +20,10 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.timer        import timer
+from   vista.params       import Params
 from   vista.directories  import Directories
 from   vista.directories  import create_folder
 from   vista.tools        import get_filelist
-from   vista.tools        import read_case_parameter
 from   vista.tools        import create_linear_interpolator
 
 #set_plt_rcparams()
@@ -44,15 +44,15 @@ dirs = Directories( case_dir )
 # -----------------------------------------------------------------------------
 # - read in case parameters
 # -----------------------------------------------------------------------------
-parameters = read_case_parameter( dirs.case_para_file )
-p_ref   = float( parameters.get('p_ref') )
-h       = float( parameters.get('H') )
-x_imp   = float( parameters.get('x_imp') )
-delta_0 = float( parameters.get('delta_0') )
+params  = Params( dirs.case_para_file )
+p_ref   = params.p_ref
+h       = params.H
+x_imp   = params.x_imp
+delta_0 = params.delta_0
 # the following parameters are normalized by delta_0
-x_sep   = float( parameters.get('x_sep') )
-x_att   = float( parameters.get('x_att') )
-x_pfmax = float( parameters.get('x_pfmax') )
+x_sep   = params.x_sep
+x_att   = params.x_att
+x_pfmax = params.x_pfmax
 
 # -----------------------------------------------------------------------------
 # - read in the shock motion data

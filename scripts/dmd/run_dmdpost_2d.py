@@ -12,28 +12,21 @@
 
 import os
 import sys
-import cmath
 import time
+import cmath
 import pickle
+import numpy             as     np
+import pandas            as     pd
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
-import numpy             as     np
-
-import pandas            as     pd
-
 from   vista.timer       import timer
-
+from   vista.params      import Params
 from   vista.snapshot    import Snapshot
-
 from   vista.dmdmodes    import DMDMode, DMDModes
-
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-
 from   vista.plot_style  import plot_dmd_mode 
-
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -85,7 +78,8 @@ with timer('\n - Reconstruct snapshots'):
     
     # read case parameters
 
-    modes_temp.case_parameters = read_case_parameter('case_parameters')
+    params = Params( 'case_parameters' )
+    modes_temp.case_parameters = params.params
     
     # read modes in /dmdmodes
     

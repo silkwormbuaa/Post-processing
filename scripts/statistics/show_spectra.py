@@ -11,9 +11,7 @@
 
 
 import os
-
 import sys
-
 import pandas            as     pd
 import numpy             as     np
 import matplotlib.pyplot as     plt
@@ -21,13 +19,8 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.timer       import timer
-
-from   vista.tools       import read_case_parameter
 from   vista.tools       import get_filelist
-
-from   vista.line        import LineData
-
+from   vista.params      import Params
 
 # =============================================================================
 
@@ -48,9 +41,9 @@ snapfiles = get_filelist( spectrapath, 'snapshot.bin' )
 outpath  = datapath + outfolder
 parametersfile = datapath.split('/results')[0] + '/case_parameters'
 
-parameters = read_case_parameter( parametersfile )
-delta   = float( parameters.get('delta_0') )
-u_ref   = float( parameters.get('u_ref') )
+parameters = Params( parametersfile )
+delta      = parameters.delta_0
+u_ref      = parameters.u_ref
 
 
 os.chdir(datapath)

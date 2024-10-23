@@ -20,9 +20,9 @@ sys.path.append( source_dir )
 
 from   vista.probe       import ProbeData
 from   vista.timer       import timer
+from   vista.params      import Params
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
 from   vista.directories import create_folder
 
 # =============================================================================
@@ -35,8 +35,8 @@ colors     = ['black']*len(vars)
 
 dirs = Directories( casefolder )
 
-params = read_case_parameter( dirs.case_para_file )
-withT  = True if params.get('prb_withT').lower() == 'true' else False
+params = Params( dirs.case_para_file )
+withT  = params.prb_withT
 
 # -- get all probe files
 prb_files = get_filelist( dirs.prb_dir, 'probe_' )

@@ -33,10 +33,10 @@ sys.path.append( source_dir )
 
 from   vista.grid         import GridData
 from   vista.timer        import timer
+from   vista.params       import Params
 from   vista.snapshot     import Snapshot
 from   vista.directories  import Directories
 from   vista.tools        import get_filelist
-from   vista.tools        import read_case_parameter
 from   vista.tools        import distribute_mpi_work
 from   vista.material     import get_visc
 from   vista.directories  import create_folder
@@ -77,11 +77,11 @@ if rank == 0:
     
     create_folder( out_dir )
     
-    params    = read_case_parameter( dirs.case_para_file )
-    u_ref     = float(params.get('u_ref'))
-    rho_ref   = float(params.get('rho_ref'))
+    params    = Params( dirs.case_para_file )
+    u_ref     = params.u_ref
+    rho_ref   = params.rho_ref
     p_dyn     = 0.5 * rho_ref * u_ref**2
-    roughwall = True if str(params.get('roughwall')).lower() == 'true' else False
+    roughwall = params.roughwall
     
     snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")

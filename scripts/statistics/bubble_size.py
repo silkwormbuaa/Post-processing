@@ -18,22 +18,22 @@ import pandas            as     pd
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.log         import Logger
 from   vista.grid        import GridData
+from   vista.timer       import timer
+from   vista.params      import Params
 from   vista.snapshot    import Snapshot
 from   vista.statistic   import StatisticData
-from   vista.log         import Logger
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
-from   vista.tools       import read_case_parameter
-from   vista.timer       import timer
 sys.stdout = Logger( os.path.basename(__file__) )
 
 bbox = [-60.0, 90.0, -1.5, 10.0, -11.0, 11.0]
 
 dirs = Directories( os.getcwd() )
 
-parameters = read_case_parameter( dirs.case_para_file )
-roughwall  = True if parameters.get('roughwall').lower() == 'true' else False
+parameters = Params( dirs.case_para_file )
+roughwall  = parameters.roughwall
 
 
 with timer('load grid data'):

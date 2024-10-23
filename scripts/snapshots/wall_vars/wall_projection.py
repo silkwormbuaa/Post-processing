@@ -24,11 +24,11 @@ sys.path.append( source_dir )
 
 from   vista.grid        import GridData
 from   vista.timer       import timer
+from   vista.params      import Params
 from   vista.snapshot    import Snapshot
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
-from   vista.tools       import read_case_parameter
 from   vista.material    import get_visc
 from   vista.plot_style  import plot_wall_projection
 from   vista.directories import create_folder
@@ -75,8 +75,8 @@ if rank == 0:
     create_folder( outpath_cf )
     create_folder( outpath_pf )
     
-    params    = read_case_parameter( dirs.case_para_file )
-    roughwall = True if str(params.get('roughwall')).lower() == 'true' else False
+    params    = Params( dirs.case_para_file )
+    roughwall = params.roughwall
     
     snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
@@ -110,8 +110,8 @@ grid3d     = comm.bcast( grid3d,    root=0 )
 wd_snap    = comm.bcast( wd_snap,   root=0 )
 
 
-Re_ref     = float( params.get('Re_ref') )
-visc_law   = params.get('visc_law')
+Re_ref     = params.Re_ref
+visc_law   = params.visc_law
 
 # --- distribute tasks
 
@@ -156,13 +156,13 @@ for i, snap_file in enumerate(snapfiles):
 
 # ----- visualization
 
-    delta    = float( params.get('delta_0') )
-    h_ridge  = float( params.get('H') )
-    h_md     = float( params.get('H_md') )
-    x_imp    = float( params.get('x_imp') )
-    rho_ref  = float( params.get('rho_ref') )
-    u_ref    = float( params.get('u_ref') )
-    p_ref    = float( params.get('p_ref') )
+    delta    = params.delta_0
+    h_ridge  = params.H
+    h_md     = params.H_md
+    x_imp    = params.x_imp
+    rho_ref  = params.rho_ref
+    u_ref    = params.u_ref
+    p_ref    = params.p_ref
     
     df_stat  = shift_coordinates( df_stat, delta, h_ridge, h_md, x_imp)
     df_wall  = shift_coordinates( df_wall, delta, h_ridge, h_md, x_imp)

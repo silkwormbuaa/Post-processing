@@ -22,10 +22,10 @@ sys.path.append( source_dir )
 from   vista.timer        import timer
 from   vista.probe        import ProbeData
 from   vista.probe        import ProbeFile
+from   vista.params       import Params
 from   vista.directories  import Directories
 from   vista.tools        import find_indices
 from   vista.tools        import get_filelist
-from   vista.tools        import read_case_parameter
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
 
@@ -51,18 +51,17 @@ n_data = len( prb_files )
 print(f"We are in directory:{dirs.prb_dir}\n")
 print(f"We have got {n_data:5d} probes data.\n")
 
-parameters = read_case_parameter( dirs.case_para_file )
-p_ref   = float( parameters.get('p_ref') )
-u_ref   = float( parameters.get('u_ref') )
-h       = float( parameters.get('H') )
-x_imp   = float( parameters.get('x_imp') )
-delta_0 = float( parameters.get('delta_0') )
+params    = Params( dirs.case_para_file )
+p_ref     = params.p_ref
+u_ref     = params.u_ref
+h         = params.H
+x_imp     = params.x_imp
+delta_0   = params.delta_0
 # the following parameters are normalized by delta_0
-x_sep   = float( parameters.get('x_sep') )
-x_att   = float( parameters.get('x_att') )
-x_pfmax = float( parameters.get('x_pfmax') )
-
-prb_withT = True if parameters.get('prb_withT').lower() == 'true' else False
+x_sep     = params.x_sep
+x_att     = params.x_att
+x_pfmax   = params.x_pfmax
+prb_withT = params.prb_withT
 
 # -- create output directories
 

@@ -19,9 +19,9 @@ source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.probe       import ProbeData
+from   vista.params      import Params
 from   vista.directories import Directories
 from   vista.line        import data_bin_avg
-from   vista.tools       import read_case_parameter
 from   vista.material    import get_visc
 from   vista.directories import create_folder
 
@@ -36,13 +36,13 @@ outpath = dirpath + '/postprocess/cf_psd/'
 dirs = Directories( dirpath )
 os.chdir( create_folder(outpath) )
 
-params   = read_case_parameter( dirs.case_para_file )
-u_ref    = float(params.get('u_ref'))
-rho_ref  = float(params.get('rho_ref'))
-delta    = float(params.get('delta_0'))
-lsep     = float(params.get('Lsep'))
-Re_ref   = float(params.get('Re_ref'))
-visc_law = params.get('visc_law')
+params   = Params( dirs.case_para_file )
+u_ref    = params.u_ref
+rho_ref  = params.rho_ref
+delta    = params.delta_0
+lsep     = params.Lsep
+Re_ref   = params.Re_ref
+visc_law = params.visc_law
 p_dyn    = 0.5 * rho_ref * u_ref**2
 
 prb = ProbeData( file, withT=True )

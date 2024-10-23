@@ -22,17 +22,17 @@ from   scipy.interpolate import griddata
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.statistic   import StatisticData
 from   vista.grid        import GridData
-from   vista.directories import Directories
 from   vista.timer       import timer
+from   vista.params      import Params
+from   vista.statistic   import StatisticData
+from   vista.directories import Directories
 from   vista.directories import create_folder
 from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import compute_DS
 from   vista.plot_style  import plot_slicez_stat
-from   vista.tools       import read_case_parameter
 from   vista.log         import Logger
 sys.stdout = Logger( os.path.basename(__file__) )
 
@@ -53,18 +53,18 @@ parametersfile = dirs.case_para_file
 
 # - read in case parameters
 
-parameters = read_case_parameter( parametersfile )
-delta   = float( parameters.get('delta_0') )
-h_ridge = float( parameters.get('H') )
-h_md    = float( parameters.get('H_md') )
-x_imp   = float( parameters.get('x_imp') )
-p_ref   = float( parameters.get('p_ref') )
-u_ref   = float( parameters.get('u_ref') )
-casecode =  str( parameters.get('casecode') )
+parameters = Params( parametersfile )
+delta   = parameters.delta_0
+h_ridge = parameters.H
+h_md    = parameters.H_md
+x_imp   = parameters.x_imp
+p_ref   = parameters.p_ref
+u_ref   = parameters.u_ref
+casecode =  parameters.casecode
 target_dir = '/home/wencan/temp/DataPost/contour/'+casecode+'/'
 create_folder( target_dir )
 
-locs = [ 0.001, 0.5*float( parameters.get('D'))+0.001 ]
+locs = [ 0.001, 0.5*parameters.D + 0.001 ]
 
 # - read in grid info
 
