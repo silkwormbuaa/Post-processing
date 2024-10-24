@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   shock_tracking.py
+@File    :   density_gradient_pv.py
 @Time    :   2024/08/21 
 @Author  :   Wencan WU 
 @Version :   2.0
@@ -9,7 +9,7 @@
 @Desc    :   read in a snapshot and show it with pyvista and matplotlib
 '''
 
-off_screen = True
+off_screen = False
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -47,8 +47,8 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-case_dir = '/media/wencanwu/Seagate Expansion Drive1/temp/231124'
-out_dir  = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/postprocess/snapshotZ/'
+case_dir = '/home/wencan/temp/231124'
+out_dir  = '/home/wencan/temp/231124/postprocess/snapshotZ/'
 clipbox  = [-20,12,0,10,-1,1]
 
 # =============================================================================

@@ -6,7 +6,8 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   None
+@Desc    :   read in 3d snapshot.bin, and do slicing, then show interpolated data
+             with matplotlib.
 '''
 
 
