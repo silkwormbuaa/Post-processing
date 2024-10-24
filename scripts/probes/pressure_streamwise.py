@@ -59,7 +59,6 @@ delta_0   = params.delta_0
 x_sep     = params.x_sep
 x_att     = params.x_att
 x_pfmax   = params.x_pfmax
-
 prb_withT = params.prb_withT
 
 # -- create output directories
@@ -77,6 +76,7 @@ if not os.path.exists( 'pressure_ridge.pkl' ):
     with timer("Reading pressure data"):
         
 # ----- first get the index of probes signals at snapshot time points.
+#       (no matter which probe, as long as it contains the same time points like others)
 
         prb_data = ProbeData( prb_files[0], withT=prb_withT )
         prb_data.cleandata( t_start=20.0 )
@@ -84,16 +84,12 @@ if not os.path.exists( 'pressure_ridge.pkl' ):
         
 # ----- read pressure data at the ridge probe by probe
 
-        for i in range( len(probes.probes) ):
+        for i in params.prb_ridge_index:
             
-            probe = probes.probes[i]
+            probe = probes.probes[i-1]
             xyz = probe.xyz
             
-            # find the probes at the ridges
-            if not(abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001):
-                continue
-            
-            prb_data = ProbeData( prb_files[i], withT=prb_withT )
+            prb_data = ProbeData( prb_files[i-1], withT=prb_withT )
             prb_data.cleandata( t_start=20.0 )
             prb_data.df = prb_data.df.iloc[index]
              

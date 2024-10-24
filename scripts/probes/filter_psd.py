@@ -79,23 +79,19 @@ if not os.path.exists( 'streamwise_rms.pkl' ):
         
 # ----- read pressure data at the ridge probe by probe
 
-        for i in range( 335 ):
-            
-            probe = probes.probes[i]
+        for i in params.prb_ridge_index:
+
+            probe = probes.probes[i-1]
             xyz = probe.xyz
             
-            # find the probes at the ridges
-            if not(abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001):
-                continue
-            
-            prb_data = ProbeData( prb_files[i], withT=prb_withT )
+            prb_data = ProbeData( prb_files[i-1], withT=prb_withT )
             prb_data.cleandata( t_start=20.0 )
             prb_data.get_fluc( 'p' )
             pf = np.array( prb_data.df['p_fluc'] )
-            
+
             x_locs.append( (xyz[0]-x_imp)/delta_0 )
             pf_rmss.append( np.sqrt( np.mean( pf**2 ) )/p_ref )
-            
+
             print(f"Processed pressure data at probe {i} at x={xyz[0]:.2f}.")
 
         # -- save data into a pickle file

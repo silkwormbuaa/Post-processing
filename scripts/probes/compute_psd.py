@@ -38,11 +38,11 @@ probes = ProbeFile( dirs.set_prb )
 os.chdir( dirs.prb_dir )
 
 prb_data = dirs.probes
-n_data = len( prb_data )
+n_data   = len( prb_data )
 print(f"We are in directory:{dirs.prb_dir}\n")
 print(f"We have got {n_data:5d} probes data.\n")
 
-params     = Params( dirs.case_para_file )
+params   = Params( dirs.case_para_file )
 
 # -- check if number of probe data and number of probes are consistent
 
@@ -71,9 +71,9 @@ with timer('Computing PSD '):
 
         # -- check if the probe is at the ridge or valley
         xyz = probe.xyz
-        if abs(xyz[1]) < 0.001 and abs(xyz[2]) < 0.001: os.chdir( dirs.pp_psd_ridge ) ; n_ridge += 1
-        elif abs(xyz[1] + h) < 0.001 :                  os.chdir( dirs.pp_psd_valley ); n_valley += 1
-        else:                                           os.chdir( dirs.pp_psd_others ); n_others += 1
+        if   (i+1) in params.prb_ridge_index:    os.chdir( dirs.pp_psd_ridge ) ; n_ridge  += 1
+        elif (i+1) in params.prb_valley_index :  os.chdir( dirs.pp_psd_valley ); n_valley += 1
+        else:                                    os.chdir( dirs.pp_psd_others ); n_others += 1
         
         probedata = ProbeData( prb_data[i], withT=params.prb_withT )
         probedata.cleandata( t_start=20.0 )
@@ -83,7 +83,7 @@ with timer('Computing PSD '):
         if os.getcwd() == dirs.pp_psd_ridge:
             walldist = probedata.xyz[1]
         elif os.getcwd() == dirs.pp_psd_valley:
-            walldist = abs( h + probedata.xyz[1] )
+            walldist = abs( params.H + probedata.xyz[1] )
         else: walldist = probedata.xyz[1]
         
         # in case the old cases that not having T in the probe data
