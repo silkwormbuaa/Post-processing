@@ -35,10 +35,9 @@ from   vista.grid         import GridData
 from   vista.timer        import timer
 from   vista.params       import Params
 from   vista.snapshot     import Snapshot
-from   vista.directories  import Directories
 from   vista.statistic    import StatisticData
+from   vista.directories  import Directories
 from   vista.tools        import get_filelist
-from   vista.tools        import distribute_mpi_work
 from   vista.directories  import create_folder
 from   vista.plot_setting import cpos_callback
 
@@ -104,9 +103,9 @@ u_ref      = params.u_ref
 
 if roughwall: vars_out += ['wd']
 
-x_pfmax    = params.x_pfmax
 x_imp      = params.x_imp
 delta0     = params.delta_0
+x_pfmax    = params.x_pfmax
 x_pfmax    = x_pfmax*delta0 + x_imp
 
 mpi.barrier()

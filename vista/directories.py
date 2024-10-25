@@ -88,7 +88,7 @@ class Directories:
         self.pp_snp_fricpv  = os.path.join( self.pp_snapshots, 'fricpv'  )
         self.pp_snp_fricprj = os.path.join( self.pp_snapshots, 'fricprj' )
         self.pp_snp_pfmax   = os.path.join( self.pp_snapshots, 'pfmax'   )
-        
+        self.pp_snp_zslice  = os.path.join( self.pp_snapshots, 'zslice'  )
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
@@ -127,7 +127,7 @@ class Directories:
         
         casecode = self.case_dir.split('/')[-1]
         source_dir = os.path.realpath(__file__).split('vista')[0]
-        case_para_file = source_dir + 'database/case_parameters/' + casecode
+        case_para_file = source_dir + 'database/parameters/' + casecode
         
         return case_para_file
     
