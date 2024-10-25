@@ -13,7 +13,6 @@
 import os
 import gc
 import sys
-import pickle
 
 import numpy             as     np
 import pandas            as     pd
@@ -1153,7 +1152,7 @@ class Snapshot:
         slic_type : 'X','Y' or 'Z'
         loc       : location of slice
         
-        return    : 2D Snapshot object
+        return    : 2D Snapshot instance
         """
              
 # ----- check if current snapshots 3D?

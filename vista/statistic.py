@@ -47,20 +47,28 @@ class StatisticData:
 # - statistic binary file directory
 # ----------------------------------------------------------------------
 
-    def __init__( self, stat_file ):
+    def __init__( self, stat_file=None ):
         
         """
-        stat_file: path to statistics.bin \n
+        stat_file: path to statistics.bin.
+                   (optional) if None, generate a void Statistic.\n
         
         return     :  self.fsize \n  
         initialize :  self.pos, self.n_var, self.bl, self.verbose
         """
         
-        # directory to the statistic file
-        self.file = stat_file
+        if stat_file is not None:
+        
+            # directory to the statistic file
+            self.file = stat_file
 
-        # file size
-        self.fsize = os.stat(self.file).st_size
+            # file size
+            self.fsize = os.stat(self.file).st_size
+        
+        else: 
+            
+            self.file  = None
+            self.fsize = 0
         
         # file pointer position
         self.pos = 0
@@ -1670,6 +1678,33 @@ class StatisticData:
         
         write_vtm_file( filename, dataset )
                     
+
+# ----------------------------------------------------------------------
+# >>> get a slice from 3D Statistic                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/10/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def get_slice( self, slic_type, loc:float, buff=3 ):
+        
+        """
+        slic_type : 'X','Y', or 'Z'
+        loc       : location of slice
+        
+        return    : 2D statistic instance
+        """
+
+# ----- check if current statistic is 3D?
+
+
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
