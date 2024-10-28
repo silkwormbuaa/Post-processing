@@ -341,7 +341,6 @@ class GridData:
         - !!! Note: when slicing location is on the cell interface, better add
               a small margin to avoid numerical error.
         
-        input:\n
         slic_type : 'X', 'Y', or 'Z' ( normal direction of slice) \n
         loc       : coordinate \n
         bbox      : [xmin,xmax,ymin,ymax,zmin,zmax] \n

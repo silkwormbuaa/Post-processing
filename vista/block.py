@@ -134,6 +134,50 @@ class BlockData:
         file.seek( pos_start + self.size)
 
 
+
+# ----------------------------------------------------------------------
+# >>> fill_with_data (BlockData)                             (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/10/28  - created
+#
+# Desc
+#
+#     - initialize BlockData by filling data directly
+# ----------------------------------------------------------------------
+
+    def fill_with_data( self, num, dims, df, verbose=False ):
+        
+        """
+        num:  block number\n
+        dims: [npx,npy,npz]\n
+        df:   dataframe
+        """
+        
+        self.verbose = verbose
+        
+        # block number
+        self.num = num
+        self.npx = dims[0]
+        self.npy = dims[1]
+        self.npz = dims[2]
+        
+        self.np  = self.npx * self.npy * self.npz
+        
+        self.df  = df
+        
+        # number of variables
+        self.n_var = len( df.columns )
+        
+        # size of the block data (in bytes)
+        self.size = self.sin*4 + self.np*self.n_var*self.sfl
+        
+        
+
 # ----------------------------------------------------------------------
 # >>> Drop ghost cells                                             ( 2 )
 # ----------------------------------------------------------------------

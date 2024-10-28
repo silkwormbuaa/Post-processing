@@ -14,6 +14,7 @@ import sys
 import pickle
 import numpy             as     np
 import pandas            as     pd
+from   copy              import deepcopy
 
 from   .grid             import GridData
 from   .block            import BlockData
@@ -167,18 +168,13 @@ class StatisticData:
 
         if self.format == 1:
 
-            # Read number of samples
+            # Read number of samples, sample step & start step
 
             self.n_samples = read_int_bin(file.read(sin),sin)
-
-            self.pos += sin
-
-            # Read sample step & start step
-
             self.sample_step = read_int_bin(file.read(sin),sin)
             self.start_step  = read_int_bin(file.read(sin),sin)
 
-            self.pos += int(2*sin)
+            self.pos += int(3*sin)
 
             # Read sample time & start time
 
@@ -221,7 +217,7 @@ class StatisticData:
 
             # Read number of samples, sample step & start step
 
-            self.n_samples = read_int_bin(file.read(sin),sin)
+            self.n_samples   = read_int_bin(file.read(sin),sin)
             self.sample_step = read_int_bin(file.read(sin),sin)
             self.start_step  = read_int_bin(file.read(sin),sin)
 
@@ -1704,6 +1700,156 @@ class StatisticData:
 
 # ----- check if current statistic is 3D?
 
+        tbl = self.bl[0]
+        if tbl.npx==1 or tbl.npy==1 or tbl.npz==1:
+            raise TypeError("Current statistic is not 3D data.")
+
+# ----- check if the grid file is available
+
+        if self.grid3d is None:
+            raise ValueError("Please read in grid file first!")
+        
+        else: grid3d = self.grid3d   
+
+
+# ----- select the blocks that intersect the plane
+#       1. intersected blocks' number 2. indexes of sliced location
+
+        bl_intersect = []
+        indx_slic    = []
+
+        # loop over all blocks within this 3d statistic
+        
+        for block in self.bl:
+            
+            bl_num = block.num
+            grd    = grid3d.g[bl_num-1]
+            
+            if slic_type == 'X':
+                
+                # if intersect, keep this block number and 
+                # find the index of slice location
+                if loc >= grd.lx0 and loc < grd.lx1:
+                    
+                    bl_intersect.append( bl_num )
+                
+                    for i in range( buff, grd.nx+buff ):
+                        if (grd.gx[i]-0.5*grd.hx[i] <= loc < grd.gx[i]+0.5*grd.hx[i]):
+                            
+                            indx_slic.append( i )
+                            break
+            
+            elif slic_type == 'Y':
+                
+                if loc >= grd.ly0 and loc < grd.ly1:
+                    
+                    bl_intersect.append( bl_num )
+                    
+                    for j in range( buff, grd.ny+buff ):
+                        if (grd.gy[j]-0.5*grd.hy[j] <= loc < grd.gy[j]+0.5*grd.hy[j]):
+                            
+                            indx_slic.append( j )
+                            break
+            
+            elif slic_type == 'Z':
+                
+                if loc >= grd.lz0 and loc < grd.lz1:
+                    
+                    bl_intersect.append( bl_num )
+                    
+                    for k in range( buff, grd.nz+buff ):
+                        if (grd.gz[k]-0.5*grd.hz[k] <= loc < grd.gz[k]+0.5*grd.hz[k]):
+                            
+                            indx_slic.append( k )
+                            break
+        
+# ----- check if any block intersected
+
+        if len(bl_intersect) == 0:
+            raise ValueError("No block is sliced! Check slice location.")
+        
+        if self.verbose:
+            print(f" {len(bl_intersect)} blocks are sliced.\n")
+            print(" index of block  --  index of cut cell")
+            for i in range( len(bl_intersect) ):
+                print(f" {bl_intersect[i]:15d} -- {indx_slic[i]:12d}")
+
+# ----- init a slice statistic instance
+
+        stat_2d = StatisticData()
+        
+        # get sliced data from 3d statistic and fill in a 2d statistic
+        
+        for block in self.bl:
+            
+            bl_num = block.num
+            
+            if bl_num in bl_intersect:
+                
+                grd = grid3d.g[bl_num-1]
+                idx = indx_slic[ bl_intersect.index(bl_num) ]
+                
+                N1 = grd.nx + buff*2
+                N2 = grd.ny + buff*2
+                N3 = grd.nz + buff*2
+                
+                vars   = block.df.columns
+                n_var  = len(vars)
+                df_sol = deepcopy( block.df.values)
+                sol    = np.array(df_sol).T.reshape(n_var,N3,N2,N1)
+                
+                if slic_type == 'X':
+                    
+                    dims = [1,N2,N3]
+                    sol  = sol[:,:,:,idx].reshape(n_var,N3*N2)
+                
+                elif slic_type == 'Y':
+                    
+                    dims = [N1,1,N3]
+                    sol  = sol[:,:,idx,:].reshape(n_var,N3*N1)
+                
+                elif slic_type == 'Z':
+                    
+                    dims = [N1,N2,1]
+                    sol  = sol[:,idx,:,:].reshape(n_var,N2*N1)
+                    
+                df_sol   = pd.DataFrame(sol.T, columns=vars)
+                
+                bl_slice = BlockData()
+                bl_slice.fill_with_data( bl_num, dims, df_sol )
+                stat_2d.bl.append( bl_slice )
+                
+# ----- fill in headers
+
+        if self.format == 1:
+            
+            headers = ['format',         'n_samples',        'sample_step',  
+                       'start_step',     'sample_time',      'start_time', 
+                       'meanvalues',     'doublecorr',       'triplecorr',
+                       'quadruplecorr',  'autocorr',         'mean_invar',
+                       'schlieren',      'cavitation_stats', 'vapor_gas_stats',
+                       'rste',           'thermo',           'visc_diff'
+                       ]
+        
+        if self.format == 2:
+
+            headers = ['format',         'n_samples',        'sample_step',  
+                       'start_step',     'npv',              'nscalars',
+                       'nspecies',       'sample_time',      'start_time', 
+                       'meanvalues',     'doublecorr',       'triplecorr',
+                       'quadruplecorr',  'autocorr',         'mean_invar',
+                       'schlieren',      'cavitation_stats', 'vapor_gas_stats',
+                       'rste',           'thermo',           'visc_diff'
+                       ]
+
+        for attr, value in self.__dict__.items():
+            if attr in headers:
+                setattr( stat_2d, attr, deepcopy(value) )
+
+# ----- return 2d statistic instance
+
+        return stat_2d
+
 
 
 # ----------------------------------------------------------------------
@@ -1721,35 +1867,55 @@ class StatisticData:
 # ----------------------------------------------------------------------
 
 if __name__ == "__main__":
+
+# -------- test get_slice ----------------
+
+    path  = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/statistics.bin'
+    gfile = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
     
-    path = "/media/wencan/Expansion/temp/231124/results"
-    outpath = "/media/wencan/Expansion/temp/231124/vtk"
+    grid = GridData( gfile )
+    grid.read_grid()
     
-    os.chdir(path)
+    blocklist, index = grid.select_sliced_blockgrids( 'Z', 0.1 )
     
-    box = [-999,999,-999,999,-999,999]
+    print( blocklist )
+    
+    stat3d = StatisticData( path )
+    stat3d.read_statistic( block_list=blocklist, vars_in = ['u','v','w'] )
+    stat3d.grid3d = grid
+    
+    stat2d = stat3d.get_slice( 'Z', 0.1 )
+    
+
+# -------- test write vtm ----------------
+
+    # path = "/media/wencan/Expansion/temp/231124/results"
+    # outpath = "/media/wencan/Expansion/temp/231124/vtk"
+    
+    # os.chdir(path)
+    
+    # box = [-999,999,-999,999,-999,999]
     
     
-    G = GridData( 'inca_grid.bin')
-    G.read_grid()
-    block_list =  G.select_blockgrids( box )
+    # G = GridData( 'inca_grid.bin')
+    # G.read_grid()
+    # block_list =  G.select_blockgrids( box )
     
     
-    S = StatisticData( 'statistics.bin' )
+    # S = StatisticData( 'statistics.bin' )
     
-    with open( 'statistics.bin', 'rb') as f:
+    # with open( 'statistics.bin', 'rb') as f:
         
-        S.verbose = True
+    #     S.verbose = True
         
-        vars = ['u','v','w','p','rho']
+    #     vars = ['u','v','w','p','rho']
         
-        S.read_stat_header( f )
-        S.read_stat_body( f, block_list, vars)
+    #     S.read_stat_header( f )
+    #     S.read_stat_body( f, block_list, vars)
     
         
-    S.match_grid( block_list, G, add_to_df=False)
-    S.grid3d = G
+    # S.match_grid( block_list, G, add_to_df=False)
+    # S.grid3d = G
     
-    os.chdir(outpath)
-    S.write_vtm( 'statistics.vtm', vars, block_list )
-        
+    # os.chdir(outpath)
+    # S.write_vtm( 'statistics.vtm', vars, block_list )

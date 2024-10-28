@@ -1297,13 +1297,13 @@ class Snapshot:
                     GX = [G2,G3]
                     sol = sol[:,:,:,idx].reshape(n_var,N3*N2)
                                     
-                if slic_type == 'Y':
+                elif slic_type == 'Y':
                     
                     dims = [N1,1,N3]
                     GX = [G1,G3]
                     sol = sol[:,:,idx,:].reshape(n_var,N3*N1)
                     
-                if slic_type == 'Z':
+                elif slic_type == 'Z':
                     
                     dims = [N1,N2,1]
                     GX   = [G1,G2]
