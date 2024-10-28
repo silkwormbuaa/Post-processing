@@ -49,10 +49,10 @@ mpi = MPIenv()
 
 casedir  = '/home/wencan/temp/smooth_mid'
 vars_in  = ['u', 'T', 'p']
-vars_out = ['u', 'T', 'p', 'DS']
-labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$']
-colmaps  = ['coolwarm', 'plasma', 'coolwarm', 'Greys_r']
-ranges   = [[-0.4,1.0],[1.0,2.0],[1.0,3.0],[0.0,0.8]]
+vars_out = ['u', 'T', 'p', 'DS','p_fluc']
+labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$', r"$p'/p_{\infty}$"]
+colmaps  = ['coolwarm', 'plasma', 'coolwarm', 'Greys_r', 'coolwarm']
+ranges   = [[-0.4,1.0],[1.0,2.0],[1.0,3.0],[0.0,0.8], [-0.5,0.5]]
 cutbox   = [-120.0, 120.0, 0.1, 86.0, 0.1, 0.11]
 clipbox  = [-20,12,0,10,-1,1]
 
@@ -65,6 +65,7 @@ params    = None
 snapfiles = None
 blocklist = None
 grid3d    = None
+statz     = None
 
 if mpi.is_root:
     
@@ -83,10 +84,14 @@ if mpi.is_root:
     grid3d.read_grid()
     blocklist = grid3d.select_blockgrids( cutbox, mode='overlap' )
     
+    statz = StatisticData( dirs.stat_zslice )
+    statz.read_statistic(block_list=blocklist, vars_in=['p'])
+        
 params    = mpi.comm.bcast( params,    root=0 )
 snapfiles = mpi.comm.bcast( snapfiles, root=0 )
 blocklist = mpi.comm.bcast( blocklist, root=0 )
 grid3d    = mpi.comm.bcast( grid3d,    root=0 )
+statz     = mpi.comm.bcast( statz,     root=0 )
 
 u_ref     = params.u_ref
 T_ref     = params.T_ref
@@ -106,6 +111,11 @@ def show_slice( snapfile ):
     snap.compute_gradients( grads=['grad_rho'] )
     
     for snapbl in snap.snap_data:
+        
+        bl_num = snapbl.num
+        statbl = statz.bl[statz.bl_nums.index(bl_num)]
+        snapbl.df['p_fluc'] = (snapbl.df['p']-statbl.df['p'])/p_ref
+        
         snapbl.df['u'] = snapbl.df['u']/u_ref
         snapbl.df['T'] = snapbl.df['T']/T_ref
         snapbl.df['p'] = snapbl.df['p']/p_ref
@@ -132,8 +142,11 @@ def show_slice( snapfile ):
         cmap.set_under('blue')
         
         dataset.set_active_scalars( var )
-        p.add_mesh( dataset, cmap=cmap, 
-                    clim=ranges[i], show_scalar_bar=False )
+        p.add_mesh( dataset, 
+                    cmap=cmap, 
+                    clim=ranges[i],
+                    lighting=False, 
+                    show_scalar_bar=False )
         
         p.add_mesh( sepline, color='yellow', line_width=4.0 )
 
