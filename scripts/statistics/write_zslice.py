@@ -34,7 +34,7 @@ dirs = Directories( casedir )
 
 grid = GridData( dirs.grid )
 grid.read_grid()
-blocklist, index = grid.select_blockgrids( slic_type, loc )
+blocklist, index = grid.select_sliced_blockgrids( slic_type, loc )
 
 stat3d = StatisticData( dirs.statistics )
 stat3d.read_statistic( blocklist, vars_in=stat3d.full_vars )
