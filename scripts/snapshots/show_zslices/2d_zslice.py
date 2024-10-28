@@ -101,6 +101,7 @@ rescale   = [-params.x_imp, 0.0, 0.0, delta, delta, delta]
 
 mpi.barrier()
 
+os.chdir( out_dir )
 clock = timer("show slices from snapshot_Z_xxxx.bin:")
 
 def show_slice( snapfile ):
