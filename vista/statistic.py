@@ -26,6 +26,9 @@ from   .io_vtk           import create_3d_vtkRectilinearGrid
 from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_log_bin
+from   .io_binary        import write_flt_bin
+from   .io_binary        import write_int_bin
+from   .io_binary        import write_log_bin
 
 from   .lib.form         import phy
 from   .lib.form         import mth
@@ -382,7 +385,8 @@ class StatisticData:
                                   'rhorho','rhorhoE' ,'rhop' ,'rhoT' ,'rhomu' ,
                                            'rhoErhoE','rhoEp','rhoET','rhoEmu',
                                                       'pp'   ,'pT'   ,'pmu'   ,
-                                                              'TT'   ,'mumu'  ]   
+                                                              'TT'   ,'Tmu'   ,
+                                                                      'mumu'  ]   
         
         # index list of vars
         
@@ -1853,6 +1857,128 @@ class StatisticData:
 
 
 # ----------------------------------------------------------------------
+# >>> write statistics                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/10/28  - created
+#
+# Desc
+#     write out statistics.bin from a StatisticData instance
+# ----------------------------------------------------------------------
+
+    def write_statistic( self, filename ):
+
+        """
+        filename: output filename
+        """
+        
+        verbose = self.verbose
+        
+# ----- write statistics header
+
+        # default size
+        sin = 4; slg = 4; sfl = 8
+        
+        with open( filename, 'wb' ) as f:
+            
+            # header format
+            
+            write_int_bin( self.format,      f, sin )
+            
+            # number of samples, sample step & start step
+            
+            write_int_bin( self.n_samples,   f, sin )
+            write_int_bin( self.sample_step, f, sin )
+            write_int_bin( self.start_step,  f, sin )
+            
+            # check format
+            
+            if self.format == 2:
+                
+                # number of transported variables
+                
+                write_int_bin( self.npv,      f, sin )
+                write_int_bin( self.nscalars, f, sin )
+                write_int_bin( self.nspecies, f, sin )
+        
+            # sample time & start time
+            
+            write_flt_bin( self.sample_time, f, sfl )
+            write_flt_bin( self.start_time,  f, sfl )
+            
+            buf_log = [ self.meanvalues,
+                        self.doublecorr,
+                        self.triplecorr,
+                        self.quadruplecorr,
+                        self.autocorr,
+                        self.mean_invar,
+                        self.schlieren,
+                        self.cavitation_stats,
+                        self.vapor_gas_stats,
+                        self.rste,
+                        self.thermo,
+                        self.visc_diff,
+                        ]
+            
+            write_log_bin( buf_log, f, slg )
+
+            if verbose: print("Finish writing statistics header.")
+        
+# --------- write statistics body
+            
+            for bl in self.bl:
+                
+                # block number
+                
+                write_int_bin( bl.num, f, sin )
+
+                # dimensions of grids, N1, N2, N3
+                
+                write_int_bin( bl.npx, f, sin )
+                write_int_bin( bl.npy, f, sin )
+                write_int_bin( bl.npz, f, sin )
+                
+                # sol(n_var, N3, N2, N1)
+                
+                write_flt_bin( np.array(bl.df.values).T, f, sfl )
+
+
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/10/28  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+    
+    @property
+    def full_vars( self ):
+
+        mean_ls = ['u','v','w','rho','rhoE','p','T','mu']
+        
+        cor2_ls = ['uu','uv','uw','urho'  ,'urhoE'   ,'up'   ,'uT'   ,'umu'   ,
+                        'vv','vw','vrho'  ,'vrhoE'   ,'vp'   ,'vT'   ,'vmu'   ,
+                             'ww','wrho'  ,'wrhoE'   ,'wp'   ,'wT'   ,'wmu'   ,
+                                  'rhorho','rhorhoE' ,'rhop' ,'rhoT' ,'rhomu' ,
+                                           'rhoErhoE','rhoEp','rhoET','rhoEmu',
+                                                      'pp'   ,'pT'   ,'pmu'   ,
+                                                              'TT'   ,'Tmu'   ,
+                                                                      'mumu'  ]
+        
+        return mean_ls + cor2_ls
+
+# ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )
 # ----------------------------------------------------------------------
 #
@@ -1870,8 +1996,10 @@ if __name__ == "__main__":
 
 # -------- test get_slice ----------------
 
-    path  = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/statistics.bin'
+    path  = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
     gfile = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
+    
+    os.chdir( path )
     
     grid = GridData( gfile )
     grid.read_grid()
@@ -1880,12 +2008,22 @@ if __name__ == "__main__":
     
     print( blocklist )
     
-    stat3d = StatisticData( path )
-    stat3d.read_statistic( block_list=blocklist, vars_in = ['u','v','w'] )
+    stat3d = StatisticData( path+'/statistics.bin' )
+    stat3d.verbose = True
+    stat3d.read_statistic( block_list=blocklist, vars_in = stat3d.full_vars )
     stat3d.grid3d = grid
     
     stat2d = stat3d.get_slice( 'Z', 0.1 )
+    stat2d.verbose =True 
     
+    stat2d.write_statistic( 'slicez.bin' )
+    
+    stattest = StatisticData( 'slicez.bin' )
+    
+    stattest.verbose = True
+    
+    stattest.read_statistic( block_list=blocklist, vars_in=stattest.full_vars )
+
 
 # -------- test write vtm ----------------
 

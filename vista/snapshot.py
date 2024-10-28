@@ -1999,7 +1999,7 @@ class Snapshot:
             else: raise ValueError("snapshot type not supported.")
             
             if verbose: 
-                print(f"Finish write snapshot header, pos = {pos}.")
+                print(f"Finish writing snapshot header, pos = {pos}.")
             
 # ----- write snapshot body
 
