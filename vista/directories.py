@@ -55,10 +55,10 @@ class Directories:
         
         # supplement files
         
-        self.cc_setup = os.path.join( self.sup_dir, 'cutcells_setup.dat' )
+        self.cc_setup     = os.path.join( self.sup_dir, 'cutcells_setup.dat' )
         self.cc_BSP_setup = os.path.join( self.sup_dir, 'cutcells_BSP_setup.dat' )
-        self.wall_dist = os.path.join( self.sup_dir, 'wall_dist' )
-#        self.case_para_file = os.path.join( self.sup_dir, 'case_parameters' )
+        self.wall_dist    = os.path.join( self.sup_dir, 'wall_dist' )
+        self.stat_zslice  = os.path.join( self.sup_dir, 'stat_zslice.bin' )
 
 # - post processing directoris
         

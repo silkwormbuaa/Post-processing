@@ -1946,7 +1946,7 @@ class StatisticData:
                 
                 write_flt_bin( np.array(bl.df.values).T, f, sfl )
 
-
+        print(f"Finish writing {filename}.")
 
 # ----------------------------------------------------------------------
 # >>> Function Name                                                (Nr.)
