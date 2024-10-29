@@ -87,12 +87,12 @@ if From_File:
 else:
     
     delta = 5.2
-    casecode = '0927'
+    casecode = '241018'
 
-    gy = np.arange(-0.7488, 0.0, 0.0104)
-    gy = np.concatenate( (gy,lin_grow(0.0, 0.01045516681, 1.0219,len=73)) )
+    gy = np.arange(-1.254, 0.0, 0.01045)
+    gy = np.concatenate( (gy,lin_grow(0.0, 0.01045, 1.0219,len=73)[0]) )
     
-    gz = np.linspace(0,5.2,97)
+    gz = np.linspace(0,5.2,193)
     
     zmin = np.min( gz ) ; zmax = np.max( gz )
     ymin = np.min( gy ) ; ymax = np.max( gy )
@@ -111,7 +111,7 @@ else:
     
     # block edges
     
-    for y in [-0.7488,-0.4992,-0.2496,0.0,0.325544991,0.873080888,1.7939845]:
+    for y in [-1.254,-1.0032,-0.7524,-0.5016,-0.2508,0.0,0.325544991,0.873080888,1.7939845]:
         ax.plot([zmin/delta, zmax/delta],[y/delta,y/delta],'red',linewidth=1)
     
     for z in [0.0,1.3,2.6,3.9,5.2]:
@@ -121,16 +121,16 @@ else:
     if ymin < 0.0:
         y_wall = define_wall_shape(gz,casecode=casecode,write=False)/delta
         
-        ax.fill_between(gz/delta,-0.2,y_wall,color='gray',zorder=10,alpha=0.7)
+        ax.fill_between(gz/delta,-0.3,y_wall,color='gray',zorder=10,alpha=0.95)
     
 ax.set_xlim([0,1])
 ax.set_ylim([-0.2,1.0])
 ax.set_aspect('equal', adjustable='box')
 fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 
-#plt.show()
+plt.show()
 
-plt.savefig("mesh.pdf")
+#plt.savefig("mesh.pdf")
 
 plt.close()
     
