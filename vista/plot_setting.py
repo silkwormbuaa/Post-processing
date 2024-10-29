@@ -68,16 +68,32 @@ def cpos_callback( p:pv.Plotter ):
 #
 # ----------------------------------------------------------------------
 
-def set_plt_rcparams(preamble='stix', fontsize=40):
-
-    plt.rcParams["text.usetex"] = True
+def set_plt_rcparams(fontsize=40, latex=False, preamble='stix'):
     
-    if preamble == 'stix':
-        plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
-    elif preamble == 'amssymb':
-        plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
+    """
+    fontsize: int
+    latex:    bool, set text.usetex to True or False
+    preamble: str, set the preamble of latex
+    
+    default font is stix.
+    """
+
+    # on snellius, texlive is only partly installed, lacking type1cm.sty.
+    # so we can only use matplotlib's inherent font like 'stix'
+
+    if latex:
+
+        plt.rcParams["text.usetex"] = True
         
-    plt.rcParams['font.family'] = "Times New Roman"
+        if preamble == 'stix':
+            plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+        elif preamble == 'amssymb':
+            plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
+    
+    else:
+        plt.rcParams['mathtext.fontset'] = 'stix'
+    
+    plt.rcParams['font.family'] = "STIXGeneral"
     plt.rcParams['font.size']   = fontsize
 
 

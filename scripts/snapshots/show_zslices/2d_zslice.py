@@ -41,9 +41,10 @@ from   vista.directories  import create_folder
 from   vista.plot_setting import cpos_callback
 from   vista.plot_setting import set_plt_rcparams
 
-# - build MPI communication environment
+# - build MPI communication environment, set plotting parameters
 
 mpi = MPIenv()
+set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
@@ -157,7 +158,6 @@ def show_slice( snapfile ):
         p.close()
 
         image = crop_border(image)
-        set_plt_rcparams(fontsize=15)
 
         fig, ax = plt.subplots(figsize=(12.8,7.2))
 
