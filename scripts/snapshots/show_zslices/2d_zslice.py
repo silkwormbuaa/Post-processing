@@ -16,11 +16,9 @@ if off_screen:
     vdisplay = Xvfb(width=1920, height=1080)
     vdisplay.start()
 
-import gc
 import os
 import sys
 import time
-import numpy              as     np
 import pyvista            as     pv
 import matplotlib.pyplot  as     plt
 
@@ -54,7 +52,7 @@ vars_out = ['u', 'T', 'p', 'DS','p_fluc']
 labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$',   r"$p'/p_{\infty}$"]
 colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 'coolwarm']
 ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.0],         [0.0,0.8], [-0.5,0.5]]
-cutbox   = [-120.0, 120.0, 0.1, 86.0, 0.1, 0.11]
+cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
 
 # =============================================================================

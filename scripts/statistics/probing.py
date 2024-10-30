@@ -25,7 +25,6 @@ from   vista.directories import create_folder
 # =============================================================================
 
 case_dir   = '/home/wencan/temp/smooth_mid'
-vars_in    = StatisticData.full_vars
 probe_type = 'X'
 loc        = ( 0.1, 31.2 )
 
@@ -61,7 +60,7 @@ block_list, indx_probe = G.select_probed_blockgrids( probe_type, loc )
 with timer(" read selected blocks from statistics.bin"):
     
     stat = StatisticData(dirs.statistics)
-    stat.read_statistic( block_list, vars_in )
+    stat.read_statistic( block_list, stat.full_vars )
     
 # - do probing
 
