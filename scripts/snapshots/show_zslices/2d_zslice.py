@@ -51,22 +51,26 @@ set_plt_rcparams(latex=False,fontsize=15)
 casedir  = '/home/wencan/temp/smooth_mid'
 vars_in  = ['u', 'T', 'p']
 vars_out = ['u', 'T', 'p', 'DS','p_fluc']
-labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$', r"$p'/p_{\infty}$"]
-colmaps  = ['coolwarm', 'plasma', 'coolwarm', 'Greys_r', 'coolwarm']
-ranges   = [[-0.4,1.0],[1.0,2.0],[1.0,3.0],[0.0,0.8], [-0.5,0.5]]
+labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$',   r"$p'/p_{\infty}$"]
+colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 'coolwarm']
+ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.0],         [0.0,0.8], [-0.5,0.5]]
 cutbox   = [-120.0, 120.0, 0.1, 86.0, 0.1, 0.11]
-clipbox  = [-20,12,0,10,-1,1]
+clipbox  = [-20, 12, 0, 10, -1, 1]
 
 # =============================================================================
 
 dirs     = Directories( casedir )
 out_dir  = dirs.pp_snp_zslice
 
+# allocate variable that will be broadcasted to all workers
+
 params    = None
 snapfiles = None
 blocklist = None
 grid3d    = None
 statz     = None
+
+# root does the preparation
 
 if mpi.is_root:
     
@@ -105,13 +109,19 @@ mpi.barrier()
 os.chdir( out_dir )
 clock = timer("show slices from snapshot_Z_xxxx.bin:")
 
+# read in the snapshots and show them
+
 def show_slice( snapfile ):
-    
+
+# -- read in the snapshot and compute density gradient
+
     snap        = Snapshot( snapfile )
     snap.grid3d = grid3d
     snap.read_snapshot( block_list=blocklist, var_read=vars_in )
     snap.compute_gradients( grads=['grad_rho'] )
-    
+
+# -- data processing block by block
+
     for snapbl in snap.snap_data:
         
         bl_num = snapbl.num
@@ -123,10 +133,11 @@ def show_slice( snapfile ):
         snapbl.df['p'] = snapbl.df['p']/p_ref
         snapbl.df['DS']= compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
         
+# -- prepare for the visualization
 
     itstep      = snap.itstep
     itime       = snap.itime
-    figname     = f"slice_z_{itstep:05d}.png"
+    figname     = f"slice_z_{itstep:08d}.png"
     
     dataset     = pv.MultiBlock( snap.create_vtk_multiblock(rescale=rescale) )
     dataset     = dataset.cell_data_to_point_data().combine()
@@ -134,10 +145,14 @@ def show_slice( snapfile ):
     sepline     = dataset.contour( [0.0], scalars='u' )
     sys.stdout.flush()
 
+# -- loop over all the output variables
+
     for i, var in enumerate(vars_out):
         
         os.chdir( f'./{var}/figs' )
         p = pv.Plotter( off_screen=off_screen, window_size=[1920,1080], border=False )
+
+# ----- set color maps
 
         cmap    = plt.get_cmap(colmaps[i],51)
         cmap.set_over('red')
@@ -156,6 +171,8 @@ def show_slice( snapfile ):
         p.camera.tight()
         image = p.screenshot(return_img=True)
         p.close()
+
+# ----- pass the image from pyvista to matplotlib
 
         image = crop_border(image)
 

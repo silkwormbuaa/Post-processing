@@ -6,7 +6,7 @@
 @Author  :   Wencan WU 
 @Version :   2.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   read in a snapshot and show it with pyvista and matplotlib
+@Desc    :   read in a snapshot and show density_gradient with pyvista and matplotlib
 '''
 
 off_screen = False
@@ -47,9 +47,12 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-case_dir = '/home/wencan/temp/231124'
-out_dir  = '/home/wencan/temp/231124/postprocess/snapshotZ/'
-clipbox  = [-20,12,0,10,-1,1]
+case_dir   = '/home/wencan/temp/231124'                        # case directory  /case_dir/snapshots/snapshot_xxxx
+out_dir    = '/home/wencan/temp/231124/postprocess/snapshotZ/' # output directory
+clipbox    = [-20,12,0,10,-1,1]                                # [xmin,xmax,ymin,ymax,zmin,zmax]
+vars_out   = ['u','v','w','p','T','grad_rho','grad_p']         # variables passed to pyvista
+rescale    = [-50.4,.0,.0,5.2,5.2,5.2]                         # shift and rescale coordinates 
+                                                               # [x_shift,y_shift,z_shift,x_unit,y_unit,z_unit]
 
 # =============================================================================
 
@@ -81,9 +84,6 @@ snapfiles  = snapfiles[i_s:i_e]
 print(f"I am processor {rank:05d}, I take care of {len(snapfiles):5d} snapshots.")
 sys.stdout.flush()
 
-vars       = ['u','v','w','p','T','grad_rho','grad_p']
-rescale    = [-50.4,.0,.0,5.2,5.2,5.2]
-
 os.chdir( out_dir )
 clock = timer("show snapshot z slices")
 
@@ -98,7 +98,7 @@ for i, snap_file in enumerate(snapfiles):
     
 # ---- pass snapshot to pyvista
 
-    dataset = pv.MultiBlock( snap.create_vtk_multiblock( vars, mode='symmetry', rescale=rescale ) )
+    dataset = pv.MultiBlock( snap.create_vtk_multiblock( vars_out, mode='symmetry', rescale=rescale ) )
 
     p = pv.Plotter( off_screen=True, window_size=[1920,1080], border=False )
 
