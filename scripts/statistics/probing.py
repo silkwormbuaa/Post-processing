@@ -24,18 +24,18 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-outfolder = '/probing'
-probe_type = 'Y'
-loc = (-53.6,0.0)
+case_dir   = '/home/wencan/temp/smooth_mid'
+vars_in    = StatisticData.full_vars
+probe_type = 'X'
+loc        = ( 0.1, 31.2 )
 
 # =============================================================================
 
-dirs = Directories( os.getcwd() )
+dirs = Directories( case_dir )
 
 datafile = dirs.statistics
-gridfile = dirs.grid
 
-outpath  = dirs.pos_dir + outfolder
+outpath  = dirs.pp_statistics + '/probing_x'
 
 # - read in case parameters
 
@@ -45,13 +45,12 @@ casecode   = parameters.casecode
 
 # - read in grid info
 
-G = GridData( gridfile )
+G = GridData( dirs.grid )
 G.read_grid()
 
 # - enter outpath
 
-create_folder( outpath )
-os.chdir(outpath)
+os.chdir( create_folder( outpath ) )
 
 # - do probing 
 
@@ -61,22 +60,16 @@ block_list, indx_probe = G.select_probed_blockgrids( probe_type, loc )
 
 with timer(" read selected blocks from statistics.bin"):
     
-    with open(datafile,'br') as f:
-        
-        S = StatisticData(datafile)
-        S.read_stat_header( f )
-        vars = ['u','v','w','uu','vv','ww','uv']
-        S.read_stat_body( f, block_list, vars )
-
-        
-
+    stat = StatisticData(dirs.statistics)
+    stat.read_statistic( block_list, vars_in )
+    
 # - do probing
 
 with timer(" Get probed dataframe"):
     
-    df_stat = S.get_probed_df( block_list, G, indx_probe, probe_type )
+    df_stat = stat.get_probed_df( block_list, G, indx_probe, probe_type )
     
-    outfile = 'probing_'+probe_type
+    outfile = f'probing_{probe_type}.dat'
     
     df_stat.to_string( outfile, 
                        index=False, 
