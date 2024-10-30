@@ -10,6 +10,7 @@
 '''
 
 import os
+import shutil
 import pandas            as    pd
 import numpy             as    np
 
@@ -28,5 +29,5 @@ index = np.array(df['index'])
 for i in index[1::2]:
     
     snap_folder = f'snapshot_{i:08d}'
-    os.remove(snap_folder)
+    shutil.rmtree(snap_folder, ignore_errors=True)
     print( f'{snap_folder} is removed.' )
