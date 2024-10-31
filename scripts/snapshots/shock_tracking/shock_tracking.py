@@ -29,8 +29,8 @@ from   vista.tools       import get_filelist
 y0 = 10.4
 xrange = [8.0, 24.0]     # [-8,10] for 231124
 
-inputpath    = '/home/wwu1/prjspc/smooth_mid/'
-outputpath   = '/home/wwu1/prjspc/smooth_mid/postprocess/snapshots/shock_tracking/2d/'
+inputpath    = '/home/wencan/temp/smooth_mid/'
+outputpath   = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/2d/'
 
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
@@ -102,7 +102,8 @@ for i, snap_file in enumerate(snap_files):
             
             new_data = pd.DataFrame( {'x':g.gx[3:-3], 'grad_rho':line[3:-3]} )
 
-            prbdf = pd.concat( [prbdf, new_data], ignore_index=True )        
+            if prbdf.empty: prbdf = new_data
+            else:           prbdf = pd.concat( [prbdf, new_data], ignore_index=True )        
 
     # - drop outside data and sort the dataframe
     
@@ -167,4 +168,4 @@ for i, snap_file in enumerate(snap_files):
     print("------------------\n")
 
 result = pd.DataFrame( {'time':times, 'x_shock':x_shocks, 'grad_rho_max':grad_rho_maxs} )
-result.to_csv('shock_tracking2d.csv', index=False, sep='  ')
+result.to_csv('shock_tracking2d.csv', index=False, sep=' ')
