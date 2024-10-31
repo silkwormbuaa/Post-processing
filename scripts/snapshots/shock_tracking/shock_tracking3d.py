@@ -169,7 +169,7 @@ for i, snap_file in enumerate(snap_files):
     
     ax.contourf( xx, zz, grad_rho, cmap='Greys', levels=clevels, extend='both' )
     ax.plot( x_shock, z_shock, 'r', ls=':' )
-    ax.set_title(f"t ={snap.itime:8.2f} s")
+    ax.set_title(f"t ={snap.itime:8.2f} ms")
 
     plt.savefig(f'snap_{snap.itstep:08d}.png')
     plt.close()

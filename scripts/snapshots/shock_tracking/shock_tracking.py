@@ -29,8 +29,8 @@ from   vista.tools       import get_filelist
 y0 = 10.4
 xrange = [8.0, 24.0]     # [-8,10] for 231124
 
-inputpath    = '/media/wencan/Expansion/temp/231124/'
-outputpath   = '/home/wencanwu/temp/'
+inputpath    = '/home/wwu1/prjspc/smooth_mid/'
+outputpath   = '/home/wwu1/prjspc/smooth_mid/postprocess/snapshots/shock_tracking/2d/'
 
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
@@ -149,6 +149,7 @@ for i, snap_file in enumerate(snap_files):
     
     ax.set_xlim( xrange )
     ax.set_ylim( [-0.05, 0.8] )
+    ax.set_title(f"t= {snap.itime:8.2f} ms")
     
     plt.savefig(f'snap_Z_{snap.itstep:08d}.png')
     
