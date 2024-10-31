@@ -56,9 +56,10 @@ print("==================\n")
 
 # - initialize a list to store the x location of the shock
 
-times        = list()
-x_shocks     = list()
-x_last_shock = None
+times         = list()
+x_shocks      = list()
+grad_rho_maxs = list()
+x_last_shock  = None
 
 # - loop over the snapshot files
 
@@ -158,10 +159,11 @@ for i, snap_file in enumerate(snap_files):
     x_last_shock = x_shock
     times.append( snap.itime )        
     x_shocks.append( x_shock )
+    grad_rho_maxs.append( grad_rho_max )
     
     progress = (i+1)/len(snap_files)
     print(f"{i+1}/{len(snap_files)} is done. " + clock.remainder(progress))
     print("------------------\n")
 
-result = pd.DataFrame( {'time':times, 'x_shock':x_shocks} )
-result.to_csv('shock_tracking2d.csv', index=False)
+result = pd.DataFrame( {'time':times, 'x_shock':x_shocks, 'grad_rho_max':grad_rho_maxs} )
+result.to_csv('shock_tracking2d.csv', index=False, sep='  ')
