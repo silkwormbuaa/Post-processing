@@ -51,7 +51,7 @@ vars_in  = ['u', 'T', 'p']
 vars_out = ['u', 'T', 'p', 'DS','p_fluc']
 labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$',   r"$p'/p_{\infty}$"]
 colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 'coolwarm']
-ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.0],         [0.0,0.8], [-0.5,0.5]]
+ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8], [-0.5,0.5]]
 cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
 

@@ -26,7 +26,8 @@ from   vista.directories import create_folder
 
 case_dir   = '/home/wencan/temp/smooth_mid'
 probe_type = 'X'
-loc        = ( 0.1, 31.2 )
+loc        = ( 0.1, 0.01 )
+outfile    = f'probing_0.dat'
 
 # =============================================================================
 
@@ -67,8 +68,6 @@ with timer(" read selected blocks from statistics.bin"):
 with timer(" Get probed dataframe"):
     
     df_stat = stat.get_probed_df( block_list, G, indx_probe, probe_type )
-    
-    outfile = f'probing_{probe_type}.dat'
     
     df_stat.to_string( outfile, 
                        index=False, 
