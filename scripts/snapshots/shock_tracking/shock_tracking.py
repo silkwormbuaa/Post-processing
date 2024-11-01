@@ -26,12 +26,18 @@ from   vista.tools       import get_filelist
 
 # =============================================================================
 
-y0 = 10.4
-xrange = [8.0, 24.0]     # [-8,10] for 231124
+y0 = 31.2
+xrange = [17,32]    
 
-inputpath    = '/home/wencan/temp/smooth_mid/'
-outputpath   = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/2d/'
+# y = 10.4, xrange = [-8,10] for 231124
+#           xrange = [8,24]  for smooth_mid
+# y = 31.2, xrange = [17,32] for 231124
+#           xrange = [30,45] for smooth_mid
 
+
+inputpath    = '/home/wencan/temp/231124/'
+
+outputpath   = inputpath + 'postprocess/snapshots/shock_tracking/2d/'
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
 
