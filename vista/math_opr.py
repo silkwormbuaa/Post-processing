@@ -91,3 +91,42 @@ def unitize_L2( vector ):
     
     return vector_unitized
 
+
+# ----------------------------------------------------------------------
+# >>> find the maximum/minimum point of a parabola curve        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/11/01  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def find_parabola_max( point1, point2, point3):
+    
+    # get the x, y coordinates of the three points
+    x1, y1 = point1
+    x2, y2 = point2
+    x3, y3 = point3
+    
+    # solve the coefficients: a, b, c
+    A = np.array([
+        [x1**2, x1, 1],
+        [x2**2, x2, 1],
+        [x3**2, x3, 1]
+    ])
+    B = np.array([y1, y2, y3])
+    
+    a, b, c = np.linalg.solve(A, B)
+    
+    # find the x coordinate of the maximum point
+    x_max = -b / (2 * a)
+    
+    # get the maximum value
+    y_max = a * x_max**2 + b * x_max + c
+    
+    return (x_max, y_max)

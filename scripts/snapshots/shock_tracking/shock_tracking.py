@@ -23,6 +23,7 @@ from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
 from   vista.tools       import find_indices
 from   vista.tools       import get_filelist
+from   vista.math_opr    import find_parabola_max
 
 # =============================================================================
 
@@ -41,9 +42,9 @@ outputpath   = inputpath + 'postprocess/snapshots/shock_tracking/2d/'
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
 
-tolerance = 3.0     # max distance between max_grad_rho and mean shock location
+tolerance  = 3.0     # max distance between max_grad_rho and mean shock location
 
-half_width = 1.5    # half width of the subdomain to search for the shock front
+half_width = 2.0    # half width of the subdomain to search for the shock front
 
 # =============================================================================
 
@@ -122,8 +123,14 @@ for i, snap_file in enumerate(snap_files):
     
     idmax = prbdf['grad_rho'].idxmax()
     
-    x_shock = prbdf.iloc[idmax]['x']
-    grad_rho_max = prbdf.iloc[idmax]['grad_rho']
+    p1 = [prbdf['x'][idmax-1], prbdf['grad_rho'][idmax-1]]
+    p2 = [prbdf['x'][idmax],   prbdf['grad_rho'][idmax]]
+    p3 = [prbdf['x'][idmax+1], prbdf['grad_rho'][idmax+1]]
+    
+    x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
+    
+    # x_shock = prbdf.iloc[idmax]['x']
+    # grad_rho_max = prbdf.iloc[idmax]['grad_rho']
 
 # -----------------------------------------------------------------------------
 # - check if the maximum is at the boundary
@@ -143,9 +150,15 @@ for i, snap_file in enumerate(snap_files):
         sub_df   = prbdf.iloc[indx_s:indx_e].copy()
 
         idmax = sub_df['grad_rho'].idxmax()
+
+        p1 = [sub_df['x'][idmax-1], sub_df['grad_rho'][idmax-1]]
+        p2 = [sub_df['x'][idmax],   sub_df['grad_rho'][idmax]]
+        p3 = [sub_df['x'][idmax+1], sub_df['grad_rho'][idmax+1]]
         
-        x_shock      = sub_df['x'][idmax]
-        grad_rho_max = sub_df['grad_rho'][idmax]
+        x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
+
+        # x_shock      = sub_df['x'][idmax]
+        # grad_rho_max = sub_df['grad_rho'][idmax]
         
 # -----------------------------------------------------------------------------
     
