@@ -129,9 +129,6 @@ for i, snap_file in enumerate(snap_files):
     
     x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
     
-    # x_shock = prbdf.iloc[idmax]['x']
-    # grad_rho_max = prbdf.iloc[idmax]['grad_rho']
-
 # -----------------------------------------------------------------------------
 # - check if the maximum is at the boundary
     
@@ -157,9 +154,7 @@ for i, snap_file in enumerate(snap_files):
         
         x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
 
-        # x_shock      = sub_df['x'][idmax]
-        # grad_rho_max = sub_df['grad_rho'][idmax]
-        
+
 # -----------------------------------------------------------------------------
     
     # - plot the grad_rho on the probe line

@@ -26,6 +26,7 @@ from   vista.grid        import GridData
 from   vista.tools       import find_indices
 from   vista.tools       import get_filelist
 from   vista.directories import create_folder
+from   vista.math_opr    import find_parabola_max
 
 # =============================================================================
 
@@ -35,14 +36,14 @@ xrange = [8.0,24.0]
 # [-8,10] for 231124
 
 inputpath    = '/home/wencan/temp/smooth_mid/'
-outputpath   = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking'
+outputpath   = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/3d'
 
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
 
-tolerance = 3.0     # max distance between max_grad_rho and mean shock location
+tolerance  = 3.0     # max distance between max_grad_rho and mean shock location
 
-half_width = 1.5    # half width of the subdomain to search for the shock front
+half_width = 2.0    # half width of the subdomain to search for the shock front
 
 # =============================================================================
 
@@ -135,8 +136,14 @@ for i, snap_file in enumerate(snap_files):
     # - tracking the shock front line where max grad_rho is located
     
     idmax = grad_rho.argmax(axis=1)
+    x_shock = np.zeros(npz)
     
-    x_shock   = xx[np.arange(npz),idmax]
+    for j in range(len(idmax)):
+        p1 = [ xx[j,idmax[j]-1], grad_rho[j,idmax[j]-1] ]
+        p2 = [ xx[j,idmax[j]],   grad_rho[j,idmax[j]  ] ]
+        p3 = [ xx[j,idmax[j]+1], grad_rho[j,idmax[j]+1] ]
+        
+        x_shock[j], _ = find_parabola_max(p1,p2,p3)
     
 # - check if any element of x_shock is 'tolerance' away from x_last_shock
 # ------------------------------------------------------------------------------    
@@ -153,9 +160,16 @@ for i, snap_file in enumerate(snap_files):
         sub_zz       = zz[:,indx_s:indx_e]
         
         idmax        = sub_grad_rho.argmax(axis=1)
-    
-        x_shock   = sub_xx[np.arange(npz),idmax]
+        x_shock      = np.zeros(npz)
         
+        for j in range(len(idmax)):
+            p1 = [ xx[j,idmax[j]-1], grad_rho[j,idmax[j]-1] ]
+            p2 = [ xx[j,idmax[j]],   grad_rho[j,idmax[j]  ] ]
+            p3 = [ xx[j,idmax[j]+1], grad_rho[j,idmax[j]+1] ]
+            
+            x_shock[j], _ = find_parabola_max(p1,p2,p3)        
+    
+
 # ------------------------------------------------------------------------------
     
     z_shock   = zz[:,0]
