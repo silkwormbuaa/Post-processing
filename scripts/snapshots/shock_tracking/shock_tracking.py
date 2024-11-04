@@ -24,11 +24,12 @@ from   vista.grid        import GridData
 from   vista.tools       import find_indices
 from   vista.tools       import get_filelist
 from   vista.math_opr    import find_parabola_max
+from   vista.directories import create_folder
 
 # =============================================================================
 
-y0 = 31.2
-xrange = [17,32]    
+y0 = 10.4
+xrange = [-8,10]    
 
 # y = 10.4, xrange = [-8,10] for 231124
 #           xrange = [8,24]  for smooth_mid
@@ -72,7 +73,7 @@ new_shock_is_far      = False
 
 # - loop over the snapshot files
 
-os.chdir( outputpath )
+os.chdir( create_folder(outputpath) )
 clock = timer("Tracking the shock location")
 
 for i, snap_file in enumerate(snap_files):

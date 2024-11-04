@@ -32,12 +32,15 @@ from   vista.math_opr    import find_parabola_max
 # =============================================================================
 
 y0 = 10.4
-xrange = [8.0,24.0]     
+xrange = [-8,10.0]     
 
-# [-8,10] for 231124
+# y = 10.4, xrange = [-8,10] for 231124
+#           xrange = [8,24]  for smooth_mid
+# y = 31.2, xrange = [17,32] for 231124
+#           xrange = [30,45] for smooth_mid
 
-inputpath    = '/home/wencan/temp/smooth_mid/'
-outputpath   = '/home/wencan/temp/smooth_mid/postprocess/snapshots/shock_tracking/3d'
+inputpath    = '/home/wencan/temp/231124/'
+outputpath   = inputpath + 'postprocess/snapshots/shock_tracking/3d'
 
 snapshotpath = inputpath + 'snapshots/'
 gridfile     = inputpath + 'results/inca_grid.bin'
@@ -145,7 +148,7 @@ for i, snap_file in enumerate(snap_files):
     
     if x_last_shock is None: x_last_shock = np.mean(x_temp)
     
-    if any( abs(x_temp - x_last_shock)  > tolerance ):
+    if np.any( np.abs(x_temp - x_last_shock)  > tolerance ):
         print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
     
     indx_s,_     = find_indices(xx[0,:], x_last_shock-half_width)
