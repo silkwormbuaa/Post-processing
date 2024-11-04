@@ -7,6 +7,7 @@
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Slice at y= 2*delta0 and track the shock front. 
+             All use special treatment.(only search in the subdomain around last shock)
 '''
 
 
@@ -62,9 +63,10 @@ print("==================\n")
 
 # - initialize a list to store the x location of the shock
 
-times      = list()
-shocklines = list()
-x_last_shock = None
+times                 = list()
+shocklines            = list()
+x_last_shock          = None
+
 
 # - loop over the snapshot files
 
@@ -135,39 +137,31 @@ for i, snap_file in enumerate(snap_files):
     
     # - tracking the shock front line where max grad_rho is located
     
-    idmax = grad_rho.argmax(axis=1)
-    x_shock = np.zeros(npz)
-    
-    for j in range(len(idmax)):
-        p1 = [ xx[j,idmax[j]-1], grad_rho[j,idmax[j]-1] ]
-        p2 = [ xx[j,idmax[j]],   grad_rho[j,idmax[j]  ] ]
-        p3 = [ xx[j,idmax[j]+1], grad_rho[j,idmax[j]+1] ]
-        
-        x_shock[j], _ = find_parabola_max(p1,p2,p3)
-    
+    idmax  = grad_rho.argmax(axis=1)
+    x_temp = xx[:,idmax]
+
 # - check if any element of x_shock is 'tolerance' away from x_last_shock
 # ------------------------------------------------------------------------------    
     
-    if x_last_shock is None: x_last_shock = np.mean(x_shock)
+    if x_last_shock is None: x_last_shock = np.mean(x_temp)
     
-    if any( abs(x_shock - x_last_shock)  > tolerance ):
+    if any( abs(x_temp - x_last_shock)  > tolerance ):
         print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
     
-        indx_s,_     = find_indices(xx[0,:], x_last_shock-half_width)
-        indx_e,_     = find_indices(xx[0,:], x_last_shock+half_width)
-        sub_grad_rho = grad_rho[:,indx_s:indx_e]
-        sub_xx       = xx[:,indx_s:indx_e]
-        sub_zz       = zz[:,indx_s:indx_e]
+    indx_s,_     = find_indices(xx[0,:], x_last_shock-half_width)
+    indx_e,_     = find_indices(xx[0,:], x_last_shock+half_width)
+    sub_grad_rho = grad_rho[:,indx_s:indx_e]
+    sub_xx       = xx[:,indx_s:indx_e]
+    
+    idmax        = sub_grad_rho.argmax(axis=1)
+    x_shock      = np.zeros(npz)
+    
+    for j in range(len(idmax)):
+        p1 = [ sub_xx[j,idmax[j]-1], sub_grad_rho[j,idmax[j]-1] ]
+        p2 = [ sub_xx[j,idmax[j]],   sub_grad_rho[j,idmax[j]  ] ]
+        p3 = [ sub_xx[j,idmax[j]+1], sub_grad_rho[j,idmax[j]+1] ]
         
-        idmax        = sub_grad_rho.argmax(axis=1)
-        x_shock      = np.zeros(npz)
-        
-        for j in range(len(idmax)):
-            p1 = [ xx[j,idmax[j]-1], grad_rho[j,idmax[j]-1] ]
-            p2 = [ xx[j,idmax[j]],   grad_rho[j,idmax[j]  ] ]
-            p3 = [ xx[j,idmax[j]+1], grad_rho[j,idmax[j]+1] ]
-            
-            x_shock[j], _ = find_parabola_max(p1,p2,p3)        
+        x_shock[j], _ = find_parabola_max(p1,p2,p3)        
     
 
 # ------------------------------------------------------------------------------

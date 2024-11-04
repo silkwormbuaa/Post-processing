@@ -63,10 +63,12 @@ print("==================\n")
 
 # - initialize a list to store the x location of the shock
 
-times         = list()
-x_shocks      = list()
-grad_rho_maxs = list()
-x_last_shock  = None
+times                 = list()
+x_shocks              = list()
+grad_rho_maxs         = list()
+x_last_shock          = None
+new_shock_at_boundary = False
+new_shock_is_far      = False
 
 # - loop over the snapshot files
 
@@ -119,27 +121,31 @@ for i, snap_file in enumerate(snap_files):
     prbdf = prbdf.sort_values(by='x')
     prbdf = prbdf.reset_index(drop=True)
 
-    # - find the maximum of the gradient
+    # - find lacation of the maximum of the gradient
     
     idmax = prbdf['grad_rho'].idxmax()
-    
-    p1 = [prbdf['x'][idmax-1], prbdf['grad_rho'][idmax-1]]
-    p2 = [prbdf['x'][idmax],   prbdf['grad_rho'][idmax]]
-    p3 = [prbdf['x'][idmax+1], prbdf['grad_rho'][idmax+1]]
-    
-    x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
-    
+
 # -----------------------------------------------------------------------------
 # - check if the maximum is at the boundary
-    
-    if idmax == 0 or idmax == len(prbdf)-1:
-        print("The maximum is at the boundary! Please have a check!")
 
+    x_temp = prbdf['x'][idmax]
+
+    if idmax == 1 or idmax == len(prbdf)-1:
+        
+        new_shock_at_boundary = True
+        print(f"The maximum is at the boundary! {snap_file}")
+
+    else: new_shock_at_boundary = False
+    
 # - check if x_shock is 'tolerance' away from x_last_shock
 
-    if x_last_shock is None: x_last_shock = x_shock
+    if x_last_shock is None: x_last_shock = x_temp
 
-    if abs(x_shock - x_last_shock) > tolerance:
+    if abs(x_temp - x_last_shock) > tolerance: new_shock_is_far = True
+    else:                                      new_shock_is_far = False
+
+    if new_shock_is_far or new_shock_at_boundary:
+
         print("Warning: the shock front is not continuous! Special treatment will be applied!")
 
         indx_s,_ = find_indices( np.array(prbdf['x']), x_last_shock-half_width )
@@ -154,6 +160,14 @@ for i, snap_file in enumerate(snap_files):
         
         x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
 
+    else:
+
+        p1 = [prbdf['x'][idmax-1], prbdf['grad_rho'][idmax-1]]
+        p2 = [prbdf['x'][idmax],   prbdf['grad_rho'][idmax]]
+        p3 = [prbdf['x'][idmax+1], prbdf['grad_rho'][idmax+1]]
+        
+        x_shock, grad_rho_max = find_parabola_max(p1,p2,p3)
+    
 
 # -----------------------------------------------------------------------------
     
