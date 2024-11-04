@@ -671,9 +671,9 @@ def parse_float(value, i, index):
 
 def WriteProbe():
 
-    outfile  = '/home/wencanwu/my_simulation/STBLI_mid_Re/241018/test.inp'
-    casecode = '241018'
-    y_valley = -1.04     # -0.13674
+    outfile  = '/home/wencanwu/my_simulation/STBLI_mid_Re/241030/test.inp'
+    casecode = '241030'
+    y_valley = -0.13679
     probes = ProbeFile()
 #    probes.read( fname )
 #    probes.show()
@@ -690,9 +690,12 @@ def WriteProbe():
         probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
+    print(f"Number of probes at the ridges: {len(probes.probes)}. [0,{len(probes.probes)-1}]")
+    n = len(probes.probes)
+    
 # --- probes at the valleys
 
-    z  = 0.65
+    z  = 0.1625
     y  = y_valley
 
     for x in xs:
@@ -701,10 +704,13 @@ def WriteProbe():
         probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
+    print(f"Number of probes at the valleys: {len(probes.probes)-n}. [{n},{len(probes.probes)-1}]")
+    n = len(probes.probes)
+    
 # --- probes before the interaction region
 
     x = -53.6
-    zs = np.arange( -10.4, 10.6, 0.2)
+    zs = np.arange( -5.2, 0.065, 0.065)
     ys = define_wall_shape( zs, casecode=casecode, write=False )
     
     for z,y in zip(zs,ys):
@@ -712,6 +718,9 @@ def WriteProbe():
         probe = Probe()
         probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe )
+    
+    print(f"Number of probes before the interaction region: {len(probes.probes)-n}. [{n},{len(probes.probes)-1}]")
+    n = len(probes.probes)
     
 # --- probes after the interaction region
 
@@ -723,6 +732,9 @@ def WriteProbe():
         probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe )
 
+    print(f"Number of probes after the interaction region: {len(probes.probes)-n}. [{n},{len(probes.probes)-1}]")
+    n = len(probes.probes)
+    
 # --- a vertical line at (x-x_imp)/delta = -5.0
 
     x = 24.4
@@ -734,6 +746,8 @@ def WriteProbe():
         probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
         probes.probes.append( probe )
 
+    print(f"Number of probes at the vertical line: {len(probes.probes)-n}. [{n},{len(probes.probes)-1}]")
+    
     probes.write( outfile )
 
 

@@ -326,7 +326,8 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     case=6 : 240211 case, D/delta = 0.25, A = 0.13
     case=7 : 240210 case, D/delta = 0.25, A = 0.52
              241018 case, D/delta = 0.25, A = 0.52, Re_tau = 1226
-    case=8 : 241017 case, D/delta = 0.25, A = 0.06837
+    case=8 : 241017 case, D/delta = 0.25, A = 0.06837, Re_tau = 1226
+    case=9 : 241030 case, D/delta = 0.0625, A = 0.068395, Re_tau = 1226
     
     write out wall_X.dat or return list of y
     """
@@ -347,6 +348,7 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
         elif casecode == '231124': Case=4
         elif casecode == '241017': Case=8
         elif casecode == '241018': Case=7
+        elif casecode == '241030': Case=9
         
     
     if   Case == 1:   D = 10.4
@@ -358,6 +360,7 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
     elif Case == 6:   D = 1.3;      A = 0.13
     elif Case == 7:   D = 1.3;      A = 0.52
     elif Case == 8:   D = 1.3;      A = 0.06837
+    elif Case == 9:   D = 0.325;    A = 0.068395;  len_w = 0.27359
     
     y_list = []
     
