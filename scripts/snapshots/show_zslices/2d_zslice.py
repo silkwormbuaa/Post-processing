@@ -47,11 +47,22 @@ set_plt_rcparams(latex=False,fontsize=15)
 # =============================================================================
 
 casedir  = '/home/wencan/temp/smooth_mid'
-vars_in  = ['u', 'T', 'p']
-vars_out = ['u', 'T', 'p', 'DS','p_fluc']
-labels   = [r'$u/u_{\infty}$', r'$T/T_{\infty}$', r'$p/p_{\infty}$', r'$DS$',   r"$p'/p_{\infty}$"]
-colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 'coolwarm']
-ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8], [-0.5,0.5]]
+
+vars_out = [ 'rho_fluc' ]
+
+varslist = ['u',                'T',               'p',               'DS',      
+            'p_fluc',           'rho',            'rho_fluc',        'u_r',
+            'v_r',              'w3']
+labels   = [r'$u/u_{\infty}$',     r'$T/T_{\infty}$',      r'$p/p_{\infty}$',         r'$DS$',   
+            r"$p'/p_{\infty}$",    r"$\rho/\rho_{\infty}$",r"$\rho '/\rho_{\infty}$", r"$u_{r}/u_{\infty}$", 
+            r"$v_{r}/u_{\infty}$", r'$\omega$']
+colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 
+            'coolwarm',        'plasma',          'coolwarm',       'coolwarm',
+            'coolwarm',        'coolwarm']
+ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8], 
+            [-0.5,0.5],        [0.5,2.5],         [-0.25,0.25],      [-0.2,0.2],        
+            [-0.2,0.2],        [-1.5,1.5]]
+vars_in  = ['u', 'v', 'w', 'T', 'p']
 cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
 
@@ -88,7 +99,7 @@ if mpi.is_root:
     blocklist = grid3d.select_blockgrids( cutbox, mode='overlap' )
     
     statz = StatisticData( dirs.stat_zslice )
-    statz.read_statistic(block_list=blocklist, vars_in=['p'])
+    statz.read_statistic(block_list=blocklist, vars_in=['u','v','p','rho'])
         
 params    = mpi.comm.bcast( params,    root=0 )
 snapfiles = mpi.comm.bcast( snapfiles, root=0 )
@@ -100,6 +111,7 @@ u_ref     = params.u_ref
 T_ref     = params.T_ref
 p_ref     = params.p_ref
 delta     = params.delta_0
+rho_ref   = params.rho_ref
 rescale   = [-params.x_imp, 0.0, 0.0, delta, delta, delta]
 
 mpi.barrier()
@@ -116,7 +128,7 @@ def show_slice( snapfile ):
     snap        = Snapshot( snapfile )
     snap.grid3d = grid3d
     snap.read_snapshot( block_list=blocklist, var_read=vars_in )
-    snap.compute_gradients( grads=['grad_rho'] )
+    snap.compute_gradients( grads=['grad_rho','vorticity'] )
 
 # -- data processing block by block
 
@@ -124,12 +136,17 @@ def show_slice( snapfile ):
         
         bl_num = snapbl.num
         statbl = statz.bl[statz.bl_nums.index(bl_num)]
-        snapbl.df['p_fluc'] = (snapbl.df['p']-statbl.df['p'])/p_ref
         
-        snapbl.df['u'] = snapbl.df['u']/u_ref
-        snapbl.df['T'] = snapbl.df['T']/T_ref
-        snapbl.df['p'] = snapbl.df['p']/p_ref
-        snapbl.df['DS']= compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
+        snapbl.df['p_fluc']   = (snapbl.df['p']  - statbl.df['p']  )/p_ref
+        snapbl.df['rho_fluc'] = (snapbl.df['rho']- statbl.df['rho'])/rho_ref
+        snapbl.df['u_r']      = (snapbl.df['u']  - statbl.df['u']  )/u_ref
+        snapbl.df['v_r']      = (snapbl.df['v']  - statbl.df['v']  )/u_ref
+        snapbl.df['w3']       =  snapbl.df['w3'] /u_ref*delta
+        snapbl.df['u']        =  snapbl.df['u']  /u_ref
+        snapbl.df['T']        =  snapbl.df['T']  /T_ref
+        snapbl.df['p']        =  snapbl.df['p']  /p_ref
+        snapbl.df['rho']      =  snapbl.df['rho']/rho_ref
+        snapbl.df['DS']       = compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
         
 # -- prepare for the visualization
 
@@ -145,21 +162,21 @@ def show_slice( snapfile ):
 
 # -- loop over all the output variables
 
-    for i, var in enumerate(vars_out):
+    for var in vars_out:
         
         os.chdir( f'./{var}/figs' )
         p = pv.Plotter( off_screen=off_screen, window_size=[1920,1080], border=False )
 
 # ----- set color maps
 
-        cmap    = plt.get_cmap(colmaps[i],51)
+        cmap    = plt.get_cmap(colmaps[varslist.index(var)],51)
         cmap.set_over('red')
         cmap.set_under('blue')
         
         dataset.set_active_scalars( var )
         p.add_mesh( dataset, 
                     cmap=cmap, 
-                    clim=ranges[i],
+                    clim=ranges[varslist.index(var)],
                     lighting=False, 
                     show_scalar_bar=False )
         
@@ -176,13 +193,13 @@ def show_slice( snapfile ):
 
         fig, ax = plt.subplots(figsize=(12.8,7.2))
 
-        img = ax.imshow(image, extent=clipbox[:4], cmap=cmap, clim=ranges[i])
+        img = ax.imshow(image, extent=clipbox[:4], cmap=cmap, clim=ranges[varslist.index(var)])
 
         ax.set_xlabel(r'$(x-x_{imp})/\delta_0$')
         ax.set_ylabel(r'$y/\delta_0$')
 
         cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
-        cbar.ax.set_ylabel( labels[i], loc='center')
+        cbar.ax.set_ylabel( labels[varslist.index(var)], loc='center')
 
         plt.title(f"t = {itime:.2f} ms", loc='center',y=1.05)
 
