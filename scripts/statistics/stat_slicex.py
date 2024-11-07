@@ -41,6 +41,8 @@ periodic_ave = False
 
 # =============================================================================
 
+vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp','rho']
+
 dirs = Directories( os.getcwd() )
 
 datafile = dirs.statistics
@@ -95,24 +97,17 @@ for i, loc in enumerate(locs):
         # - read statistics data file
 
         S = StatisticData( datafile )
-
-        with timer("read selected blocks and match grid"):
+        S.verbose = True
             
-            with open(datafile,'br') as f:
-                
-                S.read_stat_header( f )
-                
-                vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp','rho']
-                
-                S.read_stat_body( f, block_list, vars )
-                
-                S.match_grid( block_list, G )
-                
-                S.compute_vars( block_list, ['mach','RS','p`'])
-                
-                S.compute_gradients( block_list, ['vorticity','Q_cr','lambda2'])
-                
-                S.compute_source_terms( block_list, G )
+        S.read_statistic( block_list=block_list, vars=vars)
+            
+        S.match_grid( block_list, G )
+        
+        S.compute_vars( block_list, ['mach','RS','p`'])
+        
+        S.compute_gradients( block_list, ['vorticity','Q_cr','lambda2'])
+        
+        S.compute_source_terms( block_list, G )
                 
         with timer("Get slice dataframe"):
             
