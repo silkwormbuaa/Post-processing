@@ -62,7 +62,7 @@ api_key = keys['EMAIL_API_KEY']
 
 casedir = os.path.basename( os.getcwd() )
 
-casedir = "/media/wencanwu/Seagate Expansion Drive1/temp/test"
+#casedir = "/media/wencanwu/Seagate Expansion Drive1/temp/test"
 
 runfile = os.path.join( casedir, 'run.out' )
 
