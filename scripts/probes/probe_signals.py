@@ -27,7 +27,7 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-casefolder = '/media/wencan/Expansion/temp/smooth_adiabtic'
+casefolder = '/home/wencan/temp/smooth_mid'
 vars       = ['u','v','w','rho', 'p', 'T']
 colors     = ['black']*len(vars)
 

@@ -99,7 +99,7 @@ for i, loc in enumerate(locs):
         S = StatisticData( datafile )
         S.verbose = True
             
-        S.read_statistic( block_list=block_list, vars=vars)
+        S.read_statistic( block_list=block_list, vars_in=vars)
             
         S.match_grid( block_list, G )
         
@@ -149,7 +149,7 @@ for i, loc in enumerate(locs):
         # generate interpolation grid
         
         z = np.linspace(-1.0,1.0, 320)  # must be muliple of 16 for periodic average
-        if casecode == 'smooth':
+        if 'smooth' in casecode:
             y = np.linspace(0.02, 1.1, 55)
         else:
             y = np.linspace(-0.1, 1.1, 241)
@@ -199,7 +199,7 @@ for i, loc in enumerate(locs):
         
 # ------ extending corner grid for smooth wall
 
-        if casecode == 'smooth':
+        if 'smooth' in casecode:
             
             len_ext = np.shape(zz)[1]
             zz = np.concatenate(([zz[0,:]],zz),axis=0)
@@ -243,7 +243,7 @@ for i, loc in enumerate(locs):
         cbar = r'$\langle Mach \rangle$'
         cbar_levels = np.linspace(0.0,2.0,21)
         cbar_ticks  = np.linspace(0.0,2.0,5)
-        if casecode == 'smooth':
+        if 'smooth' in casecode:
             plot_slicex_stat( zz, yy, mach,
                               tag=tag,
                               filename=casecode+'_Mach_'+str(i+1),
