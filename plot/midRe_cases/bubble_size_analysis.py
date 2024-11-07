@@ -13,6 +13,7 @@ import os
 import sys
 import numpy             as     np
 import matplotlib.pyplot as     plt
+from   scipy.stats       import skew, kurtosis
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
@@ -84,3 +85,15 @@ ax.set_ylim( [0.0,0.8] )
 plt.savefig(f'psd_bubble.png')
 plt.show()
 plt.close()
+
+# =============================================================================
+# skewness and flatness
+
+for line in lines:
+    
+    mean_size = np.mean( line.df['bubble_volume'] )
+    bubble_vol_fluc = (np.array(line.df['bubble_volume'])-mean_size)/mean_size
+    skewness = skew( bubble_vol_fluc )
+    flatness = kurtosis( bubble_vol_fluc )
+    
+    print(f"Skewness: {skewness}, Flatness: {flatness}")

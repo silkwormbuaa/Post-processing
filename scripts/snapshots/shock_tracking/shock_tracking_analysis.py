@@ -16,6 +16,7 @@ import pickle
 import numpy             as     np
 import pandas            as     pd
 import matplotlib.pyplot as     plt
+from   scipy.stats       import skew, kurtosis
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -30,16 +31,15 @@ from   vista.directories import create_folder
 
 casedir = '/home/wencan/temp/smooth_mid'
 
-shockpath2d = casedir + '/postprocess/snapshots/shock_tracking/2d'
+shockpath2d = casedir + '/postprocess/snapshots/shock_tracking/2d_y2'
 shockpath3d = casedir + '/postprocess/snapshots/shock_tracking/3d'
-outdir      = casedir + '/postprocess/snapshots/shock_tracking'
 
 fs = 100
 n_seg = 8
 overlap = 0.5
 
-analyse2d=False
-analyse3d=True
+analyse2d=True
+analyse3d=False
 
 dirs = Directories( casedir )
 
@@ -48,7 +48,6 @@ dirs = Directories( casedir )
 params = Params( dirs.case_para_file )
 Lsep   = params.Lsep
 
-os.chdir( create_folder(shockpath2d) )
 
 if analyse2d:
     shock2d_files = get_filelist( shockpath2d, 'shock_tracking2d' )
@@ -57,18 +56,21 @@ if analyse3d:
 
 if analyse2d:
     
-    os.chdir( create_folder(outdir+'/2d') )
+    os.chdir( create_folder( shockpath2d ) )
     
     # - read the shock motion data into dataframe    
     
     for shock2d_file in shock2d_files:
-        df2d = pd.concat([pd.read_csv(shock2d_file) for shock2d_file in shock2d_files])
+        df2d = pd.concat([pd.read_csv(shock2d_file, delimiter=r"\s+") for shock2d_file in shock2d_files])
     
     # - compute the rms of the shock fluctuation
     
     x_mean = df2d['x_shock'].mean()
     x_fluc = df2d['x_shock'] - x_mean
     rms2d  = np.sqrt( np.mean( x_fluc**2 ) )
+    skewness = skew( x_fluc )
+    flatness = kurtosis( x_fluc )
+    print(f" rms: {rms2d}, skewness: {skewness}, flatness: {flatness}")
     
     # - plot shock motion
     
@@ -97,7 +99,7 @@ if analyse2d:
 
 if analyse3d:
     
-    os.chdir( create_folder(outdir+'/3d') )
+    os.chdir( create_folder( shockpath3d ) )
     
     # - read in the shock motion data into dataframe
     
