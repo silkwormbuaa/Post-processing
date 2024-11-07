@@ -34,6 +34,10 @@ x_sep     = -8.42
 x_att     = 1.10
 x_pfmax   = -7.136
 
+prb_sep   = 144
+prb_att   = 391
+prb_pfmax = 158
+
 # INCA version led different setting
 
 prb_withT = True

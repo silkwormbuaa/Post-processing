@@ -30,10 +30,13 @@ D         = 1.3
 
 # Case specific flow conditions
 
-Lsep      = 68.2566
 x_sep     = -10.84
 x_att     = 2.45
 x_pfmax   = -10.06
+
+prb_sep   = 118
+prb_att   = 406
+prb_pfmax = 125
 
 # INCA version led different setting
 
