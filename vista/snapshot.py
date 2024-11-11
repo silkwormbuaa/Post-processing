@@ -574,6 +574,49 @@ class Snapshot:
         print(f"Snapshot {self.itstep} gradients ({grads}) are computed.\n")
              
 
+
+# ----------------------------------------------------------------------
+# >>> compute variables                                         (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/11/11  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_vars( self, block_list:list, vars_new:list ):
+        
+        """
+        block_list : list of blocks that are going to compute gradients;
+        vars_new   : list of new variables to compute new variables.
+        
+        return : corresponding new variables are added to self.snap_data[].df
+        """
+
+        for num in block_list:
+            
+            df = self.snap_data[self.bl_nums.index(num)].df
+
+# ------ Mach number
+
+            if "mach" in vars_new:
+                
+                u     = np.array( df['u'] )
+                v     = np.array( df['v'] )
+                w     = np.array( df['w'] )
+                T     = np.array( df['T'] )
+                gamma = 1.4
+                R     = 287.0508571
+
+                df['mach']  = np.sqrt( u*u + v*v + w*w ) / np.sqrt( gamma* R*T )
+
+
+
 # ----------------------------------------------------------------------
 # >>> Function Name                                                (Nr.)
 # ----------------------------------------------------------------------

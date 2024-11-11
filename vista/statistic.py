@@ -538,7 +538,6 @@ class StatisticData:
         return : corresponding variables are added to self.bl[].df
         """
         
-        
         for num in block_list:
             
             df = self.bl[num-1].df
