@@ -227,8 +227,8 @@ def periodic_average( array, N:int, axis=0, sym=False, antisym=False ):
         array = array.T
         
     n0, n1 = np.array( array ).shape
-    array = np.array( array ).reshape( N, int(n0/N), n1 )
-    array = np.mean( array, axis=0 )
+    array  = np.array( array ).reshape( N, int(n0/N), n1 )
+    array  = np.mean( array, axis=0 )
     
     # symmetrize or anti-symmetrize the array
     

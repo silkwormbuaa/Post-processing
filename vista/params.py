@@ -188,7 +188,7 @@ class Params:
     
     @property
     def period( self ):
-        return float( self.params.get('period') )
+        return int( self.params.get('period') )
     
     @property
     def D( self ):

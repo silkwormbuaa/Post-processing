@@ -1,0 +1,43 @@
+# Basic info
+
+casecode  = 241018
+tag       = mid-Re
+roughwall = True
+
+# Flow setup parameters
+
+u_ref     = 507.0
+p_ref     = 45447.289
+rho_ref   = 0.9886
+T_ref     = 160.15
+delta_0   = 5.2
+Re_ref    = 9636.0
+visc_law  = P07
+
+# Numerical setup parameters
+
+dt_snap   = 0.01  
+
+# Geometric setup parametrs
+
+H         = 1.04
+H_md      = 0.416
+x_imp     = 50.4
+period    = 16
+D         = 1.3
+
+# Case specific flow conditions
+
+x_sep     = -9.96
+x_att     = 2.86
+x_pfmax   = -11.58
+
+prb_sep   = 67
+prb_att   = 221
+prb_pfmax = 47
+
+# INCA version led different setting
+
+prb_withT = True
+
+# probe groups

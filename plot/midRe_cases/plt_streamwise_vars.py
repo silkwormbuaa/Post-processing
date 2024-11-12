@@ -26,12 +26,13 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-OutPath  = "/media/wencan/Expansion/temp/DataPost/midRe/averaged_streamwise_vars"
+OutPath  = "/media/wencan/Expansion/temp/DataPost/midRe/averaged_streamwise_vars_new"
 
 data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data3 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data4 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 sw_iw_pw_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_SBLI_B2.dat'
 sw_iw_pwrms_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_rms_SBLI_B2.dat'
@@ -39,11 +40,11 @@ sw_iw_Cf_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/Cf_SBLI
 
 add_sw_luis = False
 
-datalist = [data0,   data1,   data2,   data3]
-color    = ['gray', 'blue',   'gray', 'blue'] 
-label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough']
-lstyle   = ['--',   '--',    '-.',  '-.']
-width    = [4.0,     4.0,    4.0,    4.0]
+datalist = [data0,   data1,   data2,   data3, data4]
+color    = ['gray', 'blue',   'gray', 'blue', 'red'] 
+label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough', 'midRe_rough02']
+lstyle   = ['--',   '--',    '-.',  '-.', '-.']
+width    = [4.0,     4.0,    4.0,    4.0, 4.0]
 lines = []
 
 plt_pwfluc = True
@@ -125,7 +126,7 @@ if plt_pwfluc:
                     width=1)
 
     ax.set_xlim([-20,10])
-    ax.set_ylim([0.01,0.09])
+    ax.set_ylim([0.01,0.12])
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #                linestyle='--',linewidth=0.2)
 
@@ -147,7 +148,7 @@ if plt_pwfluc:
         ax.tick_params(axis='y', pad=10)
         
         if show_label:
-            ax.legend( fontsize=30 ) 
+            ax.legend( fontsize=20 ) 
         
     # set the bounding box of axes
     ax.spines[:].set_color('black')
