@@ -11,6 +11,7 @@
 import os
 from   pathlib           import Path
 from   .tools            import get_filelist
+from   .params           import Params
 
 class Directories:
     
@@ -130,6 +131,43 @@ class Directories:
         case_para_file = source_dir + 'database/parameters/' + casecode
         
         return case_para_file
+    
+
+# ----------------------------------------------------------------------
+# >>> fetch probe file name                                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/11/13  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    # get a certain probe file
+    def fetch_prb_from_index( self, index:int ):
+        """
+        index: int, index of the probe file
+        return: str, path to the probe file
+        """
+        return self.prb_dir + f'/probe_{index:05d}.dat'
+    
+    def fetch_prb_from_type( self, probe_type:str ):
+        """"
+        probe_type: str, 'pfmax','sep','att'
+        return: str, path to the probe file 
+        """
+        params = Params( self.case_para_file )
+        
+        if probe_type   == 'pfmax':
+            return self.fetch_prb_from_index( params.prb_pfmax )
+        elif probe_type == 'sep':
+            return self.fetch_prb_from_index( params.prb_sep )
+        elif probe_type == 'att':
+            return self.fetch_prb_from_index( params.prb_att )
     
     
 

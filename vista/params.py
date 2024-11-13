@@ -222,6 +222,20 @@ class Params:
         """in shifted and normalized coordinate"""
         return float( self.params.get('x_pfmax') )
     
+    @property
+    def prb_sep( self ):
+        """file index of the probe data at separation point"""
+        return int( self.params.get('prb_sep') )
+        
+    @property
+    def prb_att( self ):
+        """file index of the probe data at attachment point"""
+        return int( self.params.get('prb_att') )
+    
+    @property
+    def prb_pfmax( self ):
+        """file index of the probe data at peak pressure point"""
+        return int( self.params.get('prb_pfmax') )
 
 # ------------------- INCA version led difference ------------------------
     
