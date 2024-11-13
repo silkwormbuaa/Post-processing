@@ -46,22 +46,22 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_mid'
+casedir  = '/home/wencan/temp/231124'
 
-vars_out = [ 'rho_fluc' ]
+vars_out = [ 'mach' ]
 
 varslist = ['u',                'T',               'p',               'DS',      
             'p_fluc',           'rho',            'rho_fluc',        'u_r',
-            'v_r',              'w3']
+            'v_r',              'w3',             'mach']
 labels   = [r'$u/u_{\infty}$',     r'$T/T_{\infty}$',      r'$p/p_{\infty}$',         r'$DS$',   
             r"$p'/p_{\infty}$",    r"$\rho/\rho_{\infty}$",r"$\rho '/\rho_{\infty}$", r"$u_{r}/u_{\infty}$", 
-            r"$v_{r}/u_{\infty}$", r'$\omega$']
+            r"$v_{r}/u_{\infty}$", r'$\omega$',    r'$M$']
 colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 
             'coolwarm',        'plasma',          'coolwarm',       'coolwarm',
-            'coolwarm',        'coolwarm']
+            'coolwarm',        'coolwarm',        'coolwarm']
 ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8], 
             [-0.5,0.5],        [0.5,2.5],         [-0.25,0.25],      [-0.2,0.2],        
-            [-0.2,0.2],        [-1.5,1.5]]
+            [-0.2,0.2],        [-1.5,1.5],        [0.0,2.0]]
 vars_in  = ['u', 'v', 'w', 'T', 'p']
 cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
@@ -129,6 +129,7 @@ def show_slice( snapfile ):
     snap.grid3d = grid3d
     snap.read_snapshot( block_list=blocklist, var_read=vars_in )
     snap.compute_gradients( grads=['grad_rho','vorticity'] )
+    snap.compute_vars( blocklist, ['mach'] )
 
 # -- data processing block by block
 
@@ -158,6 +159,7 @@ def show_slice( snapfile ):
     dataset     = dataset.cell_data_to_point_data().combine()
     dataset     = dataset.clip_box( clipbox, invert=False )
     sepline     = dataset.contour( [0.0], scalars='u' )
+    sonline     = dataset.contour( [1.0], scalars='mach' )
     sys.stdout.flush()
 
 # -- loop over all the output variables
@@ -181,6 +183,7 @@ def show_slice( snapfile ):
                     show_scalar_bar=False )
         
         p.add_mesh( sepline, color='yellow', line_width=4.0 )
+        p.add_mesh( sonline, color='green',  line_width=4.0 )
 
         p.view_vector([0.0,0.0,1.0],viewup=[0.0,1.0,0.0])
         p.camera.tight()

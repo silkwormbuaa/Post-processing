@@ -575,6 +575,51 @@ class Snapshot:
              
 
 # ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/11/13  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def compute_vars( self, block_list=None, vars_new=['mach'] ):
+        
+        """
+        block_list: list of blocks that are going to compute gradients;
+                    if None, all blocks will compute gradients.
+        vars_new: list of strings, choose from ['mach']
+        
+        return: selected variables are added to self.snap_data[].df
+        """
+        
+        if block_list is None:
+            block_list = self.bl_nums
+        
+        for num in block_list:
+            df = self.snap_data[self.bl_nums.index(num)].df
+            
+# --------- compute Mach number
+
+            if 'mach' in vars_new:
+                
+                u = np.array( df['u'] )
+                v = np.array( df['v'] )
+                w = np.array( df['w'] )
+                T = np.array( df['T'] )
+                gamma = 1.4
+                R = 287.0508571
+                
+                df['mach'] = np.sqrt( u*u+ v*v+ w*w) / np.sqrt( gamma * R * T )               
+        
+        
+        
+# ----------------------------------------------------------------------
 # >>> Drop ghost point data                                       (Nr.)
 # ----------------------------------------------------------------------
 #
