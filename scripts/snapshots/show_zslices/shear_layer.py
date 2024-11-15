@@ -48,7 +48,7 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124'
+casedir  = '/home/wencan/temp/smooth_mid'
 
 vars_out = [ 'p_fluc' ]
 
@@ -223,6 +223,7 @@ def show_slice( snapfile ):
         cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
         cbar.ax.set_ylabel( labels[varslist.index(var)], loc='center')
 
+        ax.text(-11.0, 3.9, r"$0.5u_{\infty}$", fontsize=15, color='black')
         plt.title(f"t = {itime:.2f} ms", loc='center',y=1.05)
 
         if off_screen:
