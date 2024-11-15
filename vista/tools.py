@@ -854,7 +854,7 @@ def crop_to_contour_map(image):
     edges = cv2.Canny(gray, 50, 150)
 
     # Dilate the edges to connect any small gaps
-    kernel = np.ones((10,10), np.uint8)
+    kernel = np.ones((1,1), np.uint8)
     dilated = cv2.dilate(edges, kernel, iterations=2)
 
     # Find contours based on the dilated edge map
@@ -886,12 +886,17 @@ def crop_to_contour_map(image):
 
 if __name__ == "__main__":
     
-    x,d = lin_grow(0.0,-0.01045,1.0000,len=96)
     
-    print(d)
+    imagefile = "/home/wencanwu/Downloads/figs/slice_z_01927735.png"
     
-#    print(x[1:].reshape(8,24))
-
-    print(x)
+    imag = cv2.imread(imagefile)
+    imag = cv2.cvtColor(imag, cv2.COLOR_BGR2RGB)
+#    imag = np.array(imag)
     
-    print(len(x))
+    image = crop_to_contour_map(imag)
+    
+    print(type( image ))
+    
+    plt.imshow(image)
+    
+    plt.show()
