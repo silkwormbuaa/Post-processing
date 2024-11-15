@@ -9,6 +9,7 @@
 '''
 
 import os 
+import cv2
 import math
 import shutil
 import numpy             as     np
@@ -801,7 +802,10 @@ def crop_border(image, border_color='white'):
         raise ValueError("only 'white' or 'black' are supported for border_color")
 
     # find which pixels are not the border color
-    mask = np.all(image != color_to_crop, axis=-1)
+#    mask = np.all(image != color_to_crop, axis=-1)
+
+    mask = np.logical_or(np.all(np.abs(image - [255, 255, 255])<10, axis=-1),
+                         np.all(np.abs(image - [0, 0, 0])<10, axis=-1))
 
     # get the border of the non-border color
     coords = np.argwhere(mask)
@@ -818,6 +822,52 @@ def crop_border(image, border_color='white'):
     cropped_image = image[y_min:y_max+1, x_min:x_max+1]
 
     return cropped_image
+
+
+# ----------------------------------------------------------------------
+# >>> crop border 2                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/11/15  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def crop_to_contour_map(image):
+    """
+    Crop an image to keep only the inner rectangular contour map, removing any elements outside it.
+
+    Parameters:
+    - image: NumPy array with shape (height, width, 3), an RGB image.
+
+    Returns:
+    - Cropped image as a NumPy array.
+    """
+    # Convert image to grayscale for simpler processing
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+    edges = cv2.Canny(gray, 50, 150)
+
+    # Dilate the edges to connect any small gaps
+    kernel = np.ones((10,10), np.uint8)
+    dilated = cv2.dilate(edges, kernel, iterations=2)
+
+    # Find contours based on the dilated edge map
+    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Find the largest rectangular contour area that should correspond to the main map
+    rect_contour = max(contours, key=cv2.contourArea)
+    x, y, w, h = cv2.boundingRect(rect_contour)
+
+    # Crop the image to the refined bounding box
+    refined_cropped_image = image[y:y+h, x:x+w]
+
+    return refined_cropped_image
 
 
 # ----------------------------------------------------------------------
