@@ -66,7 +66,7 @@ ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8],
             [-0.2,0.2],        [-1.5,1.5],        [0.0,2.0]]
 vars_in  = ['u', 'v', 'w', 'T', 'p']
 cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
-clipbox  = [-10, 5, 0, 4, -1, 1]
+clipbox  = [-12, 6, 0, 5, -1, 1]
 
 # =============================================================================
 
@@ -198,6 +198,9 @@ def show_slice( snapfile ):
         vector2d        = vector2d*mask
         dataset['vector'] = vector2d
         p.add_arrows( dataset.points, dataset['vector'], mag=0.7, color='black')
+        
+        # reference velocity vector of 0.5 u_ref
+        p.add_arrows( np.array([[-10.0,4,0.0]]), np.array([[0.5,0.0,0.0]]), mag=0.7, color='black', label='u_ref')
 
 # ----- set the view and render the image
 
