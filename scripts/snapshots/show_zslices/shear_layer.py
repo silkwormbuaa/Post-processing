@@ -34,7 +34,7 @@ from   vista.snapshot     import Snapshot
 from   vista.statistic    import StatisticData
 from   vista.directories  import Directories
 from   vista.tools        import crop_border
-from   vista.tools        import crop_to_contour_map
+from   vista.tools        import crop_to_rect_map
 from   vista.tools        import get_filelist
 from   vista.plane_analy  import compute_DS
 from   vista.directories  import create_folder
@@ -208,7 +208,7 @@ def show_slice( snapfile ):
 
 # ----- pass the image from pyvista to matplotlib
 
-#        image = crop_to_contour_map(image)
+        image = crop_to_rect_map(image)
 
         fig, ax = plt.subplots(figsize=(12.8,7.2))
 

@@ -838,7 +838,7 @@ def crop_border(image, border_color='white'):
 #
 # ----------------------------------------------------------------------
 
-def crop_to_contour_map(image):
+def crop_to_rect_map(image):
     """
     Crop an image to keep only the inner rectangular contour map, removing any elements outside it.
 
@@ -848,26 +848,39 @@ def crop_to_contour_map(image):
     Returns:
     - Cropped image as a NumPy array.
     """
+    
     # Convert image to grayscale for simpler processing
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-    edges = cv2.Canny(gray, 50, 150)
+    # Threshold the image to get a binary image
+    bw = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)[1]
 
-    # Dilate the edges to connect any small gaps
-    kernel = np.ones((1,1), np.uint8)
-    dilated = cv2.dilate(edges, kernel, iterations=2)
+    # Detect edges using Canny edge detection
+    edges = cv2.Canny(bw, 50, 150)
 
-    # Find contours based on the dilated edge map
-    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Hough transform to detect lines
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=50, maxLineGap=10)
 
-    # Find the largest rectangular contour area that should correspond to the main map
-    rect_contour = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(rect_contour)
+    # crop the image based on the range of the lines
+    if lines is not None:
+        
+        xmin = min([line[0,0] for line in lines])
+        ymin = min([line[0,1] for line in lines])
+        xmax = max([line[0,2] for line in lines])
+        ymax = max([line[0,3] for line in lines])
+        
+        cv2.line(edges, (xmin, ymin), (xmin, ymax), (155, 155, 155), 2)
+        cv2.line(edges, (xmin, ymax), (xmax, ymax), (155, 155, 155), 2)
+        cv2.line(edges, (xmax, ymax), (xmax, ymin), (155, 155, 155), 2)
+        cv2.line(edges, (xmax, ymin), (xmin, ymin), (155, 155, 155), 2)
 
-    # Crop the image to the refined bounding box
-    refined_cropped_image = image[y:y+h, x:x+w]
+        cropped_image = image[ymin:ymax, xmin:xmax]
 
-    return refined_cropped_image
+    else:
+        cropped_image = image
+
+    # return the cropped image
+    return cropped_image
 
 
 # ----------------------------------------------------------------------
@@ -893,7 +906,7 @@ if __name__ == "__main__":
     imag = cv2.cvtColor(imag, cv2.COLOR_BGR2RGB)
 #    imag = np.array(imag)
     
-    image = crop_to_contour_map(imag)
+    image = crop_to_rect_map(imag)
     
     print(type( image ))
     
