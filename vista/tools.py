@@ -838,13 +838,14 @@ def crop_border(image, border_color='white'):
 #
 # ----------------------------------------------------------------------
 
-def crop_to_rect_map(image):
+def crop_to_rect_map(image, buff=0):
     """
     Crop an image to keep only the inner rectangular contour map, removing any elements outside it.
 
     Parameters:
     - image: NumPy array with shape (height, width, 3), an RGB image.
-
+    - buff:  int, width of the buffer(in the number of pixels). Buffer is the region 
+             where the edge of the image should falls in. 
     Returns:
     - Cropped image as a NumPy array.
     """
@@ -853,15 +854,25 @@ def crop_to_rect_map(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
     # Threshold the image to get a binary image
+    # the part we want to crop is white, a value very close to 255, so we set a 
+    # threshold of 250 to get a binary image
+    
     bw = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)[1]
 
     # Detect edges using Canny edge detection
     edges = cv2.Canny(bw, 50, 150)
 
     # Hough transform to detect lines
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=50, maxLineGap=10)
+    # lines are 3D matrix, [number of lines, 1, four values (x1, y1, x2, y2)]
+    # minLineLength is adjusted ad hoc here to avoid fragment lines near the edges.
+    
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=200, maxLineGap=10)
 
     # crop the image based on the range of the lines
+    # image pixels order is from top-left to bottom-right (n_y, n_x)
+    
+    n_y, n_x = image.shape[:2]
+    
     if lines is not None:
         
         xmin = min([line[0,0] for line in lines])
@@ -869,10 +880,20 @@ def crop_to_rect_map(image):
         xmax = max([line[0,2] for line in lines])
         ymax = max([line[0,3] for line in lines])
         
-        cv2.line(edges, (xmin, ymin), (xmin, ymax), (155, 155, 155), 2)
-        cv2.line(edges, (xmin, ymax), (xmax, ymax), (155, 155, 155), 2)
-        cv2.line(edges, (xmax, ymax), (xmax, ymin), (155, 155, 155), 2)
-        cv2.line(edges, (xmax, ymin), (xmin, ymin), (155, 155, 155), 2)
+        # draw the rectangle on edges (in case you want to visualize the cropping box)
+        # cv2.line(edges, (xmin, ymin), (xmin, ymax), (155, 155, 155), 2)
+        # cv2.line(edges, (xmin, ymax), (xmax, ymax), (155, 155, 155), 2)
+        # cv2.line(edges, (xmax, ymax), (xmax, ymin), (155, 155, 155), 2)
+        # cv2.line(edges, (xmax, ymin), (xmin, ymin), (155, 155, 155), 2)
+
+        # crop the image
+        
+        if buff > 0 :
+            
+            if n_y - ymax > buff:  ymax = n_y
+            if ymin       > buff:  ymin = 0
+            if n_x - xmax > buff:  xmax = n_x
+            if xmin       > buff:  xmin = 0 
 
         cropped_image = image[ymin:ymax, xmin:xmax]
 

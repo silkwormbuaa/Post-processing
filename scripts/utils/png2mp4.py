@@ -26,7 +26,7 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    figpath = '/home/wencan/temp/231124/postprocess/snapshots/zslice/w3/figs/'
+    figpath = '/home/wencan/temp/smooth_adiabatic/postprocess/snapshots/zslice/p_fluc_vector/figs/'
 #    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
 
     os.chdir( figpath )

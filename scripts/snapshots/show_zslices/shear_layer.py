@@ -48,7 +48,7 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_mid'
+casedir  = '/home/wencan/temp/231124'
 
 vars_out = [ 'p_fluc' ]
 
@@ -211,7 +211,7 @@ def show_slice( snapfile ):
 
 # ----- pass the image from pyvista to matplotlib
 
-        image = crop_to_rect_map(image)
+        image = crop_to_rect_map(image, buff=100)
 
         fig, ax = plt.subplots(figsize=(12.8,7.2))
 
