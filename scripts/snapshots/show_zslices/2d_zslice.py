@@ -19,6 +19,7 @@ if off_screen:
 import os
 import sys
 import time
+import numpy              as     np
 import pyvista            as     pv
 import matplotlib.pyplot  as     plt
 
@@ -46,25 +47,26 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124'
+casedir  = '/home/wencan/temp/smooth_mid/'
 
-vars_out = [ 'mach' ]
+vars_out = [ 'w3_r' ]
 
 varslist = ['u',                'T',               'p',               'DS',      
             'p_fluc',           'rho',            'rho_fluc',        'u_r',
-            'v_r',              'w3',             'mach']
+            'v_r',              'w3',             'mach',            'w3_r']
 labels   = [r'$u/u_{\infty}$',     r'$T/T_{\infty}$',      r'$p/p_{\infty}$',         r'$DS$',   
             r"$p'/p_{\infty}$",    r"$\rho/\rho_{\infty}$",r"$\rho '/\rho_{\infty}$", r"$u_{r}/u_{\infty}$", 
-            r"$v_{r}/u_{\infty}$", r'$\omega$',    r'$M$']
+            r"$v_{r}/u_{\infty}$", r'$\omega$',            r'$M$',    r'$\omega_r$']
 colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r', 
             'coolwarm',        'plasma',          'coolwarm',       'coolwarm',
-            'coolwarm',        'coolwarm',        'coolwarm']
+            'coolwarm',        'coolwarm',        'coolwarm',       'coolwarm']
 ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8], 
             [-0.5,0.5],        [0.5,2.5],         [-0.25,0.25],      [-0.2,0.2],        
-            [-0.2,0.2],        [-1.5,1.5],        [0.0,2.0]]
+            [-0.2,0.2],        [-1.5,1.5],        [0.0,2.0],         [-6,6]]
 vars_in  = ['u', 'v', 'w', 'T', 'p']
 cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
+clipbox  = [-12, 6, 0, 5, -1, 1]
 
 # =============================================================================
 
@@ -147,7 +149,21 @@ def show_slice( snapfile ):
         snapbl.df['T']        =  snapbl.df['T']  /T_ref
         snapbl.df['p']        =  snapbl.df['p']  /p_ref
         snapbl.df['rho']      =  snapbl.df['rho']/rho_ref
-        snapbl.df['DS']       = compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
+        snapbl.df['DS']       =  compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
+        
+# ----- compute the relative vorticity
+
+        g   = grid3d.g[bl_num-1] 
+
+        u_r = np.array(snapbl.df['u_r']).reshape( snapbl.npy, snapbl.npx )
+        v_r = np.array(snapbl.df['v_r']).reshape( snapbl.npy, snapbl.npx )
+        
+        dur_dy = np.gradient( u_r, g.gy, axis=0 )
+        dvr_dx = np.gradient( v_r, g.gx, axis=1 )
+        
+        w3_r = (dvr_dx - dur_dy)*delta
+        
+        snapbl.df['w3_r'] = w3_r.flatten()
         
 # -- prepare for the visualization
 

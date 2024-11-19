@@ -150,7 +150,7 @@ def show_slice( snapfile ):
         snapbl.df['T']        =  snapbl.df['T']  /T_ref
         snapbl.df['p']        =  snapbl.df['p']  /p_ref
         snapbl.df['rho']      =  snapbl.df['rho']/rho_ref
-        snapbl.df['DS']       = compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
+        snapbl.df['DS']       =  compute_DS( snapbl.df['grad_rho'], min=0.0, max=2.0)
         
 # -- prepare for the visualization
 

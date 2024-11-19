@@ -603,7 +603,7 @@ class BlockData:
             df['sensor']       = sensor
             df['grad_rho_mod'] = grad_rho
             
-# ----- compute Ducros sensor
+# ----- compute Ducros shock sensor, from paper of Pirozzoli Annu. Rev. Fluid.
 
         if 'Ducros' in grads:
 
