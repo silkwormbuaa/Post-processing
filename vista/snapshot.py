@@ -173,6 +173,7 @@ class Snapshot:
         
         """
         block_list: (optional) if None, read all blocks.
+        var_read: MUST be in orders of ['u','v','w','T','p','vapor','cappa','cp','mu','wd', others...]
         """
         
         # before read in snapshots, clear first.
@@ -1950,6 +1951,40 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
+# >>> delete vars                                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/11/20  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def delete_vars( self, vars:list, blocklist=None ):
+        
+        """
+        vars: list of variables to be deleted
+        """
+        
+        if blocklist is None:
+            blocklist = self.bl_nums
+        
+        for snap_bl in self.snap_data:
+            
+            bl_num = snap_bl.num
+            
+            if bl_num in blocklist:
+                
+                snap_bl.df.drop( columns=vars, inplace=True )
+                
+        print(f"deleted variables {vars} from snapshot {self.itstep}.\n")
+        
+
+# ----------------------------------------------------------------------
 # >>> Write snapshot                                                (Nr.)
 # ----------------------------------------------------------------------
 #
@@ -2083,8 +2118,12 @@ class Snapshot:
 
                 # sol(n_var, N3, N2, N1)
                 
-                write_flt_bin( np.array(bl_data.df.values).T, f, self.kind )
+                # check if the dataframe is empty
+                if bl_data.df.empty:
+                    raise ValueError(f"Write block {bl_data.num} failed, dataframe is empty.")
                 
+                write_flt_bin( np.array(bl_data.df.values).T, f, self.kind )
+
 
 # ----------------------------------------------------------------------
 # >>> Assign wall_dist field from wd_snap to a real snapshot      (Nr.)
