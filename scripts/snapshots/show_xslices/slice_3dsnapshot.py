@@ -35,6 +35,7 @@ casedir   = '/home/wencan/temp/231124'
 slic_type = 'X'
 locs      = [0.0]
 locs      = np.array(locs) * 5.2 + 50.4
+bbox      = [-30.0,120.0,-1.0,31.0,-11.0,11.0]
 
 # =============================================================================
 
@@ -73,14 +74,12 @@ def slice_snapshot( snapfile ):
         
         outfile = os.path.dirname( snapfile) + f"/snapshot_{slic_type}_{i:03d}.bin"
         
-        blocklist, _ = grid3d.select_sliced_blockgrids( slic_type, loc )
+        blocklist, _ = grid3d.select_sliced_blockgrids( slic_type, loc, bbox )
         
         snap = Snapshot( snapfile )
         snap.read_snapshot( blocklist )
-        
         snap.grid3d = grid3d
         snap2d = snap.get_slice( slic_type, loc )
-        
         snap2d.write_snapshot( outfile )
         
         print(f"Finish writing slice {snap2d.itstep}.")

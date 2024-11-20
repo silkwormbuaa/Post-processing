@@ -90,6 +90,7 @@ class Directories:
         self.pp_snp_fricprj = os.path.join( self.pp_snapshots, 'fricprj' )
         self.pp_snp_pfmax   = os.path.join( self.pp_snapshots, 'pfmax'   )
         self.pp_snp_zslice  = os.path.join( self.pp_snapshots, 'zslice'  )
+        self.pp_snp_xslice  = os.path.join( self.pp_snapshots, 'xslice'  )
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)

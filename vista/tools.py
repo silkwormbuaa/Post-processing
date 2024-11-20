@@ -802,10 +802,7 @@ def crop_border(image, border_color='white'):
         raise ValueError("only 'white' or 'black' are supported for border_color")
 
     # find which pixels are not the border color
-#    mask = np.all(image != color_to_crop, axis=-1)
-
-    mask = np.logical_or(np.all(np.abs(image - [255, 255, 255])<10, axis=-1),
-                         np.all(np.abs(image - [0, 0, 0])<10, axis=-1))
+    mask = np.all(image != color_to_crop, axis=-1)
 
     # get the border of the non-border color
     coords = np.argwhere(mask)

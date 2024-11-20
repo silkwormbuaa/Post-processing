@@ -22,7 +22,7 @@ from   vista.directories import Directories
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/smooth_adiabatic/'
+casedir   = '/home/wencan/temp/231124/'
 slic_type = 'X'
 locs      = [0.0]
 locs      = np.array(locs) * 5.2 + 50.4
