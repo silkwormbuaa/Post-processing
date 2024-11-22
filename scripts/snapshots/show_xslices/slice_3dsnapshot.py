@@ -33,7 +33,7 @@ mpi = MPIenv()
 
 casedir   = '/home/wencan/temp/231124'
 slic_type = 'X'
-locs      = [0.0]
+locs      = [-14.98,-11.58,-9.96,2.86,8.0]
 locs      = np.array(locs) * 5.2 + 50.4
 bbox      = [-30.0,120.0,-1.0,31.0,-11.0,11.0]
 
@@ -82,7 +82,7 @@ def slice_snapshot( snapfile ):
         snap2d = snap.get_slice( slic_type, loc )
         snap2d.write_snapshot( outfile )
         
-        print(f"Finish writing slice {snap2d.itstep}.")
+        print(f"Finish writing slice {snap2d.itstep:08d}_{i:03d}.")
         
         del snap, snap2d        
         

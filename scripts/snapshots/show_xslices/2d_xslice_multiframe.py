@@ -19,9 +19,10 @@ if off_screen:
 import os
 import sys
 import time
-import numpy              as     np
-import pyvista            as     pv
-import matplotlib.pyplot  as     plt
+import numpy               as     np
+import pyvista             as     pv
+import matplotlib.pyplot   as     plt
+from   matplotlib.gridspec import GridSpec
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -50,7 +51,7 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 casedir  = '/home/wencan/temp/231124/'
 
-locs     = [0.0]
+locs     = [-14.98,-11.58,-9.96,2.86,8.0]
 locs     = np.array(locs) * 5.2 + 50.4
 
 vars_out = ['u',                'v',               'w',                'p',
@@ -73,7 +74,7 @@ colmaps  = ['coolwarm',        'coolwarm',        'coolwarm',        'coolwarm',
             'coolwarm',        'coolwarm',        'coolwarm',        'coolwarm',
             'coolwarm',        'Greys_r',         'coolwarm']
 
-ranges   = [[-0.4,1.0],        [-0.3,0.3],        [-0.3,0.3],        [-0.5,0.5],
+ranges   = [[-0.4,1.0],        [-0.3,0.3],        [-0.3,0.3],        [1.0,2.5],
             [1.0,2.0],         [0.5,2.5],         [0.0,2.0],         [-6,6],
             [-0.3,0.3],        [-0.3,0.3],        [-0.3,0.3],        [-0.5,0.5],
             [-0.5,0.5],        [0.0,0.8],         [-6,6]]
@@ -151,7 +152,6 @@ def show_slice( snapdir ):
 
 # -- read in the snapshot and compute density gradient
 
-    images = []
     datasets = []
     seplines = []
     sonlines = []
@@ -216,69 +216,88 @@ def show_slice( snapdir ):
         sonlines.append( sonline )
         sys.stdout.flush()
 
-    # -- loop over all the output variables
+# - loop over all the output variables (each var gets a figure)
 
-        for var in vars_out:
+    for var in vars_out:
+    
+        images = []
+    
+        os.chdir( f'./{var}/figs' )
+        
+        for i, dataset in enumerate(datasets):
+        
+            p = pv.Plotter( off_screen=off_screen, window_size=[1920,1080], border=False )
+
+            # set color maps
+
+            cmap    = plt.get_cmap(colmaps[varslist.index(var)],51)
+            cmap.set_over('red')
+            cmap.set_under('blue')
             
-            os.chdir( f'./{var}/figs' )
+            dataset.set_active_scalars( var )
+            p.add_mesh( dataset, 
+                        cmap=cmap, 
+                        clim=ranges[varslist.index(var)],
+                        lighting=False, 
+                        show_scalar_bar=False )
             
-            for i, dataset in enumerate(datasets):
+            p.add_mesh( seplines[i], color='yellow', line_width=5.0 )
+            p.add_mesh( sonlines[i], color='green',  line_width=5.0 )
+
+            p.view_vector([1.0,0.0,0.0],viewup=[0.0,1.0,0.0])
             
-                p = pv.Plotter( off_screen=off_screen, window_size=[1920,1080], border=False )
+            p.camera.tight(view='zy')
+            image = p.screenshot(return_img=True)
+            p.close()
 
-        # ----- set color maps
+            # pass the image from pyvista to matplotlib
 
-                cmap    = plt.get_cmap(colmaps[varslist.index(var)],51)
-                cmap.set_over('red')
-                cmap.set_under('blue')
-                
-                dataset.set_active_scalars( var )
-                p.add_mesh( dataset, 
-                            cmap=cmap, 
-                            clim=ranges[varslist.index(var)],
-                            lighting=False, 
-                            show_scalar_bar=False )
-                
-                p.add_mesh( sepline, color='yellow', line_width=4.0 )
-                p.add_mesh( sonline, color='green',  line_width=3.0 )
+            image = crop_border(image)
+            images.append( image )
 
-                p.view_vector([1.0,0.0,0.0],viewup=[0.0,1.0,0.0])
-                
-                p.camera.tight(view='zy')
-                image = p.screenshot(return_img=True)
-                p.close()
+        itstep      = snap.itstep
+        itime       = snap.itime
+        figname     = f"slice_x_{itstep:08d}.png"
 
-                # pass the image from pyvista to matplotlib
+        fig = plt.figure( figsize=(12.8,7.2) )
 
-                image = crop_border(image)
-                images.append( image )
+        fig.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1)
 
-            itstep      = snap.itstep
-            itime       = snap.itime
-            figname     = f"slice_X_{itstep:08d}.png"
+        gs  = GridSpec(2,3, figure=fig)
+        
+        for i, image in enumerate(images):
+            
+            n_row = i//3
+            n_col = i%3
+            
+            ax = fig.add_subplot(gs[n_row,n_col])
 
-            fig, ax = plt.subplots(figsize=(12.8,7.2))
-
-            img = ax.imshow(image, extent=clipbox[4:]+clipbox[2:4], 
+            img = ax.imshow(images[i], extent=clipbox[4:]+clipbox[2:4], 
                             cmap=cmap, clim=ranges[varslist.index(var)])
             
             ax.fill_between( zlist, wallshape, -0.3, color='gray')
             ax.set_ylim( [-0.3, clipbox[3]] )
-            ax.set_xlabel(r'$z/\delta_0$')
-            ax.set_ylabel(r'$y/\delta_0$')
-
-            cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
-            cbar.ax.set_ylabel( labels[varslist.index(var)], loc='center')
-
-            plt.title(f"t = {itime:.2f} ms", loc='center',y=1.05)
-
-            if off_screen:
-                plt.savefig( figname, dpi=150)
-            else:
-                plt.show()
             
-            plt.close()
-            os.chdir( '../../' )
+            if n_col == 0:  ax.set_ylabel(r'$y/\delta_0$')
+            if n_row == 1:  ax.set_xlabel(r'$z/\delta_0$')
+
+        gs_colorbar = GridSpec(2,2, figure=fig, width_ratios=[1.5,0.5],
+                               left = 0.70, right = 1.0, bottom=0.24, top=0.3)
+        
+        cbar_ax = fig.add_subplot(gs_colorbar[0,0])
+        cbar = fig.colorbar( img, cax=cbar_ax, orientation='horizontal', shrink=0.5 ) 
+        cbar.ax.set_ylabel( labels[varslist.index(var)], loc='center')
+
+        fig.suptitle(f"t = {itime:.2f} ms")
+
+        if off_screen:
+            plt.savefig( figname, dpi=150)
+            print(f"\nfig {var} {figname} is saved.")
+        else:
+            plt.show()
+        
+        plt.close()
+        os.chdir( '../../' )
 
 if mpi.size == 1:
     print("No workers available. Master should do all tasks.")
