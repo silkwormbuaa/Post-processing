@@ -142,6 +142,7 @@ with timer('paradmd '):
 
 # print out the time finishing the job
 
-print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
-    
+if paradmd.rank == 0:
+    print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+   
 sys.stdout.flush()       
