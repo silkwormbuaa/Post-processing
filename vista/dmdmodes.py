@@ -9,14 +9,14 @@
 '''
 
 import pickle
-
 import numpy             as     np
-
 import pandas            as     pd
-
 from   scipy.interpolate import griddata
 
 from   .plot_style       import plot_dmd_mode 
+from   .io_vtk           import create_multiblock_dataset
+from   .io_vtk           import add_var_vtkRectilinearGrid
+from   .io_vtk           import create_3d_vtkRectilinearGrid
 
 class DMDMode:
 # ----------------------------------------------------------------------
@@ -217,6 +217,100 @@ class DMDModes:
         
         self.modes.clear()
 
+
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/12/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def create_vtk_multiblock( self, vars, block_list, snap_type, grid3d,
+                               rescale=[0.0,0.0,0.0,1.0,1.0,1.0], buff=3):
+        """
+        transform the dmd modes into vtk multiblock vtk \n
+        vars: list of variables to be saved
+        block_list: list of block names
+        snap_type: type of snapshot
+        grid3d: 3D grid
+        rescale: rescale the grid points. [x_shift, y_shift, z_shift, x_norm, y_norm, z_norm]
+        """
+
+# ----- setup vtk blocks
+
+        vtk_blocks = list()
+        i_start    = 0
+        
+        for bl_num in block_list:
+            
+            g = grid3d.g[bl_num-1]
+            
+            px = (g.px[buff:-buff]+rescale[0])/rescale[3]
+            py = (g.py[buff:-buff]+rescale[1])/rescale[4]
+            pz = (g.pz[buff:-buff]+rescale[2])/rescale[5]
+            
+            # modify the grid points arrays based on snapshot type
+            if   snap_type == 'block': pass
+            elif snap_type == 'X':     px = np.array([0.0])
+            elif snap_type == 'Z':     pz = np.array([0.0])
+            elif snap_type == 'Y' or snap_type == 'W': py = np.array([0.0])
+            
+            # build one vtk block
+            bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )            
+            n_cells = bl_vtk.GetNumberOfCells()
+            
+# --------- reconstructed data
+
+            step = self.step
+            
+            for i in range(step):
+                
+                header = f"recons_{i:05d}"
+                
+                for j, var in enumerate(vars):
+                
+                    data_header = header + '_' + var
+                    i_s = i_start + j*n_cells
+                    i_e = i_start + (j+1)*n_cells
+                    #print(i_s, i_e)
+                    
+                    databuff = self.recons_data.real[i_s:i_e,i]
+                    
+                    bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
+
+# --------- modes
+
+            # n_modes = len(self.indxes)
+            
+            # for i in range(n_modes):
+                    
+            #         header = f"phi_{self.indxes[i]:05d}"
+                    
+            #         for j, var in enumerate(vars):
+                    
+            #             data_header = header + '_' + var
+            #             i_s = i_start + j*n_cells
+            #             i_e = i_start + (j+1)*n_cells
+            #             databuff = self.Phis[i_s:i_e,i]
+                        
+            #             bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
+
+            vtk_blocks.append( bl_vtk )
+            i_start += len(vars)*n_cells
+        # build the multiple block dataset
+        
+        dataset = create_multiblock_dataset( vtk_blocks )
+        
+        return dataset
+        
 
 
 # ----------------------------------------------------------------------

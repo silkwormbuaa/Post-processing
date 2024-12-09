@@ -17,10 +17,12 @@ import cmath
 import pickle
 import numpy             as     np
 import pandas            as     pd
+import pyvista           as     pv
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
+from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.params      import Params
 from   vista.snapshot    import Snapshot
@@ -44,6 +46,9 @@ os.chdir( dirs.pp_dmd)
 
 snap_dir = dirs.snp_dir
 
+grid3d = GridData( dirs.grid )
+grid3d.read_grid()
+
 step = 1
 
 t_0 = time.time()
@@ -55,7 +60,6 @@ with timer('\n - Get snapshots file and grid vector'):
     testfile = snap_files[0]
     
     snapshot_temp = Snapshot( testfile )
-    
     
     if snapshot_temp.type == 'slice': 
         
@@ -71,7 +75,9 @@ with timer('\n - Get snapshots file and grid vector'):
         
     
     GX = snapshot_temp.get_grid_vectors( buff=3 )
-
+    
+    block_list = snapshot_temp.bl_nums
+    
     df = pd.DataFrame( GX, columns = GX_header )
 
 sys.stdout.flush()    
@@ -137,4 +143,17 @@ sys.stdout.flush()
 # =============================================================================
 # match mesh and reconstructed data( both std_dmd and spdmd ), each modes
 # =============================================================================
-    
+
+dataset = modes_temp.create_vtk_multiblock( ['u','v','w','p'], block_list, 'X', grid3d )
+
+dataset = pv.MultiBlock( dataset )
+# dataset = dataset.cell_data_to_point_data().combine()
+
+p = pv.Plotter(window_size=[1920,1080])
+
+dataset.set_active_scalars('recons_00000_u')
+
+p.add_mesh( dataset )
+
+p.show()
+
