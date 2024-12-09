@@ -23,15 +23,20 @@ from   vista.timer       import timer
 from   vista.colors      import colors  as col
 from   vista.params      import Params
 from   vista.paradmd     import ParaDmd
+from   vista.directories import Directories
 from   vista.plot_style  import plot_eigens
 from   vista.plot_style  import plot_amp_st
 from   vista.plot_style  import plot_psi_st
-from   vista.log         import Logger
-sys.stdout = Logger( os.path.basename(__file__) )
+#from   vista.log         import Logger
+#sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 # Take gamma, rho from command line | read case parameters
 # =============================================================================
+
+casedir = '/home/wencan/temp/231124'
+
+dirs = Directories( casedir )
 
 arguments = sys.argv
 
@@ -52,7 +57,7 @@ elif len( arguments ) == 3 or len( arguments ) > 3 : # in case >run.out
 
 else: raise ValueError("gamma and rho should be provided!")
 
-case_parameters = Params( 'case_parameters' )
+case_parameters = Params( dirs.case_para_file )
 
 sys.stdout.flush()
 
@@ -64,11 +69,12 @@ sys.stdout.flush()
 
 Lsep     = case_parameters.Lsep
 velocity = case_parameters.u_ref
-snap_dir = os.getcwd()
+snap_dir = dirs.snp_dir
 
 
 # check if paradmd.pkl exists
 
+os.chdir( dirs.pp_dmd )
 if not os.path.exists( 'spdmd_result.pkl' ):
 
     # Set the instance and read in Pqs
@@ -120,7 +126,7 @@ c. ([1,2,3]) will look for the elements in a 1-D array arr[1:3].
 
 fmt = '.png'
 
-eigen_dir = snap_dir + '/eigen_plots'
+eigen_dir = dirs.pp_dmd + '/eigen_plots'
 
 if not os.path.exists( eigen_dir ):
     os.mkdir( eigen_dir )

@@ -30,6 +30,8 @@ from   .init_empty       import init_1Dcmx_empty
 from   .init_empty       import init_2Dflt_empty
 from   .init_empty       import init_2Dcmx_empty
 
+from   .directories      import create_folder
+
 from   .colors           import colors   as col
 
 class ParaDmd:
@@ -64,17 +66,19 @@ class ParaDmd:
         
         self.snap_dir = snap_dir
         
-        self.snap_struct_file  = snap_dir + '/snap_struct.csv'
+        dmddir = create_folder( snap_dir + '/../postprocess/dmd' )
         
-        self.snap_info_file    = snap_dir + '/snap_info.dat'
+        self.snap_struct_file  = dmddir + '/snap_struct.csv'
         
-        self.Pqs_file          = snap_dir + '/Pqs.pkl'
+        self.snap_info_file    = dmddir + '/snap_info.dat'
         
-        self.ind_spmode_file   = snap_dir + '/ind_spmode.csv'
+        self.Pqs_file          = dmddir + '/Pqs.pkl'
         
-        self.spdmd_result_file = snap_dir + '/spdmd_result.pkl'
+        self.ind_spmode_file   = dmddir + '/ind_spmode.csv'
         
-        self.dmdmodes_dir      = snap_dir + '/dmdmodes'
+        self.spdmd_result_file = dmddir + '/spdmd_result.pkl'
+        
+        self.dmdmodes_dir      = dmddir + '/dmdmodes'
         
         
         # some parameters need to be defined first
@@ -511,31 +515,55 @@ class ParaDmd:
         
         buff_data = buff_data.reshape(( self.n_var, Nx*Ny*Nz ))
 
-        if self.select == 'u':    
-            buff_data = buff_data[0,:]/self.var_norms.get('u')
-            
-        elif self.select == 'v':  
-            buff_data = buff_data[1,:]/self.var_norms.get('v')
-            
-        elif self.select == 'w':  
-            buff_data = buff_data[2,:]/self.var_norms.get('w')
-            
-        elif self.select == 'T':  
-            buff_data = buff_data[3,:]/self.var_norms.get('T')
-            
-        elif self.select == 'p':  
-            buff_data = buff_data[4,:]/self.var_norms.get('p')
-            
-        elif self.select == 'cf': 
-            buff_data = buff_data[5,:]/self.var_norms.get('cf')
-            
-        else: raise ValueError(col.fg.red,
-                               'The selected variable does not exist.',
-                               col.reset)
+        buff_data = self.select_var( buff_data )
         
         return buff_data
         
 
+# ----------------------------------------------------------------------
+# >>> select variables                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/12/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def select_var( self, buff_data ):
+
+        """
+        return: a 1D list of selected variables
+        """
+        
+        temp = []
+        vars = self.select
+        
+        if 'u' in vars:    
+            temp.append( buff_data[0,:]/self.var_norms.get('u') )
+            
+        if 'v' in vars:  
+            temp.append( buff_data[1,:]/self.var_norms.get('v') )
+            
+        if 'w' in vars:  
+            temp.append( buff_data[2,:]/self.var_norms.get('w') )
+            
+        if 'T' in vars:  
+            temp.append( buff_data[3,:]/self.var_norms.get('T') )
+            
+        if 'p' in vars:  
+            temp.append( buff_data[4,:]/self.var_norms.get('p') )
+            
+        if 'cf' in vars: 
+            temp.append( buff_data[5,:]/self.var_norms.get('cf') )
+
+        
+        return np.array( temp ).ravel()
+        
 
 # ----------------------------------------------------------------------
 # >>> Parallel DMD                                                (Nr.)
@@ -785,7 +813,6 @@ class ParaDmd:
                            root=0 )
         
         # - save reconstructed data
-        os.chdir( self.snap_dir )
         
         if self.rank == 0:
             
@@ -832,7 +859,7 @@ class ParaDmd:
         
         # Save P,q,s,N_t with pickle
         
-        with open( self.snap_dir + "/Pqs.pkl", "wb" ) as f:
+        with open( self.Pqs_file, "wb" ) as f:
             
             pickle.dump( self.P, f )
             
@@ -875,7 +902,7 @@ class ParaDmd:
         
         # Check if Pqs.dat file is available
         
-        if not ( os.path.exists( self.snap_dir+'/Pqs.pkl' ) ):
+        if not ( os.path.exists( self.Pqs_file ) ):
             
             raise FileNotFoundError("Pqs.pkl is unavailable. Please run "
                                     "do_paradmd and save_Pqs first.")
@@ -883,7 +910,7 @@ class ParaDmd:
         
         # Read P,q,s,N_t with pickle
         
-        with open( self.snap_dir + "/Pqs.pkl","rb") as f:
+        with open( self.Pqs_file,"rb") as f:
             
             self.P = pickle.load( f )
             
@@ -900,7 +927,7 @@ class ParaDmd:
             self.alphas = pickle.load( f )
             
         
-        print("Pqs.pkl file is read.\n")
+        print(f"{self.Pqs_file} is read.\n")
 
 
 
@@ -1232,7 +1259,7 @@ class ParaDmd:
             
             df = df.astype(str)
             
-            max_lengths = df.applymap(len).max()
+            max_lengths = df.map(len).max()
             
             for column in df.columns:
                 df[column] = df[column].apply(lambda x:
@@ -1245,7 +1272,7 @@ class ParaDmd:
             # output the unsorted, full index
             df_unsorted = df_unsorted.astype(str)
             
-            max_lengths = df_unsorted.applymap(len).max()
+            max_lengths = df_unsorted.map(len).max()
             
             for column in df_unsorted.columns:
                 df_unsorted[column] = df_unsorted[column].apply(lambda x:

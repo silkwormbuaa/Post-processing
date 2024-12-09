@@ -18,19 +18,25 @@ source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.timer       import timer
+from   vista.colors      import colors    as col
 from   vista.params      import Params
 from   vista.paradmd     import ParaDmd
 from   vista.snapshot    import Snapshot
-from   vista.colors      import colors    as col
+from   vista.directories import Directories
 from   vista.tools       import get_filelist
-from   vista.log         import Logger
-sys.stdout = Logger( os.path.basename(__file__) )
+from   vista.directories import create_folder
+#from   vista.log         import Logger
+#sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-snap_dir = os.getcwd()
+casepath = '/home/wencan/temp/231124'
 
-os.chdir(snap_dir)
+dirs = Directories( casepath )
+
+snap_dir = dirs.snp_dir
+
+os.chdir( create_folder(dirs.pp_dmd) )
 
 paradmd = ParaDmd( snap_dir )
 
@@ -49,7 +55,7 @@ with timer('Get snapshots file list, snapshots info and case parameters'):
     
     if paradmd.rank == 0:
         
-        snap_files = get_filelist( snap_dir + '/snapshots' )
+        snap_files = get_filelist( snap_dir, 'snapshot_X_004.bin' )
         
         testfile = snap_files[0]
         
@@ -57,8 +63,7 @@ with timer('Get snapshots file list, snapshots info and case parameters'):
         
         snapshot_temp.get_snapshot_struct()
         
-        params = Params( 'case_parameters' )
-        
+        params = Params( dirs.case_para_file )
             
     snap_files = paradmd.comm.bcast( snap_files, root=0 )
     
@@ -92,8 +97,11 @@ with timer('\nRead in all the snapshots'):
     
     # select which parameter will be chosen to do DMD
     
-    paradmd.select = 'p'
+    paradmd.select = ['u','v','w','p']
     paradmd.var_norms['p'] = params.p_ref
+    paradmd.var_norms['u'] = params.u_ref
+    paradmd.var_norms['v'] = params.u_ref
+    paradmd.var_norms['w'] = params.u_ref
     
     for snap_file in snap_files:
         
@@ -123,6 +131,7 @@ with timer('paradmd '):
         
         paradmd.para_write_modes()
         
+        os.chdir( dirs.pp_dmd )
         paradmd.save_reconstruct()
                 
     # if spdmd is yet to do

@@ -67,7 +67,7 @@ class Directories:
         self.pp_probes       = os.path.join( self.pos_dir, 'probes' )
         self.pp_solution     = os.path.join( self.pos_dir, 'solution' )
         self.pp_snapshots    = os.path.join( self.pos_dir, 'snapshots' )
-        self.pp_DMD          = os.path.join( self.pos_dir, 'DMD' )
+        self.pp_dmd          = os.path.join( self.pos_dir, 'dmd' )
         
 # --- pp_statistics subdirectories
         
@@ -91,6 +91,7 @@ class Directories:
         self.pp_snp_pfmax   = os.path.join( self.pp_snapshots, 'pfmax'   )
         self.pp_snp_zslice  = os.path.join( self.pp_snapshots, 'zslice'  )
         self.pp_snp_xslice  = os.path.join( self.pp_snapshots, 'xslice'  )
+
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
