@@ -8,6 +8,7 @@
 @Desc    :   None
 '''
 
+import cmath
 import pickle
 import numpy             as     np
 import pandas            as     pd
@@ -218,9 +219,8 @@ class DMDModes:
         self.modes.clear()
 
 
-
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> recons_to_vtk                                            (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -233,7 +233,7 @@ class DMDModes:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, vars, block_list, snap_type, grid3d,
+    def recons_to_vtk( self, vars, block_list, snap_type, grid3d,
                                rescale=[0.0,0.0,0.0,1.0,1.0,1.0], buff=3):
         """
         transform the dmd modes into vtk multiblock vtk \n
@@ -286,23 +286,6 @@ class DMDModes:
                     
                     bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
 
-# --------- modes
-
-            # n_modes = len(self.indxes)
-            
-            # for i in range(n_modes):
-                    
-            #         header = f"phi_{self.indxes[i]:05d}"
-                    
-            #         for j, var in enumerate(vars):
-                    
-            #             data_header = header + '_' + var
-            #             i_s = i_start + j*n_cells
-            #             i_e = i_start + (j+1)*n_cells
-            #             databuff = self.Phis[i_s:i_e,i]
-                        
-            #             bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
-
             vtk_blocks.append( bl_vtk )
             i_start += len(vars)*n_cells
         # build the multiple block dataset
@@ -312,6 +295,90 @@ class DMDModes:
         return dataset
         
 
+# ----------------------------------------------------------------------
+# >>> mode_to_vtk                                            (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2024/12/09  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def mode_to_vtk( self, indx, vars, block_list, snap_type, grid3d, 
+                     rescale=[0.0,0.0,0.0,1.0,1.0,1.0], 
+                     buff=3):
+        """
+        transform the dmd modes into vtk multiblock vtk \n
+        vars: list of variables to be saved
+        block_list: list of block names
+        snap_type: type of snapshot
+        grid3d: 3D grid
+        rescale: rescale the grid points. [x_shift, y_shift, z_shift, x_norm, y_norm, z_norm]
+        """
+
+# ----- select the mode
+
+        Phi = np.array( self.Phis[:,self.indxes.index(indx)] )
+        alpha_pol = self.df_ind.loc[self.df_ind['indxes']==indx,
+                                    'alphas_pol'].iloc[0]
+        phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
+
+        # modes at different phases under a certain frequency
+        modes = [Phi * alpha_pol * phase for phase in phases]
+
+# ----- setup vtk blocks
+
+        vtk_blocks = list()
+        i_start    = 0
+        
+        for bl_num in block_list:
+            
+            g = grid3d.g[bl_num-1]
+            
+            px = (g.px[buff:-buff]+rescale[0])/rescale[3]
+            py = (g.py[buff:-buff]+rescale[1])/rescale[4]
+            pz = (g.pz[buff:-buff]+rescale[2])/rescale[5]
+            
+            # modify the grid points arrays based on snapshot type
+            if   snap_type == 'block': pass
+            elif snap_type == 'X':     px = np.array([0.0])
+            elif snap_type == 'Z':     pz = np.array([0.0])
+            elif snap_type == 'Y' or snap_type == 'W': py = np.array([0.0])
+            
+            # build one vtk block
+            bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )            
+            n_cells = bl_vtk.GetNumberOfCells()
+            
+# --------- modes
+
+            n_phases = len(phases)
+            
+            for i in range(n_phases):
+                    
+                header = f"mode_{indx:03d}_{i:01d}"
+
+                for j, var in enumerate(vars):
+                
+                    data_header = header + '_' + var
+                    i_s = i_start + j*n_cells
+                    i_e = i_start + (j+1)*n_cells
+                    databuff = modes[i].real[i_s:i_e]
+                    
+                    bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
+
+            vtk_blocks.append( bl_vtk )
+            i_start += len(vars)*n_cells
+            
+        # build the multiple block dataset
+        
+        dataset = create_multiblock_dataset( vtk_blocks )
+        
+        return dataset
 
 # ----------------------------------------------------------------------
 # >>> Match mesh                                                (Nr.)

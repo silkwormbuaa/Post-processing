@@ -144,7 +144,9 @@ sys.stdout.flush()
 # match mesh and reconstructed data( both std_dmd and spdmd ), each modes
 # =============================================================================
 
-dataset = modes_temp.create_vtk_multiblock( ['u','v','w','p'], block_list, 'X', grid3d )
+dataset = modes_temp.recons_to_vtk( ['u','v','w','p'], block_list, 'X', grid3d )
+
+
 
 dataset = pv.MultiBlock( dataset )
 # dataset = dataset.cell_data_to_point_data().combine()
