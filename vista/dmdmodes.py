@@ -360,7 +360,7 @@ class DMDModes:
             
             for i in range(n_phases):
                     
-                header = f"mode_{indx:03d}_{i:01d}"
+                header = f"mode_{indx:05d}_{i:02d}"
 
                 for j, var in enumerate(vars):
                 

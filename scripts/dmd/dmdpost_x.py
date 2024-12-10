@@ -9,40 +9,53 @@
 @Desc    :   None
 '''
 
+off_screen = True
+
+if off_screen:
+    from xvfbwrapper import Xvfb
+    vdisplay = Xvfb(width=1920, height=1080)
+    vdisplay.start()
 
 import os
 import sys
 import time
 import cmath
 import pickle
-import numpy             as     np
-import pandas            as     pd
-import pyvista           as     pv
+import pandas             as     pd
+import pyvista            as     pv
+import matplotlib.pyplot  as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
 
-from   vista.grid        import GridData
-from   vista.timer       import timer
-from   vista.params      import Params
-from   vista.snapshot    import Snapshot
-from   vista.dmdmodes    import DMDMode, DMDModes
-from   vista.directories import Directories
-from   vista.tools       import get_filelist
-from   vista.plot_style  import plot_dmd_mode 
-from   vista.directories import create_folder
+from   vista.grid         import GridData
+from   vista.timer        import timer
+from   vista.params       import Params
+from   vista.snapshot     import Snapshot
+from   vista.dmdmodes     import DMDMode, DMDModes
+from   vista.directories  import Directories
+from   vista.tools        import get_filelist
+from   vista.tools        import crop_border
+from   vista.directories  import create_folder
+from   vista.plot_setting import set_plt_rcparams
 #from   vista.log         import Logger
 #sys.stdout = Logger( os.path.basename(__file__) )
+set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
 casedir = '/home/wencan/temp/231124'
+clipbox = [-100,100, -0.3,2.0,-2,2]
+colmap  = 'coolwarm'
+
+# =============================================================================
+
 
 dirs = Directories( casedir )
 
-os.chdir( dirs.pp_dmd)
+os.chdir( dirs.pp_dmd )
 
 snap_dir = dirs.snp_dir
 
@@ -141,21 +154,96 @@ with timer('\n - Reconstruct snapshots'):
 sys.stdout.flush()
 
 # =============================================================================
-# match mesh and reconstructed data( both std_dmd and spdmd ), each modes
+# check the reconstructed data
 # =============================================================================
 
-dataset = modes_temp.recons_to_vtk( ['u','v','w','p'], block_list, 'X', grid3d )
+# dataset = modes_temp.recons_to_vtk( ['u','v','w','p'], block_list, 'X', grid3d )
+
+# dataset = pv.MultiBlock( dataset )
+# # dataset = dataset.cell_data_to_point_data().combine()
+
+# p = pv.Plotter(window_size=[1920,1080])
+
+# dataset.set_active_scalars('recons_00000_u')
+
+# p.add_mesh( dataset )
+
+# p.show()
 
 
+# =============================================================================
+# check each mode
+# =============================================================================
 
-dataset = pv.MultiBlock( dataset )
-# dataset = dataset.cell_data_to_point_data().combine()
+os.chdir( create_folder(dirs.pp_dmd + '/modes_figs') )
 
-p = pv.Plotter(window_size=[1920,1080])
 
-dataset.set_active_scalars('recons_00000_u')
+for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
+    
+    dataset = modes_temp.mode_to_vtk(indx, ['u','v','w','p'], block_list, 'X', grid3d, 
+                                     rescale=[0,0,0,5.2,5.2,5.2] )
 
-p.add_mesh( dataset )
+    dataset = pv.MultiBlock( dataset )
+    dataset = dataset.cell_data_to_point_data().combine()
+    dataset = dataset.clip_box( clipbox, invert=False )
 
-p.show()
+    St = modes_temp.df_ind.iloc[i]['Sts']
+
+    for var in ['u','v','w','p']:
+        
+        # define the data range
+        varname_list = [f'mode_{indx:05d}_{j:02d}_{var}' for j in range(8)]
+        ranges       = [ dataset.get_data_range(varname) for varname in varname_list ]
+        range_var    = [min( [r[0] for r in ranges] ), max( [r[1] for r in ranges] )]
+        
+        for j in range(8):
+        
+            dataset.set_active_scalars(f'mode_{indx:05d}_{j:02d}_{var}')
+    
+            p = pv.Plotter(off_screen=off_screen,window_size=[1920,1080],border=False)
+            
+            # set color map
+            
+            cmap = plt.get_cmap( colmap, 51 )
+            cmap.set_over('red')
+            cmap.set_under('blue')
+            
+            p.add_mesh( dataset,
+                        cmap=cmap,
+                        clim=range_var,
+                        lighting=False,
+                        show_scalar_bar=False)
+            
+            p.camera.tight(view='zy')
+            image = p.screenshot(return_img=True)
+            p.close()
+            
+            image = crop_border(image)
+            
+            fig,ax = plt.subplots(figsize=(12.8,7.2))
+            
+            img = ax.imshow(image, 
+                            extent=[-2,2,-0.3,2], 
+                            cmap='coolwarm',
+                            clim=range_var)
+
+            ax.set_xlabel(r'$z/\delta_0$')
+            ax.set_ylabel(r'$y/\delta_0$')
+
+            cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
+
+            plt.title(fr"phase {j}/8 $\pi$, St = {St:8.4f}", loc='center',y=1.05)
+
+
+            figname = f"mode_{indx:05d}_{j:02d}_{var}.png"
+            if off_screen:
+                plt.savefig( figname, dpi=150)
+            else:
+                plt.show()
+            
+            plt.close()
+            
+            print(f"Save {figname} done.")      
+            
+
 
