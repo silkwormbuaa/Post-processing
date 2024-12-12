@@ -9,6 +9,7 @@
 '''
 
 import os 
+import sys
 import cv2
 import math
 import shutil
@@ -56,7 +57,7 @@ def get_filelist( FoldPath, key=None ):
         FileList.sort()
     
     else:
-        print(f"Folder {FoldPath} does not exist!")
+        print(f"Folder {FoldPath} does not exist!"); sys.exit()
             
     return FileList
 
