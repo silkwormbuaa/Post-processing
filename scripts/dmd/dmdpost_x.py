@@ -21,9 +21,11 @@ import sys
 import time
 import cmath
 import pickle
-import pandas             as     pd
-import pyvista            as     pv
-import matplotlib.pyplot  as     plt
+import numpy               as     np
+import pandas              as     pd
+import pyvista             as     pv
+import matplotlib.pyplot   as     plt
+from   matplotlib.gridspec import GridSpec
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
@@ -36,6 +38,7 @@ from   vista.dmdmodes     import DMDMode, DMDModes
 from   vista.directories  import Directories
 from   vista.tools        import get_filelist
 from   vista.tools        import crop_border
+from   vista.tools        import define_wall_shape
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
 #from   vista.log         import Logger
@@ -47,8 +50,9 @@ set_plt_rcparams(latex=False,fontsize=15)
 # =============================================================================
 
 casedir = '/home/wencan/temp/231124'
-clipbox = [-100,100, -0.3,2.0,-2,2]
+clipbox = [-100,100, -0.11,2.0,-2,2]
 colmap  = 'coolwarm'
+vars    = ['u','v','w','p']
 
 # =============================================================================
 
@@ -157,7 +161,7 @@ sys.stdout.flush()
 # check the reconstructed data
 # =============================================================================
 
-# dataset = modes_temp.recons_to_vtk( ['u','v','w','p'], block_list, 'X', grid3d )
+# dataset = modes_temp.recons_to_vtk( vars, block_list, 'X', grid3d )
 
 # dataset = pv.MultiBlock( dataset )
 # # dataset = dataset.cell_data_to_point_data().combine()
@@ -177,10 +181,14 @@ sys.stdout.flush()
 
 os.chdir( create_folder(dirs.pp_dmd + '/modes_figs') )
 
+zlist     = np.linspace(-2,2,endpoint=True,num=401)
+delta     = params.delta_0
+casecode  = params.casecode
+wallshape = define_wall_shape( zlist*delta, casecode=casecode, write=False )/delta
 
 for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
     
-    dataset = modes_temp.mode_to_vtk(indx, ['u','v','w','p'], block_list, 'X', grid3d, 
+    dataset = modes_temp.mode_to_vtk(indx, vars, block_list, 'X', grid3d, 
                                      rescale=[0,0,0,5.2,5.2,5.2] )
 
     dataset = pv.MultiBlock( dataset )
@@ -189,16 +197,19 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
 
     St = modes_temp.df_ind.iloc[i]['Sts']
 
-    for var in ['u','v','w','p']:
+    images     = list()
+    range_vars = list()
+    for var in vars:
         
         # define the data range
-        varname_list = [f'mode_{indx:05d}_{j:02d}_{var}' for j in range(8)]
+        varname_list = [f'mode_{indx:05d}_{var}_{j:02d}' for j in range(8)]
         ranges       = [ dataset.get_data_range(varname) for varname in varname_list ]
         range_var    = [min( [r[0] for r in ranges] ), max( [r[1] for r in ranges] )]
+        range_vars.append( range_var )
         
         for j in range(8):
         
-            dataset.set_active_scalars(f'mode_{indx:05d}_{j:02d}_{var}')
+            dataset.set_active_scalars(f'mode_{indx:05d}_{var}_{j:02d}')
     
             p = pv.Plotter(off_screen=off_screen,window_size=[1920,1080],border=False)
             
@@ -220,30 +231,59 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
             
             image = crop_border(image)
             
-            fig,ax = plt.subplots(figsize=(12.8,7.2))
+            images.append(image)
+
+# --------
+
+    images = np.array(images).reshape( len(vars), 8, *images[0].shape )
+    
+    for j in range(8):
+        
+        fig = plt.figure(figsize=(12.8,7.2))
+        fig.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1)
+        gs  = GridSpec(2,2, figure=fig)
+        
+        for k, image in enumerate(images[:,j]):
+            
+            n_row = k//2
+            n_col = k%2
+            
+            ax = fig.add_subplot(gs[n_row,n_col])
             
             img = ax.imshow(image, 
-                            extent=[-2,2,-0.3,2], 
-                            cmap='coolwarm',
-                            clim=range_var)
+                            extent=[-2,2,-0.11,2], 
+                            cmap=cmap,
+                            clim=range_vars[k])
 
-            ax.set_xlabel(r'$z/\delta_0$')
-            ax.set_ylabel(r'$y/\delta_0$')
-
-            cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
-
-            plt.title(fr"phase {j}/8 $\pi$, St = {St:8.4f}", loc='center',y=1.05)
-
-
-            figname = f"mode_{indx:05d}_{j:02d}_{var}.png"
-            if off_screen:
-                plt.savefig( figname, dpi=150)
-            else:
-                plt.show()
+            ax.fill_between( zlist, wallshape, -0.3, color='gray' )
+            ax.set_ylim( [-0.3,2])
+            ax.text(1.6,1.8,vars[k])
             
-            plt.close()
-            
-            print(f"Save {figname} done.")      
+            if n_row==1: ax.set_xlabel(r'$z/\delta_0$')
+            if n_col==0: ax.set_ylabel(r'$y/\delta_0$')
+
+#        cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
+
+        fig.suptitle(fr"phase {j}/8 $\pi$, St = {St.real:.4f}")
+
+        figname = f"mode_{indx:05d}_{j:02d}.png"
+        if off_screen:
+            plt.savefig( figname, dpi=150)
+        else:
+            plt.show()
+        
+        plt.close()
+        
+        print(f"Save {figname} done.") 
+
+    # convert png image to gif
+    
+    convert_gif = f"convert -delay 100 -layers Optimize mode_{indx:05d}_*.png mode_{indx:05d}.gif"
+    
+    exit_code = os.system( convert_gif )
+    
+    if exit_code == 0: print( f"Output mode_{indx:05d} gif.\n")
+    else:              print( f"Failed to output mode_{indx:05d} gif.")   
             
 
 

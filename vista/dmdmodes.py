@@ -310,6 +310,7 @@ class DMDModes:
 # ----------------------------------------------------------------------
 
     def mode_to_vtk( self, indx, vars, block_list, snap_type, grid3d, 
+                     n_phases=8,
                      rescale=[0.0,0.0,0.0,1.0,1.0,1.0], 
                      buff=3):
         """
@@ -326,7 +327,7 @@ class DMDModes:
         Phi = np.array( self.Phis[:,self.indxes.index(indx)] )
         alpha_pol = self.df_ind.loc[self.df_ind['indxes']==indx,
                                     'alphas_pol'].iloc[0]
-        phases = [cmath.rect(1.0, cmath.pi*0.25*i) for i in range(8)]
+        phases = [cmath.rect(1.0, cmath.pi*2.0/n_phases*i) for i in range(n_phases)]
 
         # modes at different phases under a certain frequency
         modes = [Phi * alpha_pol * phase for phase in phases]
@@ -360,11 +361,11 @@ class DMDModes:
             
             for i in range(n_phases):
                     
-                header = f"mode_{indx:05d}_{i:02d}"
+                header = f"mode_{indx:05d}"
 
                 for j, var in enumerate(vars):
                 
-                    data_header = header + '_' + var
+                    data_header = header + '_' + var + f'_{i:02d}'
                     i_s = i_start + j*n_cells
                     i_e = i_start + (j+1)*n_cells
                     databuff = modes[i].real[i_s:i_e]
