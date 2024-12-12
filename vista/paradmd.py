@@ -9,30 +9,24 @@
 '''
 
 import os
-import gc 
-import pickle
+import gc
+import sys
 import time
-
+import pickle
 import numpy             as     np
 import numpy.linalg      as     linalg
-
 import pandas            as     pd
-
 from   mpi4py            import MPI
 
 from   .timer            import timer
-
+from   .colors           import colors   as col
 from   .tools            import get_filelist
 from   .tools            import to_dictionary
-
 from   .init_empty       import init_1Dflt_empty
 from   .init_empty       import init_1Dcmx_empty
 from   .init_empty       import init_2Dflt_empty
 from   .init_empty       import init_2Dcmx_empty
-
 from   .directories      import create_folder
-
-from   .colors           import colors   as col
 
 class ParaDmd:
 # ----------------------------------------------------------------------
@@ -60,7 +54,6 @@ class ParaDmd:
         self.comm    = MPI.COMM_WORLD
         self.rank    = self.comm.Get_rank()
         self.n_procs = self.comm.Get_size()
-        
         
         # Check if pre-processing files exists
         
@@ -755,8 +748,12 @@ class ParaDmd:
         
         self.freq = np.angle( mu )/self.dt/(2*np.pi)
         
-        print(f"DMD finished, got Phis shape {np.shape(self.Phi_i)}\n")
+        self.comm.barrier()
+        
+        if self.comm.rank == 0:
+            print(f"DMD finished, got Phis shape {np.shape(self.Phi_i)}\n")
 
+        sys.stdout.flush()
 
 
 # ----------------------------------------------------------------------

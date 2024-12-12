@@ -119,7 +119,7 @@ paradmd.dt = params.dt_snap
 # do parallel dmd
 # =============================================================================
 
-with timer('paradmd '):
+with timer('paradmd'):
 
     paradmd.do_paradmd()
     
@@ -133,7 +133,7 @@ with timer('paradmd '):
         
         os.chdir( dirs.pp_dmd )
         paradmd.save_reconstruct()
-                
+
     # if spdmd is yet to do
     
     else:
