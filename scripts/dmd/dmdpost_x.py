@@ -19,7 +19,6 @@ if off_screen:
 import os
 import sys
 import time
-import cmath
 import pickle
 import numpy               as     np
 import pandas              as     pd
@@ -41,8 +40,7 @@ from   vista.tools        import crop_border
 from   vista.tools        import define_wall_shape
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
-#from   vista.log         import Logger
-#sys.stdout = Logger( os.path.basename(__file__) )
+
 set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
@@ -56,49 +54,28 @@ vars    = ['u','v','w','p']
 
 # =============================================================================
 
-
 dirs = Directories( casedir )
 
-os.chdir( dirs.pp_dmd )
+# - enter folder: case/postprocess/dmd/
 
+os.chdir( dirs.pp_dmd )
 snap_dir = dirs.snp_dir
+
+# - grid for packing dmd results into vtk
 
 grid3d = GridData( dirs.grid )
 grid3d.read_grid()
 
-step = 1
+# - find all the blocks in the snapshot slice
 
-t_0 = time.time()
+snap_files    = get_filelist( snap_dir, 'snapshot_X_004.bin' )
+snapshot_temp = Snapshot( snap_files[0] )
+block_list    = snapshot_temp.bl_nums
 
-with timer('\n - Get snapshots file and grid vector'):
-    
-    snap_files = get_filelist( snap_dir, 'snapshot_X_004.bin' )
-    
-    testfile = snap_files[0]
-    
-    snapshot_temp = Snapshot( testfile )
-    
-    if snapshot_temp.type == 'slice': 
-        
-        snap_type = snapshot_temp.slic_type
-        if   snap_type == 'X': GX_header=['y','z']
-        elif snap_type == 'Z': GX_header=['x','y']
-        elif snap_type == 'W' or snap_type == 'Y': GX_header=['x','z']      
-        
-    elif snapshot_temp.type == 'block': 
-        
-        snap_type = 'block'
-        GX_header = ['x','y','z']
-        
-    
-    GX = snapshot_temp.get_grid_vectors( buff=3 )
-    
-    block_list = snapshot_temp.bl_nums
-    
-    df = pd.DataFrame( GX, columns = GX_header )
-
+print(f"Found {len(block_list)} blocks in the snapshot slice.")
 sys.stdout.flush()    
-    
+
+
 # =============================================================================
 # Reconstruct snapshots with selected spdmd modes:
 # =============================================================================
@@ -150,6 +127,9 @@ with timer('\n - Reconstruct snapshots'):
     print(f"\nSt of these modes:")
     print([mode.St for mode in modes_temp.modes])
     
+# - reconstruct dmd modes and select positive modes into df_ind
+
+    step = 1
     modes_temp.reconstruct( step )
 
     print(f"\nIndexes of positive modes:")
@@ -186,7 +166,11 @@ delta     = params.delta_0
 casecode  = params.casecode
 wallshape = define_wall_shape( zlist*delta, casecode=casecode, write=False )/delta
 
+# - loop over each mode
+
 for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
+    
+    # pack 8 (by default) phases of variables into vtk dataset
     
     dataset = modes_temp.mode_to_vtk(indx, vars, block_list, 'X', grid3d, 
                                      rescale=[0,0,0,5.2,5.2,5.2] )
@@ -233,7 +217,7 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
             
             images.append(image)
 
-# --------
+# -- plot mode shape in 8 phases
 
     images = np.array(images).reshape( len(vars), 8, *images[0].shape )
     
@@ -262,8 +246,6 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
             if n_row==1: ax.set_xlabel(r'$z/\delta_0$')
             if n_col==0: ax.set_ylabel(r'$y/\delta_0$')
 
-#        cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
-
         fig.suptitle(fr"phase {j}/8 $\pi$, St = {St.real:.4f}")
 
         figname = f"mode_{indx:05d}_{j:02d}.png"
@@ -276,7 +258,7 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
         
         print(f"Save {figname} done.") 
 
-    # convert png image to gif
+# -- convert png image to gif
     
     convert_gif = f"convert -delay 100 -layers Optimize mode_{indx:05d}_*.png mode_{indx:05d}.gif"
     
@@ -284,6 +266,3 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
     
     if exit_code == 0: print( f"Output mode_{indx:05d} gif.\n")
     else:              print( f"Failed to output mode_{indx:05d} gif.")   
-            
-
-
