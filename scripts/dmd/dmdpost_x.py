@@ -47,10 +47,11 @@ set_plt_rcparams(latex=False,fontsize=15)
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir = '/home/wencan/temp/231124'
-clipbox = [-100,100, -0.11,2.0,-2,2]
+casedir = '/home/wencan/temp/smooth_mid/'
+clipbox = [-100,150, 0.0,2.0,-2,2]
 colmap  = 'coolwarm'
 vars    = ['u','v','w','p']
+snaptag = 'snapshot_X_004.bin'
 
 # =============================================================================
 
@@ -68,8 +69,9 @@ grid3d.read_grid()
 
 # - find all the blocks in the snapshot slice
 
-snap_files    = get_filelist( snap_dir, 'snapshot_X_004.bin' )
+snap_files    = get_filelist( snap_dir, snaptag )
 snapshot_temp = Snapshot( snap_files[0] )
+snapshot_temp.read_snapshot()
 block_list    = snapshot_temp.bl_nums
 
 print(f"Found {len(block_list)} blocks in the snapshot slice.")
@@ -235,7 +237,7 @@ for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
             ax = fig.add_subplot(gs[n_row,n_col])
             
             img = ax.imshow(image, 
-                            extent=[-2,2,-0.11,2], 
+                            extent=[-2,2,0.0,2], 
                             cmap=cmap,
                             clim=range_vars[k])
 
