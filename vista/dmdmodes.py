@@ -310,27 +310,30 @@ class DMDModes:
 # ----------------------------------------------------------------------
 
     def mode_to_vtk( self, indx, vars, block_list, snap_type, grid3d, 
-                     n_phases=8,
+                     i_phase=0, n_phases=8,
                      rescale=[0.0,0.0,0.0,1.0,1.0,1.0], 
                      buff=3):
         """
         transform the dmd modes into vtk multiblock vtk \n
+        indx: indx of mode (out of number of snapshots)
         vars: list of variables to be saved
         block_list: list of block names
-        snap_type: type of snapshot
-        grid3d: 3D grid
+        snap_type:  type of snapshot
+        grid3d:     3D grid
+        i_phase:    which phase it is
+        n_phases:   total number of phases in 2*pi
         rescale: rescale the grid points. [x_shift, y_shift, z_shift, x_norm, y_norm, z_norm]
+        buff:    number of buffer layers
         """
 
 # ----- select the mode
 
-        Phi = np.array( self.Phis[:,self.indxes.index(indx)] )
-        alpha_pol = self.df_ind.loc[self.df_ind['indxes']==indx,
-                                    'alphas_pol'].iloc[0]
-        phases = [cmath.rect(1.0, cmath.pi*2.0/n_phases*i) for i in range(n_phases)]
-
+        Phi       = np.array( self.Phis[:,self.indxes.index(indx)] )
+        alpha_pol = self.df_ind.loc[self.df_ind['indxes']==indx,'alphas_pol'].iloc[0]
+        phase     = cmath.rect(1.0, cmath.pi*2.0/n_phases*i_phase)
+        
         # modes at different phases under a certain frequency
-        modes = [Phi * alpha_pol * phase for phase in phases]
+        mode      = Phi * alpha_pol * phase 
 
 # ----- setup vtk blocks
 
@@ -357,20 +360,16 @@ class DMDModes:
             
 # --------- modes
 
-            n_phases = len(phases)
-            
-            for i in range(n_phases):
-                    
-                header = f"mode_{indx:05d}"
+            header = f"mode_{indx:05d}"
 
-                for j, var in enumerate(vars):
+            for j, var in enumerate(vars):
+            
+                data_header = header + '_' + var + f'_{i_phase:02d}'
+                i_s = i_start + j*n_cells
+                i_e = i_start + (j+1)*n_cells
+                databuff = mode.real[i_s:i_e]
                 
-                    data_header = header + '_' + var + f'_{i:02d}'
-                    i_s = i_start + j*n_cells
-                    i_e = i_start + (j+1)*n_cells
-                    databuff = modes[i].real[i_s:i_e]
-                    
-                    bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
+                bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
 
             vtk_blocks.append( bl_vtk )
             i_start += len(vars)*n_cells
