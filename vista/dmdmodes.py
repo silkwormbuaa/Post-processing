@@ -364,7 +364,7 @@ class DMDModes:
 
             for j, var in enumerate(vars):
             
-                data_header = header + '_' + var + f'_{i_phase:02d}'
+                data_header = header + '_' + var + f'_{i_phase:03d}'
                 i_s = i_start + j*n_cells
                 i_e = i_start + (j+1)*n_cells
                 databuff = mode.real[i_s:i_e]
