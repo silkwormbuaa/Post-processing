@@ -49,8 +49,8 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_mid/'
-clipbox  = [-100,150, 0.0, 2.0,-2,2]
+casedir  = '/home/wencan/temp/231124/'
+clipbox  = [-100.0, 150.0, 0.0, 2.0, -2.0, 2.0]
 colmap   = 'coolwarm'
 vars     = ['u','v','w','p']
 n_frames = 64
@@ -252,7 +252,7 @@ def postprocess_dmd_x( indx ):
             ax = fig.add_subplot(gs[n_row,n_col])
             
             img = ax.imshow(image, 
-                            extent=[-2,2,0.0,2], 
+                            extent=[*clipbox[4:],*clipbox[2:4]], 
                             cmap=cmap,
                             clim=range_vars[k])
 
