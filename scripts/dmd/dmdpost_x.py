@@ -24,6 +24,7 @@ import numpy               as     np
 import pyvista             as     pv
 import matplotlib.pyplot   as     plt
 from   matplotlib.gridspec import GridSpec
+from   moviepy.editor      import ImageSequenceClip
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
@@ -193,7 +194,8 @@ def postprocess_dmd_x( indx ):
         
 # -- loop over every phase  
 
-    St = df.iloc[i]['Sts']
+    St       = df.iloc[i]['Sts']
+    fignames = list()
 
     for j in range( n_frames ):
     
@@ -205,7 +207,7 @@ def postprocess_dmd_x( indx ):
         dataset = dataset.cell_data_to_point_data().combine()
         dataset = dataset.clip_box( clipbox, invert=False )
 
-        images     = list()
+        images  = list()
 
         for k, var in enumerate(vars):
         
@@ -261,6 +263,7 @@ def postprocess_dmd_x( indx ):
         fig.suptitle(fr"phase {j}/{int(n_frames/2):d} $\pi$, St = {St.real:.4f}")
 
         figname = f"mode_{indx:05d}_{j:03d}.png"
+        fignames.append( figname )
         if off_screen:
             plt.savefig( figname, dpi=150)
         else:
@@ -271,14 +274,22 @@ def postprocess_dmd_x( indx ):
         print(f"Save {figname} done.") 
         sys.stdout.flush()
 
+# -- convert png image to mp4
+
+    output_video = f"mode_{indx:05d}.mp4"
+    clip = ImageSequenceClip( fignames, fps=20 )
+    clip.write_videofile( output_video, codec='libx264' )
+    print(f" Output video {output_video} is saved!\n")    
+
+
 # -- convert png image to gif
     
-    convert_gif = f"convert -delay 10 -layers Optimize mode_{indx:05d}_*.png mode_{indx:05d}.gif"
+    # convert_gif = f"convert -delay 10 -layers Optimize mode_{indx:05d}_*.png mode_{indx:05d}.gif"
     
-    exit_code = os.system( convert_gif )
+    # exit_code = os.system( convert_gif )
     
-    if exit_code == 0: print( f"Output mode_{indx:05d} gif.\n")
-    else:              print( f"Failed to output mode_{indx:05d} gif.")   
+    # if exit_code == 0: print( f"Output mode_{indx:05d} gif.\n")
+    # else:              print( f"Failed to output mode_{indx:05d} gif.")   
 
 
 # =============================================================================
