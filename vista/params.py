@@ -195,6 +195,12 @@ class Params:
         return float( self.params.get('D') )
     
 
+# --------------- Computational domain parameters ---------------------
+
+    @property
+    def y_min( self ):
+        return float( self.params.get('y_min') )
+
 # --------------- case specific flow conditions -----------------------
     
     @property

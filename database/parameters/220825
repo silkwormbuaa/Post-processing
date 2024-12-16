@@ -14,6 +14,9 @@ delta_0   = 5.2
 Re_ref    = 2230.0
 visc_law  = P05
 
+# Computational domain parameters (normalized)
+
+y_min     = -0.11
 
 
 # Numerical setup parameters

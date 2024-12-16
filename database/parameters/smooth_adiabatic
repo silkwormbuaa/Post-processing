@@ -23,10 +23,12 @@ dt_snap   = 0.01
 H         = 0.00
 H_md      = 0.00
 x_imp     = 50.4
-
 period    = 64
-
 D         = 10.4
+
+# Computational domain parameters (normalized)
+
+y_min     = 0.0
 
 # Case specific flow conditions
 

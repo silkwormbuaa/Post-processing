@@ -50,7 +50,7 @@ mpi = MPIenv()
 # =============================================================================
 
 casedir  = '/home/wencan/temp/smooth_mid/'
-clipbox  = [-100,150, 0.0,2.0,-2,2]
+clipbox  = [-100,150, 0.0, 2.0,-2,2]
 colmap   = 'coolwarm'
 vars     = ['u','v','w','p']
 n_frames = 64
@@ -152,17 +152,20 @@ if mpi.is_root:
 
     # - define the wall shape for plotting 
     
-    zlist     = np.linspace(-2,2,endpoint=True,num=401)
-    delta     = params.delta_0
-    casecode  = params.casecode
-    wallshape = define_wall_shape( zlist*delta, casecode=casecode, write=False )/delta
+    zlist      = np.linspace(-2,2,endpoint=True,num=401)
+    clipbox[2] = params.y_min 
+    delta      = params.delta_0
+    casecode   = params.casecode
+    wallshape  = define_wall_shape( zlist*delta, casecode=casecode, write=False )/delta
 
 
 grid3d     = mpi.comm.bcast( grid3d,     root=0 )
 block_list = mpi.comm.bcast( block_list, root=0 ) 
 modes_temp = mpi.comm.bcast( modes_temp, root=0 )
+clipbox    = mpi.comm.bcast( clipbox,    root=0 )
 zlist      = mpi.comm.bcast( zlist,      root=0 )
 wallshape  = mpi.comm.bcast( wallshape,  root=0 )
+
 
 clock = timer(f"dmdpost of x slices:")
 

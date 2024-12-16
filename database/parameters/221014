@@ -26,6 +26,10 @@ x_imp     = 50.4
 period    = 2
 D         = 10.4
 
+# Computational domain parameters (normalized)
+
+y_min     = -0.11
+
 # Case specific flow conditions
 
 x_sep     = -8.405
