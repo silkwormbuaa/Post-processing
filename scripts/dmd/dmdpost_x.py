@@ -305,7 +305,6 @@ if mpi.size == 1:
     
     for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
         
-        print( i, indx )
         postprocess_dmd_x( indx )
         clock.print_progress( i, len(modes_temp.df_ind['indxes']))
         

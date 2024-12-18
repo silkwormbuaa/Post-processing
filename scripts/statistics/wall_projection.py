@@ -196,6 +196,7 @@ with timer("plotting"):
                           cbar_label=r"$\sqrt{\langle p'p'\rangle}/p_{\infty}$",
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
+                          col_map='Reds',
                           label=casecode)
     
 # --- periodic average results

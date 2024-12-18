@@ -33,6 +33,7 @@ data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/wall_pro
 data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data3 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data4 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data5 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 sw_iw_pw_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_SBLI_B2.dat'
 sw_iw_pwrms_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_rms_SBLI_B2.dat'
@@ -40,11 +41,11 @@ sw_iw_Cf_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/Cf_SBLI
 
 add_sw_luis = False
 
-datalist = [data0,   data1,   data2,   data3, data4]
-color    = ['gray', 'blue',   'gray', 'blue', 'red'] 
-label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough', 'midRe_rough02']
-lstyle   = ['--',   '--',    '-.',  '-.', '-.']
-width    = [4.0,     4.0,    4.0,    4.0, 4.0]
+datalist = [data0,   data1,   data2,   data3, data4, data5]
+color    = ['gray', 'blue',   'gray', 'blue', 'red', 'green'] 
+label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough', 'midRe_rough02','midRe_rough03']
+lstyle   = ['--',   '--',    '-.',  '-.', '-.','-.']
+width    = [4.0,     4.0,    4.0,    4.0, 4.0, 4.0]
 lines = []
 
 plt_pwfluc = True
