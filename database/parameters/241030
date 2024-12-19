@@ -45,3 +45,10 @@ prb_pfmax = 47
 prb_withT = True
 
 # probe groups
+
+prb_ridge_index     = [1..389]
+prb_valley_index    = [390..778]
+prb_upspan_index    = [779..859]
+prb_downspan_index  = [860..940]
+prb_upvline_index   = [941..1018]
+prb_downvline_index = []
