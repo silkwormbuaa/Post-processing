@@ -252,7 +252,7 @@ class Params:
 
 # ------------------- probe setup parameters --------------------------
 
-    def __indexstr_to_list__( indexstr ):
+    def __indexstr_to_list__( self, indexstr ):
         
         def parse_range(range_str):
             """parse str like '100..105' """
@@ -326,7 +326,7 @@ class Params:
 
 def Testing():
 
-    paramfile = '/media/wencanwu/Seagate Expansion Drive1/temp/231124/supplements/case_parameters'
+    paramfile = '/home/wencan/Post-processing/database/parameters/241018'
 
     params = Params( paramfile )
     
