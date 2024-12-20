@@ -28,17 +28,17 @@ D         = 0.325
 
 # Computational domain parameters (normalized)
 
-y_min     = -0.21
+y_min     = -0.03
 
 # Case specific flow conditions
 
-x_sep     = -9.96
-x_att     = 2.86
-x_pfmax   = -11.58
+x_sep     = -10.36
+x_att     = 2.56
+x_pfmax   = -10.16
 
-prb_sep   = 67
-prb_att   = 221
-prb_pfmax = 47
+prb_sep   = 101
+prb_att   = 132
+prb_pfmax = 101
 
 # INCA version led different setting
 

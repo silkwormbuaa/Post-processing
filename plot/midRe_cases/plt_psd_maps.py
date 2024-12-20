@@ -11,9 +11,9 @@
 
 import os
 import sys
-import numpy             as     np
-import matplotlib.pyplot as     plt
-from   matplotlib.colors import Normalize
+import numpy               as     np
+import matplotlib.pyplot   as     plt
+from   matplotlib.colors   import Normalize
 from   matplotlib.gridspec import GridSpec
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
@@ -34,25 +34,27 @@ datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/ps
 datapath1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/probes/psd_ridge'
 datapath2 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
 datapath3 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
-datapaths = [datapath0, datapath1, datapath2, datapath3]
+datapath4 = '/media/wencan/Expansion/temp/241018/postprocess/probes/psd_ridge'
+datapath5 = '/media/wencan/Expansion/temp/241030/postprocess/probes/psd_ridge'
+datapaths = [datapath0, datapath1, datapath2, datapath3, datapath4, datapath5]
 
 # separation range in normalized unit
-x_separs = [-8.42  , -7.33, -10.84,  -9.96 ]
-x_reatts = [1.06795, 1.89,  2.45,    2.86 ]
-x_ppmaxs = [-7.3333, -8.53, -10.06,  -11.58 ]
+x_separs = [-8.42  , -7.33, -10.84,  -9.96 ,-15.03,-10.36 ]
+x_reatts = [1.06795, 1.89,  2.45,    2.86  ,3.57  ,2.56   ]
+x_ppmaxs = [-7.3333, -8.53, -10.06,  -11.58,-14.75,-10.16 ]
 
 # labels
-label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough']
+label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_0.1', 'midRe_0.2', 'midRe_0.026']
 
 # subplots position and size
 
-fig = plt.figure( figsize=(15, 25) )
-gs = GridSpec(4,10)
-ax_range = [1,1,1,0]
+fig = plt.figure( figsize=(15, 30) )
+gs = GridSpec(6,10)
+ax_range = [0,0,0,0,0,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs = list()
 
-for i in range(4):
+for i in range(6):
     
     psdfilelist = get_filelist( datapaths[i] )
     
@@ -66,11 +68,13 @@ for i in range(4):
         probe.read_psd( psdfile )
         st_probe = np.array( probe.psd_df['freq'] )*5.2/507.0
         x_probe  = [(probe.xyz[0]-50.4)/5.2]*len(st_probe)
-        pmpsd_probe = np.array( probe.psd_df['pmpsd_cf_fluc'] )
+        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
 
         x.append( x_probe )
         st.append( st_probe )
         pmpsd.append( pmpsd_probe )
+    
+    print(f"finish loading {i+1} case.")
     
     st_sep = np.array( st ) * (x_reatts[i]-x_separs[i])
     
@@ -86,7 +90,7 @@ for i in range(4):
     
     ax.text( 4.0, 0.02, label[i] )
     
-    ax.set_xlim([-12.5, 10.0])
+    ax.set_xlim([-18.0, 10.0])
     ax.set_yscale('log')
     ax.set_ylim([0.01, 100])
     ax.minorticks_on()
@@ -113,7 +117,7 @@ for i in range(4):
     ylabel = r'$St = fL_{sep}/u_{\infty}$'
     ax.set_ylabel(ylabel)
     
-    if i%4 != 3:
+    if i%6 != 5:
         ax.xaxis.set_ticklabels([])
     else:
         xlabel = r'$(x-x_{imp})/\delta_0$'
@@ -125,7 +129,7 @@ for i in range(4):
     
     axs.append(ax)
 
-axs[3].set_xlim([-15.0, 10.0])
+axs[5].set_xlim([-18.0, 10.0])
     
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
 cbar_ticks = np.linspace(0, 0.3, 7)
@@ -141,4 +145,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'psd_4maps_cf.png' )
+plt.savefig( 'psd_6maps_p.png' )

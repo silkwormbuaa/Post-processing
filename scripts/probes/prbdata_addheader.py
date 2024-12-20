@@ -61,7 +61,7 @@ if opt == 1:
 
 elif opt == 2:
     
-    casepath = '/media/wencan/Expansion/temp/231124'
+    casepath = '/home/wencan/temp/241030'
     
     case = Directories( casepath )
     

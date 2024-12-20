@@ -42,8 +42,8 @@ sw_iw_Cf_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/Cf_SBLI
 add_sw_luis = False
 
 datalist = [data0,   data1,   data2,   data3, data4, data5]
-color    = ['gray', 'blue',   'gray', 'blue', 'red', 'green'] 
-label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_rough', 'midRe_rough02','midRe_rough03']
+color    = ['gray', 'blue',   'gray', 'pink', 'red', 'green'] 
+label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_0.1', 'midRe_0.2','midRe_0.026']
 lstyle   = ['--',   '--',    '-.',  '-.', '-.','-.']
 width    = [4.0,     4.0,    4.0,    4.0, 4.0, 4.0]
 lines = []
