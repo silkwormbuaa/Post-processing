@@ -21,7 +21,7 @@ dt_snap   = 0.01
 # Geometric setup parametrs
 
 H         = 0.13679
-H_md      = 0.416
+H_md      = 0.05758
 x_imp     = 50.4
 period    = 64
 D         = 0.325

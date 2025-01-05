@@ -53,18 +53,19 @@ data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/up
 data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/upstream_profile'
 data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
 data3 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/upstream_profile'
-
+data4 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/upstream_profile'
+data5 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/upstream_profile'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
 dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
-datalist = [data0, data1,   data2, data3 ]
-dy       = [0.0,     0.0,     0.312, 0.312]
-color    = ['gray', 'blue', 'gray',  'blue']
-label    = ['lowRe_smooth', 'midRe_smoth','lowRe_rough',   'midRe_rough']
-lstyle   = ['--',  '--',     '-.',  '-.']
-width    = [4.0,   4.0,      4.0,   4.0 ]
+datalist = [data0, data1,   data2,   data3, data4, data5]
+dy       = [0.0,     0.0,     0.312, 0.312, 0.624, 0.07921]
+color    = ['gray', 'blue', 'gray',  'pink', 'red', 'green']
+label    = ['lowRe_smooth', 'midRe_smoth','lowRe_rough',   'midRe_0.1','midRe_0.2','midRe_0.026']
+lstyle   = ['--',  '--',     '-.',  '-.',  '-.',  '-.']
+width    = [4.0,   4.0,      4.0,   4.0,   4.0,   4.0 ]
 lines = []
 
 # ----------------------------------------------------------------------
