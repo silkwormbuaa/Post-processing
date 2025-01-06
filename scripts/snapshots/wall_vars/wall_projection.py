@@ -44,8 +44,8 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-casepath = '/home/wencan/temp/220927' 
-bbox     = [ -30.0, 108.0, -1.3, 5.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
+casepath = '/home/wencan/temp/241030' 
+bbox     = [ -30.0, 108.0, -1.3, 0.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
 
 # =============================================================================
 # preparation

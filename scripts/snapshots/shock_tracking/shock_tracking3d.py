@@ -32,14 +32,16 @@ from   vista.math_opr    import find_parabola_max
 # =============================================================================
 
 y0 = 10.4
-xrange = [-8,10.0]     
+xrange = [0.0,18.0]     
 
 # y = 10.4, xrange = [-8,10] for 231124
 #           xrange = [8,24]  for smooth_mid
+#           xrange = [0,18]  for 241030
 # y = 31.2, xrange = [17,32] for 231124
 #           xrange = [30,45] for smooth_mid
+#           xrange = [24,40] for 241030
 
-inputpath    = '/home/wencan/temp/231124/'
+inputpath    = '/home/wencan/temp/241030/'
 outputpath   = inputpath + 'postprocess/snapshots/shock_tracking/3d'
 
 snapshotpath = inputpath + 'snapshots/'
