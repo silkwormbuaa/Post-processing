@@ -52,9 +52,9 @@ n_procs = comm.Get_size()
 # option
 # =============================================================================
 
-case_dir  = '/home/wencan/temp/smooth_mid'
+case_dir  = '/home/wencan/temp/241030'
 bbox      = [-30.0,110.0,-3.0, 0.5, -99.0,99.0]
-walldist  = 0.019
+walldist  = 0.005
 vars_in   = ['u','w','T']
 add_vector= True
 
@@ -103,8 +103,8 @@ snapfiles  = comm.bcast( snapfiles,  root=0 )
 block_list = comm.bcast( block_list, root=0 )
 grid3d     = comm.bcast( grid3d,     root=0 )
 wd_snap    = comm.bcast( wd_snap,    root=0 )
-Re_ref     = float(params.get('Re_ref'))
-visc_law   = params.get('visc_law')
+Re_ref     = params.Re_ref
+visc_law   = params.visc_law
 
 vars_out   = vars_in
 if roughwall : vars_out += ['mu','wd']
