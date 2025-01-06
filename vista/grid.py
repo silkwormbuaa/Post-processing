@@ -814,12 +814,12 @@ class GridBlock:
             print( 'nz = ', self.nz )
         
         # read grid bounding box corner location ( no ghost cells )
-        self.lx0 = read_flt_bin( file.read(sfl), sfl )
-        self.lx1 = read_flt_bin( file.read(sfl), sfl )
-        self.ly0 = read_flt_bin( file.read(sfl), sfl )
-        self.ly1 = read_flt_bin( file.read(sfl), sfl )
-        self.lz0 = read_flt_bin( file.read(sfl), sfl )
-        self.lz1 = read_flt_bin( file.read(sfl), sfl )
+        self.lx0 = np.around(read_flt_bin( file.read(sfl), sfl ), decimals=10)
+        self.lx1 = np.around(read_flt_bin( file.read(sfl), sfl ), decimals=10)
+        self.ly0 = np.around(read_flt_bin( file.read(sfl), sfl ), decimals=10)
+        self.ly1 = np.around(read_flt_bin( file.read(sfl), sfl ), decimals=10)
+        self.lz0 = np.around(read_flt_bin( file.read(sfl), sfl ), decimals=10)
+        self.lz1 = np.around(read_flt_bin( file.read(sfl), sfl ), decimals=10)
         
         self.size += 6*sfl
         if self.verbose:
