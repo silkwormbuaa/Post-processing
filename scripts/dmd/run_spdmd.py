@@ -34,7 +34,7 @@ from   vista.plot_style  import plot_psi_st
 # Take gamma, rho from command line | read case parameters
 # =============================================================================
 
-casedir = '/home/wencan/temp/smooth_mid'
+casedir = '/home/wencan/temp/241030'
 
 dirs = Directories( casedir )
 

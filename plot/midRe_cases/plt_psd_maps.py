@@ -33,28 +33,28 @@ outpath = '/media/wencan/Expansion/temp/DataPost/midRe/psd'
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
 datapath1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/probes/psd_ridge'
 datapath2 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
-datapath3 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
-datapath4 = '/media/wencan/Expansion/temp/241018/postprocess/probes/psd_ridge'
-datapath5 = '/media/wencan/Expansion/temp/241030/postprocess/probes/psd_ridge'
-datapaths = [datapath0, datapath1, datapath2, datapath3, datapath4, datapath5]
+datapath3 = '/media/wencan/Expansion/temp/241030/postprocess/probes/psd_ridge'
+datapath4 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
+datapath5 = '/media/wencan/Expansion/temp/241018/postprocess/probes/psd_ridge'
+datapaths = [datapath0, datapath1, datapath2, datapath3, datapath4]
 
 # separation range in normalized unit
-x_separs = [-8.42  , -7.33, -10.84,  -9.96 ,-15.03,-10.36 ]
-x_reatts = [1.06795, 1.89,  2.45,    2.86  ,3.57  ,2.56   ]
-x_ppmaxs = [-7.3333, -8.53, -10.06,  -11.58,-14.75,-10.16 ]
+x_separs = [-8.42  , -7.33, -10.84, -10.36,  -9.96, -15.03]
+x_reatts = [1.06795, 1.89,  2.45,   2.56 ,    2.86, 3.57  ]
+x_ppmaxs = [-7.3333, -8.53, -10.06, -10.16,  -11.58,-14.75]
 
 # labels
-label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_0.1', 'midRe_0.2', 'midRe_0.026']
+label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_0.026', 'midRe_0.1', 'midRe_0.2']
 
 # subplots position and size
 
-fig = plt.figure( figsize=(15, 30) )
-gs = GridSpec(6,10)
-ax_range = [0,0,0,0,0,0]
+fig       = plt.figure( figsize=(15, 30) )
+gs        = GridSpec(5,10)
+ax_range  = [0,0,0,0,0,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
-axs = list()
+axs       = list()
 
-for i in range(6):
+for i in range(5):
     
     psdfilelist = get_filelist( datapaths[i] )
     
@@ -117,7 +117,7 @@ for i in range(6):
     ylabel = r'$St = fL_{sep}/u_{\infty}$'
     ax.set_ylabel(ylabel)
     
-    if i%6 != 5:
+    if i%5 != 4:
         ax.xaxis.set_ticklabels([])
     else:
         xlabel = r'$(x-x_{imp})/\delta_0$'
@@ -129,7 +129,7 @@ for i in range(6):
     
     axs.append(ax)
 
-axs[5].set_xlim([-18.0, 10.0])
+axs[4].set_xlim([-18.0, 10.0])
     
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
 cbar_ticks = np.linspace(0, 0.3, 7)
@@ -145,4 +145,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'psd_6maps_p.png' )
+plt.savefig( 'psd_5maps_p.png' )

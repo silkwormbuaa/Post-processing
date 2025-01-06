@@ -36,31 +36,32 @@ loc     = 'pf_max'
 independent_len = False
 figname = 'psd_lines'
 fmat    = '.png'
-cases   = [0,1]
-withT   = [True, True]
-color   = ['gray','black']
-lstyle  = ['--',  ':' ]
-width   = [4.0,   4.0 ]
-label   = ['high smooth', 'high rough']
+cases   = [0,1,2]
+withT   = [True, True, True]
+color   = ['black','yellowgreen','steelblue']
+lstyle  = ['--', (0, (3, 1, 1, 1, 1, 1)), ':' ]
+width   = [4.0,  4.0, 4.0 ]
+label   = ['highRe smooth', 'rough_0.026', 'rough_0.1']
 showlegend = False
-normalize = True
+normalize  = True
 
 # =============================================================================
 
 datapath0 = '/home/wencan/temp/smooth_mid/probes/'
-datapath1 = '/home/wencan/temp/231124/probes/'
+datapath1 = '/home/wencan/temp/241030/probes/'
+datapath2 = '/home/wencan/temp/231124/probes/'
 
 outpath  = '/home/wencan/temp/DataPost/midRe/psd'
 
-datapaths = [datapath0, datapath1]
+datapaths = [datapath0, datapath1, datapath2]
 
-prbfiles_sep   = ['probe_00098.dat', 'probe_00067.dat']
-prbfiles_pfmax = ['probe_00084.dat', 'probe_00047.dat']  
+prbfiles_sep   = ['probe_00098.dat', 'probe_00117.dat', 'probe_00067.dat']
+prbfiles_pfmax = ['probe_00084.dat', 'probe_00117.dat', 'probe_00047.dat']  
 
-if loc == 'sep':      prbfiles = prbfiles_sep
+if loc   == 'sep':    prbfiles = prbfiles_sep
 elif loc == 'pf_max': prbfiles = prbfiles_pfmax
 
-len_sep = [ 9.22, 12.82 ]
+len_sep = [ 9.22, 12.92, 12.82 ]
 
 probes = []
 
