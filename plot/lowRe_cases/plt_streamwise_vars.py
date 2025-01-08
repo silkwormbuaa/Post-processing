@@ -11,6 +11,7 @@
 import os
 import sys
 import pickle
+import numpy             as     np
 import matplotlib.pyplot as     plt
 import matplotlib.ticker as     ticker
 
@@ -18,12 +19,13 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line        import LineData
-from   vista.plot_tools  import PlotDataframe
+from   vista.tools       import create_linear_interpolator
 
-plt.rcParams["text.usetex"] = True
+
+plt.rcParams["text.usetex"]         = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
-plt.rcParams['font.family'] = "Times New Roman"
-plt.rcParams['font.size']   = 40
+plt.rcParams['font.family']         = "Times New Roman"
+plt.rcParams['font.size']           = 40
 
 OutPath  = "/media/wencan/Expansion/temp/DataPost/lowRe/averaged_streamwise_vars"
 
@@ -39,21 +41,29 @@ data5 = '/media/wencan/Expansion/temp/221221/postprocess/statistics/wall_project
 
 data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
-datalist = [data1,   data2,   data3,                   data4,        data5,  data6]
-dy       = [0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
-color    = ['green', 'blue', 'black',                  'red',        'purple', 'gray']
-label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125',  'awall']
-lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',    '--']
-width    = [4.0,      4.0,    4.0,                     4.0,          4.0, 4.0]
-lines = []
+datalist = [data1,   data2,   data3,                   data4,        data5,     data6]
+dy       = [0.494,   0.468,   0.416,                   0.312,        0.26,      0.0]
+color    = ['green', 'blue', 'black',                  'red',        'purple',  'gray']
+label    = ['2.0',   '1.0',  '0.5',                    '0.25',       '0.125',   'awall']
+lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',       '--']
+width    = [4.0,      4.0,    4.0,                     4.0,          4.0,       4.0]
+
+x_sep    = [-8.405,  -8.317,  -9.18,                  -10.84,       -10.67,  -8.42 ]
+x_att    = [1.400 ,  1.360 ,  2.16 ,                    2.45,       2.59  ,  1.10  ]
+x_pfmax  = [-7.712,  -7.49 ,  -8.71,                  -10.06,       -8.93 ,  -7.136]
+
+lines    = []
 
 plt_pwfluc = True
 plt_pw     = True
+plt_pwg    = True
 plt_Cf     = True
 
-pure = True
+pure       = False
+show_label = True
 
-fmt =  '.pdf' # or '.png'
+figsize    = [15,8]
+fmt        =  '.png' # or '.png'
 
 # - read in data files
 
@@ -69,11 +79,6 @@ for i, datafile in enumerate( datalist ):
     
     lines.append( line )
 
-# d0_pwfluc = PlotDataframe(sw_pfluc_file)
-# d0_pw     = PlotDataframe(sw_Cp_file)
-# d0_f      = PlotDataframe(sw_Cf_file)
-# d0_f.shift_x( 50.4, 5.2 )
-# d0_pw.shift_x( 50.4, 5.2 )
 
 os.chdir(OutPath)
 
@@ -93,7 +98,7 @@ os.chdir(OutPath)
 
 if plt_pwfluc:
 
-    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -104,44 +109,13 @@ if plt_pwfluc:
                  label = line.label,
                  linewidth = line.width)
 
-    # ax.plot( d0_pwfluc.df['(x-x_imp)/δ'], 
-    #         d0_pwfluc.df['<p`>_'],
-    #         'gray', 
-    #         label=r'$smooth$', 
-    #         ls   ='--',
-    #         linewidth=4)
-
-    # separation locations
-
-    #ax.plot( [-10.6786859,-10.6786859],
-    #         [0.0,0.1],
-    #         'purple',
-    #         linewidth=1)
-    #
-    #ax.plot( [-10.6574429,-10.6574429],
-    #         [0.0,0.1],
-    #            'red',
-    #            linewidth=1)
-    #
-    #ax.plot( [-9.179693795,-9.179693795],
-    #         [0.0,0.1],
-    #            'black',
-    #            linewidth=1)
-    #
-    #ax.plot( [-8.316817364,-8.316817364],
-    #         [0.0,0.1],
-    #            'blue',
-    #            linewidth=1)
-    #
-    #ax.plot( [-8.405281852,-8.405281852],
-    #         [0.0,0.1],
-    #            'green',
-    #            linewidth=1)
-    #
-    #ax.plot( [-8.56077913,-8.56077913],
-    #         [0.0,0.1],
-    #            'gray',
-    #            linewidth=1)
+    # to avoid line overlapped on marker
+    
+    for i,line in enumerate( lines ):
+        interpolator = create_linear_interpolator( line.df['x'], line.df['p_fluc'])
+        ax.plot( x_sep[i],   interpolator(x_sep[i]), 'p',   color=line.color, ms=15)
+        ax.plot( x_att[i],   interpolator(x_att[i]), 'p',   color=line.color, ms=15)
+        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=15)
 
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
@@ -206,7 +180,7 @@ if plt_pwfluc:
 
 if plt_pw:
 
-    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -217,12 +191,13 @@ if plt_pw:
                 label = line.label,
                 linewidth = line.width)
 
-    # ax.plot( d0_pw.df['x_s'], 
-    #         d0_pw.df['Cp'],
-    #         'gray', 
-    #         label=r'$smooth$', 
-    #         ls   ='--',
-    #         linewidth=4)
+    # to avoid line overlapped on marker
+    
+    for i,line in enumerate( lines ):
+        interpolator = create_linear_interpolator(line.df['x'], line.df['Cp'])
+        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
@@ -269,7 +244,97 @@ if plt_pw:
         
     plt.savefig( figname + fmt )
     plt.show()
+
+
+# ----------------------------------------------------------------------
+# >>> plot pressure gradient                                     (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/01/06  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+
+if plt_pwg:
+
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
+
+    for i,line in enumerate( lines ):
+        
+        pwg = np.gradient( line.df['Cp'], line.df['x'] )
+        
+        ax.plot( line.df['x'], 
+                 pwg,
+                 line.color,
+                 ls = line.lstyle,
+                 label = line.label,
+                 linewidth = line.width)
+
+    # to avoid line overlapped on marker
     
+    for i,line in enumerate( lines ):
+        
+        pwg = np.gradient( line.df['Cp'], line.df['x'] )
+        interpolator = create_linear_interpolator(line.df['x'], pwg)
+        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
+
+        
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=15,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1)
+
+    ax.set_xlim([-20.0,10.0])
+    ax.set_ylim([-0.1,0.6])
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#                linestyle='--',linewidth=0.2)
+
+    figname = "wall_pressure_gradient"
+
+    # Adjust the spacing around the plot to remove the white margin
+    if pure:
+        figname += '_pure'
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1) 
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        
+    else:
+        
+        ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5 )
+        ax.tick_params(axis='x', pad=15)
+        
+        ax.set_ylabel(r"$\frac{d<p_w>}{dx}/p_{\infty}$")
+        ax.tick_params(axis='y', pad=10)
+
+        if show_label:
+            ax.legend( fontsize=30 ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)        
+        
+    plt.savefig( figname + fmt )
+    plt.show()
+
+
 # ----------------------------------------------------------------------
 # >>> plot friction coefficient                                   (Nr.)
 # ----------------------------------------------------------------------
@@ -286,7 +351,7 @@ if plt_pw:
 
 if plt_Cf:
     
-    fig, ax = plt.subplots( figsize=[15,5], constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -297,6 +362,12 @@ if plt_Cf:
                 label = line.label,
                 linewidth = line.width)
 
+    # to avoid line overlapped on marker
+    
+    for i,line in enumerate( lines ):
+        interpolator = create_linear_interpolator(line.df['x'], line.df['Cf'])
+        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
+        
     # ax.plot( d0_f.df['x_s'], 
     #         d0_f.df['Cf']*1000,
     #         'gray', 

@@ -33,7 +33,7 @@ y_min     = -0.11
 # Case specific flow conditions
 
 x_sep     = -8.405
-x_att     = 1.400
+x_att     = 1.400 
 x_pfmax   = -7.712
 
 prb_sep   = 144

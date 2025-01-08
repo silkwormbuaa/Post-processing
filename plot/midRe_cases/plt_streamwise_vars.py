@@ -56,19 +56,18 @@ x_sep    = [-8.42,         -7.33,            -10.84,        -10.36,       -9.96]
 x_att    = [1.10,           1.89,              2.45,          2.56,        2.86]
 x_pfmax  = [-7.136,        -8.53,            -10.06,        -10.16,      -11.58]
 
-lines = []
+lines    = []
 
 plt_pwfluc = True
 plt_pw     = True
 plt_pwg    = True
 plt_Cf     = True
 
-figsizes = [15,8]
-
-pure = False
+pure       = False
 show_label = True
 
-fmt =  'sw.png' # or '.png'
+figsize    = [15,8]
+fmt        =  '.png' # or '.png'
 
 # - read in data files
 
@@ -102,7 +101,7 @@ os.chdir(OutPath)
 
 if plt_pwfluc:
 
-    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -117,9 +116,9 @@ if plt_pwfluc:
     
     for i,line in enumerate( lines ):
         interpolator = create_linear_interpolator( line.df['x'], line.df['p_fluc'])
-        ax.plot( x_sep[i], interpolator(x_sep[i]), 'p', color=line.color, ms=15)
-        ax.plot( x_att[i], interpolator(x_att[i]), 'p', color=line.color, ms=15)
-
+        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=15)
 
     if add_sw_luis:
         swdf = pd.read_csv(sw_iw_pwrms_file, delimiter=r'\s+')
@@ -193,7 +192,7 @@ if plt_pwfluc:
 
 if plt_pw:
 
-    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -285,7 +284,7 @@ if plt_pw:
 
 if plt_pwg:
 
-    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         
@@ -307,15 +306,7 @@ if plt_pwg:
         ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
         ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
         ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
-        
-    if add_sw_luis:
-        swdf = pd.read_csv(sw_iw_pw_file, delimiter=r'\s+')
-        ax.plot( swdf['x']*7.15/5.2, 
-                 swdf['y'],
-                 'black',
-                 ls = '-',
-                 label = 'midRe_smooth',
-                 linewidth = 4.0)
+
         
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
@@ -381,7 +372,7 @@ if plt_pwg:
 
 if plt_Cf:
     
-    fig, ax = plt.subplots( figsize=figsizes, constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
     for i,line in enumerate( lines ):
         

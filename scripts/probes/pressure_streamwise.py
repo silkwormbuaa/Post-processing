@@ -32,7 +32,7 @@ set_plt_rcparams()
 
 # =============================================================================
 
-case_dir  = '/home/wencan/temp/smooth_mid/' 
+case_dir  = '/home/wencan/temp/241030/' 
 plot_all  = False
 plot_stat = True
 
