@@ -1137,7 +1137,7 @@ class ParaDmd:
         
         self.psi_pol = np.abs( self.alphas_pol )/max( np.abs(self.alphas_pol) )
         
-        self.psi = np.abs( self.alphas )/max( np.abs(self.alphas) )
+        self.psi = np.abs( self.alphas )/max( np.abs(self.alphas_pol) )
        
 
 
