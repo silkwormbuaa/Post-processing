@@ -464,7 +464,7 @@ class ProbeData:
 #
 # ----------------------------------------------------------------------
 
-    def pre_multi_psd( self, var, n_seg, overlap, nfft=None ):
+    def pre_multi_psd( self, var, n_seg, overlap, nfft=None, normalize=True ):
 
         """
         var: variable to compute PSD
@@ -477,7 +477,7 @@ class ProbeData:
         
         data = np.array( self.df[var] )
         
-        freq, pm_psd = pre_multi_psd( data, self.fs, n_seg, overlap, nfft )
+        freq, pm_psd = pre_multi_psd( data, self.fs, n_seg, overlap, nfft, normalize )
         
         if self.psd_df.empty:
             self.psd_df['freq'] = freq

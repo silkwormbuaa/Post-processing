@@ -35,7 +35,7 @@ def psd_hann( data, fs, n_seg, overlap, nfft=None ):
     
     return freq, psd
 
-def pre_multi_psd( data, fs, n_seg, overlap, nfft=None ):
+def pre_multi_psd( data, fs, n_seg, overlap, nfft=None, normalize=True ):
     
     """
     data: input signal\n
@@ -50,7 +50,11 @@ def pre_multi_psd( data, fs, n_seg, overlap, nfft=None ):
     
     freq, psd = psd_hann( data, fs, n_seg, overlap, nfft=nfft )
     
-    power = np.sum( psd * freq[1] ) # frequency[1] is the frequency resolution
+    if normalize:
+        power = np.sum( psd * freq[1] ) # frequency[1] is the frequency resolution
+    else:
+        power = 1.0
+    
     
     pm_psd = freq * psd / power
     

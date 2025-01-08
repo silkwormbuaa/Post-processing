@@ -13,7 +13,6 @@ import os
 import sys
 import pandas            as     pd
 import numpy             as     np
-from   scipy.interpolate import make_interp_spline
 
 source_dir = os.path.realpath(__file__).split('plot')[0] 
 sys.path.append( source_dir )
@@ -34,7 +33,7 @@ plt.rcParams['font.size']   = 30
 
 loc     = 'pf_max'
 independent_len = False
-figname = 'psd_lines'
+figname = 'psdlines'
 fmat    = '.png'
 cases   = [0,1,2]
 withT   = [True, True, True]
@@ -42,8 +41,9 @@ color   = ['black','yellowgreen','steelblue']
 lstyle  = ['--', (0, (3, 1, 1, 1, 1, 1)), ':' ]
 width   = [4.0,  4.0, 4.0 ]
 label   = ['highRe smooth', 'rough_0.026', 'rough_0.1']
-showlegend = False
-normalize  = True
+showlegend  = False
+premultiply = True
+normalize   = True
 
 # =============================================================================
 
@@ -74,8 +74,8 @@ with timer("reading probes"):
         probe.cleandata( t_start=20.0 )
         probe.get_fluc( 'p' )
         
-        if normalize: 
-            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+        if premultiply: 
+            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5, normalize=normalize )
             var = 'pmpsd_p_fluc'
         else:         
             probe.compute_psd( 'p_fluc', n_seg=8, overlap=0.5 )
@@ -88,6 +88,11 @@ with timer("reading probes"):
 # =============================================================================
 
 os.chdir( outpath )
+
+if premultiply:
+    if normalize: ylabel = r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$'
+    else:         ylabel = r'$f \cdot PSD(f)$'
+else:             ylabel = r'$PSD(f)$'
 
 fig, ax = plt.subplots( figsize=(9, 8), constrained_layout=True )
 
@@ -126,12 +131,15 @@ ax.tick_params( which='minor',
 # ax.set_ylim( [0.0,0.3] )
 
 ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
-ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
+ax.set_ylabel( ylabel )
 
 ax.spines[:].set_color('black')
 ax.spines[:].set_linewidth(2)
 
 if showlegend: ax.legend()
+
+if premultiply: figname = 'pm_'    + figname
+if normalize:   figname = 'norm_' + figname
 
 plt.savefig( figname + fmat )
 plt.close()
@@ -188,7 +196,7 @@ ax.tick_params( which='minor',
                 width=1)
 
 ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
-ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
+ax.set_ylabel( ylabel )
 
 ax.spines[:].set_color('black')
 ax.spines[:].set_linewidth(2)
