@@ -23,12 +23,23 @@ sys.path.append( source_dir )
 
 from   vista.tools       import get_filelist
 
+# =============================================================================
 
-def main():
+figpath = '/home/wencan/temp/smooth_mid/postprocess/snapshots/fricprj/figs_cf'
+
+outfile = os.path.basename( figpath ) + '.mp4'
+
+# =============================================================================
+
+
+def convert( figpath, outfile='output.mp4' ):
     
-    figpath = '/home/wencan/temp/231124/postprocess/snapshots/xslice/v_r/figs/'
-#    figpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots/figures_DS'
-
+    """
+    figpath: path to the folder with all .png figures
+    
+    output
+    """
+    
     os.chdir( figpath )
 
     figfiles = get_filelist( figpath, 'png' )
@@ -57,10 +68,10 @@ def main():
             create_video_from_images(figfile, video, fps=25)
             print(f'total loading progress:{(i+1)/len(figs)*100:8.2f}%...')
         
-        concatenate_videos(videos, '../output.mp4')
+        concatenate_videos(videos, f'../{outfile}')
 
     else:
-        create_video_from_images(figfiles, '../output.mp4', fps=25)
+        create_video_from_images(figfiles, f'../{outfile}', fps=25)
         
 # ----------------------------------------------------------------------
 # >>> Function Name                                                (Nr.)
@@ -159,4 +170,4 @@ def concatenate_videos(video_files, output_video_path):
 # ----------------------------------------------------------------------
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit( convert(figpath, outfile=outfile) )
