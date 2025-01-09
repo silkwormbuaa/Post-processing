@@ -1274,7 +1274,7 @@ def plot_spanwise_variables( z, v, ylabel, figname ):
     
     fig, ax = plt.subplots( figsize=(15,10) )
     
-    ax.plot( z, v, color='black')
+    ax.plot( z, v, color='black', marker='o', markersize=10)
     
     ax.set_xlabel(r"$z/\delta_0$")
     ax.set_ylabel(ylabel)

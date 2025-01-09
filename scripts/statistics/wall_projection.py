@@ -198,7 +198,14 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           col_map='Reds',
                           label=casecode)
-    
+
+# --- output the spanwise distribution of wall variables, e.g. Cf, Cp, p_fluc
+
+    ylabel = r'$C_f\times 10^3$'
+    figname = 'spanwise_cf.png'
+    plot_spanwise_variables( zz[-24:,0], fric[-24:,0]/dyn_p*1000.0, 
+                             ylabel, figname)
+
 # --- periodic average results
     
     fric = periodic_average( fric, period )
@@ -234,7 +241,7 @@ with timer("plotting"):
 # --- output the spanwise distribution of wall variables, e.g. Cf, Cp, p_fluc
 
     ylabel = r'$C_f\times 10^3$'
-    figname = 'spanwise_cf.png'
+    figname = 'spanwise_ave_cf.png'
     plot_spanwise_variables( zz[:,0], fric[:,0]/dyn_p*1000.0, 
                              ylabel, figname)
 
