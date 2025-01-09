@@ -39,6 +39,7 @@ from   vista.directories  import Directories
 from   vista.tools        import get_filelist
 from   vista.tools        import crop_border
 from   vista.tools        import define_wall_shape
+from   vista.tools        import crop_to_rect_map
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
 
@@ -49,7 +50,7 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/241030/'
+casedir  = '/home/wencan/temp/231124/'
 clipbox  = [-100.0, 150.0, 0.0, 2.0, -2.0, 2.0]
 colmap   = 'coolwarm'
 vars     = ['u','v','w','p']
@@ -202,13 +203,31 @@ def postprocess_dmd_x( indx ):
 
     for j in range( n_frames ):
     
-    
         dataset = modes_temp.mode_to_vtk(indx, vars, block_list, 'X', grid3d,
                                          j, n_frames, rescale=[0,0,0,5.2,5.2,5.2])
 
         dataset = pv.MultiBlock( dataset )
+        
+        
         dataset = dataset.cell_data_to_point_data().combine()
         dataset = dataset.clip_box( clipbox, invert=False )
+        
+        # set vector [u,v,w]
+        
+        vel_vars = [f'mode_{indx:05d}_{var}_{j:03d}' for var in ['u','v','w']]
+        
+        dataset = add_velocity_vector( vel_vars, dataset )
+        
+#        sys.exit()
+        
+        # streamlines = dataset.streamlines(
+        #      pointa=(0,1.0,-2),
+        #      pointb=(0,1.0, 2),
+        #      n_points=25,
+        #      max_time=500,
+        #      integration_direction='both',
+        #      surface_streamlines=True,
+        # )
 
         images  = list()
 
@@ -230,11 +249,19 @@ def postprocess_dmd_x( indx ):
                         lighting=False,
                         show_scalar_bar=False)
             
+            if k == 0:
+                
+                p.add_arrows( dataset.points, dataset['velocity'],
+                              mag=40, color='black')
+                # p.add_mesh(streamlines.tube(radius=0.01), 
+                #         color='black',
+                #         line_width=0.01)
+            
             p.camera.tight(view='zy')
             image = p.screenshot(return_img=True)
             p.close()
             
-            image = crop_border(image)
+            image = crop_to_rect_map(image, buff=100)
             
             images.append(image)
 
@@ -295,6 +322,27 @@ def postprocess_dmd_x( indx ):
     # else:              print( f"Failed to output mode_{indx:05d} gif.")   
 
 
+def add_velocity_vector( vars, dataset:pv.MultiBlock ) -> pv.MultiBlock:
+    
+    """
+    add [u,v,w] as vector 'velocity' for pv.MultiBlock
+    """
+    
+    u = np.zeros_like(dataset[vars[0]])
+    v = dataset[vars[1]]
+    w = dataset[vars[2]]
+    
+    vector = np.array([u,v,w]).T
+
+    mask         = np.zeros_like( vector, dtype=bool )
+    mask[::10,::] = True
+    vector       = vector*mask
+        
+    dataset['velocity'] = vector
+    
+    return dataset
+
+
 # =============================================================================
 # do post processing in parallel
 # =============================================================================
@@ -303,7 +351,7 @@ if mpi.size == 1:
     
     print("No worker available. Master should do all tasks.")
     
-    for i, indx in enumerate( modes_temp.df_ind['indxes'] ):
+    for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
         
         postprocess_dmd_x( indx )
         clock.print_progress( i, len(modes_temp.df_ind['indxes']))
