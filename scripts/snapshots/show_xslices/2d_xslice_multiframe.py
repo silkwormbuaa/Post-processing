@@ -92,6 +92,7 @@ out_dir  = dirs.pp_snp_xslice
 
 params    = None
 snapdirs  = None
+blocklist = None
 grid3d    = None
 statxs    = None
 
