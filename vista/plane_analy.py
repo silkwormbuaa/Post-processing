@@ -397,21 +397,57 @@ def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
 #
 # ----------------------------------------------------------------------
 
-def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pv.MultiBlock:
+def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pd.DataFrame:
     
     """
-    interpolate data into a uniform or rectilinear cartesian grid
+    source: data source, a pyvista MultiBlock object.
+    vars:   list of variables
+    mesh_vectors: [px,py,pz], 3D, the value of cross-plane direction is 0.
+    
+    Return: a data frame. Data should be reshaped as (npj,npi).
+     
+    interpolate data into a uniform or rectilinear cartesian grid.
     """
     
-    n_vars = len( vars )
-    
-    px = np.array( mesh_vectors[0] )
-    py = np.array( mesh_vectors[1] )
-    pz = np.array( mesh_vectors[2] )
+    px = np.array( mesh_vectors[0] ); npx = len(px)
+    py = np.array( mesh_vectors[1] ); npy = len(py)
+    pz = np.array( mesh_vectors[2] ); npz = len(pz)
     
     grid = pv.RectilinearGrid( px, py, pz )
     
-    return grid.sample( source )
+    interped = grid.sample( source )
+
+    # using 'ij' indexing will return matrix with size (npx,npy,npz)
+    
+    x,y,z = np.meshgrid( px, py, pz, indexing='ij' )
+    
+    # since data should be reshaped as (npj,npi) if you want to plot streamline
+    # with matplotlib, so we should adjust the order of coordinates, which 
+    # originally in the order of (npx,npy,npz) (C-format).
+    
+    if   npx == 1: pass
+    elif npy == 1:
+        z = z.reshape( npx, npz ).T
+        x = x.reshape( npx, npz ).T
+    elif npz == 1:
+        y = y.reshape( npx, npy ).T
+        x = x.reshape( npx, npy ).T
+    else: 
+        raise ValueError("Only support 2D data interpolation!")
+    
+    df = pd.DataFrame( {'x':x.ravel(),'y':y.ravel(),'z':z.ravel()} )
+    
+    # pv.RectlinearData.point_data are ordered as ( npz*npy*npx, n_vars)
+    
+    if   npx == 1:  
+        for var in vars:
+            df[var] = np.array(interped.point_data[var]).reshape(npz,npy).T.ravel()
+    
+    elif npy == 1 or npz ==1:  
+        for var in vars:
+            df[var] = np.array(interped.point_data[var])
+    
+    return df
     
     
     
@@ -432,8 +468,8 @@ def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pv.MultiBlock:
 
 def Testing():
 
-    snapfile = '/home/wencan/temp/241030/snapshots/snapshot_01200380/snapshot_X_000.bin'
-    gridfile = '/home/wencan/temp/241030/results/inca_grid.bin'
+    snapfile = '/home/wencan/temp/220927/snapshots/snapshot_01327116/snapshot_Z_001.bin' 
+    gridfile = '/home/wencan/temp/220927/results/inca_grid.bin'
     
     os.chdir('/home/wencan/temp/test')
     
@@ -448,60 +484,33 @@ def Testing():
     
     print( dataset )
 
-    py = np.linspace(0,     10.4, 101, endpoint=True)
-    pz = np.linspace(-10.4, 10.4, 201, endpoint=True)
-    px = np.array( [0.0] )
+    px = np.linspace(0,   20, 101, endpoint=True)
+    py = np.linspace(0.0,  10.4, 201, endpoint=True)
+    pz = np.array( [0.0] )
     
-    interped = pv_interpolate( dataset, ['u','v','w','T'], [px,py,pz] )
+    df = pv_interpolate( dataset, ['u','v','w','T'], [px,py,pz] )
     
-    print( interped )
+    print( df )
+    
+    u = np.array( df['u'] ).reshape( 201, 101 )
+    v = np.array( df['v'] ).reshape( 201, 101 )
+    w = np.array( df['w'] ).reshape( 201, 101 )
+    z = np.array( df['z'] ).reshape( 201, 101 )
+    x = np.array( df['x'] ).reshape( 201, 101 )  
+    y = np.array( df['y'] ).reshape( 201, 101 )
 
-    # p = pv.Plotter()
-    
-    # p.add_mesh( interped )
-    # p.add_axes()
-    # p.show()
-    
-# =============================================================================
-    
-    shape = interped.dimensions
-    
-    print( shape )
-    
-    print( interped.meshgrid )
-    
-    meshgrid =  np.array(interped.meshgrid).reshape([3,shape[1],shape[2]])
-
-    print("shape of meshgrid:")
-    print(meshgrid)
-    
-    
-    u = np.array( interped.point_data['u']).reshape([shape[2],shape[1]]).T.reshape([shape[1],shape[2]])
-    v = np.array( interped.point_data['v']).reshape([shape[2],shape[1]]).T.reshape([shape[1],shape[2]])
-    w = np.array( interped.point_data['w']).reshape([shape[2],shape[1]]).T.reshape([shape[1],shape[2]])
-
-    y = np.array( meshgrid[1] )
-    z = np.array( meshgrid[2] )
     
     # print( len(interped.point_data["u"]) )
 
     fig, ax = plt.subplots( figsize = [12,8] )
     
-    cs = ax.contourf(z, y, u)
-    
-    print(z.shape)
-    print(y.shape)
-    print(w.shape)
-    print(v.shape)
-    
-    print( z[0] )
-    print( z[1] )
-    
-    ax.streamplot( z,y, 
-                   w,v,
-                   density=2)
+    cs = ax.contourf( x,y, u)
     
     
+    ax.streamplot( x,y, 
+                   u,v,
+                   density=2,
+                   color='black')
     
     plt.savefig("test.png")
 
