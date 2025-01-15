@@ -8,13 +8,15 @@
 @Desc    :   2D data analysis 
 '''
 
+import os
+import pickle
 import numpy             as     np
-
 import pandas            as     pd
-
+import pyvista           as     pv
 import matplotlib.pyplot as     plt
 
-import pickle
+from   .snapshot         import Snapshot
+from   .grid             import GridData
 
 # ----------------------------------------------------------------------
 # >>> Save sonic line                                            (Nr.)
@@ -380,6 +382,40 @@ def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
     return psi 
 
 
+
+# ----------------------------------------------------------------------
+# >>> Interpolate data into a 2D plane                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/01/12  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pv.MultiBlock:
+    
+    """
+    interpolate data into a uniform or rectilinear cartesian grid
+    """
+    
+    n_vars = len( vars )
+    
+    px = np.array( mesh_vectors[0] )
+    py = np.array( mesh_vectors[1] )
+    pz = np.array( mesh_vectors[2] )
+    
+    grid = pv.RectilinearGrid( px, py, pz )
+    
+    return grid.sample( source )
+    
+    
+    
+
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
 # ----------------------------------------------------------------------
@@ -396,9 +432,80 @@ def compute_stream_function( rho, rho_w, w_favre, v_favre, z, y ):
 
 def Testing():
 
-    pass
+    snapfile = '/home/wencan/temp/241030/snapshots/snapshot_01200380/snapshot_X_000.bin'
+    gridfile = '/home/wencan/temp/241030/results/inca_grid.bin'
+    
+    os.chdir('/home/wencan/temp/test')
+    
+    snap = Snapshot( snapfile )
+    snap.read_snapshot()
+    
+    grid = GridData( gridfile )
+    grid.read_grid()
+    
+    snap.grid3d = grid
+    dataset = pv.MultiBlock( snap.create_vtk_multiblock() )
+    
+    print( dataset )
 
+    py = np.linspace(0,     10.4, 101, endpoint=True)
+    pz = np.linspace(-10.4, 10.4, 201, endpoint=True)
+    px = np.array( [0.0] )
+    
+    interped = pv_interpolate( dataset, ['u','v','w','T'], [px,py,pz] )
+    
+    print( interped )
 
+    # p = pv.Plotter()
+    
+    # p.add_mesh( interped )
+    # p.add_axes()
+    # p.show()
+    
+# =============================================================================
+    
+    shape = interped.dimensions
+    
+    print( shape )
+    
+    print( interped.meshgrid )
+    
+    meshgrid =  np.array(interped.meshgrid).reshape([3,shape[1],shape[2]])
+
+    print("shape of meshgrid:")
+    print(meshgrid)
+    
+    
+    u = np.array( interped.point_data['u']).reshape([shape[2],shape[1]]).T.reshape([shape[1],shape[2]])
+    v = np.array( interped.point_data['v']).reshape([shape[2],shape[1]]).T.reshape([shape[1],shape[2]])
+    w = np.array( interped.point_data['w']).reshape([shape[2],shape[1]]).T.reshape([shape[1],shape[2]])
+
+    y = np.array( meshgrid[1] )
+    z = np.array( meshgrid[2] )
+    
+    # print( len(interped.point_data["u"]) )
+
+    fig, ax = plt.subplots( figsize = [12,8] )
+    
+    cs = ax.contourf(z, y, u)
+    
+    print(z.shape)
+    print(y.shape)
+    print(w.shape)
+    print(v.shape)
+    
+    print( z[0] )
+    print( z[1] )
+    
+    ax.streamplot( z,y, 
+                   w,v,
+                   density=2)
+    
+    
+    
+    plt.savefig("test.png")
+
+    plt.close()    
 
 # ----------------------------------------------------------------------
 # >>> Main: for test and debugging                              ( -1 )

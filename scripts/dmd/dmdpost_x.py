@@ -261,7 +261,7 @@ def postprocess_dmd_x( indx ):
             image = p.screenshot(return_img=True)
             p.close()
             
-            image = crop_to_rect_map(image, buff=100)
+            image = crop_to_rect_map(image, buff=500)
             
             images.append(image)
 
