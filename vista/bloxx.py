@@ -9,6 +9,8 @@
 '''
 
 import os
+import shutil
+import numpy             as     np
 import pandas            as     pd
 from   copy              import deepcopy
 
@@ -68,7 +70,7 @@ class Grid_bloxx:
             }
             
             for key, value in variables_to_set.items():
-                self.variables[key] = value
+                self.variables[key.strip()] = value
         
         else:
             self.filename  = file_path.split('/')[-1]
@@ -198,6 +200,8 @@ class Grid_bloxx:
     @property
     def BC(self):
         return self.BX + self.BY + self.BZ
+
+
 
 # ----------------------------------------------------------------------
 # >>> class of Mesh_bloxx                                          ( 0 )
@@ -417,28 +421,30 @@ class Mesh_bloxx:
 
 def Testing():
 
-    file_path = '/home/wencanwu/test/bloxx_test/grid'
-    
-    os.chdir(file_path.split('grid')[0])
-    
-    
-    mesh = Mesh_bloxx(file_path)
-    
-#    mesh.grids = mesh.select_blocks((-120.0,-0.30,-11.0,120.0,100.0,11.0))
-    
-    mesh.sort_grids()
-
-    mesh.save_grid( create_folder('./new_grid') )
-    
-    grid = mesh.grids[0]
-    
-    for variable in grid.variables:
-        print(variable, grid.variables[variable])
-
-
-
 
 # Example usages:
+
+# =============================================================================
+
+# -- sort grids based on (lx1,ly1,lz1)
+
+#     file_path = '/home/wencanwu/test/bloxx_test/grid'
+    
+#     os.chdir(file_path.split('grid')[0])
+    
+#     mesh = Mesh_bloxx(file_path)
+    
+# #    mesh.grids = mesh.select_blocks((-120.0,-0.30,-11.0,120.0,100.0,11.0))
+    
+#     mesh.sort_grids()
+
+#     mesh.save_grid( create_folder('./new_grid') )
+    
+#     grid = mesh.grids[0]
+    
+#     for variable in grid.variables:
+#         print(variable, grid.variables[variable])
+
 
 # =============================================================================
 
