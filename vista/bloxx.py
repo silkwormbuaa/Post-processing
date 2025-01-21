@@ -18,12 +18,61 @@ from   .directories      import create_folder
 class Grid_bloxx:
 
     """
-    file_path: path to the grid file
+    file_path: path to the grid file, if None, create an empty grid \n
     """
 
-    def __init__(self, file_path):
-        self.variables = self._read_grid_file(file_path)
-        self.filename  = file_path.split('/')[-1]
+    def __init__(self, file_path=None):
+        
+        if file_path is None:
+            self.filename  = ''
+            self.variables = {}
+
+            variables_to_set = {
+                'LX       ': '0.0, 1.0 ,',
+                'LY       ': '0.0, 1.0 ,',
+                'LZ       ': '0.0, 1.0 ,',
+                'NX       ': '1,',
+                'NY       ': '1,',
+                'NZ       ': '1,',
+                'TIMES_PI ': ' .F. ,',
+                'SHAPEX   ': '"HOMO" ,',
+                'PARAMX   ': '0.00000000e+00  , 0.00000000e+00  , 0.00000000e+00  ,',
+                'SHAPEY   ': '"HOMO" ,',
+                'PARAMY   ': '0.00000000e+00  , 0.00000000e+00  , 0.00000000e+00  ,',
+                'SHAPEZ   ': '"HOMO" ,',
+                'PARAMZ   ': '0.00000000e+00  , 0.00000000e+00  , 0.00000000e+00  ,',
+                'BX1      ': '"DUMMY" ,',
+                'FLUIDX1  ': '"DUMMY" ,',
+                'VALX1    ': '0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,',
+                'PX1      ': '0               , 0               , 0               ,',
+                'BX2      ': '"DUMMY" ,',
+                'FLUIDX2  ': '"DUMMY" ,',
+                'VALX2    ': '0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,',
+                'PX2      ': '0               , 0               , 0               ,',
+                'BY1      ': '"DUMMY" ,',
+                'FLUIDY1  ': '"DUMMY" ,',
+                'VALY1    ': '0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,',
+                'PY1      ': '0               , 0               , 0               ,',
+                'BY2      ': '"DUMMY" ,',
+                'FLUIDY2  ': '"DUMMY" ,',
+                'VALY2    ': '0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,',
+                'PY2      ': '0               , 0               , 0               ,',
+                'BZ1      ': '"DUMMY" ,',
+                'FLUIDZ1  ': '"DUMMY" ,',
+                'VALZ1    ': '0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,',
+                'PZ1      ': '0               , 0               , 0               ,',
+                'BZ2      ': '"DUMMY" ,',
+                'FLUIDZ2  ': '"DUMMY" ,',
+                'VALZ2    ': '0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,',
+                'PZ2      ': '0               , 0               , 0               ,',
+            }
+            
+            for key, value in variables_to_set.items():
+                self.variables[key] = value
+        
+        else:
+            self.filename  = file_path.split('/')[-1]
+            self.variables = self._read_grid_file(file_path)
 
     def _read_grid_file(self, file_path):
         variables = {}
@@ -166,7 +215,7 @@ class Grid_bloxx:
 
 class Mesh_bloxx:
     
-    def __init__(self, folder):
+    def __init__(self, folder=None):
         
         """
         folder: folder path containing grid files
@@ -174,15 +223,23 @@ class Mesh_bloxx:
         read each grid files as Grid_bloxx object and store them in self.grids
         """
         
-        self.folder     = folder
-        self.grid_files = get_filelist( folder, 'inca_grid' )
-        
-        self.grids = []
-        
-        for file in self.grid_files:
+        if folder is None:
             
-            grid = Grid_bloxx(file)
-            self.grids.append(grid)
+            self.folder     = ''
+            self.grid_files = []
+            self.grids      = []
+    
+        else:
+        
+            self.folder     = folder
+            self.grid_files = get_filelist( folder, 'inca_grid' )
+            
+            self.grids = []
+            
+            for file in self.grid_files:
+                
+                grid = Grid_bloxx(file)
+                self.grids.append(grid)
         
         
 # ----------------------------------------------------------------------
@@ -372,6 +429,11 @@ def Testing():
     mesh.sort_grids()
 
     mesh.save_grid( create_folder('./new_grid') )
+    
+    grid = mesh.grids[0]
+    
+    for variable in grid.variables:
+        print(variable, grid.variables[variable])
 
 
 
