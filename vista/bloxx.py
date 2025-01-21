@@ -13,6 +13,7 @@ import pandas            as     pd
 from   copy              import deepcopy
 
 from   .tools            import get_filelist
+from   .directories      import create_folder
 
 class Grid_bloxx:
 
@@ -250,7 +251,7 @@ class Mesh_bloxx:
         lz1 = [grid.LZ[1] for grid in self.grids]
         old_filename = [grid.filename for grid in self.grids]
         
-        df = pd.DataFrame({'lx1': lx1, 'ly1': ly1, 'lz1': lz1, 
+        df = pd.DataFrame({'lx1': lx1, 'ly1': ly1, 'lz1': lz1, 'grids': self.grids,
                            'old_filename': old_filename})
         
         # sort grids and reset index
@@ -258,18 +259,16 @@ class Mesh_bloxx:
         df = df.sort_values(by=['lx1', 'ly1', 'lz1'])
         df = df.reset_index(drop=True)
         
-        print(df)
+        for i, grid in enumerate(df['grids']):
+            grid.filename = f"inca_grid_{i+1:06d}.inp"
         
-        # generate a dict between filename and index
-        # since the order in dataframe is sorted, but not the grids in self.grids,
-        # so new indexes from dataframe should be assigned to grids.
         
-        new_index = {filename: index for filename, index in zip(df['old_filename'], df.index+1)}
+        # add new filenames to the dataframe
         
-        # change grid filename and write to file
+        new_filename = [grid.filename for grid in df['grids']]
+        df['new_filename'] = new_filename
         
-        for grid in self.grids:
-            grid.filename = f"inca_grid_{new_index[grid.filename]:06d}.inp"
+        print( df )
         
         print(f"Grids are sorted based on (x,y,z) !")
 
@@ -361,9 +360,10 @@ class Mesh_bloxx:
 
 def Testing():
 
-    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/241018/grid'
+    file_path = '/home/wencanwu/test/bloxx_test/grid'
     
-    os.chdir('/home/wencanwu/my_simulation/STBLI_mid_Re/241018/grid_new')
+    os.chdir(file_path.split('grid')[0])
+    
     
     mesh = Mesh_bloxx(file_path)
     
@@ -371,7 +371,10 @@ def Testing():
     
     mesh.sort_grids()
 
-    mesh.save_grid('./')
+    mesh.save_grid( create_folder('./new_grid') )
+
+
+
 
 # Example usages:
 
