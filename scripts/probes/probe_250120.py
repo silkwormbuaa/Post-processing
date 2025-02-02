@@ -44,7 +44,7 @@ def WriteProbe():
     
 # --- probes at the convergent line
 
-    z  = 0.1625
+    z  = 2.60001
     y  = 0.00001
 
     for x in xs:
