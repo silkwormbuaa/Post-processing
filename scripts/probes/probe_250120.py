@@ -22,7 +22,7 @@ from   vista.probe      import ProbeFile, Probe
 
 def WriteProbe():
 
-    outfile  = '/home/wencanwu/my_simulation/STBLI_low_Re/250120/test.inp'
+    outfile  = '/home/wencanwu/my_simulation/STBLI_low_Re/250120/inca_probes.inp'
     probes = ProbeFile()
 #    probes.read( fname )
 #    probes.show()
@@ -36,7 +36,7 @@ def WriteProbe():
     for x in xs:
         
         probe = Probe()
-        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
     print(f"Number of probes at the ridges: {len(probes.probes)}. [0,{len(probes.probes)-1}]")
@@ -50,7 +50,7 @@ def WriteProbe():
     for x in xs:
         
         probe = Probe()
-        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
         probes.probes.append( probe ) 
     
     print(f"Number of probes at the valleys: {len(probes.probes)-n}. [{n},{len(probes.probes)-1}]")
@@ -65,7 +65,7 @@ def WriteProbe():
     
     for y in ys:
         probe = Probe()
-        probe.assign( 'POINT', 20, [x,y,z], 'ALL' )
+        probe.assign( 'POINT', 5, [x,y,z], 'ALL' )
         probes.probes.append( probe )
 
     print(f"Number of probes at the vertical line: {len(probes.probes)-n}. [{n},{len(probes.probes)-1}]")
