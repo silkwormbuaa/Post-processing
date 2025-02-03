@@ -36,7 +36,6 @@ plt_RS_uu   = True
 plt_RS_vv   = True
 plt_RS_ww   = True
 plt_RS_uv   = True
-plt_RS_DNS  = True
 plt_rho     = True
 plt_T       = False
 plt_Mt      = False
