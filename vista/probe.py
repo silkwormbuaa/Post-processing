@@ -348,12 +348,14 @@ class ProbeData:
 #
 # ----------------------------------------------------------------------
 
-    def cleandata( self, t_start ):
+    def cleandata( self, t_start, t_end=None ):
         
         """
         t_start: start time to keep the data
+        t_end  : end time to keep the data
         
-        drop the transient data at the beginning
+        drop the transient data at the beginning or keep the data between start 
+        and end.
         """
 
         timelist = np.array( self.df['time'] )
@@ -365,7 +367,15 @@ class ProbeData:
             if timelist[i] >= t_start:
                 cut_index = i ; break
         
-        self.df = self.df[cut_index:]
+        if t_end is not None:
+            
+            for i in range( cut_index, len(timelist) ):
+                if timelist[i] >= t_end: break; 
+            end_index=i
+            self.df = self.df[cut_index:end_index]
+            
+        else:
+            self.df = self.df[cut_index:]
         
 
 # ----------------------------------------------------------------------

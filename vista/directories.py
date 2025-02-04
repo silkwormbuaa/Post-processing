@@ -170,6 +170,8 @@ class Directories:
             return self.fetch_prb_from_index( params.prb_sep )
         elif probe_type == 'att':
             return self.fetch_prb_from_index( params.prb_att )
+        else:
+            raise ValueError("prbe_type only support 'pfmax','sep','att'!")
     
     
 
