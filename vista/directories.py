@@ -83,6 +83,7 @@ class Directories:
         self.pp_pre_ridge  = os.path.join( self.pp_probes, 'pre_ridge'  )
         self.pp_pre_valley = os.path.join( self.pp_probes, 'pre_valley' )
         self.pp_signals    = os.path.join( self.pp_probes, 'signals'    )
+        self.pp_signal     = os.path.join( self.pp_probes, 'signal'     )
       
 # --- pp_snapshots subdirectories
 

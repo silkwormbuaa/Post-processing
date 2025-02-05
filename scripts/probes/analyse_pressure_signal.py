@@ -28,22 +28,26 @@ from   vista.directories   import create_folder
 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/241030'
+casefolder = '/home/wencan/temp/smooth_mid'
 vars       = ['p']
 colors     = ['black']*len(vars)
+prb_type   = 'pfmax'
+time_range = [20.0,61.0]
 
 # =============================================================================
 
 dirs       = Directories( casefolder )
 params     = Params( dirs.case_para_file )
-prbfile    = dirs.fetch_prb_from_type( 'pfmax' )
+prbfile    = dirs.fetch_prb_from_type( prb_type )
 
-os.chdir( create_folder(dirs.pp_signals) )
+figname    = prb_type + '.png'
+
+os.chdir( create_folder(dirs.pp_signal) )
 
 # --- read in the probe data at the pressure fluctuation maximum point
 
 prb_data   = ProbeData( prbfile, withT=params.prb_withT )
-prb_data.cleandata( t_start=20, t_end=61.0 )
+prb_data.cleandata( t_start=time_range[0], t_end=time_range[1] )
 
 # --- compute statistics of signals
 
@@ -69,7 +73,8 @@ for var in vars:
     
     ax1  = fig.add_subplot( gs[0,0:14])
     ax1.plot( time, signals, lw=0.5, color='black' )
-#    ax1.set_xlim([20.0,61.0])
+    ax1.set_xlim( time_range )
+    ax1.set_ylabel( var )
     
     ax2  = fig.add_subplot( gs[0,15:]) 
     ax2.plot( bin_centers, stdpdf, linestyle=':', color='gray')
@@ -78,6 +83,8 @@ for var in vars:
     ax2.set_xlim([-3,3])
     ax2.set_ylim([0.0, 0.65])
     
+    plt.savefig( var + figname )
     plt.show()
+    plt.close()
 
 
