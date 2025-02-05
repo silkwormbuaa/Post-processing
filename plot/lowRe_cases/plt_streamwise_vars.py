@@ -54,16 +54,17 @@ x_pfmax  = [-7.712,  -7.49 ,  -8.71,                  -10.06,       -8.93 ,  -7.
 
 lines    = []
 
-plt_pwfluc = True
-plt_pw     = True
-plt_pwg    = True
-plt_Cf     = True
+plt_pwfluc    = True
+plt_pwfluc_ln = True
+plt_pw        = True
+plt_pwg       = True
+plt_Cf        = True
 
-pure       = False
-show_label = True
+pure          = False
+show_label    = True
 
-figsize    = [15,8]
-fmt        =  '.png' # or '.png'
+figsize       = [15,8]
+fmt           =  '.png' # or '.png'
 
 # - read in data files
 
@@ -81,6 +82,35 @@ for i, datafile in enumerate( datalist ):
 
 
 os.chdir(OutPath)
+
+# adjust plotting style
+
+def adjust_plotting( ax:plt.Axes ):
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=15,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1)
+
+    ax.set_xlim([-20,10])
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+
+    ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
+    ax.tick_params(axis='x', pad=15)
+    
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    # ax.xaxis.set_ticklabels([])
+    # ax.yaxis.set_ticklabels([])
 
 # ----------------------------------------------------------------------
 # >>> plot wall pressure fluctuation                             (Nr.)
@@ -117,53 +147,73 @@ if plt_pwfluc:
         ax.plot( x_att[i],   interpolator(x_att[i]), 'p',   color=line.color, ms=15)
         ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=15)
 
-
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
-
-    ax.minorticks_on()
-    ax.tick_params(which='major',
-                    axis='both',
-                    direction='in',
-                    length=15,
-                    width=2)
-    ax.tick_params(which='minor',
-                    axis='both', 
-                    direction='in',
-                    length=10,
-                    width=1)
-
-    ax.set_xlim([-20,10])
     ax.set_ylim([0.02,0.1])
-#    ax.grid(visible=True, which='both',axis='both',color='gray',
-#                linestyle='--',linewidth=0.2)
-
+    ax.set_ylabel(r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$" )
+    ax.tick_params(axis='y', pad=10)
+    
+    adjust_plotting( ax )
+    
     figname = "pressure_fluctuation_awall"
 
-    # Adjust the spacing around the plot to remove the white margin
-    if pure:
-        figname += '_pure'
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1) 
-        ax.xaxis.set_ticklabels([])
-        ax.yaxis.set_ticklabels([])
-        
-    else:
-        
-        ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
-        ax.tick_params(axis='x', pad=15)
-
-        ax.set_ylabel(r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$" )
-        ax.tick_params(axis='y', pad=10)
-
-#        ax.legend( ) 
-        
-    # set the bounding box of axes
-    ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(3)
-    
     plt.savefig( figname + fmt )
+    print( f"{figname.ljust(30)} is output in {OutPath}." )
     plt.show()
+
+
+# ----------------------------------------------------------------------
+# >>> plot locally normalized wall pressure fluctuations         (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/02/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_pwfluc_ln:
     
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
+
+    for i,line in enumerate( lines ):
+        
+        ax.plot( line.df['x'], 
+                 line.df['p_fluc']/line.df['Cp'],
+                 line.color,
+                 ls = line.lstyle,
+                 label = line.label,
+                 linewidth = line.width)
+    
+    # to avoid line overlapped on marker
+    
+    for i,line in enumerate( lines ):
+        interpolator = create_linear_interpolator( line.df['x'], line.df['p_fluc']/line.df['Cp'])
+        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
+        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=15)
+
+    # adjust the y axis
+
+    ax.set_ylim([0.01,0.08])
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
+    ax.set_ylabel(r"$\sqrt{\langle p'p' \rangle}/p_{w}$" )
+    ax.tick_params(axis='y', pad=10)
+    
+    adjust_plotting( ax )
+    
+    if show_label:
+        ax.legend( fontsize=20 ) 
+        
+    figname = "pressure_fluctuation_ln"
+    plt.savefig( figname + fmt )
+    print( f"{figname.ljust(30)} is output in {OutPath}." )
+    plt.show()
+
+
 # ----------------------------------------------------------------------
 # >>> plot wall pressure                                        (Nr.)
 # ----------------------------------------------------------------------
@@ -199,50 +249,19 @@ if plt_pw:
         ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
         ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
 
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
-
-    ax.minorticks_on()
-    ax.tick_params(which='major',
-                    axis='both',
-                    direction='in',
-                    length=15,
-                    width=2)
-    ax.tick_params(which='minor',
-                    axis='both', 
-                    direction='in',
-                    length=10,
-                    width=1)
-
-    ax.set_xlim([-20.0,10.0])
     ax.set_ylim([0.8,2.5])
-#    ax.grid(visible=True, which='both',axis='both',color='gray',
-#                linestyle='--',linewidth=0.2)
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    ax.set_ylabel("$<p_w>/p_{\infty}$")
+    ax.tick_params(axis='y', pad=10)
 
+    if show_label:
+        ax.legend( fontsize=30 ) 
+        
+    adjust_plotting( ax )
+    
     figname = "wall_pressure_awall"
-
-    # Adjust the spacing around the plot to remove the white margin
-    if pure:
-        figname += '_pure'
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1) 
-        ax.xaxis.set_ticklabels([])
-        ax.yaxis.set_ticklabels([])
-        
-    else:
-        
-        ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5 )
-        ax.tick_params(axis='x', pad=15)
-        
-        ax.set_ylabel("$<p_w>/p_{\infty}$")
-        ax.tick_params(axis='y', pad=10)
-
-#        ax.legend( ) 
-
-    # set the bounding box of axes
-    ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(3)        
-        
     plt.savefig( figname + fmt )
+    print( f"{figname.ljust(30)} is output in {OutPath}." )
     plt.show()
 
 
@@ -286,52 +305,20 @@ if plt_pwg:
         ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
         ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
 
-        
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
-
-    ax.minorticks_on()
-    ax.tick_params(which='major',
-                    axis='both',
-                    direction='in',
-                    length=15,
-                    width=2)
-    ax.tick_params(which='minor',
-                    axis='both', 
-                    direction='in',
-                    length=10,
-                    width=1)
-
-    ax.set_xlim([-20.0,10.0])
     ax.set_ylim([-0.1,0.6])
-#    ax.grid(visible=True, which='both',axis='both',color='gray',
-#                linestyle='--',linewidth=0.2)
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+    ax.set_ylabel(r"$\frac{d<p_w>}{dx}/p_{\infty}$")
+    ax.tick_params(axis='y', pad=10)
+
+    if show_label:
+        ax.legend( fontsize=30 ) 
+        
+    adjust_plotting( ax )
 
     figname = "wall_pressure_gradient"
-
-    # Adjust the spacing around the plot to remove the white margin
-    if pure:
-        figname += '_pure'
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1) 
-        ax.xaxis.set_ticklabels([])
-        ax.yaxis.set_ticklabels([])
-        
-    else:
-        
-        ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5 )
-        ax.tick_params(axis='x', pad=15)
-        
-        ax.set_ylabel(r"$\frac{d<p_w>}{dx}/p_{\infty}$")
-        ax.tick_params(axis='y', pad=10)
-
-        if show_label:
-            ax.legend( fontsize=30 ) 
-
-    # set the bounding box of axes
-    ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(3)        
         
     plt.savefig( figname + fmt )
+    print( f"{figname.ljust(30)} is output in {OutPath}." )
     plt.show()
 
 
@@ -367,63 +354,25 @@ if plt_Cf:
     for i,line in enumerate( lines ):
         interpolator = create_linear_interpolator(line.df['x'], line.df['Cf'])
         ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
-        
-    # ax.plot( d0_f.df['x_s'], 
-    #         d0_f.df['Cf']*1000,
-    #         'gray', 
-    #         label=r'$smooth$', 
-    #         ls   ='--',
-    #         linewidth=4)
-    
+            
     ax.plot( [-20,12],
              [0,0],
              'black',
              ls = '--',
              linewidth=2 )
 
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
-
-    ax.minorticks_on()
-    ax.tick_params(which='major',
-                    axis='both',
-                    direction='in',
-                    length=15,
-                    width=2)
-    ax.tick_params(which='minor',
-                    axis='both', 
-                    direction='in',
-                    length=10,
-                    width=1)
-
-    ax.set_xlim([-20.0,10.0])
     ax.set_ylim([-2.5,4.5])
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+    ax.set_ylabel("$C_fx10^3$")
+    ax.tick_params(axis='y', pad=10)
+
+    if show_label:
+        ax.legend( fontsize=30 ) 
     
-#    ax.grid(visible=True, which='both',axis='both',color='gray',
-#                linestyle='--',linewidth=0.2)
-
+    adjust_plotting( ax )
+        
     figname = "friction_coefficient_awall"
-
-    # Adjust the spacing around the plot to remove the white margin
-    if pure:
-        figname += '_pure'
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1) 
-        ax.xaxis.set_ticklabels([])
-        ax.yaxis.set_ticklabels([])
-        
-    else:
-        
-        ax.set_xlabel("$(x-x_{imp})/\delta_0$", labelpad=-5) 
-        ax.tick_params(axis='x', pad=15)
-        
-        ax.set_ylabel("$C_fx10^3$")
-        ax.tick_params(axis='y', pad=10)
-
-#        ax.legend( ) 
-
-    # set the bounding box of axes
-    ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(3)
-        
+    
     plt.savefig( figname + fmt )
+    print( f"{figname.ljust(30)} is output in {OutPath}." )
     plt.show()

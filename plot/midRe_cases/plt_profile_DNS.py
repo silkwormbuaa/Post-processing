@@ -108,7 +108,7 @@ line1000.marker = markers.MarkerStyle(marker='s')
 print( OutPath)
 os.chdir( OutPath )
 
-def adjust_plot( ax:plt.axes ):
+def adjust_plot( ax:plt.Axes ):
     
     ax.minorticks_on()
     
