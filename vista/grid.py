@@ -685,9 +685,13 @@ class GridData:
         return : a list of grouped blocks numbers.
         """
 
-# ----- if block_list is None, then group all blocks        
+# ----- if block_list is None, then group all blocks
+ 
         if block_list is None:
             block_list = [i for i in range(1, self.n_bl+1)]
+
+        if len(block_list) == 0:
+            raise ValueError("An EMPTY block_list is passed to group_by_range()!")
 
 # ----- read in grid blocks into pandas dataframe
 
@@ -1191,10 +1195,13 @@ def Testing():
     print(k)
     
 
-#    blocklist = grd.select_blockgrids([-999,999,-10,0,-999,999], mode='within')
-#    group_list = grd.group_by_range('xz', block_list=blocklist)
+    blocklist = grd.select_blockgrids([-999,999,-10,0.0,-999,999], mode='within')
+    
+    print(len(blocklist))
+    
+    group_list = grd.group_by_range('xy', block_list=blocklist)
 
-    #print( group_list )
+    print( group_list )
     
 #    xyz_prb = [76,0,10.4]
     
