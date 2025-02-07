@@ -14,8 +14,12 @@
 '''
 
 import os
+import sys
 
-import glob
+source_dir = os.path.realpath(__file__).split('scripts')[0]
+sys.path.append( source_dir )
+
+from   vista.tools       import get_filelist
 
 # ----------------------------------------------------------------------
 # >>> Control Panel                                               ( 0 )
@@ -34,7 +38,7 @@ import glob
 
 # input the step of your backup (where you want to continue computation)
 
-backupstep = int( 9999999 )
+backupstep = int( 1340310 )
 
 trim_snapshots = True
 trim_probe     = True
@@ -248,10 +252,11 @@ if trim_ibforce:
     
     print( os.getcwd() )
     
-    # get all ib force files, only retain filenames instead of paths.
-    ibfiles = glob.glob( 'f_bl_*' )
+    if 'backuptime' not in globals():
+        raise ValueError("snapshot_index.dat file should be included in order to clean ib force files.")
     
-    ibfiles.sort()
+    # get all ib force files, only retain filenames instead of paths.
+    ibfiles = get_filelist( folder+'/forces', 'force_0' )
     
     for file in ibfiles:
         
