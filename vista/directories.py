@@ -31,6 +31,7 @@ class Directories:
         self.prb_dir  = os.path.join( self.case_dir, 'probes' )
         self.sup_dir  = os.path.join( self.case_dir, 'supplements' )
         self.pos_dir  = os.path.join( self.case_dir, 'postprocess' )
+        self.for_dir  = os.path.join( self.case_dir, 'forces' )
 
         # -- second level directories
         
@@ -68,6 +69,7 @@ class Directories:
         self.pp_solution     = os.path.join( self.pos_dir, 'solution' )
         self.pp_snapshots    = os.path.join( self.pos_dir, 'snapshots' )
         self.pp_dmd          = os.path.join( self.pos_dir, 'dmd' )
+        self.pp_forces       = os.path.join( self.pos_dir, 'forces' )
         
 # --- pp_statistics subdirectories
         
@@ -192,10 +194,10 @@ class Directories:
 
 def create_folder( path ):
     
-    try:
+    if not os.path.exists(path):
         Path(path).mkdir(parents=True, exist_ok=True)
         print(f"Folder created at path: {path}")
-    except FileExistsError:
+    else:
         print(f"Folder already exists at path: {path}")
     
     return path

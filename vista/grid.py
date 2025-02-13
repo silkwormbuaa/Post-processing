@@ -63,7 +63,6 @@ class GridData:
         self.verbose = False
 
 
-
 # ----------------------------------------------------------------------
 # >>> Read Grid                                                (Nr.)
 # ----------------------------------------------------------------------
@@ -160,6 +159,7 @@ class GridData:
             print(f"grid with solver: {self.grid_with_solver}")
             print(f"number of blocks: {self.n_bl}")
 
+
 # ----------------------------------------------------------------------
 # >>> Read Grid File Body                                       ( 1-2 )
 # ----------------------------------------------------------------------
@@ -201,6 +201,7 @@ class GridData:
             i += 1
             
             if self.pos >= self.fsize: end_of_file = True
+
 
 # ----------------------------------------------------------------------
 # >>> Get Sorted Block Grids Groups                             ( 1-3 )
@@ -318,7 +319,6 @@ class GridData:
                     selected_bls.append( bl_num )
             
         return selected_bls
-
 
 
 # ----------------------------------------------------------------------
@@ -581,8 +581,6 @@ class GridData:
                 
                 break
             
-            
-                
         return bl_num, [i, j, k]
                 
 

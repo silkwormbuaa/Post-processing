@@ -1,0 +1,54 @@
+# Basic info
+
+casecode  = 250120
+tag       = low-Re
+roughwall = True
+
+# Flow setup parameters
+
+u_ref     = 507.0
+p_ref     = 45447.289
+rho_ref   = 0.9886
+T_ref     = 160.15
+delta_0   = 5.2
+Re_ref    = 9636.0
+visc_law  = P07
+
+# Numerical setup parameters
+
+dt_snap   = 0.01  
+
+# Geometric setup parametrs
+
+H         = 0.13679
+H_md      = 0.05758
+x_imp     = 50.4
+period    = 64
+D         = 0.325
+
+# Computational domain parameters (normalized)
+
+y_min     = -0.03
+
+# Case specific flow conditions
+
+x_sep     = -10.36
+x_att     = 2.56
+x_pfmax   = -10.16
+
+prb_sep   = 117
+prb_att   = 271
+prb_pfmax = 117
+
+# INCA version led different setting
+
+prb_withT = True
+
+# probe groups
+
+prb_ridge_index     = [1..389]
+prb_valley_index    = [390..778]
+prb_upspan_index    = [779..856]
+prb_downspan_index  = []
+prb_upvline_index   = []
+prb_downvline_index = []
