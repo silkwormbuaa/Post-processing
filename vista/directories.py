@@ -61,6 +61,7 @@ class Directories:
         self.cc_BSP_setup = os.path.join( self.sup_dir, 'cutcells_BSP_setup.dat' )
         self.wall_dist    = os.path.join( self.sup_dir, 'wall_dist' )
         self.stat_zslice  = os.path.join( self.sup_dir, 'stat_zslice.bin' )
+        self.stat_yslice  = os.path.join( self.sup_dir, 'stat_yslice.bin' )
 
 # - post processing directoris
         
