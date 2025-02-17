@@ -1612,7 +1612,7 @@ class StatisticData:
 
         vtk_blocks =  list()
         
-        for bl in self.bl:
+        for bl in self.bl_clean:
             
             bl_num = bl.num
             
