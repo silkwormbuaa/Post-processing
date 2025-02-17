@@ -429,11 +429,14 @@ class StatisticData:
 #   - match data with grids
 # ----------------------------------------------------------------------
     
-    def match_grid( self, block_list, G, add_to_df=True ):
+    def match_grid( self, block_list, G, add_to_df=True, stat_type='block' ):
         
         """
         block_list : list of selected blocks' numbers \n
         G          : GridData object \n
+        add_to_df  : add x,y,z and vol_fra to self.bl[].df, if not, just connect
+                     g to self.bl[index]\n
+        stat_type  : 'block' or 'X' or 'Y' or 'Z' \n
         
         return : x,y,z and vol_fra are added to self.bl[].df \n
         """
@@ -442,30 +445,63 @@ class StatisticData:
             
             g = G.g[num-1]
             
-            self.bl[num-1].g = g
+            bl = self.bl[self.bl_nums.index(num)]
+            
+            bl.g = g
             
             if add_to_df:
+                if stat_type == 'block':
                 
-                X,Y,Z = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
-                hx,hy,hz = np.meshgrid( g.hx, g.hy, g.hz, indexing='ij' )
+                    X, Y, Z  = np.meshgrid( g.gx, g.gy, g.gz, indexing='ij' )
+                    hx,hy,hz = np.meshgrid( g.hx, g.hy, g.hz, indexing='ij' )
+                    
+                    bl.df['x']  = X.T.flatten()
+                    bl.df['y']  = Y.T.flatten()
+                    bl.df['z']  = Z.T.flatten()
+                    bl.df['hx'] = hx.T.flatten()
+                    bl.df['hy'] = hy.T.flatten()
+                    bl.df['hz'] = hz.T.flatten()
+                    
+                    
+                    # adding vol_fra !! original vol_fra has i,j,k order, 
+                    # should be transpose as k,j,i
+                    if g.vol_fra is not None:
+                        bl.df['vol_fra'] = np.ravel( g.vol_fra.T )
                 
-                self.bl[num-1].df['x'] = X.T.flatten()
-                self.bl[num-1].df['y'] = Y.T.flatten()
-                self.bl[num-1].df['z'] = Z.T.flatten()
-                self.bl[num-1].df['hx'] = hx.T.flatten()
-                self.bl[num-1].df['hy'] = hy.T.flatten()
-                self.bl[num-1].df['hz'] = hz.T.flatten()
-                
-                
-                # adding vol_fra !! original vol_fra has i,j,k order, 
-                # should be transpose as k,j,i
-                if g.vol_fra is not None:
-                    self.bl[num-1].df['vol_fra'] = np.ravel( g.vol_fra.T )
-            
-                if g.vol is not None:
-                    self.bl[num-1].df['vol'] = np.ravel( g.vol )
+                    if g.vol is not None:
+                        bl.df['vol'] = np.ravel( g.vol )
 
+                elif stat_type == 'X':
+                    
+                    Z, Y  = np.meshgrid( g.gz, g.gy, indexing='ij' )
+                    hz,hy = np.meshgrid( g.hz, g.hy, indexing='ij' )
 
+                    bl.df['y']  = Y.flatten()
+                    bl.df['z']  = Z.flatten()
+                    bl.df['hy'] = hy.flatten()
+                    bl.df['hz'] = hz.flatten()
+                
+                elif stat_type == 'Y':
+                    
+                    Z, X  = np.meshgrid( g.gz, g.gx, indexing='ij' )
+                    hz,hx = np.meshgrid( g.hz, g.hx, indexing='ij' )
+                    
+                    bl.df['x']  = X.flatten()
+                    bl.df['z']  = Z.flatten()
+                    bl.df['hx'] = hx.flatten()
+                    bl.df['hz'] = hz.flatten()
+                
+                elif stat_type == 'Z':
+                    
+                    Y, X  = np.meshgrid( g.gy, g.gx, indexing='ij' )
+                    hy,hx = np.meshgrid( g.hy, g.hx, indexing='ij' )
+                    
+                    bl.df['x']  = X.flatten()
+                    bl.df['y']  = Y.flatten()
+                    bl.df['hx'] = hx.flatten()
+                    bl.df['hy'] = hy.flatten()
+                    
+                    
 # ----------------------------------------------------------------------
 # >>> drop ghost cells                                          (Nr.)
 # ----------------------------------------------------------------------
