@@ -20,18 +20,19 @@ sys.path.append( source_dir )
 
 from   vista.grid        import GridData
 from   vista.params      import Params
+from   vista.directories import Directories
 from   vista.tools       import define_wall_shape
 from   vista.tools       import lin_grow
 
 # =============================================================================
 
-From_File = False
+From_File = True
 
 # if From_file, give workpath to inca_grid.bin
 
-#workpath = '/home/wencanwu/my_simulation/temp/220927_lowRe/results'
+workpath = '/home/wencan/temp/220927'
 #workpath = '/media/wencanwu/Seagate Expansion Drive/temp/220825/results'
-workpath = '/home/wencanwu/my_simulation/STBLI_mid_Re'
+#workpath = '/home/wencanwu/my_simulation/STBLI_mid_Re'
 
 # =============================================================================
 
@@ -41,8 +42,9 @@ os.chdir( workpath )
 
 if From_File:
 
-    gridfile = workpath + '/inca_grid.bin'
-    parametersfile = workpath.split('/results')[0] + '/case_parameters'
+    dirs           = Directories( workpath )
+    gridfile       = dirs.grid
+    parametersfile = dirs.case_para_file
 
     params   = Params( parametersfile )
     casecode = params.casecode
