@@ -26,8 +26,8 @@ from   vista.tools       import get_filelist
 # =============================================================================
 
 casedir = '/home/wencan/temp/250120/'
-vars_in = ['rho','mu']
-bbox    = [ -55, -50, -3.0, 1.0, -11, 11]
+vars_in = ['rho','mu','p']
+bbox    = [ -57.92, -48.70, -3.0, 1.0, -11, 11]
 
 # =============================================================================
 
@@ -76,6 +76,6 @@ print(f"average mu  is              {integrated_data['mu'][0]/integrated_data['A
 p = pv.Plotter()
 cmp = plt.get_cmap('coolwarm',51)
 
-p.add_mesh( surface, scalars='rho', cmap=cmp, show_scalar_bar=True )
+p.add_mesh( surface, scalars='p', cmap=cmp, show_scalar_bar=True )
 p.add_axes()
 p.show()

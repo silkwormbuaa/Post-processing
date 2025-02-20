@@ -392,7 +392,7 @@ for i, loc in enumerate(locs):
                           filename=casecode+'_Q_'+str(i+1),
                           col_map='RdBu_r',
                           cbar_label=cbar,
-                          wall=True,
+                          wall=False,
                           cbar_levels=cbar_levels,
 #                          cbar_ticks=cbar_ticks,
                           title=title)
@@ -410,7 +410,7 @@ for i, loc in enumerate(locs):
                           filename=casecode+'_l2_'+str(i+1),
                           col_map='RdBu_r',
                           cbar_label=cbar,
-                          wall=True,
+                          wall=False,
                           cbar_levels=cbar_levels,
 #                          cbar_ticks=cbar_ticks,
                           title=title)    

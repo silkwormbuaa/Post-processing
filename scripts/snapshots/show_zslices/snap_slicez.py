@@ -8,6 +8,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   read in 3d snapshot.bin, and do slicing, then show interpolated data
              with matplotlib.
+           ! This is a code without using pyvista, should be deprecated in the future.
 '''
 
 

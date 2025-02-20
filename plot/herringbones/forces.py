@@ -97,16 +97,16 @@ if not os.path.exists('mean_forces_x.csv'):
         df = pd.concat( [df, newrow_df], ignore_index=True )
 
     g = grid.g[colblock_list[0]-1]
-    block_area = (g.lx1 - g.lx0) * (g.ly1 - g.ly0)
+    block_area = (g.lx1 - g.lx0) * (g.lz1 - g.lz0)
 
     for var in df.columns[1:]:
         df[var] = df[var] / block_area
 
-    df.to_csv( 'mean_forces_x.csv', index=False )
+    df.to_csv( 'mean_forces_x.csv', sep='\t',index=False )
     print(f'Save mean_forces_x.csv in {os.getcwd()}.')
 
 else:
-    df = pd.read_csv('mean_forces_x.csv')
+    df = pd.read_csv('mean_forces_x.csv', delimiter=r'\s+')
     print(f'Read mean_forces_x.csv in {os.getcwd()}.')
     
 print( df )
@@ -124,6 +124,7 @@ print( df )
 # Desc
 #
 # ----------------------------------------------------------------------
+plt.rcParams['font.size']           = 20
 
 total_force_x = df['mean_fric_x'] + df['mean_pres_x']
 
@@ -138,7 +139,9 @@ ax.plot( x, total_force_x/dynp*1000,     label='total force in x', color='black'
 ax.set_xlabel(r'$(x-x_\delta)/\delta_0$')
 ax.set_ylabel(r'$\tau$')
 
-ax.set_ylim([-2.5,4.5])
+#ax.set_xlim([-20, 10])
+# ax.set_ylim([-2.5,4.5])
+
 
 plt.legend()
 plt.show()
