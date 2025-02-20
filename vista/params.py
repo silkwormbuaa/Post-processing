@@ -169,6 +169,7 @@ class Params:
 
     @property
     def dt_snap( self ):
+        """in physical unit"""
         return float( self.params.get('dt_snap') )
 
 
@@ -176,22 +177,27 @@ class Params:
     
     @property
     def H( self ):
+        """in physical unit"""
         return float( self.params.get('H') )
     
     @property
     def H_md( self ):
+        """in physical unit"""
         return float( self.params.get('H_md') )
     
     @property
     def x_imp( self ):
+        """in unshifted physical unit"""
         return float( self.params.get('x_imp') )
     
     @property
     def period( self ):
+        """integer"""
         return int( self.params.get('period') )
     
     @property
     def D( self ):
+        """in physical unit"""
         return float( self.params.get('D') )
     
 
