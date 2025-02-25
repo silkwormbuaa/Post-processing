@@ -2399,10 +2399,7 @@ class Snapshot:
 # ----- check if grid data is ready
         
         if self.grid3d is None:
-            raise ValueError("Please read in grid data first!")
-        
-        else: 
-            G = self.grid3d
+            raise ValueError("Please set self.grid3d before read_snapshot!")
         
 # ----- drop ghost cells
 
@@ -2426,7 +2423,7 @@ class Snapshot:
                 continue
             
             bl_num = snap_bl.num
-            g = G.g[bl_num-1]
+            g  = snap_bl.g
             
             px = (g.px[buffl:-buffr]+rescale[0])/rescale[3]
             py = (g.py[buffl:-buffr]+rescale[1])/rescale[4]

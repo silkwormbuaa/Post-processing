@@ -304,6 +304,7 @@ class BlockData:
         bl_clean.npz = Nz
         bl_clean.np  = Nx*Ny*Nz
         bl_clean.df  = df
+        bl_clean.g   = self.g
         
         return bl_clean
 

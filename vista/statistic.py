@@ -346,8 +346,15 @@ class StatisticData:
         
             self.bl.append(BlockData(file, bl_list, n_var, sel_vars, vars_indx, verbose))
             
+            # collect the bl_nums and match grid to block
+            
+            self.bl_nums.append(self.bl[-1].num)
+            
+            if self.grid3d is not None:
+                self.bl[-1].g = self.grid3d.g[self.bl[-1].num-1]
+            
             self.pos = self.pos + self.bl[-1].size
-                                    
+
             if self.pos >= self.fsize: end_of_file = True
             
         # get list of block numbers
@@ -432,6 +439,8 @@ class StatisticData:
     def match_grid( self, block_list, G, add_to_df=True, stat_type='block' ):
         
         """
+        bl.g => g. Necessary if grid3d was not set before read_stat()
+        
         block_list : list of selected blocks' numbers \n
         G          : GridData object \n
         add_to_df  : add x,y,z and vol_fra to self.bl[].df, if not, just connect
@@ -1623,26 +1632,31 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def create_vtk_multiblock( self, block_list, vars, buff=3, mode='symmetry' ):
+    def create_vtk_multiblock( self, block_list, vars, buff=3, 
+                              mode='symmetry', rescale=[0.0,0.0,0.0,1.0,1.0,1.0] ):
         
         """
         write statistics into vtm file (multiblock vtk)
         
         block_list : list of selected blocks' numbers
         vars       : list of variables to be written
+        buff       : number of ghost layers\n
+        mode       : 'symmetry' or 'oneside'\n
+        rescale    : rescale the grid points. [x_shift, y_shift, z_shift, x_norm, y_norm, z_norm]
         """
 
 # ----- check if grid data is ready
 
         if self.grid3d is None:
-            raise ValueError("Please read in grid data first.")
-        
-        else:
-            G = self.grid3d
+            raise ValueError("Please set self.grid3d before read_stat")
+
 
 # ----- drop ghost cells
 
         self.drop_ghost( block_list, buff=buff, mode=mode )
+        
+        if mode == 'symmetry':  buffl = buff; buffr = buff
+        elif mode == 'oneside': buffl = buff; buffr = buff-1
 
 # ----- setup vtk file
 
@@ -1650,33 +1664,38 @@ class StatisticData:
         
         for bl in self.bl_clean:
             
-            bl_num = bl.num
-            
             # only write selected blocks, different to SnapData
             
-            if bl_num in block_list:
+            if bl.num not in block_list:
+                continue
+            
+            bl_num = bl.num
+            g = bl.g
+            
+            px = (g.px[buffl:-buffr]+rescale[0])/rescale[3]
+            py = (g.py[buffl:-buffr]+rescale[1])/rescale[4]
+            pz = (g.pz[buffl:-buffr]+rescale[2])/rescale[5]
+                        
+            # build one vtk block
+            
+            if bl.npx == 1: px = np.array([0.0])
+            if bl.npy == 1: py = np.array([0.0])
+            if bl.npz == 1: pz = np.array([0.0])
+            
+            bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
+            
+            for var in vars:
                 
-                g = G.g[bl_num-1]
+                var_data = np.array(bl.df[var])
                 
-                px = g.px[buff:-buff]
-                py = g.py[buff:-buff]
-                pz = g.pz[buff:-buff]
-                
-                # build one vtk block
-                bl_vtk = create_3d_vtkRectilinearGrid( px, py, pz )
-                
-                for var in vars:
-                    
-                    var_data = np.array(bl.df[var])
-                    
-                    if len(var_data) != bl.npx*bl.npy*bl.npz:
-                        raise ValueError(f"Data length not match for variable {var} in block {bl_num}.")
-                    elif len(var_data) == 0:
-                        raise ValueError(f"Data length is zero for variable {var} in block {bl_num}.")
+                if len(var_data) != bl.npx*bl.npy*bl.npz:
+                    raise ValueError(f"Data length not match for variable {var} in block {bl_num}.")
+                elif len(var_data) == 0:
+                    raise ValueError(f"Data length is zero for variable {var} in block {bl_num}.")
 
-                    bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
-                    
-                vtk_blocks.append( bl_vtk )
+                bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
+                
+            vtk_blocks.append( bl_vtk )
         
         # build the multiple blocks dataset     
         dataset = create_multiblock_dataset(vtk_blocks)
