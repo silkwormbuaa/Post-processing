@@ -26,25 +26,25 @@ from   vista.directories import create_folder
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
-plt.rcParams['font.size']   = 30
+plt.rcParams['font.size']   = 45
 
 outpath = '/media/wencan/Expansion/temp/DataPost/midRe/psd'
 
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/probes/psd_ridge'
-datapath2 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
-datapath3 = '/media/wencan/Expansion/temp/241030/postprocess/probes/psd_ridge'
-datapath4 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
+datapath1 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
+datapath2 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/probes/psd_ridge'
+datapath3 = '/media/wencan/Expansion/temp/231124/postprocess/probes/psd_ridge'
+datapath4 = '/media/wencan/Expansion/temp/241030/postprocess/probes/psd_ridge'
 datapath5 = '/media/wencan/Expansion/temp/241018/postprocess/probes/psd_ridge'
 datapaths = [datapath0, datapath1, datapath2, datapath3, datapath4]
 
 # separation range in normalized unit
-x_separs = [-8.42  , -7.33, -10.84, -10.36,  -9.96, -15.03]
-x_reatts = [1.06795, 1.89,  2.45,   2.56 ,    2.86, 3.57  ]
-x_ppmaxs = [-7.3333, -8.53, -10.06, -10.16,  -11.58,-14.75]
+x_separs = [-8.42  ,  -10.84, -7.33, -9.96, -10.36, -15.03]
+x_reatts = [1.06795,  2.45,   1.89,   2.86, 2.56 ,  3.57  ]
+x_ppmaxs = [-7.3333,  -10.06, -8.53, -11.58,-10.16, -14.75]
 
 # labels
-label    = ['lowRe_smooth', 'midRe_smooth', 'lowRe_rough', 'midRe_0.026', 'midRe_0.1', 'midRe_0.2']
+label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}$', r'$\mathcal{HS}$',r'$\mathcal{HR}$1', r'$\mathcal{HR}$2', r'$\mathcal{HR}$3']
 
 # subplots position and size
 
@@ -90,7 +90,7 @@ for i in range(5):
     
     ax.text( 4.0, 0.02, label[i] )
     
-    ax.set_xlim([-18.0, 10.0])
+    ax.set_xlim([-15.0, 10.0])
     ax.set_yscale('log')
     ax.set_ylim([0.01, 100])
     ax.minorticks_on()
@@ -129,17 +129,18 @@ for i in range(5):
     
     axs.append(ax)
 
-axs[4].set_xlim([-18.0, 10.0])
+axs[4].set_xlim([-15.0, 10.0])
     
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
-cbar_ticks = np.linspace(0, 0.3, 7)
-cbar_ax = fig.add_subplot([0.4,0.05,0.6,0.1],visible=False)
+cbar_ticks = np.linspace(0, 0.3, 4)
+cbar_ax = fig.add_subplot([0.3,0.03,0.6,0.1],visible=False)
 #cbar_ax.set_position([0.0, 0.0, 0.7, 0.03])
 cbar = fig.colorbar(pmpsd, ax=cbar_ax, orientation='horizontal', shrink=0.8,
                     ticks=cbar_ticks)
 cbar.ax.tick_params(axis='x', direction='in', bottom=True, top=False,
                     length=10.0, width=1.5)
-cbar.ax.set_ylabel(cbar_label, rotation='horizontal', labelpad=0.2)
+cbar.ax.set_xlabel(cbar_label, loc='center', labelpad=20)
+cbar.ax.xaxis.set_label_position('top')
 cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 

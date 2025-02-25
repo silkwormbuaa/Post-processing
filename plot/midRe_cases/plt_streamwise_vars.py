@@ -46,15 +46,14 @@ add_sw_luis = False
 # color, label, lstyle, width's order will be adjusted automatically
 # x_sep, x_att, x_pfmax should be carefully checked. 
 
-datalist = [data0,          data1,            data2,         data3,        data4]
-color    = ['gray',         'black',          'orangered',  'yellowgreen', 'steelblue'] 
-label    = ['lowRe_smooth', 'midRe_smooth',   'lowRe_rough', 'midRe_0.026','midRe_0.1']
-lstyle   = ['-',            '--',             '-.',      (0, (3, 1, 1, 1, 1, 1)),  ':']
-width    = [4.0,            4.0,              4.0,             4.0,         4.0]
-
-x_sep    = [-8.42,         -7.33,            -10.84,        -10.36,       -9.96]
-x_att    = [1.10,           1.89,              2.45,          2.56,        2.86]
-x_pfmax  = [-7.136,        -8.53,            -10.06,        -10.16,      -11.58]
+datalist = [data0,              data2,             data1,             data4,              data3                  ]
+color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ] 
+label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ]
+lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1))]
+width    = [4.0,                 4.0,               4.0,                 4.0,                4.0                 ]
+x_sep    = [-8.42,              -10.84,            -7.33,              -9.96,             -10.36                 ]
+x_att    = [1.10,                 2.45,             1.89,               2.86,               2.56                 ]
+x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,             -10.16                 ]
 
 lines    = []
 
@@ -164,7 +163,7 @@ if plt_pwfluc:
 
     # adjust the y axis
 
-    ax.set_ylim([0.01,0.12])
+    ax.set_ylim([0.01,0.10])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
     ax.set_ylabel(r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$" )
     ax.tick_params(axis='y', pad=10)

@@ -1,7 +1,7 @@
 # Basic info
 
 casecode = smooth_mid
-tag      = smooth_mid
+tag      = $\mathcal{HS}$
 roughwall = False
 
 # Flow setup parameters

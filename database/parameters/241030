@@ -1,7 +1,7 @@
 # Basic info
 
 casecode  = 241030
-tag       = mid-Re
+tag       = $\mathcal{HR}$2
 roughwall = True
 
 # Flow setup parameters

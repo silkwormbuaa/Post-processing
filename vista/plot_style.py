@@ -946,7 +946,7 @@ def plot_slicex_stat( zz, yy, v,
 #            lw = speed/speed.max()
             ax.streamplot( zz,yy, 
                            vectors[0], vectors[1],
-                           density=2.0,            # linewidth=lw,
+                           density=2.5,            # linewidth=lw,
                            color='black',
                            linewidth=2.0)
         
@@ -965,9 +965,10 @@ def plot_slicex_stat( zz, yy, v,
 #                                              zorder=100 ) # transpanrency
 #        ax.add_patch( rect2 )
         
-        ax.text( 0.1, 0.95,
+        ax.text( 0.92, 0.95,
                  tag,
                  va='center',
+                 ha='right',
                  fontsize=textfontsize,
                  zorder=101,
                  bbox={"fc":"white","alpha":0.8,"ec":"None"})    
