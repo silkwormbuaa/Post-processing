@@ -80,19 +80,22 @@ class StatisticData:
         # number of variables
         self.n_var = 0
         
+        # type of statistic, 'block' or 'X', 'Y', 'Z'
+        self.stat_type = None
+        
         # list of blocks
-        self.bl = []
+        self.bl       = []
         self.bl_clean = []
 
         # list of block numbers
-        self.bl_nums = []
+        self.bl_nums       = []
         self.bl_nums_clean = []
         
         # Verbose ? 
         self.verbose = False
         
         # Grid3d (including all blocks grids from inca_grid.bin file)
-        self.grid3d = None
+        self.grid3d        = None
         
         # Dataframe for friction and pressure projection 
         self.df_fric = None
@@ -126,6 +129,15 @@ class StatisticData:
             self.read_stat_body( f, block_list, vars_in )
 
 
+        # determined stat_type
+        
+        bl = self.bl[0]
+        
+        if bl.npx   == 1: self.stat_type = 'X'
+        elif bl.npy == 1: self.stat_type = 'Y'
+        elif bl.npz == 1: self.stat_type = 'Z'
+        else            : self.stat_type = 'block'
+        
         print(f"\nStatisticData {self.file} is read.\n")
         sys.stdout.flush()
         
@@ -436,7 +448,7 @@ class StatisticData:
 #   - match data with grids
 # ----------------------------------------------------------------------
     
-    def match_grid( self, block_list, G, add_to_df=True, stat_type='block' ):
+    def match_grid( self, block_list, G, add_to_df=True ):
         
         """
         bl.g => g. Necessary if grid3d was not set before read_stat()
@@ -445,10 +457,11 @@ class StatisticData:
         G          : GridData object \n
         add_to_df  : add x,y,z and vol_fra to self.bl[].df, if not, just connect
                      g to self.bl[index]\n
-        stat_type  : 'block' or 'X' or 'Y' or 'Z' \n
         
         return : x,y,z and vol_fra are added to self.bl[].df \n
         """
+        
+        stat_type = self.stat_type
         
         for num in block_list:
             
@@ -510,6 +523,7 @@ class StatisticData:
                     bl.df['hx'] = hx.flatten()
                     bl.df['hy'] = hy.flatten()
                     
+
                     
 # ----------------------------------------------------------------------
 # >>> drop ghost cells                                          (Nr.)
@@ -1616,6 +1630,87 @@ class StatisticData:
         self.vol_bubble = vol_bubble
         
         return vol_bubble
+
+
+
+# ----------------------------------------------------------------------
+# >>> spanwise periodic average                                 (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/02/25  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def spanwise_periodic_average( self, blocklist, vars, period ):
+        
+        """
+        Do periodic average and store the averaged results to original bl.df
+        
+        blocklist : blocks that apply periodic average
+        vars      : list of variables
+        period    : length of period
+        stat_type : 'block', 'X', or 'Y'
+        """
+        
+        grid3d    = self.grid3d
+        stat_type = self.stat_type
+        
+        # - get list of grouped block
+        grouped_block_list = grid3d.group_by_range('xy', block_list=blocklist)
+        print(grouped_block_list)
+        
+        # - check if x,y,z is added to the dataframe of blocks
+        z_is_ready = 'z' in self.bl[self.bl_nums.index(blocklist[0])].df.columns
+        x_is_ready = 'x' in self.bl[self.bl_nums.index(blocklist[0])].df.columns
+        
+        print(x_is_ready, z_is_ready)
+        
+        if not (x_is_ready or z_is_ready):
+            raise ValueError("Please match grid first and add coordinates to the dataframes of blocks.")
+        
+        # - loop over the list
+        for group in grouped_block_list:
+        
+        # ---- check if domain size is multiple of period
+            z0 = min([grid3d.g[num-1].lz0 for num in group])
+            z1 = max([grid3d.g[num-1].lz1 for num in group])
+            if np.round((z1-z0) % period,7) != 0.0:
+                raise ValueError(f"Domain size in z is not a multiple of period.")
+       
+        # ---- add coordiante remainder to the dataframe 
+        
+            for num in group:
+                df = self.bl[self.bl_nums.index(num)].df
+                
+                # compute remainder of z
+                df['remainder'] = np.array(df['z']) % period
+                
+            # - concat all dataframe from blocks
+            group_df = pd.concat([self.bl[self.bl_nums.index(num)].df for num in group ])
+            
+            for var in vars:
+                if stat_type == 'block':
+                    group_df[var] = group_df.groupby(['remainder','x','y'])[var].transform('mean')
+                elif stat_type == 'Y':
+                    group_df[var] = group_df.groupby(['remainder','x'])[var].transform('mean')
+                elif stat_type == 'X':
+                    group_df[var] = group_df.groupby(['remainder','y'])[var].transform('mean')
+                
+            # - distribute averaged data back to each dataframe
+
+            k = 0
+            for num in group:
+                df     = self.bl[self.bl_nums.index(num)].df
+                for var in vars:
+                    df[var] = np.array(group_df[var][k:k+len(df)])
+                k += len(df)
+
 
 
 # ----------------------------------------------------------------------
