@@ -1663,13 +1663,10 @@ class StatisticData:
         
         # - get list of grouped block
         grouped_block_list = grid3d.group_by_range('xy', block_list=blocklist)
-        print(grouped_block_list)
         
         # - check if x,y,z is added to the dataframe of blocks
         z_is_ready = 'z' in self.bl[self.bl_nums.index(blocklist[0])].df.columns
         x_is_ready = 'x' in self.bl[self.bl_nums.index(blocklist[0])].df.columns
-        
-        print(x_is_ready, z_is_ready)
         
         if not (x_is_ready or z_is_ready):
             raise ValueError("Please match grid first and add coordinates to the dataframes of blocks.")

@@ -9,6 +9,7 @@
 '''
 
 import os
+import sys
 import pickle
 import numpy             as     np
 import pandas            as     pd
@@ -415,8 +416,17 @@ def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pd.DataFrame:
     
     grid = pv.RectilinearGrid( px, py, pz )
     
+    print( grid.x )
+    print( grid.y )
+    print( grid.z )
+    
     interped = grid.sample( source )
+    
+    p = pv.Plotter()
+    p.add_mesh( interped, scalars='v' )
+    p.show()
 
+    sys.exit()
     # using 'ij' indexing will return matrix with size (npx,npy,npz)
     
     x,y,z = np.meshgrid( px, py, pz, indexing='ij' )
@@ -425,7 +435,8 @@ def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pd.DataFrame:
     # with matplotlib, so we should adjust the order of coordinates, which 
     # originally in the order of (npx,npy,npz) (C-format).
     
-    if   npx == 1: pass
+    if   npx == 1:
+        pass
     elif npy == 1:
         z = z.reshape( npx, npz ).T
         x = x.reshape( npx, npz ).T
