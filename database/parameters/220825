@@ -28,7 +28,7 @@ dt_snap   = 0.01
 H         = 0.52
 H_md      = 0.104
 x_imp     = 50.4
-period    = 8
+n_period  = 8
 D         = 2.6
 
 # Case specific flow conditions

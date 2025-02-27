@@ -23,7 +23,7 @@ dt_snap   = 0.01
 H         = 0.52
 H_md      = 0.208
 x_imp     = 50.4
-period    = 16
+n_period  = 16
 D         = 1.3
 
 # Computational domain parameters (normalized)

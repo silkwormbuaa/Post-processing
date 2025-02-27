@@ -62,7 +62,7 @@ x_imp     = params.x_imp
 p_ref     = params.p_ref
 u_ref     = params.u_ref
 casecode  = params.casecode
-n_period  = params.period
+n_period  = params.n_period
 tag       = params.tag
 roughwall = params.roughwall
 

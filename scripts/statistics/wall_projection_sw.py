@@ -100,7 +100,7 @@ with timer("plotting"):
     rho_ref  = params.rho_ref
     u_ref    = params.u_ref
     p_ref    = params.p_ref
-    period   = params.period
+    period   = params.n_period
     casecode = params.casecode
     
     dyn_p   = 0.5*rho_ref*u_ref*u_ref

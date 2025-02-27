@@ -21,27 +21,34 @@ sys.path.append( source_dir )
 
 from   vista.grid        import GridData
 from   vista.statistic   import StatisticData
+from   vista.directories import Directories
+from   vista.params      import Params
+from   vista.tools       import define_wall_shape
 from   vista.plane_analy import pv_interpolate
 
-
-grid_file  = '/home/wencan/temp/231124/results/inca_grid.bin'
-stat_file  = '/home/wencan/temp/231124/supplements/stat_xslice_000.bin'
-vars_read  = ['u','v','w']
+case_folder = '/home/wencan/temp/241030/'
+vars_read  = ['u','v','w','T']
 bbox       = [-100,0,-2,10,-20,20]
 
-grid       = GridData(grid_file)
+dirs        = Directories( case_folder )
+
+params      = Params( dirs.case_para_file )
+
+grid       = GridData( dirs.grid )
 grid.read_grid()
 
 blocklist, _ = grid.select_sliced_blockgrids('X', -27.496,bbox=bbox)
 
+stat_file    = dirs.sup_dir + '/stat_xslice_upstream.bin'
 stat         = StatisticData(stat_file)
 stat.grid3d  = grid
 stat.read_statistic(blocklist,vars_in=vars_read)
 stat.match_grid(blocklist, grid, add_to_df=True )
+stat.compute_vars(blocklist,['mach'])
 
 # periodic averaging
 
-stat.spanwise_periodic_average( blocklist, ['u','v','w'], 1.3 )
+stat.spanwise_periodic_average( blocklist, ['u','v','w','mach'], params.period )
 
 # interpolate into a whole cartesian grid
 
@@ -49,22 +56,29 @@ pz = np.linspace( 0.0, 2.6, 101, endpoint=True)
 py = np.linspace(-0.6, 2.4, 201, endpoint=True)
 px = np.array([0.0])
 
-dataset = pv.MultiBlock( stat.create_vtk_multiblock(blocklist,vars_read) )
+dataset = pv.MultiBlock( stat.create_vtk_multiblock(blocklist,['u','v','w','mach']) )
+df      = pv_interpolate( dataset, ['u','v','w','mach'], [px,py,pz] )
 
-df      = pv_interpolate( dataset, vars_read, [px,py,pz] )
-
-v = np.array( df['v'] ).reshape( (len(py),len(pz)) )
-w = np.array( df['w'] ).reshape( (len(py),len(pz)) )
-u = np.array( df['u'] ).reshape( (len(py),len(pz)) )
-z = np.array( df['z'] ).reshape( (len(py),len(pz)) )
-y = np.array( df['y'] ).reshape( (len(py),len(pz)) )
+v    = np.array( df['v']    ).reshape( (len(py),len(pz)) )
+w    = np.array( df['w']    ).reshape( (len(py),len(pz)) )
+u    = np.array( df['u']    ).reshape( (len(py),len(pz)) )
+mach = np.array( df['mach'] ).reshape( (len(py),len(pz)) )
+z    = np.array( df['z']    ).reshape( (len(py),len(pz)) )
+y    = np.array( df['y']    ).reshape( (len(py),len(pz)) )
 
 # visualization
 
 fig, ax = plt.subplots(1,1,figsize=(8,6))
 
-cs = ax.contourf(z,y,v, levels=100, cmap='jet')
+cs     = ax.contourf(z, y, v, levels=51, cmap='RdBu_r')
+csnoic = ax.contour( z, y, mach, levels=[1.0], colors='lime', linewidths=2.0)
 
 ax.streamplot(z,y, w, v, color='black', linewidth=0.5, density=4)
+
+ywall = define_wall_shape(pz, casecode='241030', write=False)
+
+ax.fill_between( pz, -0.6, y2=ywall, color='gray', zorder=10 )
+
+ax.set_aspect('equal')
 
 plt.show()

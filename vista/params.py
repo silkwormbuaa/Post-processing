@@ -192,8 +192,13 @@ class Params:
     
     @property
     def period( self ):
-        """integer"""
-        return int( self.params.get('period') )
+        """float, length of period"""
+        return float( self.params.get('period') )
+
+    @property
+    def n_period( self ):
+        """int, number of periods"""
+        return int( self.params.get('n_period') )
     
     @property
     def D( self ):
