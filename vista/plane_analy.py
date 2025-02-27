@@ -415,18 +415,12 @@ def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pd.DataFrame:
     pz = np.array( mesh_vectors[2] ); npz = len(pz)
     
     grid = pv.RectilinearGrid( px, py, pz )
-    
-    print( grid.x )
-    print( grid.y )
-    print( grid.z )
+
+    # on wencanwu-Latitude-7320, pv.grid_sample would lead to misordering of data;
+    # but with same version of pyvista on wencan-dell-5810, it works well.
     
     interped = grid.sample( source )
-    
-    p = pv.Plotter()
-    p.add_mesh( interped, scalars='v' )
-    p.show()
 
-    sys.exit()
     # using 'ij' indexing will return matrix with size (npx,npy,npz)
     
     x,y,z = np.meshgrid( px, py, pz, indexing='ij' )
@@ -435,6 +429,7 @@ def pv_interpolate( source:pv.MultiBlock, vars, mesh_vectors ) -> pd.DataFrame:
     # with matplotlib, so we should adjust the order of coordinates, which 
     # originally in the order of (npx,npy,npz) (C-format).
     
+
     if   npx == 1:
         pass
     elif npy == 1:
