@@ -599,7 +599,7 @@ class StatisticData:
         
         for num in block_list:
             
-            df = self.bl[num-1].df
+            df = self.bl[self.bl_nums.index(num)].df
             
 # --------- compute Mach number 
 
@@ -614,23 +614,23 @@ class StatisticData:
                 
                 mach = np.sqrt( u*u+v*v+w*w ) / np.sqrt( gamma*R*T )
                 
-                self.bl[num-1].df['mach'] = mach
+                df['mach'] = mach
 
 # ---------- compute turbulent kinetic energy
 
             if "RS" in vars_new:
                 
-                uu = np.array(df['uu']) - np.array(df['u'])*np.array(df['u'])
-                vv = np.array(df['vv']) - np.array(df['v'])*np.array(df['v'])
-                ww = np.array(df['ww']) - np.array(df['w'])*np.array(df['w'])
-                uv = np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
-                tke= uu + vv + ww
+                uu  = np.array(df['uu']) - np.array(df['u'])*np.array(df['u'])
+                vv  = np.array(df['vv']) - np.array(df['v'])*np.array(df['v'])
+                ww  = np.array(df['ww']) - np.array(df['w'])*np.array(df['w'])
+                uv  = np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+                tke = uu + vv + ww
                 
-                self.bl[num-1].df['u`u`'] = uu 
-                self.bl[num-1].df['v`v`'] = vv
-                self.bl[num-1].df['w`w`'] = ww
-                self.bl[num-1].df['u`v`'] = uv
-                self.bl[num-1].df['tke']= tke  
+                df['u`u`'] = uu 
+                df['v`v`'] = vv
+                df['w`w`'] = ww
+                df['u`v`'] = uv
+                df['tke']  = tke  
 
 # ---------- compute pressure fluctuation
 
@@ -638,26 +638,24 @@ class StatisticData:
                 
                 # in solid cells, may appear negative values, so use abs.
                 p_fluc = abs(np.array(df['pp']) - np.array(df['p'])**2)
-                
-                self.bl[num-1].df['p`'] = np.sqrt( p_fluc )
+                df['p`'] = np.sqrt( p_fluc )
 
 # ---------- compute viscosity mu
 
             if "mu" in vars_new:
                 
                 mu = np.array( df['T'].apply(phy.sutherland) )
-                
-                self.bl[num-1].df['mu'] = mu
+                df['mu'] = mu
 
 # ---------- compute favre average velocity
 
             if "favre_velocity" in vars_new:
                 
-                rho  = np.array( df['rho'] )
-                self.bl[num-1].df['rho'] = np.array( df['rho'] )
-                self.bl[num-1].df['u_favre'] = np.array( df['urho'] ) / rho
-                self.bl[num-1].df['v_favre'] = np.array( df['vrho'] ) / rho
-                self.bl[num-1].df['w_favre'] = np.array( df['wrho'] ) / rho
+                rho           = np.array( df['rho']  )
+                df['rho']     = np.array( df['rho']  )
+                df['u_favre'] = np.array( df['urho'] ) / rho
+                df['v_favre'] = np.array( df['vrho'] ) / rho
+                df['w_favre'] = np.array( df['wrho'] ) / rho
                 
 
 # ----------------------------------------------------------------------
@@ -685,7 +683,7 @@ class StatisticData:
         
         for num in block_list:
             
-            block = self.bl[num-1]
+            block = self.bl[self.bl_nums.index(num)]
             
             block.compute_gradients_block( grads )
         
@@ -717,7 +715,7 @@ class StatisticData:
         
         for num in block_list:
             
-            df = self.bl[num-1].df
+            df = self.bl[self.bl_nums.index(num)].df
             g  = G.g[num-1]
 
             vars_exist = df.columns
@@ -742,7 +740,7 @@ class StatisticData:
             
             S1 = np.gradient( np.gradient(temp, g.gy, axis=1), g.gz, axis=0)
 
-            self.bl[num-1].df['S1'] = S1.flatten()
+            df['S1'] = S1.flatten()
             
 # --------- compute S2 = dd(v'w')/dzdz - dd(v'w')/dydy
 
@@ -751,9 +749,9 @@ class StatisticData:
             S2 = np.gradient( np.gradient(vw, g.gz, axis=0), g.gz, axis=0) \
                - np.gradient( np.gradient(vw, g.gy, axis=1), g.gy, axis=1)
             
-            self.bl[num-1].df['S2'] = S2.flatten()
+            df['S2'] = S2.flatten()
             
-            self.bl[num-1].df['S'] = S1.flatten() + S2.flatten()
+            df['S']  = S1.flatten() + S2.flatten()
             
 
 # ----------------------------------------------------------------------
@@ -784,7 +782,7 @@ class StatisticData:
         
 # ----- collect data frame from all filled blocks
         
-        df = pd.concat( [self.bl[num-1].df for num in block_list] )
+        df = pd.concat( [self.bl[self.bl_nums.index(num)].df for num in block_list] )
 
         # reset indexes in case repeated indexes from different blocks
         
@@ -929,10 +927,10 @@ class StatisticData:
         
 # ----- do slicing on each bl.df
 
-        for i, bl_num in enumerate( block_list ):
+        for i, num in enumerate( block_list ):
             
-            bl   = self.bl[bl_num-1]
-            g    = G.g[bl_num-1]
+            bl   = self.bl[self.bl_nums.index(num)]
+            g    = G.g[num-1]
             indx = indx_slic[i]
             
             npx = g.nx + buff*2
@@ -1004,7 +1002,7 @@ class StatisticData:
 
 # ----- concatenate all dataframes in all selected blocks
 
-        df_slice = pd.concat( [self.bl[num-1].df for num in block_list] )
+        df_slice = pd.concat( [self.bl[self.bl_nums.index(num)].df for num in block_list] )
         
         df_slice.reset_index( drop=True, inplace=True)
         
@@ -1038,10 +1036,10 @@ class StatisticData:
 
 # ----- extract probed line data on each bl.df
 
-        for i, bl_num in enumerate( bl_list ):
+        for i, num in enumerate( bl_list ):
             
-            bl    = self.bl[bl_num-1]
-            g     = G.g[bl_num-1]
+            bl    = self.bl[self.bl_nums.index(num)]
+            g     = G.g[num-1]
             indx  = indx_probed[i]
             
             npx   = g.nx + buff*2
@@ -1080,7 +1078,7 @@ class StatisticData:
         
 # ------ concatenate all dataframe in all selected blocks
 
-        df_probe = pd.concat( [self.bl[num-1].df_probe for num in bl_list] )
+        df_probe = pd.concat( [self.bl[self.bl_nums.index(num)].df_probe for num in bl_list] )
         
         df_probe.sort_values(by=[probe_type.lower()],inplace=True)
         
@@ -1158,7 +1156,7 @@ class StatisticData:
                 
                 f_visc = np.zeros( (npx,npz), dtype='f' )
                 
-                data_df = self.bl[num-1].df
+                data_df = self.bl[self.bl_nums.index(num)].df
                 
                 wd = np.array( data_df['wd'] ).reshape( npz, npy, npx )
                 u  = np.array( data_df['u' ] ).reshape( npz, npy, npx )
@@ -1355,7 +1353,7 @@ class StatisticData:
                 mu_plane  = np.zeros( (npx,npz), dtype='f' )
                 rho_plane = np.zeros( (npx,npz), dtype='f' )
                 
-                data_df = self.bl[num-1].df
+                data_df = self.bl[self.bl_nums.index(num)].df
                 
                 p   = np.array( data_df['p' ]  ).reshape( npz, npy, npx )
                 pp  = np.array( data_df['pp']  ).reshape( npz, npy, npx )
@@ -1482,13 +1480,13 @@ class StatisticData:
             
 # --------- prepare block data chunk
 
-            data_df = self.bl[num-1].df
+            data_df = self.bl[self.bl_nums.index(num)].df
             
-            p   = np.array( data_df['p' ] ).reshape( npz, npy, npx )
-            pp  = np.array( data_df['pp'] ).reshape( npz, npy, npx )
-            mu  = np.array( data_df['mu'] ).reshape( npz, npy, npx )
+            p   = np.array( data_df['p' ]  ).reshape( npz, npy, npx )
+            pp  = np.array( data_df['pp']  ).reshape( npz, npy, npx )
+            mu  = np.array( data_df['mu']  ).reshape( npz, npy, npx )
             rho = np.array( data_df['rho'] ).reshape( npz, npy, npx )
-            u   = np.array( data_df['u'] ).reshape( npz, npy, npx )
+            u   = np.array( data_df['u']   ).reshape( npz, npy, npx )
             
 # --------- get slice from those data chunks
             
@@ -1515,7 +1513,7 @@ class StatisticData:
             # compute pressure fluctuation
             df_wall['p`'] = np.sqrt( np.array( df_wall['pp']-df_wall['p']**2 ))
 
-            self.bl[num-1].df_wall = df_wall
+            self.bl[self.bl_nums.index(num)].df_wall = df_wall
 
             p_ave      = np.mean( np.array(df_wall['p'])  )
             p_fluc_ave = np.mean( np.array(df_wall['p`']) )
@@ -1526,7 +1524,7 @@ class StatisticData:
 
 # --------- save wall vars into StatisticsData.df_wall (a single pd.DataFrame)
 
-        self.df_wall = pd.concat([self.bl[num-1].df_wall for num in block_list])
+        self.df_wall = pd.concat([self.bl[self.bl_nums.index(num)].df_wall for num in block_list])
         self.df_wall.reset_index( drop=True, inplace=True )
         self.df_wall.sort_values( by=['z','x'], inplace=True )
         
@@ -1562,10 +1560,10 @@ class StatisticData:
         
         for num in block_list:
             
-            if self.bl[num-1].num != wd_snap.snap_data[num-1].num:
+            if self.bl[self.bl_nums.index(num)].num != wd_snap.snap_data[wd_snap.bl_nums.index(num)].num:
                 raise ValueError("block number not match when assigning walldist.")
             
-            self.bl[num-1].df['wd'] = wd_snap.snap_data[num-1].df['wd']
+            self.bl[self.bl_nums.index(num)].df['wd'] = wd_snap.snap_data[wd_snap.bl_nums.index(num)].df['wd']
 
 
 # ----------------------------------------------------------------------
@@ -1599,8 +1597,8 @@ class StatisticData:
         
         for num in block_list:
             
-            df = self.bl[num-1].df
-            g = G.g[num-1]
+            df = self.bl[self.bl_nums.index(num)].df
+            g  = G.g[num-1]
 
             npx = g.nx + buff*2
             npy = g.ny + buff*2
