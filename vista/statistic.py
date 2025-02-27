@@ -614,7 +614,7 @@ class StatisticData:
                 
                 mach = np.sqrt( u*u+v*v+w*w ) / np.sqrt( gamma*R*T )
                 
-                df['mach'] = mach
+                self.bl[self.bl_nums.index(num)].df['mach'] = mach
 
 # ---------- compute turbulent kinetic energy
 
@@ -1653,7 +1653,6 @@ class StatisticData:
         blocklist : blocks that apply periodic average
         vars      : list of variables
         period    : length of period
-        stat_type : 'block', 'X', or 'Y'
         """
         
         grid3d    = self.grid3d
@@ -1684,8 +1683,8 @@ class StatisticData:
                 df = self.bl[self.bl_nums.index(num)].df
                 
                 # compute remainder of z
-                df['remainder'] = np.array(df['z']) % period
-                
+                df['remainder'] = np.round(np.array(df['z']) % period,7)
+            
             # - concat all dataframe from blocks
             group_df = pd.concat([self.bl[self.bl_nums.index(num)].df for num in group ])
             
@@ -1696,7 +1695,7 @@ class StatisticData:
                     group_df[var] = group_df.groupby(['remainder','x'])[var].transform('mean')
                 elif stat_type == 'X':
                     group_df[var] = group_df.groupby(['remainder','y'])[var].transform('mean')
-                
+            
             # - distribute averaged data back to each dataframe
 
             k = 0
@@ -1705,7 +1704,6 @@ class StatisticData:
                 for var in vars:
                     df[var] = np.array(group_df[var][k:k+len(df)])
                 k += len(df)
-
 
 
 # ----------------------------------------------------------------------

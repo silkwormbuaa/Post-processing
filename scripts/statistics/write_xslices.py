@@ -22,10 +22,14 @@ from   vista.directories import Directories
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/241030/'
+casedir   = '/home/wencan/temp/220927/'
 slic_type = 'X'
 locs      = [-14.98,-10.36,-10.16,2.56,8.0]
 locs      = np.array(locs) * 5.2 + 50.4
+outfiles  = [f'/stat_xslice_{i:03d}.bin' for i in range(len(locs))]
+
+#locs      = [-20.0]
+#outfiles  = ['/stat_xslice_upstream.bin']
 
 # =============================================================================
 
@@ -37,7 +41,7 @@ grid.read_grid()
 
 for i, loc in enumerate( locs ):
     
-    outfile = dirs.sup_dir + f'/stat_xslice_{i:03d}.bin'
+    outfile = dirs.sup_dir + outfiles[i]
 
     blocklist, index = grid.select_sliced_blockgrids( slic_type, loc )
 

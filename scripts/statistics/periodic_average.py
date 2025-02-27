@@ -13,6 +13,7 @@
 import os
 import sys
 import numpy             as     np
+import pandas            as     pd
 import pyvista           as     pv
 import matplotlib.pyplot as     plt
 
@@ -26,18 +27,31 @@ from   vista.params      import Params
 from   vista.tools       import define_wall_shape
 from   vista.plane_analy import pv_interpolate
 
-case_folder = '/home/wencan/temp/241030/'
-vars_read  = ['u','v','w','T']
-bbox       = [-100,0,-2,10,-20,20]
+plt.rcParams["text.usetex"]         = True
+plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
+plt.rcParams['font.family']         = "Times New Roman"
+plt.rcParams['font.size']           = 30
 
-dirs        = Directories( case_folder )
+# =============================================================================
 
-params      = Params( dirs.case_para_file )
+case_folder = '/home/wencan/temp/smooth_adiabatic/'
+vars_read   = ['u','v','w','T']
+bbox        = [-100,0,-2,10,-20,20]
+streamline  = False
 
-grid       = GridData( dirs.grid )
+figname     = 'zoomin_v'
+if streamline: figname += '_streamline'
+figname    += '.png'
+
+# =============================================================================
+
+dirs         = Directories( case_folder )
+params       = Params( dirs.case_para_file )
+grid         = GridData( dirs.grid )
+
 grid.read_grid()
-
-blocklist, _ = grid.select_sliced_blockgrids('X', -27.496,bbox=bbox)
+blocklist, _ = grid.select_sliced_blockgrids('X', -53.6, bbox=bbox)
 
 stat_file    = dirs.sup_dir + '/stat_xslice_upstream.bin'
 stat         = StatisticData(stat_file)
@@ -48,37 +62,84 @@ stat.compute_vars(blocklist,['mach'])
 
 # periodic averaging
 
-stat.spanwise_periodic_average( blocklist, ['u','v','w','mach'], params.period )
+stat.spanwise_periodic_average( blocklist, ['u','v','w','mach'], params.D )
 
 # interpolate into a whole cartesian grid
 
-pz = np.linspace( 0.0, 2.6, 101, endpoint=True)
+pz = np.linspace( 0.0, 1.3, 81, endpoint=True)
 py = np.linspace(-0.6, 2.4, 201, endpoint=True)
 px = np.array([0.0])
 
 dataset = pv.MultiBlock( stat.create_vtk_multiblock(blocklist,['u','v','w','mach']) )
+dataset = dataset.cell_data_to_point_data()
 df      = pv_interpolate( dataset, ['u','v','w','mach'], [px,py,pz] )
 
-v    = np.array( df['v']    ).reshape( (len(py),len(pz)) )
-w    = np.array( df['w']    ).reshape( (len(py),len(pz)) )
-u    = np.array( df['u']    ).reshape( (len(py),len(pz)) )
-mach = np.array( df['mach'] ).reshape( (len(py),len(pz)) )
-z    = np.array( df['z']    ).reshape( (len(py),len(pz)) )
-y    = np.array( df['y']    ).reshape( (len(py),len(pz)) )
+ywall = define_wall_shape(pz, casecode=params.casecode, write=False)/params.delta_0
+v     = np.array( df['v']    ).reshape( (len(py),len(pz)) )/params.u_ref
+w     = np.array( df['w']    ).reshape( (len(py),len(pz)) )/params.u_ref
+u     = np.array( df['u']    ).reshape( (len(py),len(pz)) )/params.u_ref
+mach  = np.array( df['mach'] ).reshape( (len(py),len(pz)) )
+z     = np.array( df['z']    ).reshape( (len(py),len(pz)) )/params.delta_0
+y     = np.array( df['y']    ).reshape( (len(py),len(pz)) )/params.delta_0
+
 
 # visualization
 
-fig, ax = plt.subplots(1,1,figsize=(8,6))
+fig = plt.figure(figsize=(8,6))
+ax  = fig.add_axes([0.1,0.2,0.95,0.7])
 
-cs     = ax.contourf(z, y, v, levels=51, cmap='RdBu_r')
-csnoic = ax.contour( z, y, mach, levels=[1.0], colors='lime', linewidths=2.0)
+cbar_levels = np.linspace( -2.0, 2.0, 51)
+cbar_ticks  = np.linspace( -2.0, 2.0, 5)
 
-ax.streamplot(z,y, w, v, color='black', linewidth=0.5, density=4)
+cs     = ax.contourf(z, y, v*100, levels=cbar_levels, cmap='RdBu_r', extend='both')
+csnoic = ax.contour( z, y, mach,  levels=[1.0], colors='lime', linewidths=2.0, zorder=9)
 
-ywall = define_wall_shape(pz, casecode='241030', write=False)
+if streamline:
+    ax.streamplot(z,y, w, v, color='black', linewidth=0.5, density=1.0)
+    #ax.quiver(z[::4,::4], y[::4,::4], w[::4,::4], v[::4,::4], color='black', scale=100)
 
-ax.fill_between( pz, -0.6, y2=ywall, color='gray', zorder=10 )
-
+ax.fill_between( pz/params.delta_0, -0.12, y2=ywall, color='gray', zorder=10 )
 ax.set_aspect('equal')
 
-plt.show()
+cbar = plt.colorbar( cs, 
+                     orientation='vertical', 
+                     location='left', 
+                     aspect=10,
+                     ticks=cbar_ticks,
+                     pad=0.30,
+                     shrink=0.6) 
+
+cbar.outline.set_linewidth(1.5)
+
+cbar.ax.tick_params( direction='in',
+                     left=True,right=False,
+                     labelleft=True,labelright=False,
+                     length=5,
+                     width=1.0)
+
+cbar.ax.set_xlabel(r'$\frac{\langle v \rangle}{u_{\infty}}\cdot 100$',labelpad=20)
+
+ax.set_xlim( [0.0,  0.25] )
+ax.set_ylim( [-0.12,0.4]  )
+
+ax.set_xticks( [0.0, 0.125, 0.25] )
+ax.set_xticklabels( [r'$0.0$', r'$0.125$', r'$0.25$'] )
+ax.set_yticks( [-0.1, 0.0, 0.1, 0.2, 0.3, 0.4] )
+ax.tick_params(which='major',
+               axis='both', 
+               direction='out',
+               length=10.0,
+               width=1.0, 
+               pad=10)
+
+ax.set_xlabel(r'$z/\delta_0$')
+ax.set_ylabel(r'$y/\delta_0$')
+
+ax.spines[:].set_color('black')
+ax.spines[:].set_linewidth(1.5)
+ax.spines[:].set_zorder(11)
+
+
+os.chdir( dirs.pp_statistics + '/yz_planes' )
+plt.savefig(figname, dpi=300)
+print(f"Figure saved to {dirs.pp_statistics}/yz_planes/{figname}.")
