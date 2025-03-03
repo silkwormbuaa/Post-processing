@@ -1,6 +1,6 @@
 # Basic info
 
-casecode  = 250120
+casecode  = 250218
 tag       = low-Re
 roughwall = True
 
@@ -20,8 +20,8 @@ dt_snap   = 0.01
 
 # Geometric setup parametrs
 
-H         = 0.52
-H_md      = 0.00
+H         = 0.173
+H_md      = 0.000
 x_imp     = 50.4
 n_period  = 4
 D         = 5.2

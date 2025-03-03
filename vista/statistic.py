@@ -133,7 +133,7 @@ class StatisticData:
         
         bl = self.bl[0]
         
-        if bl.npx   == 1: self.stat_type = 'X'
+        if   bl.npx == 1: self.stat_type = 'X'
         elif bl.npy == 1: self.stat_type = 'Y'
         elif bl.npz == 1: self.stat_type = 'Z'
         else            : self.stat_type = 'block'

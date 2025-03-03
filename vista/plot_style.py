@@ -851,7 +851,7 @@ def plot_slicez_stat( xx, yy, v,
 
 def plot_slicex_stat( zz, yy, v,
                       tag=None,
-                      wall=True, 
+                      wall=False, 
                       sonic=True,
                       separation=False,
                       vectors=None, 

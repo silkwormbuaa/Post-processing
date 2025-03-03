@@ -27,7 +27,7 @@ from   vista.directories import Directories
 from   vista.statistic   import StatisticData
 # =============================================================================
 
-casefolder = '/home/wencan/temp/250120'
+casefolder = '/home/wencan/temp/250218'
 
 file0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
@@ -42,8 +42,9 @@ grid.read_grid()
 block_list, _ = grid.select_sliced_blockgrids( 'Y', 0.001 )
 
 stat2d = StatisticData( dirs.stat_yslice )
+stat2d.grid3d = grid
 stat2d.read_statistic( block_list, vars_in=['pp','p'] )
-stat2d.match_grid( block_list, grid, stat_type='Y' )
+stat2d.match_grid( block_list, grid )
 stat2d.drop_ghost( block_list )
 
 for bl in stat2d.bl_clean:

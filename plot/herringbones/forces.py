@@ -12,6 +12,7 @@
 
 import os
 import sys
+import pickle
 import numpy             as     np
 import pandas            as     pd
 import matplotlib.pyplot as     plt
@@ -22,6 +23,7 @@ sys.path.append( source_dir )
 from   vista.timer       import timer
 from   vista.params      import Params
 from   vista.grid        import GridData
+from   vista.line        import LineData
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.directories import create_folder
@@ -61,6 +63,10 @@ dirs          = Directories( casefolder )
 forces_files  = get_filelist( dirs.for_dir, 'force_0' )
 params        = Params( dirs.case_para_file )
 dynp          = 0.5*params.rho_ref*params.u_ref**2
+
+datas = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+lines = LineData()
+with open( datas, 'rb' ) as f:    lines.df = pickle.load( f )
 
 os.chdir( create_folder(dirs.pp_forces) )
 
@@ -135,12 +141,18 @@ x = (df['x']-50.4)/5.2
 ax.plot( x, df['mean_fric_x']/dynp*1000, label='friction force in x', color='red' )
 ax.plot( x, df['mean_pres_x']/dynp*1000, label='pressure force in x', color='blue' )
 ax.plot( x, total_force_x/dynp*1000,     label='total force in x', color='black' ,marker='o')
+ax.hlines(0.0, x.min(), x.max(), color='gray', linestyle='--')
+
+# - smooth wall
+
+ax.plot( lines.df['x'], lines.df['Cf'], label='smooth wall fric', color='gray', linestyle='-' )
+
 
 ax.set_xlabel(r'$(x-x_\delta)/\delta_0$')
 ax.set_ylabel(r'$\tau$')
 
-#ax.set_xlim([-20, 10])
-# ax.set_ylim([-2.5,4.5])
+# ax.set_xlim([-20, 10])
+ax.set_ylim([-20,40])
 
 
 plt.legend()

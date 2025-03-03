@@ -352,6 +352,7 @@ def define_wall_shape( z_list:np.array, Case = None, casecode=None,
         elif casecode == '241018': Case=7
         elif casecode == '241030': Case=9
         elif casecode == '250120': Case=2
+        elif casecode == '250218': Case=2
         
     
     if   Case == 1:   D = 10.4

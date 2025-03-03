@@ -24,7 +24,7 @@ from   vista.directories import Directories
 # =============================================================================
 # check memory estimation compared to the full statistics.bin file
 
-casedir   = '/home/wencan/temp/250120/'
+casedir   = '/home/wencan/temp/250218/'
 slic_type = 'Y'
 loc       = 0.001
 

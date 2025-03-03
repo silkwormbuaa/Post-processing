@@ -24,10 +24,10 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-case_dir   = '/home/wencan/temp/250120'
+case_dir   = '/home/wencan/temp/250218'
 probe_type = 'X'
-loc        = ( 2.61, 0.01 )
-outfile    = f'probing_1.dat'
+loc        = ( 1.31, 0.01 )
+outfile    = f'probing_2.dat'
 
 # =============================================================================
 
