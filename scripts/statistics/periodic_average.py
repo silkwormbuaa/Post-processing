@@ -35,13 +35,13 @@ plt.rcParams['font.size']           = 30
 
 # =============================================================================
 
-case_folder = '/home/wencan/temp/220927/'
+case_folder = '/home/wencan/temp/smooth_adiabatic/'
 vars_read   = ['u','v','w','T']
 bbox        = [-100,0,-2,10,-20,20]
 streamline  = False
 D_norm      = False
 
-figname     = 'zoomin_v'
+figname     = 'zoomin_w'
 if streamline: figname += '_streamline'
 if D_norm:     figname += '_D'
 figname    += '.png'
@@ -116,7 +116,7 @@ ax  = fig.add_axes([0.1,0.2,0.95,0.7])
 cbar_levels = np.linspace( -2.0, 2.0, 51)
 cbar_ticks  = np.linspace( -2.0, 2.0, 5)
 
-cs     = ax.contourf(z, y, v*100, levels=cbar_levels, cmap='RdBu_r', extend='both')
+cs     = ax.contourf(z, y, w*100, levels=cbar_levels, cmap='RdBu_r', extend='both')
 csnoic = ax.contour( z, y, mach,  levels=[1.0], colors='lime', linewidths=2.0, zorder=9)
 
 if streamline:
@@ -142,7 +142,7 @@ cbar.ax.tick_params( direction='in',
                      length=5,
                      width=1.0)
 
-cbar.ax.set_xlabel(r'$\frac{\langle v \rangle}{u_{\infty}}\cdot 100$',labelpad=20)
+cbar.ax.set_xlabel(r'$\frac{\langle w \rangle}{u_{\infty}}\cdot 100$',labelpad=20)
 
 ax.set_xlim( x_lim )
 ax.set_ylim( y_lim )

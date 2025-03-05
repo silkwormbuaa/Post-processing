@@ -30,16 +30,17 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd        = True
-plt_u           = False
-plt_RS_uu       = False
-plt_RS_vv       = False
-plt_RS_ww       = False
-plt_RS_uv       = False
-plt_combined_RS = False
-plt_rho         = False
-plt_T           = False
-plt_Mt          = False
+plt_u_vd           = False
+plt_u              = False
+plt_RS_uu          = False
+plt_RS_vv          = False
+plt_RS_ww          = False
+plt_RS_uv          = False
+plt_combined_RS    = False
+plt_combined_RS_sn = True
+plt_rho            = False
+plt_T              = False
+plt_Mt             = False
 
 pure = False
 
@@ -548,6 +549,7 @@ if plt_RS_uv:
     plt.savefig( figname + fmt )
     plt.show()
     
+
 # ----------------------------------------------------------------------
 # >>> plot combined Reynolds stresses                          (Nr.)
 # ----------------------------------------------------------------------
@@ -626,6 +628,91 @@ if plt_combined_RS:
     plt.savefig( "RS_combined_legend" + fmt )
     plt.show()
     
+
+# ----------------------------------------------------------------------
+# >>> plot combined Reynolds stresses (normalize with smooth wall) (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_combined_RS_sn:
+    
+    fig = plt.figure(figsize=[15,10], constrained_layout=True)
+    gs  = fig.add_gridspec(2, 2)
+    
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax4 = fig.add_subplot(gs[1, 1])
+    
+    axs           = [ax1, ax2, ax3, ax4]
+    vars          = ['u`u`+', 'v`v`+', 'w`w`+', 'u`v`+']
+    y_lim         = [[-1,10], [-0.1,1.8], [-0.1,2.5], [-1.4,0.2]]
+    major_locator = [2.0, 0.4, 0.5, 0.4]
+    ylabels       = [r"$\rho \langle u^{'} u^{'} \rangle / \tau_{sw}$",
+                     r"$\rho \langle v^{'} v^{'} \rangle / \tau_{sw}$",
+                     r"$\rho \langle w^{'} w^{'} \rangle / \tau_{sw}$",
+                     r"$\rho \langle u^{'} v^{'} \rangle / \tau_{sw}$"]
+    
+    for i, ax in enumerate( axs ):
+    
+        for j, line in enumerate(lines):
+            
+            if j in [0,2]:
+                value = line.df[vars[i]]* line.tau_ave / lines[0].tau_ave
+            if j in [1,3,4]:
+                value = line.df[vars[i]]* line.tau_ave / lines[1].tau_ave
+            
+            ax.plot( line.df['ys+'],
+                     value,
+                     line.color,
+                     label = line.label,
+                     ls    = line.lstyle,
+                     linewidth = line.width)
+    
+        ax.set_xscale( "symlog", linthresh=1 )
+        ax.set_xlim( [1,3000] )
+        ax.set_ylim( y_lim[i] )
+        ax.minorticks_on()
+        ax.tick_params( which='major',
+                        axis='both',
+                        direction='in',
+                        length=20,
+                        width=2.0,
+                        pad=10)
+        ax.tick_params( which='minor',
+                        axis='both', 
+                        direction='in',
+                        length=10,
+                        width=2.0)
+        if i == 0 or i == 1:
+            ax.set_xticklabels([])
+        x_minor = matplotlib.ticker.LogLocator( 
+                            base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+        ax.xaxis.set_minor_locator( x_minor )
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(major_locator[i]))
+        
+        ax.set_ylabel( ylabels[i] )
+        
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(3)
+    
+    ax1.legend( frameon=False, loc='upper right', fontsize=25 )
+    
+    ax3.set_xlabel( "$y_s^+$", labelpad=-5 )
+    ax4.set_xlabel( "$y_s^+$", labelpad=-5 )
+        
+    plt.savefig( "RS_combined_sn" + fmt )
+    plt.show()
+
 
 # ----------------------------------------------------------------------
 # >>> Plot rho profile                                           ( 4 )
