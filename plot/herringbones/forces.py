@@ -58,7 +58,7 @@ class Bl_Force:
 
 # =============================================================================
 
-casefolder    = '/home/wencan/temp/250120'
+casefolder    = '/home/wencan/temp/250218'
 dirs          = Directories( casefolder )
 forces_files  = get_filelist( dirs.for_dir, 'force_0' )
 params        = Params( dirs.case_para_file )
@@ -151,8 +151,8 @@ ax.plot( lines.df['x'], lines.df['Cf'], label='smooth wall fric', color='gray', 
 ax.set_xlabel(r'$(x-x_\delta)/\delta_0$')
 ax.set_ylabel(r'$\tau$')
 
-# ax.set_xlim([-20, 10])
-ax.set_ylim([-20,40])
+ax.set_xlim([-20, 10])
+ax.set_ylim([-2,4])
 
 
 plt.legend()

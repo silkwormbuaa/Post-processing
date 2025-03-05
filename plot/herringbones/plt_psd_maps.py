@@ -31,26 +31,27 @@ plt.rcParams['font.size']   = 30
 outpath = '/media/wencan/Expansion/temp/DataPost/lowRe/psd'
 
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencan/Expansion/temp/250120/postprocess/probes/psd_valley'
-datapaths = [datapath0, datapath1]
+datapath1 = '/media/wencan/Expansion/temp/250120/postprocess/probes/psd_ridge'
+datapath2 = '/media/wencan/Expansion/temp/250218/postprocess/probes/psd_ridge'
+datapaths = [datapath0, datapath1, datapath2]
 
 # separation range in normalized unit
-x_separs = [-8.42  , -7.33, -10.84, -10.36,  -9.96, -15.03]
-x_reatts = [1.06795, 1.89,  2.45,   2.56 ,    2.86, 3.57  ]
-x_ppmaxs = [-7.3333, -8.53, -10.06, -10.16,  -11.58,-14.75]
+x_separs = [-8.42  ,-13.10, -7.28]
+x_reatts = [1.06795,3.86  , 1.82  ]
+x_ppmaxs = [-7.3333,-13.95, -8.58 ]
 
 # labels
-label    = ['lowRe_smooth', 'herringbone']
+label    = ['lowRe_smooth', 'R1', 'R2']
 
 # subplots position and size
 
-fig       = plt.figure( figsize=(15, 15) )
-gs        = GridSpec(2,10)
-ax_range  = [0,0,0,0,0,0]
+fig       = plt.figure( figsize=(15, 20) )
+gs        = GridSpec(3,10)
+ax_range  = [0,0,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs       = list()
 
-for i in range(2):
+for i in range(3):
     
     psdfilelist = get_filelist( datapaths[i] )
     
@@ -80,9 +81,9 @@ for i in range(2):
                           cmap='Greys',
                           norm=colornorm)
     
-    # ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=3.0)
-    # ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=3.0)
-    # ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=3.0)
+    ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=3.0)
+    ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=3.0)
+    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=3.0)
     
     ax.text( 4.0, 0.02, label[i] )
     
@@ -113,7 +114,7 @@ for i in range(2):
     ylabel = r'$St = fL_{sep}/u_{\infty}$'
     ax.set_ylabel(ylabel)
     
-    if i%2 != 4:
+    if i%len(datapaths) != len(datapaths)-1:
         ax.xaxis.set_ticklabels([])
     else:
         xlabel = r'$(x-x_{imp})/\delta_0$'
@@ -125,8 +126,6 @@ for i in range(2):
     
     axs.append(ax)
 
-axs[1].set_xlim([-18.0, 10.0])
-    
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
 cbar_ticks = np.linspace(0, 0.3, 7)
 cbar_ax = fig.add_subplot([0.4,0.05,0.6,0.1],visible=False)
@@ -141,4 +140,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'psd_herringbone_convergent_maps_p.png' )
+plt.savefig( 'psd_herringbone_all.png' )

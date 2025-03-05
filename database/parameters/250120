@@ -32,13 +32,13 @@ y_min     = -0.03
 
 # Case specific flow conditions
 
-x_sep     = -10.36
-x_att     = 2.56
-x_pfmax   = -10.16
+x_sep     = -13.10
+x_att     = 3.86  
+x_pfmax   = -13.95
 
-prb_sep   = 117
-prb_att   = 271
-prb_pfmax = 117
+prb_sep   = 084
+prb_att   = 287
+prb_pfmax = 073
 
 # INCA version led different setting
 
