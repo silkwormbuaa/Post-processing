@@ -36,7 +36,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # option zone
 # =============================================================================
 
-locs = [-110, -79.6, -53.6, -27.6, 76.4, 102.4] 
+locs = [-53.6] 
 
 ## locs in dimensionless [-31.33, -25, -20,-15, 5, 10 ] 
 
@@ -100,12 +100,11 @@ for i, loc in enumerate(locs):
         
         with open( datafile, 'br' ) as f:   
                 
-            S.read_stat_header( f )
             vars = ['u','v','w','p','pp','rho','mu','T','uu','vv','ww','uv']
             
             # only blocks in the list will be filled data chunk
-            S.read_stat_body( f, block_list, vars )
 
+            S.read_statistic( block_list, vars )
 
     # - assign vol_fra to grid, then match G to S
 
@@ -147,8 +146,7 @@ for i, loc in enumerate(locs):
 
         # match grid and pass vol_fra from G to S
         S.match_grid( block_list, G )
-
-
+        
     # - compute wall friction
 
     with timer("compute wall friction"):

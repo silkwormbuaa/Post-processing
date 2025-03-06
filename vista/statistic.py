@@ -128,17 +128,16 @@ class StatisticData:
             self.read_stat_header( f )
             self.read_stat_body( f, block_list, vars_in )
 
-
         # determined stat_type
         
-        bl = self.bl[0]
+        bl = self.bl[ 0 ]
         
         if   bl.npx == 1: self.stat_type = 'X'
         elif bl.npy == 1: self.stat_type = 'Y'
         elif bl.npz == 1: self.stat_type = 'Z'
         else            : self.stat_type = 'block'
         
-        print(f"\nStatisticData {self.file} is read.\n")
+        print(f"\nStatisticData {self.file} (type: {self.stat_type}) is read.\n")
         sys.stdout.flush()
         
         
@@ -855,9 +854,11 @@ class StatisticData:
                 v = np.sum( np.array(df_temp[var])*vol_fra*vol ) / vol_total
                 buff.append(v)
                 
-                # if abs(y) < 0.2 and var == 'u':
-                #     totalval = np.sum( np.array(df_temp[var])*vol_fra*vol )
-                #     print(f"{y:12.4f}, {totalval:12.4f}, {vol_total:12.4f},{totalval/vol_total:12.4f}")
+                # integral of volume fraction in instrinsic averaging
+                
+                if abs(y) < 0.2 and var == 'u':
+                    totalval = np.sum( np.array(df_temp[var])*vol_fra*vol )
+                    print(f"{y:12.4f}, {totalval:12.4f}, {vol_total:12.4f},{totalval/vol_total:12.4f}")
             
             if data_chunk is None: data_chunk = [buff]
             else: data_chunk.append( buff )

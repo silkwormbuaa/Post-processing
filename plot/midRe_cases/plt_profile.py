@@ -30,14 +30,14 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd           = False
+plt_u_vd           = True
 plt_u              = False
 plt_RS_uu          = False
 plt_RS_vv          = False
 plt_RS_ww          = False
 plt_RS_uv          = False
 plt_combined_RS    = False
-plt_combined_RS_sn = True
+plt_combined_RS_sn = False
 plt_rho            = False
 plt_T              = False
 plt_Mt             = False
