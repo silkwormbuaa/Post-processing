@@ -781,7 +781,7 @@ class StatisticData:
         
 # ----- collect data frame from all filled blocks
         
-        df = pd.concat( [self.bl[self.bl_nums.index(num)].df for num in block_list] )
+        df = pd.concat( [self.bl_clean[self.bl_nums_clean.index(num)].df for num in block_list] )
 
         # reset indexes in case repeated indexes from different blocks
         
@@ -856,9 +856,9 @@ class StatisticData:
                 
                 # integral of volume fraction in instrinsic averaging
                 
-                if abs(y) < 0.2 and var == 'u':
-                    totalval = np.sum( np.array(df_temp[var])*vol_fra*vol )
-                    print(f"{y:12.4f}, {totalval:12.4f}, {vol_total:12.4f},{totalval/vol_total:12.4f}")
+                # if abs(y) < 0.2 and var == 'u':
+                #     totalval = np.sum( np.array(df_temp[var])*vol_fra )
+                #     print(f"{y:12.4f}, {totalval:12.4f}, {np.sum(vol_fra):12.4f},{totalval/np.sum(vol_fra):12.4f}")
             
             if data_chunk is None: data_chunk = [buff]
             else: data_chunk.append( buff )

@@ -97,14 +97,12 @@ for i, loc in enumerate(locs):
     with timer("read block statistics data "):
 
         S = StatisticData( datafile )
-        
-        with open( datafile, 'br' ) as f:   
                 
-            vars = ['u','v','w','p','pp','rho','mu','T','uu','vv','ww','uv']
-            
-            # only blocks in the list will be filled data chunk
+        vars = ['u','v','w','p','pp','rho','mu','T','uu','vv','ww','uv']
+        
+        # only blocks in the list will be filled data chunk
 
-            S.read_statistic( block_list, vars )
+        S.read_statistic( block_list, vars )
 
     # - assign vol_fra to grid, then match G to S
 
