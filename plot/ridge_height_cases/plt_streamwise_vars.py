@@ -252,7 +252,7 @@ if plt_pw:
 
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     ax.set_ylim([0.8,2.5])
-    ax.set_ylabel("$<p_w>/p_{\infty}$")
+    ax.set_ylabel("$\langle p_w \rangle/p_{\infty}$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:
@@ -310,7 +310,7 @@ if plt_pwg:
     ax.set_ylim([-0.1,0.6])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
-    ax.set_ylabel(r"$\frac{d<p_w>}{dx}/p_{\infty}$")
+    ax.set_ylabel(r"$\frac{d \langle p_w \rangle}{dx}/p_{\infty}$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:
