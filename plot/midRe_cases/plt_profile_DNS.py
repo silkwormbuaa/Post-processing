@@ -30,7 +30,7 @@ plt.rcParams['font.size']           = 40
 
 # =============================================================================
 
-plt_u       = True
+plt_u       = False
 plt_u_vd    = True
 plt_RS      = True
 
@@ -342,7 +342,7 @@ if plt_RS:
     
     ax.set_xlim( [1,3000] )
     ax.set_ylim( [-1.5,9.0] )
-    ax.set_ylabel( r"$\rho \langle u_i'u_j'\rangle /\tau_w$" )
+    ax.set_ylabel( r"$\langle \rho \rangle \langle u_i'u_j'\rangle /\tau_w$" )
     ax.tick_params( axis='y', pad=10 )
     
     # notations

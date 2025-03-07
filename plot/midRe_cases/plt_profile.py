@@ -30,14 +30,14 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd           = True
+plt_u_vd           = False
 plt_u              = False
 plt_RS_uu          = False
 plt_RS_vv          = False
 plt_RS_ww          = False
 plt_RS_uv          = False
-plt_combined_RS    = False
-plt_combined_RS_sn = False
+plt_combined_RS    = True
+plt_combined_RS_sn = True
 plt_rho            = False
 plt_T              = False
 plt_Mt             = False
@@ -61,13 +61,12 @@ data5 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/upstream_pro
 
 dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
-datalist = [data0,          data1,         data2,   data3,   data4]
-dy       = [0.0,            0.0,           0.312,   0.07921, 0.312]
-color    = ['gray',         'black',       'orangered',  'yellowgreen', 'steelblue']
-label    = [r'$\mathcal{LS}$', r'$\mathcal{HS}$', 
-            r'$\mathcal{LR}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$']
-lstyle   = ['-',            '--',             '-.',      (0, (3, 1, 1, 1, 1, 1)),  ':']
-width    = [4.0,            4.0,           4.0,        4.0,        4.0]
+datalist = [data0,             data2,             data1,             data4             ,data3                  ]
+dy       = [0.0,               0.312,             0.0,               0.312             ,0.07921                ]
+color    = ['gray',            'orangered',       'black',           'steelblue'       ,'yellowgreen'          ]
+label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$',r'$\mathcal{HR}2$'     ]
+lstyle   = ['-',               '-.',              '--',              ':'               ,(0, (3, 1, 1, 1, 1, 1))]
+width    = [4.0,               4.0,               4.0,               4.0               ,4.0                    ]
 lines = []
 
 # ----------------------------------------------------------------------
@@ -566,7 +565,7 @@ if plt_RS_uv:
 
 if plt_combined_RS:
     
-    fig = plt.figure(figsize=[15,10], constrained_layout=True)
+    fig = plt.figure(figsize=[20,12], constrained_layout=True)
     gs  = fig.add_gridspec(2, 2)
     
     ax1 = fig.add_subplot(gs[0, 0])
@@ -578,10 +577,10 @@ if plt_combined_RS:
     vars          = ['u`u`+', 'v`v`+', 'w`w`+', 'u`v`+']
     y_lim         = [[-1,10], [-0.1,1.5], [-0.1,2.4], [-1,0.2]]
     major_locator = [2.0, 0.4, 0.5, 0.4]
-    ylabels       = [r"$\rho \langle u^{'} u^{'} \rangle / \tau_w$",
-                     r"$\rho \langle v^{'} v^{'} \rangle / \tau_w$",
-                     r"$\rho \langle w^{'} w^{'} \rangle / \tau_w$",
-                     r"$\rho \langle u^{'} v^{'} \rangle / \tau_w$"]
+    ylabels       = [r"$\langle \rho \rangle \langle u^{'} u^{'} \rangle / \tau_w$",
+                     r"$\langle \rho \rangle \langle v^{'} v^{'} \rangle / \tau_w$",
+                     r"$\langle \rho \rangle \langle w^{'} w^{'} \rangle / \tau_w$",
+                     r"$\langle \rho \rangle \langle u^{'} v^{'} \rangle / \tau_w$"]
     
     for i, ax in enumerate( axs ):
     
@@ -601,13 +600,13 @@ if plt_combined_RS:
                         axis='both',
                         direction='in',
                         length=20,
-                        width=2.0,
+                        width=1.5,
                         pad=10)
         ax.tick_params( which='minor',
                         axis='both', 
                         direction='in',
                         length=10,
-                        width=2.0)
+                        width=1.5)
         if i == 0 or i == 1:
             ax.set_xticklabels([])
         x_minor = matplotlib.ticker.LogLocator( 
@@ -645,7 +644,7 @@ if plt_combined_RS:
 
 if plt_combined_RS_sn:
     
-    fig = plt.figure(figsize=[15,10], constrained_layout=True)
+    fig = plt.figure(figsize=[20,12], constrained_layout=True)
     gs  = fig.add_gridspec(2, 2)
     
     ax1 = fig.add_subplot(gs[0, 0])
@@ -657,19 +656,19 @@ if plt_combined_RS_sn:
     vars          = ['u`u`+', 'v`v`+', 'w`w`+', 'u`v`+']
     y_lim         = [[-1,10], [-0.1,1.8], [-0.1,2.5], [-1.4,0.2]]
     major_locator = [2.0, 0.4, 0.5, 0.4]
-    ylabels       = [r"$\rho \langle u^{'} u^{'} \rangle / \tau_{sw}$",
-                     r"$\rho \langle v^{'} v^{'} \rangle / \tau_{sw}$",
-                     r"$\rho \langle w^{'} w^{'} \rangle / \tau_{sw}$",
-                     r"$\rho \langle u^{'} v^{'} \rangle / \tau_{sw}$"]
+    ylabels       = [r"$\langle \rho \rangle \langle u^{'} u^{'} \rangle / \tau_{sw}$",
+                     r"$\langle \rho \rangle \langle v^{'} v^{'} \rangle / \tau_{sw}$",
+                     r"$\langle \rho \rangle \langle w^{'} w^{'} \rangle / \tau_{sw}$",
+                     r"$\langle \rho \rangle \langle u^{'} v^{'} \rangle / \tau_{sw}$"]
     
     for i, ax in enumerate( axs ):
     
         for j, line in enumerate(lines):
             
-            if j in [0,2]:
+            if j in [0,1]:
                 value = line.df[vars[i]]* line.tau_ave / lines[0].tau_ave
-            if j in [1,3,4]:
-                value = line.df[vars[i]]* line.tau_ave / lines[1].tau_ave
+            if j in [2,3,4]:
+                value = line.df[vars[i]]* line.tau_ave / lines[2].tau_ave
             
             ax.plot( line.df['ys+'],
                      value,
@@ -686,13 +685,13 @@ if plt_combined_RS_sn:
                         axis='both',
                         direction='in',
                         length=20,
-                        width=2.0,
+                        width=1.5,
                         pad=10)
         ax.tick_params( which='minor',
                         axis='both', 
                         direction='in',
                         length=10,
-                        width=2.0)
+                        width=1.5)
         if i == 0 or i == 1:
             ax.set_xticklabels([])
         x_minor = matplotlib.ticker.LogLocator( 
