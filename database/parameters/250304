@@ -1,7 +1,7 @@
 # Basic info
 
-casecode  = 250218
-tag       = R2
+casecode  = 250304
+tag       = R3
 roughwall = True
 
 # Flow setup parameters
@@ -20,7 +20,7 @@ dt_snap   = 0.01
 
 # Geometric setup parametrs
 
-H         = 0.173
+H         = 0.052
 H_md      = 0.000
 x_imp     = 50.4
 n_period  = 4
@@ -32,13 +32,13 @@ y_min     = -0.03
 
 # Case specific flow conditions
 
-x_sep     = -7.28
-x_att     = 1.82 
-x_pfmax   = -8.58
+x_sep     = -8.99
+x_att     = 1.57 
+x_pfmax   = -8.01
 
-prb_sep   = 153
-prb_att   = 263
-prb_pfmax = 138
+prb_sep   = 133
+prb_att   = 260
+prb_pfmax = 145
 
 # INCA version led different setting
 

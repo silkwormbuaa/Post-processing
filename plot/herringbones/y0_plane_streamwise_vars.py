@@ -27,7 +27,7 @@ from   vista.directories import Directories
 from   vista.statistic   import StatisticData
 # =============================================================================
 
-casefolder = '/home/wencan/temp/250218'
+casefolder = '/home/wencan/temp/250304'
 
 file0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 

@@ -31,16 +31,16 @@ plt.rcParams['font.size']   = 30
 # option zone
 # =============================================================================
 
-loc     = 'sep'
+loc     = 'psd_max'
 independent_len = True
 figname = 'psdlines'
 fmat    = '.png'
-cases   = [0,1,2]
-withT   = [True, True, True]
-color   = ['black','yellowgreen','steelblue']
-lstyle  = ['--', (0, (3, 1, 1, 1, 1, 1)), ':' ]
-width   = [4.0,  4.0, 4.0 ]
-label   = ['low smooth', 'R1', 'R2']
+cases   = [0,1,2,3]
+withT   = [True, True, True, True]
+color   = ['black','yellowgreen','steelblue','firebrick']
+lstyle  = ['--', (0, (3, 1, 1, 1, 1, 1)), ':', '-' ]
+width   = [4.0,  4.0, 4.0, 4.0 ]
+label   = ['low smooth', 'R1', 'R2', 'R3']
 showlegend  = True
 premultiply = True
 normalize   = True
@@ -50,18 +50,22 @@ normalize   = True
 datapath0 = '/home/wencan/temp/smooth_adiabatic/probes/'
 datapath1 = '/home/wencan/temp/250120/probes/'
 datapath2 = '/home/wencan/temp/250218/probes/'
+datapath3 = '/home/wencan/temp/250304/probes/'
 
 outpath  = '/home/wencan/temp/DataPost/lowRe/psd'
 
-datapaths = [datapath0, datapath1, datapath2]
+datapaths = [datapath0, datapath1, datapath2, datapath3]
 
-prbfiles_sep   = ['probe_00144.dat', 'probe_00084.dat', 'probe_00153.dat']
-prbfiles_pfmax = ['probe_00158.dat', 'probe_00073.dat', 'probe_00138.dat']  
+prbfiles_sep     = ['probe_00144.dat', 'probe_00084.dat', 'probe_00153.dat', 'probe_00133.dat']
+prbfiles_pfmax   = ['probe_00158.dat', 'probe_00073.dat', 'probe_00138.dat', 'probe_00145.dat']  
 
-if loc   == 'sep':    prbfiles = prbfiles_sep
-elif loc == 'pf_max': prbfiles = prbfiles_pfmax
+prbfiles_psdmax  = ['probe_00144.dat', 'probe_00073.dat', 'probe_00123.dat', 'probe_00133.dat']
 
-len_sep = [ 9.52, 16.96, 9.1 ]
+if loc   == 'sep':     prbfiles = prbfiles_sep
+elif loc == 'pf_max':  prbfiles = prbfiles_pfmax
+elif loc == 'psd_max': prbfiles = prbfiles_psdmax
+
+len_sep = [ 9.52, 16.96, 9.1, 10.56]
 
 probes = []
 

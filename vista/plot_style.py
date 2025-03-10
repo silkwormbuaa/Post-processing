@@ -788,7 +788,8 @@ def plot_slicez_stat( xx, yy, v,
                  tag,
                  va='center',
                  fontsize=40,
-                 zorder=101)
+                 zorder=101,
+                 bbox={"fc":"white","alpha":0.8,"ec":"None"})
     
     if x_lim is not None: ax.set_xlim(x_lim)
     if y_lim is not None: ax.set_ylim(y_lim)   

@@ -33,25 +33,26 @@ outpath = '/media/wencan/Expansion/temp/DataPost/lowRe/psd'
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
 datapath1 = '/media/wencan/Expansion/temp/250120/postprocess/probes/psd_ridge'
 datapath2 = '/media/wencan/Expansion/temp/250218/postprocess/probes/psd_ridge'
-datapaths = [datapath0, datapath1, datapath2]
+datapath3 = '/media/wencan/Expansion/temp/250304/postprocess/probes/psd_ridge'
+datapaths = [datapath0, datapath1, datapath2, datapath3]
 
 # separation range in normalized unit
-x_separs = [-8.42  ,-13.10, -7.28]
-x_reatts = [1.06795,3.86  , 1.82  ]
-x_ppmaxs = [-7.3333,-13.95, -8.58 ]
+x_separs = [-8.42  ,-13.10, -7.28, -8.99]
+x_reatts = [1.06795,3.86  , 1.82 , 1.57 ]
+x_ppmaxs = [-7.3333,-13.95, -8.58, -8.01]
 
 # labels
-label    = ['lowRe_smooth', 'R1', 'R2']
+label    = ['lowRe_smooth', 'R1', 'R2', 'R3']
 
 # subplots position and size
 
 fig       = plt.figure( figsize=(15, 20) )
-gs        = GridSpec(3,10)
-ax_range  = [0,0,0]
+gs        = GridSpec(4,10)
+ax_range  = [0,0,0,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs       = list()
 
-for i in range(3):
+for i in range(4):
     
     psdfilelist = get_filelist( datapaths[i] )
     

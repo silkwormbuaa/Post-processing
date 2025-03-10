@@ -41,6 +41,7 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # locs = [ridge location, valley location]
 
 outfolder = '/xy_planes'
+vars      = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
 
 # =============================================================================
 
@@ -50,20 +51,20 @@ datafile = dirs.statistics
 gridfile = dirs.grid
 outpath  = dirs.pp_statistics + outfolder
 
-# - read in case parameters
+# - read in case params
 
-parameters = Params( dirs.case_para_file )
-delta   = parameters.delta_0
-h_ridge = parameters.H
-h_md    = parameters.H_md
-x_imp   = parameters.x_imp
-p_ref   = parameters.p_ref
-u_ref   = parameters.u_ref
-casecode =  parameters.casecode
+params = Params( dirs.case_para_file )
+delta   = params.delta_0
+h_ridge = params.H
+h_md    = params.H_md
+x_imp   = params.x_imp
+p_ref   = params.p_ref
+u_ref   = params.u_ref
+casecode =  params.casecode
 target_dir = '/home/wencan/temp/DataPost/contour/'+casecode+'/'
 create_folder( target_dir )
 
-locs = [ 0.001, 0.5*parameters.D + 0.001 ]
+locs = [ 0.001, 0.5*params.D + 0.001 ]
 
 # - read in grid info
 
@@ -99,21 +100,11 @@ for i, loc in enumerate( locs ):
 
         with timer("read selected blocks "):
             
-            with open(datafile,'br') as f:
-                
-                S.read_stat_header( f )
-                
-                vars = ['u','v','w','T','rho','uu','vv','ww','uv','pp','p']
-                
-                S.read_stat_body( f, block_list, vars )
-                
-                S.match_grid( block_list, G )
-                
-                S.compute_vars( block_list, ['mach','RS','p`'] )
-                
-                S.compute_gradients( block_list, 
-                                    ['grad_rho','shadowgraph','grad_p'])
-                
+            S.read_statistic( block_list, vars )
+            S.match_grid( block_list, G )
+            S.compute_vars( block_list, ['mach','RS','p`'] )
+            S.compute_gradients( block_list, ['grad_rho','shadowgraph','grad_p'])
+            
         with timer("Get slice dataframe "):
             
             df_slice = S.get_slice_df( block_list, G, indx_slic, 'Z' )
@@ -206,7 +197,9 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_MachZ_'+str(i+1),
                           cbar_label=cbar,
                           col_map='coolwarm',
-                          wall=wall)
+                          wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5])
 
         cbar = r'$<T>/T_{\infty}$'
         
@@ -217,7 +210,9 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_TemperatureZ_'+str(i+1),
                           col_map='plasma',
                           cbar_label=cbar,
-                          wall=wall)
+                          wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5])
 
         cbar = r'$\nabla{\rho}$'
         
@@ -228,7 +223,9 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_grad_rho_'+str(i+1),
                           col_map='Greys',
                           cbar_label=cbar,
-                          wall=wall)
+                          wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5])
 
         plot_slicez_stat( xx,yy,gradrho, 
                           separation=seplinefile,
@@ -237,7 +234,9 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_mean_shock_shape_'+str(i+1),
                           col_map='Greys',
                           cbar_label=cbar,
-                          wall=wall)
+                          wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5])
 
         cbar = 'DS'
         plot_slicez_stat( xx,yy,DS, 
@@ -247,7 +246,9 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_mean_shock_DS_'+str(i+1),
                           col_map='Greys_r',
                           cbar_label=cbar,
-                          wall=wall)
+                          wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5])
 
 
         cbar = r'$tke$'
@@ -259,7 +260,9 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_tke_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
-                          wall=wall)
+                          wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5])
         
         cbar = r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$"
         cbar_levels = np.linspace(0,0.5,51)
@@ -275,6 +278,8 @@ for i, loc in enumerate( locs ):
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5],
                           x_lim=[-15,10],
                           y_lim=[0,6] )
 
@@ -291,6 +296,8 @@ for i, loc in enumerate( locs ):
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           wall=wall,
+                          tag = params.tag,
+                          tag_loc=[7.0,4.5],
                           x_lim=[-15,10],
                           y_lim=[0,6] )
         

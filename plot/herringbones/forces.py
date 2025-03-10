@@ -28,6 +28,16 @@ from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.directories import create_folder
 
+# =============================================================================
+
+casefolder    = '/home/wencan/temp/250304'
+dirs          = Directories( casefolder )
+forces_files  = get_filelist( dirs.for_dir, 'force_0' )
+params        = Params( dirs.case_para_file )
+dynp          = 0.5*params.rho_ref*params.u_ref**2
+
+# =============================================================================
+
 class Bl_Force:
     
     def __init__(self, filename):
@@ -57,12 +67,6 @@ class Bl_Force:
         print(f'read in {filename} {self.index}.')
 
 # =============================================================================
-
-casefolder    = '/home/wencan/temp/250218'
-dirs          = Directories( casefolder )
-forces_files  = get_filelist( dirs.for_dir, 'force_0' )
-params        = Params( dirs.case_para_file )
-dynp          = 0.5*params.rho_ref*params.u_ref**2
 
 datas = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 lines = LineData()
@@ -152,7 +156,7 @@ ax.set_xlabel(r'$(x-x_\delta)/\delta_0$')
 ax.set_ylabel(r'$\tau$')
 
 ax.set_xlim([-20, 10])
-ax.set_ylim([-2,4])
+ax.set_ylim([-5,5])
 
 
 plt.legend()

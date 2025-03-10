@@ -57,7 +57,7 @@ os.chdir( outpath )
 for i, loc in enumerate( locs ):
     
     df_slice_file = f"df_slice_{slic_type}_{i:02d}.pkl"
-    output_file   = f"intergral_{slic_type}_{i:02d}.dat"
+    output_file   = f"integral_{slic_type}_{i:02d}.dat"
     
     if not os.path.exists( df_slice_file ):
         

@@ -1,7 +1,7 @@
 # Basic info
 
 casecode  = 250120
-tag       = low-Re
+tag       = R1
 roughwall = True
 
 # Flow setup parameters
