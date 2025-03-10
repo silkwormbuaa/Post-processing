@@ -2331,7 +2331,7 @@ class Snapshot:
 
         if vars is None:
             vars = self.snap_cleandata[0].df.columns.tolist()
-            
+        
 # ----- setupt tecplot file
         
         tp.new_layout()
@@ -2339,6 +2339,8 @@ class Snapshot:
         dataset = frame.create_dataset('snapshot',['x','y','z'] + vars)
         
         for i in range( len(self.snap_cleandata) ):
+            
+            print(f"write block {i} {bl_data.num:05d} to tecplot.")
             
             bl_data = self.snap_cleandata[i]
             

@@ -28,7 +28,12 @@ D         = 0.325
 
 # Computational domain parameters (normalized)
 
-y_min     = -0.03
+y_min        = -0.03
+
+SNAP_RANGE_X = -30.0,  120.0,
+SNAP_RANGE_Y =  -1.3,  31.0 ,
+SNAP_RANGE_Z = -10.4,  10.4 ,
+
 
 # Case specific flow conditions
 

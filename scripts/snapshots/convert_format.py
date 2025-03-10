@@ -22,13 +22,13 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-output_path = '/home/wencanwu/test/00699936'
-snap_file = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/snapshot_00699936/snapshot.bin'
-grid_file = '/home/wencanwu/my_simulation/temp/220927_lowRe/results/inca_grid.bin'
-output_filename = 'snapshot_00699936'
-box  = [-30,999,-999.0,31.0,0.0,999]     # box should also within the snapshot's range
+output_path = '/home/wencan/test/241030'
+snap_file = '/home/wencan/temp/241030/snapshots/snapshot_01200380/snapshot.bin'
+grid_file = '/home/wencan/temp/241030/results/inca_grid.bin'
+output_filename = 'snapshot_01200380'
+box  = [-30,999,-999.0,31.0,-999,999]     # box should also within the snapshot's range
 vars_in = ['u','v','w','p','T']
-vars_out =  ['u','Q_cr','vorticity','grad_rho_mod','div']
+vars_out =  ['u','v','w','p','T','Q_cr','vorticity','grad_rho_mod','div']
 vtk   = True
 szplt = False
 

@@ -211,6 +211,23 @@ class Params:
     @property
     def y_min( self ):
         return float( self.params.get('y_min') )
+    
+    def __range_to_list__( self, str_range:str ):
+        """parse str like '-120.0, 10.0' """
+        return list(map(float, str_range.split(',')))
+
+    @property
+    def snap_range_x( self ):
+        return self.__range_to_list__( self.params.get('SNAP_RANGE_X') )
+    
+    @property
+    def snap_range_y( self ):
+        return self.__range_to_list__( self.params.get('SNAP_RANGE_Y') )
+    
+    @property
+    def snap_range_z( self ):
+        return self.__range_to_list__( self.params.get('SNAP_RANGE_Z') )
+        
 
 # --------------- case specific flow conditions -----------------------
     

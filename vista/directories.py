@@ -96,7 +96,7 @@ class Directories:
         self.pp_snp_zslice  = os.path.join( self.pp_snapshots, 'zslice'  )
         self.pp_snp_xslice  = os.path.join( self.pp_snapshots, 'xslice'  )
         self.pp_snp_yslice  = os.path.join( self.pp_snapshots, 'yslice'  )
-
+        self.pp_snp_probe   = os.path.join( self.pp_snapshots, 'probe'   )
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
@@ -121,8 +121,9 @@ class Directories:
     @property
     def snaps( self ):
         items = os.listdir( self.snp_dir )
-        folders = [ item for item in items if os.path.isdir( os.path.join( self.snp_dir, item ) ) ]
-        return os.listdir( folders )
+        folders = [ os.path.join( self.snp_dir, item ) for item in items 
+                    if os.path.isdir( os.path.join( self.snp_dir, item ) ) ]
+        return folders
     
     # probes list
     @property
