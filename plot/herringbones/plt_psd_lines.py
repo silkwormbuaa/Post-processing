@@ -59,7 +59,7 @@ datapaths = [datapath0, datapath1, datapath2, datapath3]
 prbfiles_sep     = ['probe_00144.dat', 'probe_00084.dat', 'probe_00153.dat', 'probe_00133.dat']
 prbfiles_pfmax   = ['probe_00158.dat', 'probe_00073.dat', 'probe_00138.dat', 'probe_00145.dat']  
 
-prbfiles_psdmax  = ['probe_00144.dat', 'probe_00073.dat', 'probe_00123.dat', 'probe_00133.dat']
+prbfiles_psdmax  = ['probe_00144.dat', 'probe_00072.dat', 'probe_00123.dat', 'probe_00133.dat']
 
 if loc   == 'sep':     prbfiles = prbfiles_sep
 elif loc == 'pf_max':  prbfiles = prbfiles_pfmax
