@@ -32,7 +32,7 @@ from   vista.tools        import create_linear_interpolator
 case_dir = '/media/wencan/Expansion/temp/220927'
 
 #shockpath3d  = case_dir + '/postprocess/shock_tracking/3d'
-bubblepath   = case_dir + '/postprocess/bubble_size/bubble_size.dat'
+bubblepath   = case_dir + '/postprocess/bubble/bubble_size.dat'
 pressurepath = case_dir + '/postprocess/probes/pre_ridge/pressure_ridge.pkl'
 
 outputpath   = case_dir + '/postprocess/joint_analysis'

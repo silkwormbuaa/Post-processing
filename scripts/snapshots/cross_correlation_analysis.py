@@ -27,7 +27,7 @@ from   vista.plot_setting import set_plt_rcparams
 # =============================================================================
 
 shockpath3d = '/media/wencan/Expansion/temp/smooth_mid/postprocess/snapshots/shock_tracking/3d'
-bubblepath  = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble_size/bubble_size.dat'
+bubblepath  = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble/bubble_size.dat'
 
 # =============================================================================
 

@@ -23,18 +23,25 @@ sys.path.append( source_dir )
 
 from   vista.grid        import GridData
 from   vista.snapshot    import Snapshot
+from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
+from   vista.directories import create_folder
 from   vista.timer       import timer
 
-
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
+comm    = MPI.COMM_WORLD
+rank    = comm.Get_rank()
 n_procs = comm.Get_size()
 
-dirs = os.getcwd()
+# =============================================================================
 
-grd = None
+casefolder = '/home/wencan/temp/250120'
+
+# =============================================================================
+
+dirs          = Directories( casefolder )
+
+grd           = None
 snapshotfiles = None
 
 print(f"Rank {rank} is working on {dirs}.")
@@ -47,24 +54,21 @@ if rank == 0:
     print(f"I am root, now at {dirs}.")
     sys.stdout.flush()
     
-    grid_file = dirs + '/inca_grid.bin'
-    snapshotfiles = get_filelist(dirs + '/snapshots', key='snapshot.bin')
+    snapshotfiles = get_filelist( dirs.snp_dir, key='snapshot.bin')
 
     with timer('load grid data'):
-        grd = GridData( grid_file )
+        grd = GridData( dirs.grid )
         grd.read_grid()
         
 # broadcast
 
 grd           = comm.bcast( grd, root=0 )
-snapshotfiles = comm.bcast(snapshotfiles, root=0)
+snapshotfiles = comm.bcast( snapshotfiles, root=0)
 
 # distribute the tasks
 
 n_snaps = len( snapshotfiles )
 i_start, i_end = distribute_mpi_work( n_snaps, n_procs, rank )
-
-snapshot_index = np.zeros(n_snaps, dtype=int)
 
 # using one snapshot as a container to store the separation tiems
 
@@ -73,16 +77,14 @@ snap_container.read_snapshot( var_read=['u'] )
 
 for bl in snap_container.snap_data:
     
-    identifier = np.zeros_like( bl.df['u'] )
+    identifier     = np.zeros_like( bl.df['u'] )
     bl.df['n_sep'] = identifier 
 
 # loop over the snapshots to count the separation times
 
 for i, snapshotfile in enumerate( snapshotfiles[i_start:i_end] ):
     
-    snapshot_index[i_start+i] = int(snapshotfile[-21:-13])
-    
-    with timer(f'load snapshot data ...{snapshotfile[-15:]}'):
+    with timer(f'load snapshot data ...{snapshotfile[-25:]}'):
         
         snap = Snapshot( snapshotfile )
         snap.read_snapshot( var_read=['u'] )
@@ -101,12 +103,13 @@ with timer("communication"):
     
     for bl in snap_container.snap_data:
         
-        bl.df['n_sep'] = comm.reduce( np.array(bl.df['n_sep']), op=MPI.SUM, root=0)
+        bl.df['n_sep']   = comm.reduce( np.array(bl.df['n_sep']), op=MPI.SUM, root=0)
         bl.df['pdf_sep'] = bl.df['n_sep'] / len(snapshotfiles) 
 
 comm.barrier()
 
 if rank == 0:
+    os.chdir( create_folder(dirs.pp_bubble) )
     with open('snapshot_container.pkl','wb') as f:
         pickle.dump( snap_container, f )
 

@@ -24,7 +24,7 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-file       = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble_size/bubble_size.dat'
+file       = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble/bubble_size.dat'
 outputpath = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble_size'
 lsep       = 47.944
 delta0     = 5.2

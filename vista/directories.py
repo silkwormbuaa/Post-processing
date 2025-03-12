@@ -71,6 +71,7 @@ class Directories:
         self.pp_snapshots    = os.path.join( self.pos_dir, 'snapshots' )
         self.pp_dmd          = os.path.join( self.pos_dir, 'dmd' )
         self.pp_forces       = os.path.join( self.pos_dir, 'forces' )
+        self.pp_bubble       = os.path.join( self.pos_dir, 'bubble' )
         
 # --- pp_statistics subdirectories
         
