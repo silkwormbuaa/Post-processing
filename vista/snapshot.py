@@ -2150,7 +2150,8 @@ class Snapshot:
         for snap_bl in self.snap_data:
             
             bl_num = snap_bl.num
-            wd_df = wd_snap.snap_data[bl_num-1].df
+            index  = wd_snap.bl_nums.index(bl_num)
+            wd_df  = wd_snap.snap_data[index].df
             snap_bl.df['wd'] = wd_df['wd']
 
 
@@ -2203,7 +2204,7 @@ class Snapshot:
             
             if roughwall:
             
-                temp_df = cc_df[cc_df['block_number'] == bl_num]
+                temp_df   = cc_df[cc_df['block_number'] == bl_num]
                 wall_dist = np.array( snap_bl.df['wd'] )
                 g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )
             

@@ -34,6 +34,9 @@ class MPIenv:
 
     @property
     def is_root(self): return self._rank == self._root
+    
+    @property
+    def MPI(self): return MPI
 
     def barrier(self): self._comm.Barrier()
 
