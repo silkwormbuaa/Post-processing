@@ -21,7 +21,6 @@ from   mpi4py            import MPI
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.grid        import GridData
 from   vista.snapshot    import Snapshot
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
@@ -41,10 +40,9 @@ casefolder = '/home/wencan/temp/250304'
 
 dirs          = Directories( casefolder )
 
-grd           = None
 snapshotfiles = None
 
-print(f"Rank {rank} is working on {dirs.case_dir}.")
+print(f"Rank {rank} is working in folder: {dirs.case_dir}.")
 sys.stdout.flush()
 
 # root processor get the filelist
@@ -56,29 +54,25 @@ if rank == 0:
     
     snapshotfiles = get_filelist( dirs.snp_dir, key='snapshot.bin')
 
-    with timer('load grid data'):
-        grd = GridData( dirs.grid )
-        grd.read_grid()
-        
 # broadcast
 
-grd           = comm.bcast( grd, root=0 )
 snapshotfiles = comm.bcast( snapshotfiles, root=0)
 
 # distribute the tasks
 
 n_snaps = len( snapshotfiles )
 i_start, i_end = distribute_mpi_work( n_snaps, n_procs, rank )
+print(f"Rank {rank} is working on snapshots from {i_start} to {i_end}.")
+sys.stdout.flush()
 
-# using one snapshot as a container to store the separation tiems
+# using one snapshot as a container to store separation times
 
 snap_container = Snapshot( snapshotfiles[i_start] )
 snap_container.read_snapshot( var_read=['u'] )
 
 for bl in snap_container.snap_data:
     
-    identifier     = np.zeros_like( bl.df['u'] )
-    bl.df['n_sep'] = identifier 
+    bl.df['n_sep'] = np.zeros_like( bl.df['u'], dtype=int ) 
 
 # loop over the snapshots to count the separation times
 
