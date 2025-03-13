@@ -6,17 +6,8 @@
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   compute the instanteneous separation bubble size considering the cutcells
-             
-             Note:
-             
-             for roughwall case: wall_dist folder, cutcells_setup.dat, 
-                                 inca_grid.bin, snapshots folder  are need.
-             for smoothwall case: inca_grid.bin, snapshots folder are need.
-             
-             update 'roughwall' to True or False.
-             
-             change the length of spename in grid.py.
+@Desc    :   compute the instanteneous separation bubble size considering the cutcells.
+             Note: case/supplements should be ready. 
 '''
 
 import os
