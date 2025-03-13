@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 '''
 @File    :   compare_bubble_shape.py
-@Time    :   2024/05/06 
+@Time    :   2025/03/13 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
@@ -26,15 +26,15 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
-output_dir = '/home/wencan/temp/DataPost/lowRe_ridge_height/xy_plane/'
+output_dir = '/home/wencan/temp/DataPost/midRe/xy_plane/'
 
-casename = ['smooth_adiabatic','240211','220927','240210']
+casename = ['smooth_adiabatic','220927','smooth_mid','231124','241030']
 
 df_dirs  = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/xy_planes/' for case in casename]
 
-label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0=0.20$',]
-color    = ['gray','black', 'red', 'blue']
-lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1))]
+label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR1}$',r'$\mathcal{HR2}$']
+color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen' ]
+lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1))]
 
 figname0 = 'bubble_shape'
 format   = '.png'

@@ -566,7 +566,7 @@ def bilin_interp(x1,x2,y1,y2,f,x,y):
 #
 # ----------------------------------------------------------------------
 
-def find_indices( arr, target, mode='bisection' ):
+def find_indices( arr:np.ndarray, target:float, mode='bisection' ):
     
     """
     arr    : 1D list or numpy array, must monotically increase
@@ -576,7 +576,7 @@ def find_indices( arr, target, mode='bisection' ):
     return : left and right indices 
     """
 
-    # check if the target is out of bound
+    # check if the target is out of bound    
     if target < arr[0] or target > arr[-1]:
         raise ValueError("The target value is out of bound.")
  
