@@ -35,7 +35,7 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/250120'
+casefolder = '/home/wencan/temp/250304'
 
 # =============================================================================
 
@@ -44,14 +44,14 @@ dirs          = Directories( casefolder )
 grd           = None
 snapshotfiles = None
 
-print(f"Rank {rank} is working on {dirs}.")
+print(f"Rank {rank} is working on {dirs.case_dir}.")
 sys.stdout.flush()
 
 # root processor get the filelist
 
 if rank == 0:
     
-    print(f"I am root, now at {dirs}.")
+    print(f"I am root, now at {dirs.case_dir}.")
     sys.stdout.flush()
     
     snapshotfiles = get_filelist( dirs.snp_dir, key='snapshot.bin')
