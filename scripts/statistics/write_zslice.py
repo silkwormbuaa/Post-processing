@@ -37,8 +37,8 @@ grid.read_grid()
 blocklist, index = grid.select_sliced_blockgrids( slic_type, loc )
 
 stat3d = StatisticData( dirs.statistics )
-stat3d.read_statistic( blocklist, vars_in=stat3d.full_vars )
 stat3d.grid3d = grid
+stat3d.read_statistic( blocklist, vars_in=stat3d.full_vars )
 
 stat2d = stat3d.get_slice( slic_type, loc )
 stat2d.write_statistic( dirs.stat_zslice )
