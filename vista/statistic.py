@@ -1677,7 +1677,7 @@ class StatisticData:
             g  = grid3d.g[group[0]-1]
             px = (g.px[buff:-buff]+rescale[0])
             py = (g.py[buff:-buff]+rescale[1])
-            pz = np.array([0.0])
+            pz = np.array([-0.1,0.1])
             
             bl_vtk = create_3d_vtkRectilinearGrid( px/rescale[3], py/rescale[4], pz/rescale[5] )
             
