@@ -1,6 +1,6 @@
 # Basic info
 
-casecode = smooth
+casecode = smooth_adiabatic
 tag      = $\mathcal{LS}$
 roughwall = False
 

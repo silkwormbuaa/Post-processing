@@ -23,7 +23,7 @@ from   mpl_toolkits.axes_grid1 import make_axes_locatable
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
-plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
+#plt.rcParams['text.latex.preamble'] = r'\usepackage{amssymb}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
@@ -735,7 +735,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sonic = line[:,0]
             y_sonic = line[:,1]
-            ax.plot(x_sonic,y_sonic,'magenta',linewidth=1.5)
+            ax.plot(x_sonic,y_sonic,'lime',linewidth=3)
 
 
     if separation:
@@ -745,7 +745,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_sep = line[:,0]
             y_sep = line[:,1]
-            ax.plot(x_sep,y_sep,'red',linewidth=1.5)
+            ax.plot(x_sep,y_sep,'red',linewidth=3)
 
 
     if boundary is not None:
@@ -764,7 +764,7 @@ def plot_slicez_stat( xx, yy, v,
         for line in lines:
             x_shock = line[:,0]
             y_shock = line[:,1]
-            ax.plot(x_shock,y_shock,'black',linewidth=1.5)
+            ax.plot(x_shock,y_shock,'black',linewidth=2)
             
     if DS is not None:
         with open(DS, 'rb') as f:

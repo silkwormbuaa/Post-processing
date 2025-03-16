@@ -199,7 +199,9 @@ for i, loc in enumerate( locs ):
                           col_map='coolwarm',
                           wall=wall,
                           tag = params.tag,
-                          tag_loc=[7.0,4.5])
+                          tag_loc=[7.0,4.5],
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
 
         cbar = r'$<T>/T_{\infty}$'
         
@@ -212,7 +214,9 @@ for i, loc in enumerate( locs ):
                           cbar_label=cbar,
                           wall=wall,
                           tag = params.tag,
-                          tag_loc=[7.0,4.5])
+                          tag_loc=[7.0,4.5],
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
 
         cbar = r'$\nabla{\rho}$'
         
@@ -225,7 +229,9 @@ for i, loc in enumerate( locs ):
                           cbar_label=cbar,
                           wall=wall,
                           tag = params.tag,
-                          tag_loc=[7.0,4.5])
+                          tag_loc=[7.0,4.5],
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
 
         plot_slicez_stat( xx,yy,gradrho, 
                           separation=seplinefile,
@@ -236,7 +242,9 @@ for i, loc in enumerate( locs ):
                           cbar_label=cbar,
                           wall=wall,
                           tag = params.tag,
-                          tag_loc=[7.0,4.5])
+                          tag_loc=[7.0,4.5],
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
 
         cbar = 'DS'
         plot_slicez_stat( xx,yy,DS, 
@@ -248,7 +256,9 @@ for i, loc in enumerate( locs ):
                           cbar_label=cbar,
                           wall=wall,
                           tag = params.tag,
-                          tag_loc=[7.0,4.5])
+                          tag_loc=[7.0,4.5],
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
 
 
         cbar = r'$tke$'
@@ -262,7 +272,9 @@ for i, loc in enumerate( locs ):
                           cbar_label=cbar,
                           wall=wall,
                           tag = params.tag,
-                          tag_loc=[7.0,4.5])
+                          tag_loc=[7.0,4.5],
+                          x_lim=[-15,10],
+                          y_lim=[0,6] )
         
         cbar = r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$"
         cbar_levels = np.linspace(0,0.5,51)

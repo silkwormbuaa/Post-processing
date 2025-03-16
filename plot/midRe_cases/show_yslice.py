@@ -27,17 +27,18 @@ from   vista.statistic   import StatisticData
 # =============================================================================
 def main():
     
-    casefolder  = '/home/wencan/temp/241030/'
+    casefolder  = '/home/wencan/temp/231124/'
     loc         = 0.1
     sub_folder  = 'y_' + str(loc)
     vars_in     = ['pp','p','u','v','w','T']
+    bbox        = [-100,0,-2,10,-20,20]
 
     dirs       = Directories( casefolder )
     params     = Params( dirs.case_para_file )
     grid       = GridData( dirs.grid )
     
     grid.read_grid()
-    blocklist, index = grid.select_sliced_blockgrids( 'Y', loc )
+    blocklist, index = grid.select_sliced_blockgrids( 'Y', loc, bbox=bbox )
     
     os.chdir( dirs.pp_statistics + '/' + sub_folder )
     stat        = StatisticData( f'stat_{sub_folder}.bin' )
@@ -51,12 +52,11 @@ def main():
 
 def visualize( dataset:pv.MultiBlock ):
     
-    fig, ax = plt.subplots(1,1,figsize=(8,6))
-    
     dataset = dataset.cell_data_to_point_data().combine()
     
+    
     p = pv.Plotter()
-    p.add_mesh( dataset, scalars='u', cmap='RdBu_r' )
+    p.add_mesh( dataset, scalars='u', cmap='coolwarm' )
 
     p.add_axes()
     p.show()

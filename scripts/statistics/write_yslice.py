@@ -25,7 +25,7 @@ from   vista.directories import create_folder
 # =============================================================================
 # check memory estimation compared to the full statistics.bin file
 
-casedir        = '/home/wencan/temp/241030/'
+casedir        = '/home/wencan/temp/231124/'
 slic_type      = 'Y'
 default_output = False
 
