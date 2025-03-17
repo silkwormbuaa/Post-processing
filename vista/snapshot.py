@@ -2244,6 +2244,12 @@ class Snapshot:
         compute separation bubble volume from PDF of separation.
         
         Need the pdf_sep ready in self.snap_data[].df
+        
+        G: GridData instance
+        cc_df: cutcell dataframe from cutcells_setup.dat
+        roughwall: if rough wall is considered
+        opt: 1 for pdf>50%, 2 for integration of pdf_sep over whole domain
+        buff: number of ghost layers
         """
         
         vol_bubble = 0.0
@@ -2334,16 +2340,23 @@ class Snapshot:
             vars = self.snap_cleandata[0].df.columns.tolist()
         
 # ----- setupt tecplot file
+
+        tp.session.connect()
+        
+        # 'tp.new_layout()' doesn't work without tp.session.connect() 
+        # on dell desktop (ubuntu 24.04 is not supported by tecplot 2023r1,
+        # which is offered by the university so far.)
         
         tp.new_layout()
-        frame = tp.active_frame()
+        
+        frame   = tp.active_frame()
         dataset = frame.create_dataset('snapshot',['x','y','z'] + vars)
         
         for i in range( len(self.snap_cleandata) ):
             
-            print(f"write block {i} {bl_data.num:05d} to tecplot.")
-            
             bl_data = self.snap_cleandata[i]
+            
+            print(f"write block {i} {bl_data.num:05d} to tecplot.")
             
             npx = int(bl_data.npx)
             npy = int(bl_data.npy)
@@ -2353,7 +2366,9 @@ class Snapshot:
                                              (npz, npy, npx),
                                              dtypes=FieldDataType.Float )
 
-            xx,yy,zz = np.meshgrid( bl_data.g.gx, bl_data.g.gy, bl_data.g.gz, indexing='ij' )
+            xx,yy,zz = np.meshgrid( bl_data.g.gx[buff:-buff], 
+                                    bl_data.g.gy[buff:-buff], 
+                                    bl_data.g.gz[buff:-buff], indexing='ij' )
 
             # tecplot needs x,y,z in C order
             
@@ -2426,7 +2441,7 @@ class Snapshot:
                 continue
             
             bl_num = snap_bl.num
-            g  = snap_bl.g
+            g  = self.grid3d.g[bl_num-1]
             
             px = (g.px[buffl:-buffr]+rescale[0])/rescale[3]
             py = (g.py[buffl:-buffr]+rescale[1])/rescale[4]
