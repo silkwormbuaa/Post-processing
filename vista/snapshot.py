@@ -2504,7 +2504,79 @@ class Snapshot:
         dataset = self.create_vtk_multiblock(vars, block_list=block_list, buff=buff)
         
         write_vtm_file( filename, dataset )
+
+
+# ----------------------------------------------------------------------
+# >>> spanwise average                                          (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/17  - created
+#
+# Desc
+#     Do spanwise average and store the averaged results into a pickeled 
+#     StatisticData (inca's statistic.bin requires all dozens of variables, 
+#     too large and unnecessary).
+#
+# ----------------------------------------------------------------------
+
+    def spanwise_average( self, blocklist, vars, 
+                          buff=3, rescale=[0.0,0.0,0.0,1.0,1.0,1.0] ):
         
+        """
+        blocklist : blocks that apply spanwise average
+        vars      : list of variables
+        """
+        
+        grid3d    = self.grid3d
+        
+        if self.type != 'block':
+            raise ValueError("Only 'block' type is supported for spanwise average.")
+        
+        # - drop ghost cells
+        
+        self.drop_ghost( blocklist, buff=3, mode='symmetry' )
+        
+        # - get list of grouped block
+        grouped_block_list = grid3d.group_by_range('xy', block_list=blocklist)
+        
+        vtk_blocks = list()
+        
+        # -- loop over the list
+        for group in grouped_block_list:
+            
+            g  = grid3d.g[group[0]-1]
+            px = (g.px[buff:-buff]+rescale[0])
+            py = (g.py[buff:-buff]+rescale[1])
+            pz = np.array([-0.1,0.1])
+            
+            bl_vtk = create_3d_vtkRectilinearGrid( px/rescale[3], py/rescale[4], pz/rescale[5] )
+            
+            for var in vars:
+                
+                var_data = list()
+                
+                for num in group:
+                    bl_data = self.snap_cleandata[self.bl_nums_clean.index(num)].df[var]
+                    var_data.append( np.array(bl_data).reshape(g.nz,g.ny,g.nx).mean(axis=0) )
+                
+                var_data = np.array(var_data).mean(axis=0)
+                
+                if   var_data.size != (len(px)-1)*(len(py)-1):
+                    raise ValueError("Data length does not match.")
+                elif var_data.size == 0:        
+                    raise ValueError(f"There is no data in blocks {group}.")
+
+                bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, var, var_data )
+
+            vtk_blocks.append( bl_vtk )
+        
+        dataset = create_multiblock_dataset( vtk_blocks )
+        
+        return dataset
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
