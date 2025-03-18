@@ -1582,7 +1582,8 @@ class StatisticData:
 # ----------------------------------------------------------------------
 
     def compute_bubble_volume( self, G:GridData, block_list,
-                               cc_df=None, roughwall=False, buff=3 ):
+                               cc_df=None, roughwall=False, buff=3,
+                               y_threshold=None ):
         
         """
         G     : GridData instance
@@ -1592,6 +1593,7 @@ class StatisticData:
         Need data chunk with u ready.
         G should contain cell volume.
         wd (wall distance) should be contained in self.bl[num-1].df
+        y_threshold : only calculate bubble volume above this y threshold
         """
         
         vol_bubble = 0.0
@@ -1607,7 +1609,13 @@ class StatisticData:
             
             u = np.array( df['u'] ).reshape( npz, npy, npx )
             
-            identifier = u < 0.0
+            if y_threshold is not None:
+                y  = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
+                identifier = (u<0.0) & (y.T>y_threshold)
+
+            else:
+                identifier = u < 0.0
+            
             identifier = identifier*1.0
             
             vol = g.vol
@@ -1623,7 +1631,6 @@ class StatisticData:
                 g.assign_vol_fra()
             
             vol_bubble_block = vol*identifier*(g.vol_fra.T)
-                
             vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
             
         self.vol_bubble = vol_bubble

@@ -2238,7 +2238,8 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def compute_bubble_volume_pdf( self, G:GridData, cc_df=None,
-                                   roughwall=False, opt=1, buff=3 ):
+                                   roughwall=False, opt=1, buff=3,
+                                   y_threshold=None ):
         
         """
         compute separation bubble volume from PDF of separation.
@@ -2269,32 +2270,40 @@ class Snapshot:
             vol = g.vol
             
             if opt == 1:
-                
-                identifier = pdf_sep > 0.5
+
+                if y_threshold is not None:
+                    y  = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
+                    identifier = (pdf_sep > 0.5)&(y.T > y_threshold)
+                else:
+                    identifier = pdf_sep > 0.5
                 identifier = identifier*1.0   # convert to float
                 
                 if roughwall:
-                    
                     temp_df = cc_df[cc_df['block_number'] == bl_num]
                     wall_dist = np.array( snap_bl.df['wd'] )
                     g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )
-                
                 else: g.assign_vol_fra()
             
                 vol_bubble_block = vol*identifier*(g.vol_fra.T)
                 vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
             
+            
             elif opt == 2:
                 
+                if y_threshold is not None:
+                    y  = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
+                    identifier = y.T > y_threshold
+                else:
+                    identifier = np.ones_like(pdf_sep)
+                identifier = identifier*1.0
+                
                 if roughwall:
-                        
                     temp_df = cc_df[cc_df['block_number'] == bl_num]
                     wall_dist = np.array( snap_bl.df['wd'] )
                     g.assign_vol_fra( df=temp_df, wall_dist=wall_dist )    
-        
                 else: g.assign_vol_fra()
                 
-                vol_bubble_block = vol*pdf_sep*(g.vol_fra.T)
+                vol_bubble_block = vol*identifier*pdf_sep*(g.vol_fra.T)
                 vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
         
         self.vol_bubble = vol_bubble

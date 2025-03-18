@@ -18,7 +18,7 @@ import pandas            as     pd
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.log         import Logger
+# from   vista.log         import Logger
 from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.params      import Params
@@ -26,11 +26,13 @@ from   vista.snapshot    import Snapshot
 from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
-sys.stdout = Logger( os.path.basename(__file__) )
+#sys.stdout = Logger( os.path.basename(__file__) )
 
-bbox = [-60.0, 90.0, -1.5, 10.0, -11.0, 11.0]
+case_folder = '/home/wencan/temp/250304/'
 
-dirs = Directories( os.getcwd() )
+bbox = [-60.0, 100.0, -1.5, 10.0, -11.0, 11.0]
+
+dirs = Directories( case_folder )
 
 parameters = Params( dirs.case_para_file )
 roughwall  = parameters.roughwall
@@ -40,7 +42,7 @@ with timer('load grid data'):
     grd = GridData( dirs.grid )
     grd.read_grid()
     grd.cell_volume()
-    block_list = grd.select_blockgrids( bbox)
+    block_list = grd.select_blockgrids( bbox )
 
 
 if roughwall:
@@ -48,7 +50,7 @@ if roughwall:
     with timer('load wall distance snapshot'):
         wd_snap_file = get_filelist( dirs.wall_dist, key='snapshot.bin')[0]
         wd_snap = Snapshot( wd_snap_file )
-        wd_snap.read_snapshot( var_read=['wd'] )
+        wd_snap.read_snapshot( block_list, var_read=['wd'] )
     
     with timer('load cutcell info'):
         cc_df = pd.read_csv( dirs.cc_setup, delimiter=r'\s+' )
@@ -72,9 +74,15 @@ with timer('load statistics.bin'):
 
 
 with timer('compute bubble volume'):
-    vol = stat.compute_bubble_volume( grd, block_list, cc_df=cc_df,  roughwall=roughwall )
+    vol = stat.compute_bubble_volume( grd, block_list, cc_df=cc_df,  
+                                      roughwall=roughwall,
+                                      y_threshold=0.0)
 
-print(f"case {dirs.case_dir} bubble volume: {vol}")
+print(f"case {dirs.case_dir} bubble volume: {vol:.2f}")
+
+os.chdir( dirs.pp_bubble )
+with open(f"{dirs.pp_bubble}/bubble_size_stat.dat", 'w') as f:
+    f.write(f"bubble volume: {vol:.2f}\n")
 
 # print out the time finishing the job
 

@@ -107,15 +107,17 @@ def main():
 
     with timer("compute bubble size"):
         
-        sep1 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, roughwall=roughwall, opt=1 )
-        sep2 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, roughwall=roughwall, opt=2 )
+        sep1 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, 
+                                   roughwall=roughwall, opt=1, y_threshold=0.0 )
+        sep2 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, 
+                                   roughwall=roughwall, opt=2, y_threshold=0.0 )
 
         print(f"bubble size by 50% pdf: {sep1:.2f}")
         print(f"bubble size PDF:        {sep2:.2f}")
         
         with open('bubble_size_pdf.dat','w') as f:
             f.write(f"bubble size by 50% pdf: {sep1:.2f}\n")
-            f.write(f"bubble size PDF:        {sep2:.2f}")
+            f.write(f"bubble size PDF:        {sep2:.2f}\n")
 
 
     # show bubble outline computed from p.d.f. and mean u
