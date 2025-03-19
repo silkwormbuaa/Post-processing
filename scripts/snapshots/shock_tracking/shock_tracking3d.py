@@ -78,7 +78,8 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
     shocklines            = list()
     x_last_shock          = None
     
-    if mpi.is_root: create_folder( './figs/')
+    if mpi.is_root: 
+        create_folder( './figs/'); sys.stdout.flush()
 
     mpi.barrier()
     
@@ -87,6 +88,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
     if mpi.size == 1:
     
         print("No worker available. Master should do all tasks.")
+        sys.stdout.flush()
         
         for i, snapfile in enumerate(snapfiles):
             
@@ -148,7 +150,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
 # - do shock tracking on a single snapshot
 
 def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
-                         tolerance=3.0, half_width=2.0 ):
+                         tolerance=3.0, half_width=2.5 ):
     
     # - read snapshot file
 
@@ -226,13 +228,22 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
     sub_grad_rho = grad_rho[:,indx_s:indx_e]
     sub_xx       = xx[:,indx_s:indx_e]
     
-    idmax        = sub_grad_rho.argmax(axis=1)
+    idmax        = sub_grad_rho.argmax(axis=1) # array stores the index of max grad_rho
     x_shock      = np.zeros(npz)
     
     for j in range(len(idmax)):
-        p1 = [ sub_xx[j,idmax[j]-1], sub_grad_rho[j,idmax[j]-1] ]
-        p2 = [ sub_xx[j,idmax[j]],   sub_grad_rho[j,idmax[j]  ] ]
-        p3 = [ sub_xx[j,idmax[j]+1], sub_grad_rho[j,idmax[j]+1] ]
+        
+        if idmax[j] > len(sub_xx[j])-2:
+            
+            p1 = [ sub_xx[j,idmax[-2]-1], sub_grad_rho[j,idmax[-2]-1] ]
+            p2 = [ sub_xx[j,idmax[-2]],   sub_grad_rho[j,idmax[-2]  ] ]
+            p3 = [ sub_xx[j,idmax[-2]+1], sub_grad_rho[j,idmax[-2]+1] ]
+        
+        else:
+            
+            p1 = [ sub_xx[j,idmax[j]-1], sub_grad_rho[j,idmax[j]-1] ]
+            p2 = [ sub_xx[j,idmax[j]],   sub_grad_rho[j,idmax[j]  ] ]
+            p3 = [ sub_xx[j,idmax[j]+1], sub_grad_rho[j,idmax[j]+1] ]
         
         x_shock[j], _ = find_parabola_max(p1,p2,p3)        
     
