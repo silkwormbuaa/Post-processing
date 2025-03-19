@@ -227,8 +227,17 @@ class Params:
     @property
     def snap_range_z( self ):
         return self.__range_to_list__( self.params.get('SNAP_RANGE_Z') )
-        
 
+# --------------- shock tracking parameters ---------------------------
+
+    @property
+    def shock_range_1( self ):
+        return self.__range_to_list__( self.params.get('shock_range_1') )
+
+    @property
+    def shock_range_2( self ):
+        return self.__range_to_list__( self.params.get('shock_range_2') )
+    
 # --------------- case specific flow conditions -----------------------
     
     @property

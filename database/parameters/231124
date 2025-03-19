@@ -40,6 +40,15 @@ prb_sep   = 67
 prb_att   = 221
 prb_pfmax = 47
 
+# Shock tracking range
+
+# group 1, y = 10.4 (2.00 delta)
+# group 2, y = 30.0 (5.77 delta)
+# y_location, range_start, range_end
+shock_range_1 =  10.4, -8.0, 10.0
+shock_range_2 =  30.0, 17.0, 32.0
+
+
 # INCA version led different setting
 
 prb_withT = True

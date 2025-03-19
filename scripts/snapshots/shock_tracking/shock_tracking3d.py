@@ -21,76 +21,144 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.mpi         import MPIenv
 from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
 from   vista.grid        import GridData
+from   vista.params      import Params
+from   vista.directories import Directories
 from   vista.tools       import find_indices
-from   vista.tools       import get_filelist
 from   vista.directories import create_folder
 from   vista.math_opr    import find_parabola_max
 
+
+def main():
+    
+    mpi = MPIenv()
+    
+    case_dir = '/home/wencan/temp/smooth_mid/'
+    
+    dirs     = Directories( case_dir )
+    params   = Params( dirs.case_para_file )
+
+    grd       = None
+    snapfiles = None 
+
+    if mpi.is_root:
+        
+        create_folder( dirs.pp_shock )
+        create_folder( dirs.pp_shock + '/group1' )
+        create_folder( dirs.pp_shock + '/group2' )
+        grd = GridData( dirs.grid )
+        grd.read_grid()
+        snapfiles = dirs.snap3d_files
+
+    grd       = mpi.comm.bcast(grd, root=0)
+    snapfiles = mpi.comm.bcast(snapfiles, root=0)
+    params = Params( dirs.case_para_file )
+
+    os.chdir( dirs.pp_shock + '/group1' )
+    mpi_shock_tracking( mpi, grd, snapfiles, params.shock_range_1, 'shock_tracking1.pkl' )
+    
+    mpi.barrier()
+    
+    os.chdir( dirs.pp_shock + '/group2' )
+    mpi_shock_tracking( mpi, grd, snapfiles, params.shock_range_2, 'shock_tracking2.pkl' )    
+
+
 # =============================================================================
+# - do shock tracking in paralel
 
-y0 = 10.4
-xrange = [0.0,18.0]     
+def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
+    
+    blocklist = grd.select_blockgrids([ranges[1], ranges[2], ranges[0], ranges[0], -10.4, 10.4])
 
-# y = 10.4, xrange = [-8,10] for 231124
-#           xrange = [8,24]  for smooth_mid
-#           xrange = [0,18]  for 241030
-# y = 31.2, xrange = [17,32] for 231124
-#           xrange = [30,45] for smooth_mid
-#           xrange = [24,40] for 241030
+    # - initialize a list to store the x location of the shock
+    times                 = list()
+    shocklines            = list()
+    x_last_shock          = None
+    
+    if mpi.is_root: create_folder( './figs/')
 
-inputpath    = '/home/wencan/temp/241030/'
-outputpath   = inputpath + 'postprocess/snapshots/shock_tracking/3d'
+    mpi.barrier()
+    
+    clock = timer("Tracking the shock front")
+    
+    if mpi.size == 1:
+    
+        print("No worker available. Master should do all tasks.")
+        
+        for i, snapfile in enumerate(snapfiles):
+            
+            itime, shockline, x_last_shock = snap_shock_tracking( 
+                                                snapfile, 
+                                                grd, 
+                                                blocklist, 
+                                                ranges, 
+                                                x_last_shock )
+            times.append( itime )
+            shocklines.append( shockline )
 
-snapshotpath = inputpath + 'snapshots/'
-gridfile     = inputpath + 'results/inca_grid.bin'
+        
+            clock.print_progress( i, len(snapfiles) )
 
-tolerance  = 3.0     # max distance between max_grad_rho and mean shock location
+        gather_time = mpi.comm.gather( times, root=0 )
+        gather_line = mpi.comm.gather( shocklines, root=0 )
 
-half_width = 2.0    # half width of the subdomain to search for the shock front
+    else:
+        
+        if mpi.is_root:
+            mpi.master_distribute( snapfiles )
+            
+        else:
+            while True:
+                task_id = mpi.worker_receive()
+                if task_id is None: break
+                else:
+                    itime, shockline, x_last_shock = snap_shock_tracking( 
+                                                        snapfiles[task_id], 
+                                                        grd, 
+                                                        blocklist, 
+                                                        ranges, 
+                                                        x_last_shock )
+                    times.append( itime )
+                    shocklines.append( shockline )
+
+                    clock.print_progress( task_id, len(snapfiles) )
+
+        mpi.barrier()
+        
+        gather_time = mpi.comm.gather( times, root=0 )
+        gather_line = mpi.comm.gather( shocklines, root=0 )
+
+    if mpi.is_root:
+        
+        times = [ t for sublist in gather_time for t in sublist ]
+        shocklines = [ l for sublist in gather_line for l in sublist ]
+        
+        # sort based on time
+        times, shocklines = zip(*sorted(zip(times, shocklines)))
+        
+        with open(outfile, 'wb') as f:
+            pickle.dump( times, f )
+            pickle.dump( shocklines, f )
+
 
 # =============================================================================
+# - do shock tracking on a single snapshot
 
-# - get the snapshot file list
-
-snap_files = get_filelist( snapshotpath, 'snapshot.bin' )
-
-# - read grid file
-
-grd = GridData( gridfile )
-grd.read_grid()
-blocklist = grd.select_blockgrids([xrange[0], xrange[1], y0, y0, -10.4, 10.4])
-
-print(f"These blocks contains the shock-detecting line:{blocklist}.")
-print("==================\n")
-
-# - initialize a list to store the x location of the shock
-
-times                 = list()
-shocklines            = list()
-x_last_shock          = None
-
-
-# - loop over the snapshot files
-
-os.chdir( create_folder(outputpath) )
-clock = timer("Tracking the shock front")
-
-for i, snap_file in enumerate(snap_files):
+def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
+                         tolerance=3.0, half_width=2.0 ):
     
     # - read snapshot file
 
     snap = Snapshot( snap_file )
     snap.verbose = False
-    snap.grid3d = grd
+    snap.grid3d  = grid
     snap.read_snapshot(block_list=blocklist)
     snap.compute_gradients(block_list=blocklist)
 
-    fig, ax = plt.subplots(figsize=(10,6))
-
-    # - initialize a pandas dataframe list to store all blocks' df on the probe line
+# - initialize a pandas dataframe list to store all blocks' df on the probe line
 
     prbdf_list = list()
 
@@ -104,12 +172,12 @@ for i, snap_file in enumerate(snap_files):
         else:
             
             bl = snap.snap_data[ snap.bl_nums.index(bn) ]
-            g = grd.g[bn-1]        
+            g = grid.g[bn-1]        
             
             grad_rho = np.array( bl.df['grad_rho'] ).reshape( bl.npz, bl.npy, bl.npx)
 
             # find the indices of the probe in y direction
-            j,_ = find_indices( g.py, y0 )
+            j,_ = find_indices( g.py, ranges[0] )
             
             plane = np.ravel(grad_rho[3:-3,j,3:-3])
             
@@ -127,7 +195,7 @@ for i, snap_file in enumerate(snap_files):
 
     # - drop outside data and sort the dataframe
     
-    prbdf.drop( prbdf[(prbdf['x'] < xrange[0]) | (prbdf['x'] > xrange[1])].index, 
+    prbdf.drop( prbdf[(prbdf['x'] < ranges[1]) | (prbdf['x'] > ranges[2])].index, 
                 inplace=True )
     prbdf = prbdf.sort_values(by=['z','x'])
     prbdf = prbdf.reset_index(drop=True)
@@ -168,34 +236,29 @@ for i, snap_file in enumerate(snap_files):
         
         x_shock[j], _ = find_parabola_max(p1,p2,p3)        
     
-
-# ------------------------------------------------------------------------------
-    
     z_shock   = zz[:,0]
     shockline = pd.DataFrame( {'x':x_shock, 'z':z_shock} )
     
-    x_last_shock = np.mean(x_shock)
+    x_mean_shock = np.mean(x_shock)
     
-    # - plot the schlieren plane
+    # - plot the schlieren plane and the shock line
     
-    clevels = np.linspace(0,0.36,37)
+    fig, ax = plt.subplots(figsize=(10,6))
+    
+    clevels = np.linspace(0,0.5,51)
     
     ax.contourf( xx, zz, grad_rho, cmap='Greys', levels=clevels, extend='both' )
     ax.plot( x_shock, z_shock, 'r', ls=':' )
     ax.set_title(f"t ={snap.itime:8.2f} ms")
 
-    plt.savefig(f'snap_{snap.itstep:08d}.png')
+    plt.savefig(f'./figs/snap_{snap.itstep:08d}.png')
     plt.close()
-
-    # - output 
-
-    times.append( snap.itime )
-    shocklines.append( shockline )
     
-    progress = (i+1)/len(snap_files)
-    print(f"{i+1}/{len(snap_files)} is done. " + clock.remainder(progress))
-    print("------------------\n")
+    return snap.itime, shockline, x_mean_shock
 
-with open('shock_tracking3d.pkl', 'wb') as f:
-    pickle.dump( times, f )
-    pickle.dump( shocklines, f )
+
+# =============================================================================
+
+if __name__ == '__main__':
+    
+    main()

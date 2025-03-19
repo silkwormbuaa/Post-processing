@@ -28,7 +28,7 @@ from   vista.directories import Directories
 from   vista.tools       import get_filelist
 #sys.stdout = Logger( os.path.basename(__file__) )
 
-case_folder = '/home/wencan/temp/250304/'
+case_folder = '/home/wencan/temp/smooth_adiabatic/'
 
 bbox = [-60.0, 100.0, -1.5, 10.0, -11.0, 11.0]
 

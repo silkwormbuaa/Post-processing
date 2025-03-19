@@ -72,6 +72,7 @@ class Directories:
         self.pp_dmd          = os.path.join( self.pos_dir, 'dmd' )
         self.pp_forces       = os.path.join( self.pos_dir, 'forces' )
         self.pp_bubble       = os.path.join( self.pos_dir, 'bubble' )
+        self.pp_shock        = os.path.join( self.pos_dir, 'shock' )
         
 # --- pp_statistics subdirectories
         
@@ -126,6 +127,11 @@ class Directories:
         folders = [ os.path.join( self.snp_dir, item ) for item in items 
                     if os.path.isdir( os.path.join( self.snp_dir, item ) ) ]
         return folders
+    
+    # snapshot files
+    @property
+    def snap3d_files( self ):
+        return get_filelist( self.snp_dir, 'snapshot.bin' )
     
     # probes list
     @property
