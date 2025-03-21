@@ -28,6 +28,7 @@ from   vista.grid        import GridData
 from   vista.params      import Params
 from   vista.directories import Directories
 from   vista.tools       import find_indices
+from   vista.tools       import distribute_mpi_work
 from   vista.directories import create_folder
 from   vista.math_opr    import find_parabola_max
 
@@ -58,16 +59,87 @@ def main():
     params = Params( dirs.case_para_file )
 
     os.chdir( dirs.pp_shock + '/group1' )
-    mpi_shock_tracking( mpi, grd, snapfiles, params.shock_range_1, 'shock_tracking1.pkl' )
+    #mpi_shock_tracking( mpi, grd, snapfiles, params.shock_range_1, 'shock_tracking1.pkl' )
+    static_alloc_shock_tracking( mpi, grd, snapfiles, params.shock_range_1, 'shock_tracking1.pkl' )
     
     mpi.barrier()
     
     os.chdir( dirs.pp_shock + '/group2' )
-    mpi_shock_tracking( mpi, grd, snapfiles, params.shock_range_2, 'shock_tracking2.pkl' )    
+    #mpi_shock_tracking( mpi, grd, snapfiles, params.shock_range_2, 'shock_tracking2.pkl' )    
+    static_alloc_shock_tracking( mpi, grd, snapfiles, params.shock_range_2, 'shock_tracking2.pkl' )
 
+# ----------------------------------------------------------------------
+# >>> static_alloc_shock_tracking                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/21  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def static_alloc_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
+    
+    if mpi.is_root: 
+        create_folder( './figs/'); sys.stdout.flush()
+
+    mpi.barrier()
+    
+    clock = timer("Tracking the shock front")
+    
+    blocklist = grd.select_blockgrids([ranges[1], ranges[2], ranges[0], ranges[0], -10.4, 10.4])
+    
+    # - initialize a list to store the x location of the shock
+    times                 = list()
+    shocklines            = list()
+    shockline             = None
+    
+    # - distribute the tasks among all processors
+    
+    i_s, i_e = distribute_mpi_work( len(snapfiles), mpi.size, mpi.rank )
+    snapfiles = snapfiles[i_s:i_e]
+    
+    for i, snapfile in enumerate(snapfiles):
+
+        itime, shockline = snap_shock_tracking( 
+                           snapfile, 
+                           grd, 
+                           blocklist, 
+                           ranges, 
+                           shockline )
+        times.append( itime )
+        shocklines.append( shockline )
+        
+        clock.print_progress( i, len(snapfiles), mpi.rank )
+    
+    gather_time = mpi.comm.gather( times, root=0 )
+    gather_line = mpi.comm.gather( shocklines, root=0 )
+
+    if mpi.is_root:
+        
+        times = [ t for sublist in gather_time for t in sublist ]
+        shocklines = [ l for sublist in gather_line for l in sublist ]
+        
+        # sort based on time
+        times, shocklines = zip(*sorted(zip(times, shocklines)))
+        
+        with open(outfile, 'wb') as f:
+            pickle.dump( times, f )
+            pickle.dump( shocklines, f )
+        
+        print(f"Task {i} completed.")
+        sys.stdout.flush()
+        
 
 # =============================================================================
 # - do shock tracking in paralel
+
+# !!! realize dynamic task allocation is not applicable here, since the shock
+# !!! tracking is dependent on the last shock location.
 
 def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
     
@@ -101,7 +173,6 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
             times.append( itime )
             shocklines.append( shockline )
 
-        
             clock.print_progress( i, len(snapfiles) )
 
         gather_time = mpi.comm.gather( times, root=0 )
@@ -150,7 +221,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
 # - do shock tracking on a single snapshot
 
 def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
-                         half_width=2.0 ):
+                         tolerance=3.0, half_width=2.0 ):
     
     # - read snapshot file
 
@@ -219,8 +290,13 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
 # - check if any element of x_shock is 'tolerance' away from x_last_shock
 # ------------------------------------------------------------------------------    
     
-    if x_last_shock is None: x_last_shock = x_temp
-    
+    if x_last_shock is None: 
+        
+        x_last_shock = x_temp
+        if np.any( np.abs(x_temp - np.mean(x_last_shock))  > tolerance ):
+            print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
+            x_last_shock = np.array([np.mean(x_temp)]*len(x_last_shock))
+
     else: x_last_shock = x_last_shock['x'].values
     
     indx_s    = np.array([find_indices(xx[0,:], x-half_width)[0] for x in x_last_shock])
