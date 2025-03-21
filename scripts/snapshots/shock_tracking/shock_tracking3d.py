@@ -76,7 +76,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
     # - initialize a list to store the x location of the shock
     times                 = list()
     shocklines            = list()
-    x_last_shock          = None
+    shockline             = None
     
     if mpi.is_root: 
         create_folder( './figs/'); sys.stdout.flush()
@@ -92,12 +92,12 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
         
         for i, snapfile in enumerate(snapfiles):
             
-            itime, shockline, x_last_shock = snap_shock_tracking( 
-                                                snapfile, 
-                                                grd, 
-                                                blocklist, 
-                                                ranges, 
-                                                x_last_shock )
+            itime, shockline = snap_shock_tracking( 
+                               snapfile, 
+                               grd, 
+                               blocklist, 
+                               ranges, 
+                               shockline )
             times.append( itime )
             shocklines.append( shockline )
 
@@ -117,12 +117,12 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
                 task_id = mpi.worker_receive()
                 if task_id is None: break
                 else:
-                    itime, shockline, x_last_shock = snap_shock_tracking( 
-                                                        snapfiles[task_id], 
-                                                        grd, 
-                                                        blocklist, 
-                                                        ranges, 
-                                                        x_last_shock )
+                    itime, shockline = snap_shock_tracking( 
+                                       snapfiles[task_id], 
+                                       grd, 
+                                       blocklist, 
+                                       ranges, 
+                                       shockline )
                     times.append( itime )
                     shocklines.append( shockline )
 
@@ -150,7 +150,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
 # - do shock tracking on a single snapshot
 
 def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
-                         tolerance=3.0, half_width=2.5 ):
+                         half_width=2.0 ):
     
     # - read snapshot file
 
@@ -213,44 +213,36 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
     # - tracking the shock front line where max grad_rho is located
     
     idmax  = grad_rho.argmax(axis=1)
-    x_temp = xx[:,idmax]
+    
+    x_temp = xx[0,idmax]
 
 # - check if any element of x_shock is 'tolerance' away from x_last_shock
 # ------------------------------------------------------------------------------    
     
-    if x_last_shock is None: x_last_shock = np.mean(x_temp)
+    if x_last_shock is None: x_last_shock = x_temp
     
-    if np.any( np.abs(x_temp - x_last_shock)  > tolerance ):
-        print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
+    else: x_last_shock = x_last_shock['x'].values
     
-    indx_s,_     = find_indices(xx[0,:], x_last_shock-half_width)
-    indx_e,_     = find_indices(xx[0,:], x_last_shock+half_width)
-    sub_grad_rho = grad_rho[:,indx_s:indx_e]
-    sub_xx       = xx[:,indx_s:indx_e]
+    indx_s    = np.array([find_indices(xx[0,:], x-half_width)[0] for x in x_last_shock])
+    indx_e    = indx_s + int( 2*half_width//abs(xx[0,1]-xx[0,0]) )
+    
+    indices      = np.array([np.arange(s,e) for s,e in zip(indx_s,indx_e)])
+    sub_grad_rho = np.take_along_axis(grad_rho, indices, axis=1)
+    sub_xx       = np.take_along_axis(xx, indices, axis=1)
     
     idmax        = sub_grad_rho.argmax(axis=1) # array stores the index of max grad_rho
     x_shock      = np.zeros(npz)
     
     for j in range(len(idmax)):
-        
-        if idmax[j] > len(sub_xx[j])-2:
-            
-            p1 = [ sub_xx[j,idmax[-2]-1], sub_grad_rho[j,idmax[-2]-1] ]
-            p2 = [ sub_xx[j,idmax[-2]],   sub_grad_rho[j,idmax[-2]  ] ]
-            p3 = [ sub_xx[j,idmax[-2]+1], sub_grad_rho[j,idmax[-2]+1] ]
-        
-        else:
-            
-            p1 = [ sub_xx[j,idmax[j]-1], sub_grad_rho[j,idmax[j]-1] ]
-            p2 = [ sub_xx[j,idmax[j]],   sub_grad_rho[j,idmax[j]  ] ]
-            p3 = [ sub_xx[j,idmax[j]+1], sub_grad_rho[j,idmax[j]+1] ]
+
+        p1 = [ sub_xx[j,idmax[j]-1], sub_grad_rho[j,idmax[j]-1] ]
+        p2 = [ sub_xx[j,idmax[j]  ], sub_grad_rho[j,idmax[j]  ] ]
+        p3 = [ sub_xx[j,idmax[j]+1], sub_grad_rho[j,idmax[j]+1] ]
         
         x_shock[j], _ = find_parabola_max(p1,p2,p3)        
     
     z_shock   = zz[:,0]
     shockline = pd.DataFrame( {'x':x_shock, 'z':z_shock} )
-    
-    x_mean_shock = np.mean(x_shock)
     
     # - plot the schlieren plane and the shock line
     
@@ -259,15 +251,15 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
     clevels = np.linspace(0,0.5,51)
     
     ax.contourf( xx, zz, grad_rho, cmap='Greys', levels=clevels, extend='both' )
+    ax.plot( sub_xx[:,-1], z_shock, 'b', ls=':' )
+    ax.plot( sub_xx[:,0 ], z_shock, 'b', ls=':' )
     ax.plot( x_shock, z_shock, 'r', ls=':' )
     ax.set_title(f"t ={snap.itime:8.2f} ms")
 
     plt.savefig(f'./figs/snap_{snap.itstep:08d}.png')
     plt.close()
     
-    return snap.itime, shockline, x_mean_shock
-
-
+    return snap.itime, shockline
 # =============================================================================
 
 if __name__ == '__main__':
