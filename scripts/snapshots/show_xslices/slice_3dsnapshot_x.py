@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   slice_3dsnapshot.py
+@File    :   slice_3dsnapshot_x.py
 @Time    :   2024/11/19 
 @Author  :   Wencan WU 
 @Version :   1.0
