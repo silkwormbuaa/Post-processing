@@ -295,11 +295,13 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
         x_last_shock = x_temp
         if np.any( np.abs(x_temp - np.mean(x_last_shock))  > tolerance ):
             print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
+            # - cut off the extreme values
+            x_temp[np.abs(x_temp - np.mean(x_last_shock))  > tolerance] = np.mean(x_last_shock)
             x_last_shock = np.array([np.mean(x_temp)]*len(x_last_shock))
 
     else: x_last_shock = x_last_shock['x'].values
     
-    indx_s    = np.array([find_indices(xx[0,:], x-half_width)[0] for x in x_last_shock])
+    indx_s    = np.array( [find_indices(xx[0,:], x-half_width)[0] for x in x_last_shock] )
     indx_e    = indx_s + int( 2*half_width//abs(xx[0,1]-xx[0,0]) )
     
     indices      = np.array([np.arange(s,e) for s,e in zip(indx_s,indx_e)])
