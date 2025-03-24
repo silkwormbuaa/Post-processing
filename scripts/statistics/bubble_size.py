@@ -28,7 +28,7 @@ from   vista.directories import Directories
 from   vista.tools       import get_filelist
 #sys.stdout = Logger( os.path.basename(__file__) )
 
-case_folder = '/home/wencan/temp/smooth_adiabatic/'
+case_folder = '/home/wencan/temp/241030/'
 
 bbox = [-60.0, 100.0, -1.5, 10.0, -11.0, 11.0]
 
@@ -74,15 +74,15 @@ with timer('load statistics.bin'):
 
 
 with timer('compute bubble volume'):
-    vol = stat.compute_bubble_volume( grd, block_list, cc_df=cc_df,  
-                                      roughwall=roughwall,
-                                      y_threshold=0.0)
+    vol1, vol2 = stat.compute_bubble_volume( grd, block_list, cc_df=cc_df,  
+                                             roughwall=roughwall,
+                                             y_threshold=0.0)
 
-print(f"case {dirs.case_dir} bubble volume: {vol:.2f}")
+print(f"case {dirs.case_dir} bubble volume (threshold y>0): {vol1:.2f} ({vol2:.2f})")
 
 os.chdir( dirs.pp_bubble )
 with open(f"{dirs.pp_bubble}/bubble_size_stat.dat", 'w') as f:
-    f.write(f"bubble volume: {vol:.2f}\n")
+    f.write(f"bubble volume (threshold y>0): {vol1:.2f} ({vol2:.2f})\n")
 
 # print out the time finishing the job
 

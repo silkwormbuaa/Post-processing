@@ -2235,12 +2235,10 @@ class Snapshot:
         self.vol_bubble     = vol_bubble
         
         if y_threshold is not None:
-        
             self.vol_bubble_thr = vol_bubble_thr
             return vol_bubble, vol_bubble_thr
         
         else:
-            
             return vol_bubble    
 
 
@@ -2277,7 +2275,8 @@ class Snapshot:
         buff: number of ghost layers
         """
         
-        vol_bubble = 0.0
+        vol_bubble     = 0.0
+        vol_bubble_thr = 0.0
         
         for snap_bl in self.snap_data:
             
@@ -2297,9 +2296,10 @@ class Snapshot:
 
                 if y_threshold is not None:
                     y  = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
-                    identifier = (pdf_sep > 0.5)&(y.T > y_threshold)
-                else:
-                    identifier = pdf_sep > 0.5
+                    identifier_thr = (pdf_sep > 0.5)&(y.T > y_threshold)
+                    identifier_thr = identifier_thr*1.0
+
+                identifier = pdf_sep > 0.5
                 identifier = identifier*1.0   # convert to float
                 
                 if roughwall:
@@ -2309,17 +2309,20 @@ class Snapshot:
                 else: g.assign_vol_fra()
             
                 vol_bubble_block = vol*identifier*(g.vol_fra.T)
-                vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+                vol_bubble      += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
             
+                if y_threshold is not None:
+                    vol_bubble_block_thr = vol*identifier_thr*(g.vol_fra.T)
+                    vol_bubble_thr      += np.sum(vol_bubble_block_thr[buff:-buff,buff:-buff,buff:-buff])
             
             elif opt == 2:
                 
                 if y_threshold is not None:
                     y  = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
-                    identifier = y.T > y_threshold
-                else:
-                    identifier = np.ones_like(pdf_sep)
-                identifier = identifier*1.0
+                    identifier_thr = y.T > y_threshold
+                    identifier_thr = identifier_thr*1.0
+
+                identifier = np.ones_like(pdf_sep)*1.0
                 
                 if roughwall:
                     temp_df = cc_df[cc_df['block_number'] == bl_num]
@@ -2329,10 +2332,19 @@ class Snapshot:
                 
                 vol_bubble_block = vol*identifier*pdf_sep*(g.vol_fra.T)
                 vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+
+                if y_threshold is not None:
+                    vol_bubble_block_thr = vol*identifier_thr*pdf_sep*(g.vol_fra.T)
+                    vol_bubble_thr      += np.sum(vol_bubble_block_thr[buff:-buff,buff:-buff,buff:-buff])
         
         self.vol_bubble = vol_bubble
         
-        return vol_bubble
+        if y_threshold is not None:
+            self.vol_bubble_thr = vol_bubble_thr
+            return vol_bubble, vol_bubble_thr
+        
+        else:
+            return vol_bubble
     
 
 # ----------------------------------------------------------------------

@@ -38,13 +38,13 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 def main():
 
-    # =============================================================================
+# =============================================================================
 
     case_dir = '/home/wencan/temp/smooth_adiabatic/'
     var_out  = ['u','n_sep','pdf_sep','wd']
     rescale  = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
 
-    # =============================================================================
+# =============================================================================
 
     dirs      = Directories( case_dir )
     params    = Params( dirs.case_para_file )
@@ -107,20 +107,26 @@ def main():
 
     with timer("compute bubble size"):
         
-        sep1 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, 
+        sep1,sep2 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, 
                                    roughwall=roughwall, opt=1, y_threshold=0.0 )
-        sep2 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, 
+        sep3,sep4 = snapshot_container.compute_bubble_volume_pdf( grd, cc_df, 
                                    roughwall=roughwall, opt=2, y_threshold=0.0 )
 
-        print(f"bubble size by 50% pdf: {sep1:.2f}")
-        print(f"bubble size PDF:        {sep2:.2f}")
+        df_bubble = pd.read_csv('bubble_size.dat', delimiter=r'\s+')
+        sep5      = np.mean( df_bubble['bubble_volume'] )
+        sep6      = np.mean( df_bubble['bubble_volume_thr'] )
+
+        print(f"bubble size by 50% pdf   (threshold y>0): {sep1:.2f} ({sep2:.2f})")
+        print(f"bubble size PDF          (threshold y>0): {sep3:.2f} ({sep4:.2f})")
+        print(f"bubble size time average (threshold y>0): {sep5:.2f} ({sep6:.2f})")
         
         with open('bubble_size_pdf.dat','w') as f:
-            f.write(f"bubble size by 50% pdf: {sep1:.2f}\n")
-            f.write(f"bubble size PDF:        {sep2:.2f}\n")
+            f.write(f"bubble size by 50% pdf  (threshold y>0): {sep1:.2f} ({sep2:.2f})\n")
+            f.write(f"bubble size PDF         (threshold y>0): {sep3:.2f} ({sep4:.2f})\n")
+            f.write(f"bubble size time average(threshold y>0): {sep5:.2f} ({sep6:.2f})\n")
 
-
-    # show bubble outline computed from p.d.f. and mean u
+# =============================================================================
+# --- show bubble outline computed from p.d.f. and mean u
 
     snapshot_container.grid3d = grd
     dataset = snapshot_container.spanwise_average( blocklist, ['u','pdf_sep'], rescale=rescale )
@@ -144,6 +150,9 @@ def main():
 
     #snapshot_container.write_szplt( 'pdf_sep.szplt', buff=2 )
 
+
+# =============================================================================
+# --- post process the dataset to show the bubble outline
 
 def post_process_dataset( dataset:pv.MultiBlock, vars_out ):
 

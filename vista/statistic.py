@@ -1596,7 +1596,8 @@ class StatisticData:
         y_threshold : only calculate bubble volume above this y threshold
         """
         
-        vol_bubble = 0.0
+        vol_bubble     = 0.0
+        vol_bubble_thr = 0.0
         
         for num in block_list:
             
@@ -1611,11 +1612,10 @@ class StatisticData:
             
             if y_threshold is not None:
                 y  = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
-                identifier = (u<0.0) & (y.T>y_threshold)
-
-            else:
-                identifier = u < 0.0
-            
+                identifier_thr = (u<0.0) & (y.T>y_threshold)
+                identifier_thr = identifier_thr*1.0
+                
+            identifier = u < 0.0
             identifier = identifier*1.0
             
             vol = g.vol
@@ -1631,11 +1631,20 @@ class StatisticData:
                 g.assign_vol_fra()
             
             vol_bubble_block = vol*identifier*(g.vol_fra.T)
-            vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+            vol_bubble      += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+            
+            if y_threshold is not None:
+                vol_bubble_block_thr = vol*identifier_thr*(g.vol_fra.T)
+                vol_bubble_thr      += np.sum(vol_bubble_block_thr[buff:-buff,buff:-buff,buff:-buff])
             
         self.vol_bubble = vol_bubble
         
-        return vol_bubble
+        if y_threshold is not None:
+            self.vol_bubble_thr = vol_bubble_thr
+            return vol_bubble, vol_bubble_thr
+        
+        else:
+            return vol_bubble
 
 
 # ----------------------------------------------------------------------
