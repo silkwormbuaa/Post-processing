@@ -37,7 +37,7 @@ def main():
     
     mpi = MPIenv()
     
-    case_dir = '/home/wencan/temp/smooth_mid/'
+    case_dir = '/home/wencan/temp/smooth_adiabatic/'
     
     dirs     = Directories( case_dir )
     params   = Params( dirs.case_para_file )
@@ -221,7 +221,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
 # - do shock tracking on a single snapshot
 
 def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
-                         tolerance=3.0, half_width=2.0 ):
+                         tolerance=3.0, half_width=3.0 ):
     
     # - read snapshot file
 
