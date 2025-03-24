@@ -277,8 +277,8 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
     
     npz = len(np.unique(prbdf['z']))
     npx = len(np.unique(prbdf['x']))
-    xx = np.array(prbdf['x']).reshape(npz,npx)
-    zz = np.array(prbdf['z']).reshape(npz,npx)
+    xx  = np.array(prbdf['x']).reshape(npz,npx)
+    zz  = np.array(prbdf['z']).reshape(npz,npx)
     grad_rho = np.array(prbdf['grad_rho']).reshape(npz,npx)
     
     # - tracking the shock front line where max grad_rho is located
@@ -306,8 +306,9 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
     sub_grad_rho = np.take_along_axis(grad_rho, indices, axis=1)
     sub_xx       = np.take_along_axis(xx, indices, axis=1)
     
-    idmax        = sub_grad_rho.argmax(axis=1) # array stores the index of max grad_rho
-    x_shock      = np.zeros(npz)
+    idmax          = sub_grad_rho.argmax(axis=1) # array stores the index of max grad_rho
+    x_shock        = np.zeros(npz)
+    grad_rho_shock = np.zeros(npz)
     
     for j in range(len(idmax)):
 
@@ -315,10 +316,10 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
         p2 = [ sub_xx[j,idmax[j]  ], sub_grad_rho[j,idmax[j]  ] ]
         p3 = [ sub_xx[j,idmax[j]+1], sub_grad_rho[j,idmax[j]+1] ]
         
-        x_shock[j], _ = find_parabola_max(p1,p2,p3)        
+        x_shock[j], grad_rho_shock[j] = find_parabola_max(p1,p2,p3)        
     
     z_shock   = zz[:,0]
-    shockline = pd.DataFrame( {'x':x_shock, 'z':z_shock} )
+    shockline = pd.DataFrame( {'x':x_shock, 'z':z_shock, 'grad_rho':grad_rho_shock} )
     
     # - plot the schlieren plane and the shock line
     
@@ -329,7 +330,7 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
     ax.contourf( xx, zz, grad_rho, cmap='Greys', levels=clevels, extend='both' )
     ax.plot( sub_xx[:,-1], z_shock, 'b', ls=':' )
     ax.plot( sub_xx[:,0 ], z_shock, 'b', ls=':' )
-    ax.plot( x_shock, z_shock, 'r', ls=':' )
+    ax.plot( x_shock,      z_shock, 'r', ls=':' )
     ax.set_title(f"t ={snap.itime:8.2f} ms")
 
     plt.savefig(f'./figs/snap_{snap.itstep:08d}.png')

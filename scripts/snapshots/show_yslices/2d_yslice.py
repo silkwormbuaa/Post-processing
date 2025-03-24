@@ -156,7 +156,7 @@ def show_slice( snapdir ):
     seplines = []
     sonlines = []
 
-    snapfiles = get_filelist( snapdir, '_X_' )
+    snapfiles = get_filelist( snapdir, '_Y_' )
 
     for i, loc in enumerate(locs):
 
