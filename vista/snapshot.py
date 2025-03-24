@@ -2170,7 +2170,8 @@ class Snapshot:
 # ----------------------------------------------------------------------
 
     def compute_bubble_volume( self, G:GridData, cc_df=None, 
-                               roughwall=False, buff=3 ):
+                               roughwall=False, buff=3,
+                               y_threshold=None ):
         
         """
         G     : GridData instance
@@ -2180,9 +2181,13 @@ class Snapshot:
         Need data chunk with u ready.
         G should contain cell volume.
         wd (wall distance) should be contained in self.snap_data[num-1].df
+        
+        return: if y_threshold is None, return volume of separation bubble
+                else, return volume of separation bubble and volume of bubble above y_threshold
         """
         
-        vol_bubble = 0.0
+        vol_bubble     = 0.0
+        vol_bubble_thr = 0.0
         
         for snap_bl in self.snap_data:
             
@@ -2200,6 +2205,12 @@ class Snapshot:
             identifier = u < 0.0
             identifier = identifier*1.0   # convert to float
             
+            if y_threshold is not None:
+                
+                y = np.meshgrid(g.gx,g.gy,g.gz, indexing='ij')[1]
+                identifier_thr = (u<0.0) & (y.T > y_threshold)
+                identifier_thr = identifier_thr*1.0
+            
             vol = g.vol
             
             if roughwall:
@@ -2215,12 +2226,25 @@ class Snapshot:
 #            print(np.shape(vol),np.shape(identifier),np.shape(g.vol_fra.T))
             
             vol_bubble_block = vol*identifier*(g.vol_fra.T)
+            vol_bubble      += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
+            
+            if y_threshold is not None:
+                vol_bubble_block_thr = vol*identifier_thr*(g.vol_fra.T)
+                vol_bubble_thr      += np.sum(vol_bubble_block_thr[buff:-buff,buff:-buff,buff:-buff])
+
+        self.vol_bubble     = vol_bubble
+        
+        if y_threshold is not None:
+        
+            self.vol_bubble_thr = vol_bubble_thr
+            return vol_bubble, vol_bubble_thr
+        
+        else:
+            
+            return vol_bubble    
+
+
                 
-            vol_bubble += np.sum(vol_bubble_block[buff:-buff,buff:-buff,buff:-buff])
-        
-        self.vol_bubble = vol_bubble
-        
-        return vol_bubble    
 
 
 # ----------------------------------------------------------------------

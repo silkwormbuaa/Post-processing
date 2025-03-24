@@ -35,7 +35,7 @@ mpi = MPIenv()
 
 # =============================================================================
 
-casefolder  = '/home/wencan/temp/250304'
+casefolder  = '/home/wencan/temp/231124/'
 
 # =============================================================================
 
@@ -98,10 +98,11 @@ if roughwall:
 
 # - prepare the variables to store the bubble size
 
-n_snaps       = len( snapshotfiles )
-snapshot_step = np.zeros(n_snaps, dtype=int)
-snapshot_time = np.zeros(n_snaps, dtype=float)
-bubble_volume = np.zeros(n_snaps, dtype=float)
+n_snaps           = len( snapshotfiles )
+snapshot_step     = np.zeros(n_snaps, dtype=int)
+snapshot_time     = np.zeros(n_snaps, dtype=float)
+bubble_volume     = np.zeros(n_snaps, dtype=float)
+bubble_volume_thr = np.zeros(n_snaps, dtype=float) 
 
 # - use one snapshot as a container to store separation times
 
@@ -126,12 +127,13 @@ def count_bubble_size( snapshotfile ):
     
     # compute bubble volume  
 
-    vol = snap.compute_bubble_volume( grd, cc_df=cc_df, roughwall=roughwall )
-    print(f"snapshot ...{snapshotfile[-25:]} bubble size:{vol:15.4f}")
+    vol1, vol2 = snap.compute_bubble_volume( grd, cc_df=cc_df, roughwall=roughwall, y_threshold=0.0 )
+    print(f"snapshot ...{snapshotfile[-25:]} bubble size:{vol1:15.4f} ({vol2:15.4f})")
 
-    snapshot_step[index] = snap.itstep
-    snapshot_time[index] = snap.itime
-    bubble_volume[index] = vol
+    snapshot_step[index]     = snap.itstep
+    snapshot_time[index]     = snap.itime
+    bubble_volume[index]     = vol1
+    bubble_volume_thr[index] = vol2
     sys.stdout.flush()
     
     # count the separation times
@@ -169,9 +171,10 @@ else:
 
 mpi.barrier()
 
-snapshot_step  = mpi.comm.reduce( snapshot_step, root=0, op=mpi.MPI.SUM )
-snapshot_time  = mpi.comm.reduce( snapshot_time, root=0, op=mpi.MPI.SUM )
-bubble_volume  = mpi.comm.reduce( bubble_volume, root=0, op=mpi.MPI.SUM )
+snapshot_step     = mpi.comm.reduce( snapshot_step,     root=0, op=mpi.MPI.SUM )
+snapshot_time     = mpi.comm.reduce( snapshot_time,     root=0, op=mpi.MPI.SUM )
+bubble_volume     = mpi.comm.reduce( bubble_volume,     root=0, op=mpi.MPI.SUM )
+bubble_volume_thr = mpi.comm.reduce( bubble_volume_thr, root=0, op=mpi.MPI.SUM )
 
 for bl in snap_container.snap_data:
     bl.df['n_sep']   = mpi.comm.reduce( np.array(bl.df['n_sep']), op=mpi.MPI.SUM, root=0)
@@ -184,9 +187,12 @@ if mpi.is_root:
     os.chdir( create_folder(dirs.pp_bubble) )
     
     with open('bubble_size.dat','w') as f:
-        f.write("itstep".rjust(10)+"itime".rjust(15)+"bubble_volume".rjust(15)+"\n")
+        f.write("itstep".rjust(10)+"itime".rjust(15))
+        f.write("bubble_volume".rjust(15)+"bubble_volume_thr".rjust(20)+"\n")
+                
         for i in range(n_snaps):
-            f.write(f"{snapshot_step[i]:10d}{snapshot_time[i]:15.3f}{bubble_volume[i]:15.4f}\n")
+            f.write(f"{snapshot_step[i]:10d}{snapshot_time[i]:15.3f}")
+            f.write(f"{bubble_volume[i]:15.4f}{bubble_volume_thr[i]:20.4f}\n")
 
         print(f"bubble size data is saved in {dirs.pp_bubble}.")
         
