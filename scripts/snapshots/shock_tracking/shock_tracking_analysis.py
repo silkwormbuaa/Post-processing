@@ -27,94 +27,46 @@ from   vista.psd         import pre_multi_psd
 from   vista.tools       import get_filelist
 from   vista.directories import create_folder
 
+
 # =============================================================================
 
 casedir = '/home/wencan/temp/smooth_mid'
 
-shockpath2d = casedir + '/postprocess/snapshots/shock_tracking/2d_y2'
-shockpath3d = casedir + '/postprocess/snapshots/shock_tracking/3d'
-
-fs = 100
-n_seg = 8
+fs      = 100
+n_seg   = 8
 overlap = 0.5
 
-analyse2d=True
-analyse3d=False
+dirs    = Directories( casedir )
+params  = Params( dirs.case_para_file )
+Lsep    = params.Lsep
 
-dirs = Directories( casedir )
+
+def main():
+    
+    shockpath1 = dirs.pp_shock + '/group1'
+    analyze_3d_shock( shockpath1 )
+    
+    shockpath2 = dirs.pp_shock + '/group2'
+    analyze_3d_shock( shockpath2 )
+    
+    print("Analysis done.")
 
 # =============================================================================
 
-params = Params( dirs.case_para_file )
-Lsep   = params.Lsep
-
-
-if analyse2d:
-    shock2d_files = get_filelist( shockpath2d, 'shock_tracking2d' )
-if analyse3d:
-    shock3d_files = get_filelist( shockpath3d, 'shock_tracking3d' )
-
-if analyse2d:
+def analyze_3d_shock( shockpath ):
     
-    os.chdir( create_folder( shockpath2d ) )
+    shock3d_file = get_filelist( shockpath, 'shock_tracking' )[0]
     
-    # - read the shock motion data into dataframe    
-    
-    for shock2d_file in shock2d_files:
-        df2d = pd.concat([pd.read_csv(shock2d_file, delimiter=r"\s+") for shock2d_file in shock2d_files])
-    
-    # - compute the rms of the shock fluctuation
-    
-    x_mean = df2d['x_shock'].mean()
-    x_fluc = df2d['x_shock'] - x_mean
-    rms2d  = np.sqrt( np.mean( x_fluc**2 ) )
-    skewness = skew( x_fluc )
-    flatness = kurtosis( x_fluc )
-    print(f" rms: {rms2d}, skewness: {skewness}, flatness: {flatness}")
-    
-    # - plot shock motion
-    
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    ax.plot( df2d['time'], df2d['x_shock'] )
-    ax.set_title('Shock location at Z=0.0 plane')
-
-    plt.savefig( 'shock_location_2d.png' )
-    plt.close()
-        
-    # - compute the psd of the shock fluctuation
-    
-    f2d, psd2d = pre_multi_psd( x_fluc, fs, n_seg, overlap, nfft=len(x_fluc) )
-    
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    ax.plot(f2d, psd2d, label='2d shock tracking')
-    
-    ax.set_xscale('log')
-    ax.set_xlabel('Frequency [Hz]')
-    ax.set_ylabel('pmPSD')
-
-    plt.savefig( 'shock_psd_2d.png' )
-    plt.close()
-
-if analyse3d:
-    
-    os.chdir( create_folder( shockpath3d ) )
+    os.chdir( create_folder( shockpath ) )
     
     # - read in the shock motion data into dataframe
     
-    times = list()
-    shocklines = list()
+    print(f"reading {shock3d_file}")
     
-    for shock3d_file in shock3d_files:
-        with open(shock3d_file, 'rb') as f:
-            time = pickle.load(f) 
-            shockline = pickle.load(f)
+    with open(shock3d_file, 'rb') as f:
+        times = pickle.load(f) 
+        shocklines = pickle.load(f)
 
-        times = times + time
-        shocklines = shocklines + shockline
-    
-    print(len(times),len(shocklines))
     
     x_shocks = list()
     x_shocks_mid = list()
@@ -167,4 +119,10 @@ if analyse3d:
     
     plt.savefig( 'shock_pmpsd_3d.png' )
     plt.close()  
+
+
+# =============================================================================
+
+if __name__ == '__main__':
     
+    main()
