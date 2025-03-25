@@ -73,6 +73,7 @@ class Directories:
         self.pp_forces       = os.path.join( self.pos_dir, 'forces' )
         self.pp_bubble       = os.path.join( self.pos_dir, 'bubble' )
         self.pp_shock        = os.path.join( self.pos_dir, 'shock' )
+        self.pp_correlation  = os.path.join( self.pos_dir, 'correlation' )
         
 # --- pp_statistics subdirectories
         
