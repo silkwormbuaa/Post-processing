@@ -23,7 +23,7 @@ sys.path.append( source_dir )
 from   vista.params       import Params
 from   vista.probe        import ProbeData
 from   vista.directories  import Directories
-from   vista.tools        import get_filelist
+from   vista.math_opr     import find_parabola_max
 from   vista.plot_setting import set_plt_rcparams
 
 set_plt_rcparams(fontsize=30)
@@ -42,15 +42,15 @@ def main():
     
     times = ( dfsk1['itime'] - 20.0 ) * 507.0 / 5.2
     
-    plot_fluc( times, dfsk1['x_fluc_spanave'], 'shock1 spanave' )
-    plot_fluc( times, dfbb['fluc_thr'],        'bubble size fluctuation(y>0)' )
-    plot_fluc( times, dfbb['fluc'],            'bubble size fluctuation' )
-    plot_fluc( times, dfprb['p_fluc'],         'pressure fluctuation' )
+    # plot_fluc( times, dfsk1['x_fluc_spanave'], 'shock1 spanave' )
+    # plot_fluc( times, dfbb['fluc_thr'],        'bubble size fluctuation(y>0)' )
+    # plot_fluc( times, dfbb['fluc'],            'bubble size fluctuation' )
+    # plot_fluc( times, dfprb['p_fluc'],         'pressure fluctuation' )
     
-    # corr( dfsk1['x_fluc_spanave'], dfbb['fluc'], 'shock1 spanave vs bubble size' )
-    # corr( dfsk1['x_fluc_spanave'], dfbb['fluc_thr'], 'shock1 spanave vs bubble size(y>0)' )
-    # corr( dfsk1['x_fluc_spanave'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
-    # corr( dfbb['fluc'], dfprb['p_fluc'], 'bubble size vs pressure' )
+    corr( dfsk1['x_fluc_mid'], dfbb['fluc'], 'shock1 spanave vs bubble size' )
+    corr( dfsk1['x_fluc_mid'], dfbb['fluc_thr'], 'shock1 spanave vs bubble size(y>0)' )
+    corr( dfsk1['x_fluc_mid'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
+    corr( dfbb['fluc'], dfprb['p_fluc'], 'bubble size vs pressure' )
     
     # plot_fluc( times, dfsk2['x_fluc_spanave'], 'shock2 spanave' )
     # corr( dfsk1['x_fluc_spanave'], dfsk2['x_fluc_spanave'], 'shock at 2 delta vs shock at 6 delta' )
@@ -116,7 +116,13 @@ def corr( data1, data2, title, mode='full', method='auto' ):
 
     lags = np.arange(-len_data+1,len_data)*0.01*507/5.2   # 0.01 is the time interval
 
-    lag_at_max_corr = lags[np.argmax(abs(correlation))]
+    index = np.argmax(abs(correlation))
+
+    p1 = [lags[index-1], correlation[index-1]]
+    p2 = [lags[index  ], correlation[index  ]]
+    p3 = [lags[index+1], correlation[index+1]]
+    
+    lag_at_max_corr, max_corr = find_parabola_max( p1, p2, p3 )
 
     print(f"lag at max correlation: {lag_at_max_corr}")
     
@@ -131,6 +137,7 @@ def plot_corr( lags, correlation, lag_at_max_corr, title='' ):
     ax.plot( lags, correlation )
     ax.axvline( lag_at_max_corr, color='r', ls='--' )
     ax.set_title( title )
+    ax.set_xlim([-100,100])
     plt.show()
     plt.close()
     

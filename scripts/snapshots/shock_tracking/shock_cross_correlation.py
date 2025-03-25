@@ -8,6 +8,7 @@
 @Email   :   w.wu-3@tudelft.nl
 @Desc    :   Cross-correlation analysis of the shock motion at different wall 
              normal locations.
+             Now this script can be replaced by ../correlation_analysis/cross_correlation_analysis.py
 '''
 
 import os
