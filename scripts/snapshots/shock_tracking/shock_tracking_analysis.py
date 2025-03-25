@@ -67,7 +67,6 @@ def analyze_3d_shock( shockpath ):
         times = pickle.load(f) 
         shocklines = pickle.load(f)
 
-    
     x_spanave = list()
     x_mid     = list()
     
@@ -88,15 +87,55 @@ def shock_velocity_analysis( x_shocks, times ):
     
     # - compute the velocity of the shock
     
-    u_shock = np.diff( x_shocks ) / np.diff( times )
+    u_shock = np.diff( x_shocks ) / np.diff( times ) / 5.2
     times   = times[:-1] + 0.5*np.diff(times)
+
+    skewness = skewness_analysis( u_shock )
+    flatness = kurtosis(u_shock)
+    
+    print(f"Shock velocity skewness: {skewness}, flatness: {flatness}")
 
     fig, ax = plt.subplots( figsize=(12,6) )
     
-    ax.plot( times, u_shock, 'b',  )
+    ax.plot( times, u_shock, 'b', lw=0.5 )
     ax.set_title('Shock velocity')
+    ax.set_ylim( [-15,15] )
     plt.show()
     plt.close()
+
+def skewness_analysis( var ):
+    
+    # - compute the std of the variable
+    
+    std = np.std(var)
+    print( f"Standard deviation of the variable: {std}" )
+    print( f"range of var/std: {min(var/std)} - {max(var/std)}" )
+    
+    # - compute the skewness of the variable
+    
+    skewness = skew(var)
+    print( f"Skewness of the variable: {skewness}" )
+    
+    # - compute the p.d.f of the variable
+    
+    hist, bin_edges = np.histogram( var/std, bins=60, range=(-5,5), density=True )
+    bin_centers = 0.5*(bin_edges[:-1] + bin_edges[1:]) 
+    
+    # - normal distribution
+    
+    x = np.linspace(-5,5,300)
+    y = 1/np.sqrt(2*np.pi) * np.exp(-0.5*x**2)
+    
+    
+    fig, ax = plt.subplots( figsize=(12,6) )
+    ax.scatter( bin_centers, hist, marker='o', s=2)
+    ax.plot( x, y, 'gray', ':', lw=1.5 )
+    
+    ax.set_title('Probability density function of the variable')
+    plt.show()
+    plt.close()
+    
+    return skewness
 
 
 def write_shock_loc_rms( x_spanave, x_mid ):
