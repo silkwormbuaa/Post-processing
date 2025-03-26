@@ -16,6 +16,7 @@ import shutil
 import numpy             as     np
 import matplotlib.pyplot as     plt
 from   scipy.interpolate import interp1d
+from   scipy.optimize    import root
 
 # ----------------------------------------------------------------------
 # >>> GET FILE LIST                                               ( 0 )
@@ -906,6 +907,108 @@ def crop_to_rect_map(image, buff=0):
 
 
 # ----------------------------------------------------------------------
+# >>> oblique shock beta                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/26  - created
+#
+# Desc
+#    - calculate the oblique shock angle beta (in degrees) given the incoming Mach 
+#     M1 and flow deflection angle theta.
+# ----------------------------------------------------------------------
+
+def oblique_shock_beta(M1, theta_deg, gamma=1.4):
+    
+    """
+    Calculate the oblique shock angle beta (in degrees) given the incoming Mach 
+    number M1 and the flow deflection angle theta.
+    Parameters:
+        M1 (float): incoming Mach > 1
+        theta_deg (float): deflection angle 0 < theta < theta_max）。
+        gamma (float): specific heat ratio (default: 1.4)
+
+    return:
+        tuple: (weak_solution_deg, strong_solution_deg) weak and strong solutions
+        of the oblique shock angle in degrees.
+        Return None if there is no solution.
+    """
+    theta = np.radians(theta_deg)
+    
+    def theta_beta_equation(beta_rad):
+        sin_beta    = np.sin(beta_rad)
+        numerator   = (M1**2 * sin_beta**2 - 1)
+        denominator = M1**2 * (gamma + np.cos(2 * beta_rad)) + 2.0
+        return np.tan(theta) - 2 * (1 / np.tan(beta_rad)) * numerator / denominator
+
+    # initial guess
+    beta_guess_weak   = np.arcsin(1 / M1)*1.1  # weak solution guess（> close to Mach angle）
+    beta_guess_strong = np.radians(80)     # strong solution guess（close to normal shock）
+
+    # weak soluion
+    sol_weak  = root(theta_beta_equation, beta_guess_weak)
+    
+    beta_weak = sol_weak.x[0] if sol_weak.success else None
+
+    # strong solution
+    sol_strong = root(theta_beta_equation, beta_guess_strong)
+    
+    beta_strong = sol_strong.x[0] if sol_strong.success else None
+
+    # check if the solution （β > μ and θ < θ_max）
+    if beta_weak is not None:
+        beta_weak_deg = np.degrees(beta_weak)
+        # check if the deflection angle is within the maximum deflection angle
+        theta_max = oblique_shock_theta_max(M1, gamma)
+        if theta_deg > theta_max:
+            return None, None
+    else:
+        beta_weak_deg = None
+
+    if beta_strong is not None:
+        beta_strong_deg = np.degrees(beta_strong)
+    else:
+        beta_strong_deg = None
+
+    return beta_weak_deg, beta_strong_deg
+
+def oblique_shock_theta_max(M1, gamma=1.4):
+    from scipy.optimize import root_scalar
+    """
+    Calculate the maximum flow deflection angle theta_max (in degrees) given the
+    incoming Mach number M1.
+    """
+    def theta_beta_equation(beta_rad):
+        """θ-β-Mach relations"""
+        sin_beta = np.sin(beta_rad)
+        numerator = M1**2 * sin_beta**2 - 1
+        denominator = M1**2 * (gamma + np.cos(2 * beta_rad)) + 2
+        return np.arctan(2 * numerator / (np.tan(beta_rad) * denominator))
+
+    def dtheta_dbeta(beta_rad):
+        """numerics to calculate dθ/dβ"""
+        h = 1e-6
+        return (theta_beta_equation(beta_rad + h) - theta_beta_equation(beta_rad - h)) / (2 * h)
+
+    # find β（critical shock angle）where dθ/dβ = 0 
+    try:
+        sol = root_scalar(
+            dtheta_dbeta,
+            bracket=[np.arcsin(1/M1) + 0.01, np.pi/2 - 0.01],  # between Mach angle and 90°
+            method='brentq'
+        )
+        beta_critical = sol.root
+    except ValueError:
+        raise ValueError("cannot find the critical shock angle, M1 too low or incorrect gamma.")
+    
+    # calculate the maximum deflection angle
+    theta_max_rad = theta_beta_equation(beta_critical)
+    return np.degrees(theta_max_rad)
+    
+# ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
 #
@@ -921,17 +1024,29 @@ def crop_to_rect_map(image, buff=0):
 
 if __name__ == "__main__":
     
+# --- test crop_to_rect_map
     
-    imagefile = "/home/wencanwu/Downloads/figs/slice_z_01927735.png"
+#     imagefile = "/home/wencanwu/Downloads/figs/slice_z_01927735.png"
     
-    imag = cv2.imread(imagefile)
-    imag = cv2.cvtColor(imag, cv2.COLOR_BGR2RGB)
-#    imag = np.array(imag)
+#     imag = cv2.imread(imagefile)
+#     imag = cv2.cvtColor(imag, cv2.COLOR_BGR2RGB)
+# #    imag = np.array(imag)
     
-    image = crop_to_rect_map(imag)
+#     image = crop_to_rect_map(imag)
     
-    print(type( image ))
+#     print(type( image ))
     
-    plt.imshow(image)
+#     plt.imshow(image)
     
-    plt.show()
+#     plt.show()
+
+# --- test oblique_shock_beta
+
+    M1 = 2.0
+    theta_deg = 15.0
+    
+    weak, strong = oblique_shock_beta(M1, theta_deg)
+    
+    print(f"weak solution  : {weak:.2f} degrees")
+    print(f"strong solution: {strong:.2f} degrees")
+    
