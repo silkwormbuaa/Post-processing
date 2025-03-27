@@ -60,6 +60,7 @@ h_md    = params.H_md
 x_imp   = params.x_imp
 p_ref   = params.p_ref
 u_ref   = params.u_ref
+x_pfmax = params.x_pfmax
 casecode =  params.casecode
 target_dir = '/home/wencan/temp/DataPost/contour/'+casecode+'/'
 create_folder( target_dir )
@@ -267,6 +268,7 @@ for i, loc in enumerate( locs ):
                           separation=seplinefile,
                           shockshape=shockshapefile,
                           sonic=soniclinefile,
+                          x_pfmax=x_pfmax,
                           filename=casecode+'_tke_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
@@ -284,6 +286,7 @@ for i, loc in enumerate( locs ):
                           separation=seplinefile,
                           shockshape=shockshapefile,
                           sonic=soniclinefile,
+                          x_pfmax=x_pfmax,
                           filename=casecode+'_pressure_fluc_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
@@ -302,6 +305,7 @@ for i, loc in enumerate( locs ):
                           separation=seplinefile,
                           shockshape=shockshapefile,
                           sonic=soniclinefile,
+                          x_pfmax=x_pfmax,
                           filename=casecode+'_p_grad_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,

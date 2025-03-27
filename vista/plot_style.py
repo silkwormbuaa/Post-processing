@@ -703,6 +703,7 @@ def plot_slicez_stat( xx, yy, v,
                       separation=None,
                       boundary=None,
                       shockshape=None,
+                      x_pfmax=None,
                       DS=None,
                       figsize=None, 
                       filename=None,
@@ -775,6 +776,9 @@ def plot_slicez_stat( xx, yy, v,
             y_DS = line[:,1]
             ax.plot(x_DS,y_DS,'black',linewidth=0.8)
             
+    if x_pfmax is not None:
+        ax.plot(x_pfmax,0.0,'*',color='yellow',markersize=10)
+    
     
     if wall:
         x_wall = np.array([np.min(xx),np.max(xx)])
