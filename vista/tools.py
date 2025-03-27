@@ -975,6 +975,21 @@ def oblique_shock_beta(M1, theta_deg, gamma=1.4):
 
     return beta_weak_deg, beta_strong_deg
 
+
+# ----------------------------------------------------------------------
+# >>> oblique_shock_theta_max                                      (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/26  - created
+#
+# Desc
+#  - calculate the maximum deflection angle, given the incoming Mach number M1.
+# ----------------------------------------------------------------------
+
 def oblique_shock_theta_max(M1, gamma=1.4):
     from scipy.optimize import root_scalar
     """
@@ -1007,7 +1022,47 @@ def oblique_shock_theta_max(M1, gamma=1.4):
     # calculate the maximum deflection angle
     theta_max_rad = theta_beta_equation(beta_critical)
     return np.degrees(theta_max_rad)
+
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/26  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+def quantities_after_oblique_shock(M1, beta, theta, gamma=1.4):
     
+    """
+    calculate the flow quantities ratio after an oblique shock wave.
+    Parameters:
+        M1 (float): incoming Mach number
+        beta (float): oblique shock angle in degrees
+        theta (float): flow deflection angle in degrees
+        gamma (float): specific heat ratio (default: 1.4)
+    Returns:
+        tuple: (M2, P2/P1, T2/T1, rho2/rho1) after the oblique shock wave.
+    """
+    # - from J.D.Anderson, Fundamentals of Aerodynamics, 5th edition, p. 611
+    
+    mach_1n   = M1 * np.sin(np.radians(beta))
+    mach_2n   = np.sqrt( (mach_1n**2 * (gamma-1.0)/2 + 1.0) / 
+                         (gamma*mach_1n**2 - (gamma-1.0)/2) )
+    rho2_rho1 = (gamma+1.0)*mach_1n**2 / (2.0 + (gamma-1.0)*mach_1n**2) 
+    p2_p1     = 1.0 + 2.0*gamma/(gamma+1.0)*(mach_1n**2 - 1.0)
+    t2_t1     = p2_p1 / rho2_rho1
+    M2        = mach_2n / np.sin(np.radians(beta-theta))
+    
+    return M2, p2_p1, t2_t1, rho2_rho1 
+
+
 # ----------------------------------------------------------------------
 # >>> Main: for testing and debugging                               (Nr.)
 # ----------------------------------------------------------------------
@@ -1043,10 +1098,13 @@ if __name__ == "__main__":
 # --- test oblique_shock_beta
 
     M1 = 2.0
-    theta_deg = 15.0
+    theta_deg = 5.992
+    
     
     weak, strong = oblique_shock_beta(M1, theta_deg)
     
     print(f"weak solution  : {weak:.2f} degrees")
     print(f"strong solution: {strong:.2f} degrees")
+    
+    print( quantities_after_oblique_shock(M1, 40.04, 0.0) )
     
