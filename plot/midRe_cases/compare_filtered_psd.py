@@ -36,8 +36,9 @@ set_plt_rcparams()
 # option zone
 # =============================================================================
 
-cases = ['smooth_mid','231124']
-colors = ['blue','red']
+cases  = ['smooth_adiabatic','220927','smooth_mid','231124',  '241030']
+colors = ['gray',  'orangered', 'black',    'steelblue','yellowgreen']
+lstyle = ['-',     '-.',        '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
 outdir = '/home/wencan/temp/DataPost/midRe/psd'
 
 # =============================================================================
@@ -124,19 +125,27 @@ for i in range( len(cases) ):
     powers_lp_lines.append( powers_lp )
     powers_hp_lines.append( powers_hp )
 
+# =============================================================================
+# plot the pre-multiplied psd of pressure fluctuation
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
-    ax.plot( x_locs_lines[i], np.array(rms_psds_lines[i])/p_ref, '-', linewidth=2, color=colors[i] )
+    ax.plot( x_locs_lines[i], np.array(rms_psds_lines[i])/p_ref, 
+             ls=lstyle[i], linewidth=2, color=colors[i] )
+    
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}/p_{\infty}$" )
 figname = "pressure_fluctuation_rms_psd"
 plt.savefig( figname + '.png' )
 plt.close()
 
+# =============================================================================
+# plot the power spectra
+
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
-    ax.plot( x_locs_lines[i], np.array(powers_lines[i])/p_ref**2, '-', linewidth=2, color=colors[i] )
+    ax.plot( x_locs_lines[i], np.array(powers_lines[i])/p_ref**2, 
+             ls=lstyle[i], linewidth=2, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f/p^2_{\infty}$" )
@@ -146,9 +155,13 @@ figname = "pressure_fluctuation_power"
 plt.savefig( figname + '.png' )
 plt.close()
 
+# =============================================================================
+# plot the low-frequency-pass power spectra
+
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
-    ax.plot( x_locs_lines[i], np.sqrt(powers_lp_lines[i])/p_ref, '-', linewidth=2, color=colors[i] )
+    ax.plot( x_locs_lines[i], np.sqrt(powers_lp_lines[i])/p_ref, 
+             ls=lstyle[i], linewidth=2, color=colors[i] )
     
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St<1}/p_{\infty}$" )
@@ -156,9 +169,13 @@ figname = "pressure_fluctuation_power_lp"
 plt.savefig( figname + '.png' )
 plt.close()
 
+# =============================================================================
+# plot the high-frequency-pass power spectra
+
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
-    ax.plot( x_locs_lines[i], np.sqrt(powers_hp_lines[i])/p_ref, '-', linewidth=2, color=colors[i] )
+    ax.plot( x_locs_lines[i], np.sqrt(powers_hp_lines[i])/p_ref, 
+             ls=lstyle[i], linewidth=2, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St>1}/p_{\infty}$" )
@@ -166,10 +183,13 @@ figname = "pressure_fluctuation_power_hp"
 plt.savefig( figname + '.png' )
 plt.close()
 
+# =============================================================================
+# plot the ratio of low-frequency-pass power spectra to the total power spectra
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
-    ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_lines[i]), '-', linewidth=2, color=colors[i] )
+    ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_lines[i]), 
+             ls=lstyle[i], linewidth=2, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f$" )
@@ -179,10 +199,13 @@ figname = "pressure_fluctuation_power_lp_ratio"
 plt.savefig( figname + '.png' )
 plt.close()
 
+# =============================================================================
+# plot the ratio of low-frequency-pass power spectra to the high-frequency-pass power spectra
 
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
-    ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_hp_lines[i]), '-', linewidth=2, color=colors[i] )
+    ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_hp_lines[i]), 
+             ls=lstyle[i], linewidth=2, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f_{|St>1}$" )

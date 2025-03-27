@@ -30,7 +30,7 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-casedir = '/home/wencan/temp/smooth_mid'
+casedir = '/home/wencan/temp/smooth_mid/'
 
 fs      = 100
 n_seg   = 8
@@ -79,7 +79,31 @@ def analyze_3d_shock( shockpath ):
     # plot_shock_loc( x_shock, x_mid, x_spanave )
     # shock_motion_psd( x_shock )
 
-    shock_velocity_analysis( x_mid, times )
+    # shock_velocity_analysis( x_mid, times )
+    
+    x_mid_point= 0.5*(np.array(x_mid)[:-1]+np.array(x_mid)[1:])
+    
+    u_spanave  = np.diff( x_spanave ) / np.diff( times ) / 5.2
+    u_mid      = np.diff( x_mid )     / np.diff( times ) / 5.2
+    
+    u_relative = u_mid - u_spanave
+    
+    u_rel_pos  = u_relative[ u_relative > 0 ]
+    u_rel_neg  = u_relative[ u_relative < 0 ]
+    
+    times_mid = times[:-1] + 0.5*np.diff(times)
+    
+    fig, ax = plt.subplots( figsize=(12,6) )
+    ax.plot( times_mid, u_relative, 'o', 'b' )
+    ax.plot( times_mid, u_mid, 'o', 'r' )
+    ax.set_xlim( 20, 61 )
+    plt.show()
+    plt.close()
+    
+    print(f"Mean positive relative shock velocity: {np.mean(u_rel_pos)}")
+    print(f"Mean negative relative shock velocity: {np.mean(u_rel_neg)}")
+    print(f"Percentage of positive relative shock velocity: {len(u_rel_pos)/len(u_relative)}")
+    print(f"Percentage of negative relative shock velocity: {len(u_rel_neg)/len(u_relative)}")
     
     
 
@@ -95,6 +119,17 @@ def shock_velocity_analysis( x_shocks, times ):
     
     print(f"Shock velocity skewness: {skewness}, flatness: {flatness}")
 
+    # - get all the positive shock velocity
+    
+    u_positive = u_shock[ u_shock > 0 ]
+    u_negative = u_shock[ u_shock < 0 ]
+    
+    print(f"Mean positive shock velocity: {np.mean(u_positive)}")
+    print(f"Mean negative shock velocity: {np.mean(u_negative)}")
+    print(f"Percentage of positive shock velocity: {len(u_positive)/len(u_shock)}")
+    print(f"Percentage of negative shock velocity: {len(u_negative)/len(u_shock)}")
+
+
     fig, ax = plt.subplots( figsize=(12,6) )
     
     ax.plot( times, u_shock, 'b', lw=0.5 )
@@ -102,6 +137,8 @@ def shock_velocity_analysis( x_shocks, times ):
     ax.set_ylim( [-15,15] )
     plt.show()
     plt.close()
+
+
 
 def skewness_analysis( var ):
     
@@ -128,7 +165,7 @@ def skewness_analysis( var ):
     
     
     fig, ax = plt.subplots( figsize=(12,6) )
-    ax.scatter( bin_centers, hist, marker='o', s=2)
+    ax.scatter( bin_centers, hist, marker='o', s=20)
     ax.plot( x, y, 'gray', ':', lw=1.5 )
     
     ax.set_title('Probability density function of the variable')

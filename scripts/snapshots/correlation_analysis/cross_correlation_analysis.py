@@ -42,14 +42,14 @@ def main():
     
     times = ( dfsk1['itime'] - 20.0 ) * 507.0 / 5.2
     
-    # plot_fluc( times, dfsk1['x_fluc_spanave'], 'shock1 spanave' )
+    plot_fluc( times, dfsk1['x_fluc_mid'], 'shock1 at z=0' )
     # plot_fluc( times, dfbb['fluc_thr'],        'bubble size fluctuation(y>0)' )
     # plot_fluc( times, dfbb['fluc'],            'bubble size fluctuation' )
     # plot_fluc( times, dfprb['p_fluc'],         'pressure fluctuation' )
     
-    corr( dfsk1['x_fluc_mid'], dfbb['fluc'], 'shock1 spanave vs bubble size' )
-    corr( dfsk1['x_fluc_mid'], dfbb['fluc_thr'], 'shock1 spanave vs bubble size(y>0)' )
-    corr( dfsk1['x_fluc_mid'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
+    corr( dfsk1['x_fluc_spanave'], dfbb['fluc'], 'shock1 spanave vs bubble size' )
+    corr( dfsk1['x_fluc_spanave'], dfbb['fluc_thr'], 'shock1 spanave vs bubble size(y>0)' )
+    corr( dfsk1['x_fluc_spanave'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
     corr( dfbb['fluc'], dfprb['p_fluc'], 'bubble size vs pressure' )
     
     # plot_fluc( times, dfsk2['x_fluc_spanave'], 'shock2 spanave' )
