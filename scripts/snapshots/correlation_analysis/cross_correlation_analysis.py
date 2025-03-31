@@ -31,7 +31,7 @@ set_plt_rcparams(fontsize=30)
 
 def main():
     
-    case_dir = '/home/wencan/temp/smooth_mid/'
+    case_dir = '/home/wencan/temp/241030/'
     dirs     = Directories( case_dir )
     params   = Params( dirs.case_para_file )
     
@@ -39,21 +39,26 @@ def main():
     dfsk2 = read_shock_loc( dirs.pp_shock + '/group2/shock_tracking2.pkl' )
     dfbb  = read_bubble_size( dirs.pp_bubble + '/bubble_size.dat' )
     dfprb = read_prb_pressure( dirs.fetch_prb_from_type('pfmax'), params )
+    dfp   = read_p_spanave_pfmax( dirs.pp_snp_pfmax + '/pressure_at_pfmax.dat' )
     
     times = ( dfsk1['itime'] - 20.0 ) * 507.0 / 5.2
     
     plot_fluc( times, dfsk1['x_fluc_mid'], 'shock1 at z=0' )
+    plot_fluc( times, dfp['p_fluc'],     'pressure at pfmax' )
     # plot_fluc( times, dfbb['fluc_thr'],        'bubble size fluctuation(y>0)' )
     # plot_fluc( times, dfbb['fluc'],            'bubble size fluctuation' )
     # plot_fluc( times, dfprb['p_fluc'],         'pressure fluctuation' )
     
-    corr( dfsk1['x_fluc_spanave'], dfbb['fluc'], 'shock1 spanave vs bubble size' )
-    corr( dfsk1['x_fluc_spanave'], dfbb['fluc_thr'], 'shock1 spanave vs bubble size(y>0)' )
-    corr( dfsk1['x_fluc_spanave'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
-    corr( dfbb['fluc'], dfprb['p_fluc'], 'bubble size vs pressure' )
+#    corr( dfsk1['x_fluc_spanave'], dfbb['fluc'], 'shock1 spanave vs bubble size' )
+    corr( dfp['p_fluc'],           dfbb['fluc_thr'], 'pressure vs bubble size(y>0)' )
+    corr( dfsk1['x_fluc_spanave'], dfp ['p_fluc'],   'shock motion vs pressure' )
+    corr( dfsk1['x_fluc_spanave'], dfbb['fluc_thr'], 'shock motion vs bubble size(y>0)' )
     
-    # plot_fluc( times, dfsk2['x_fluc_spanave'], 'shock2 spanave' )
-    # corr( dfsk1['x_fluc_spanave'], dfsk2['x_fluc_spanave'], 'shock at 2 delta vs shock at 6 delta' )
+#    corr( dfbb['fluc'], dfprb['p_fluc'], 'bubble size vs pressure' )
+#    corr( dfsk1['x_fluc_spanave'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
+    
+    plot_fluc( times, dfsk2['x_fluc_spanave'], 'shock2 spanave' )
+    corr( dfsk1['x_fluc_spanave'], dfsk2['x_fluc_spanave'], 'shock at 2 delta vs shock at 6 delta' )
     
 
 def read_shock_loc( file ):
@@ -102,6 +107,16 @@ def read_prb_pressure( file, params: Params ):
 
     return df
 
+def read_p_spanave_pfmax( file ):
+    
+    # - read in the extracted spanwise averaged pressure at pfmax location
+    # ['itstep', 'itime', 'p_spanave']
+
+    df = pd.read_csv( file, delimiter=r'\s+' )
+
+    df['p_fluc'] = df['p_spanave_pfmax'] - np.mean(df['p_spanave_pfmax'])
+
+    return df
 
 
 def corr( data1, data2, title, mode='full', method='auto' ):
@@ -133,11 +148,18 @@ def corr( data1, data2, title, mode='full', method='auto' ):
 
 def plot_corr( lags, correlation, lag_at_max_corr, title='' ):
 
-    fig, ax = plt.subplots( figsize=(12,6) )
-    ax.plot( lags, correlation )
-    ax.axvline( lag_at_max_corr, color='r', ls='--' )
-    ax.set_title( title )
-    ax.set_xlim([-100,100])
+    fig, axs = plt.subplots( 1,2, figsize=(12,6) )
+    axs[0].plot( lags, correlation )
+    axs[0].axvline( lag_at_max_corr, color='r', ls='--' )
+    axs[0].set_title( title )
+    
+    
+    axs[1].plot( lags, correlation )
+    axs[1].axvline( lag_at_max_corr, color='r', ls='--' )
+    axs[1].set_title( title )
+    axs[1].set_xlim([-50,50])
+    
+    
     plt.show()
     plt.close()
     
