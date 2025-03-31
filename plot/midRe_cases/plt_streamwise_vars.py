@@ -22,13 +22,14 @@ sys.path.append( source_dir )
 
 from   vista.line        import LineData
 from   vista.tools       import create_linear_interpolator
+from   vista.directories import create_folder
 
 plt.rcParams["text.usetex"]         = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family']         = "Times New Roman"
 plt.rcParams['font.size']           = 40
 
-OutPath  = "/home/wencan/temp/DataPost/midRe/averaged_streamwise_vars"
+OutPath  = "/home/wencan/temp/DataPost/midRe/averaged_streamwise_vars/with_241028"
 
 data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/wall_projection/streamwise_vars.pkl'
@@ -46,14 +47,14 @@ add_sw_luis = False
 # color, label, lstyle, width's order will be adjusted automatically
 # x_sep, x_att, x_pfmax should be carefully checked. 
 
-datalist = [data0,              data2,             data1,             data4,              data3                  ]
-color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ] 
-label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ]
-lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1))]
-width    = [4.0,                 4.0,               4.0,                 4.0,                4.0                 ]
-x_sep    = [-8.42,              -10.84,            -7.33,              -9.96,             -10.36                 ]
-x_att    = [1.10,                 2.45,             1.89,               2.86,               2.56                 ]
-x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,             -10.16                 ]
+datalist = [data0,              data2,             data1,             data4,              data3                  ,data5]
+color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 
+label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
+lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
+width    = [4.0,                 4.0,               4.0,                 4.0,                4.0                 ,4.0]
+x_sep    = [-8.42,              -10.84,            -7.33,              -9.96,             -10.36                 ,-15.03]
+x_att    = [1.10,                 2.45,             1.89,               2.86,               2.56                 ,3.57]
+x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,             -10.16                 ,-14.75]
 
 lines    = []
 
@@ -83,7 +84,7 @@ for i, datafile in enumerate( datalist ):
     
     lines.append( line )
 
-os.chdir(OutPath)
+os.chdir( create_folder(OutPath) )
 
 # adjust plotting style
 

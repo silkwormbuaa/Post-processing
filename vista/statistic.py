@@ -137,7 +137,7 @@ class StatisticData:
         elif bl.npz == 1: self.stat_type = 'Z'
         else            : self.stat_type = 'block'
         
-        print(f"\nStatisticData {self.file} (type: {self.stat_type}) is read.\n")
+        print(f"StatisticData {self.file} (type: {self.stat_type}) is read.\n")
         sys.stdout.flush()
         
         

@@ -23,7 +23,7 @@ from   vista.directories import Directories
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/241030/'
+casedir   = '/home/wencan/temp/241018/'
 slic_type = 'Z'
 loc       = 0.001
 

@@ -263,6 +263,8 @@ for i, loc in enumerate( locs ):
 
 
         cbar = r'$tke$'
+        cbar_levels = np.linspace(0,12500,51)
+        cbar_ticks  = np.linspace(0,12500,5)
         
         plot_slicez_stat( xx,yy,tke, 
                           separation=seplinefile,
@@ -272,6 +274,8 @@ for i, loc in enumerate( locs ):
                           filename=casecode+'_tke_'+str(i+1),
                           col_map='coolwarm',
                           cbar_label=cbar,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           wall=wall,
                           tag = params.tag,
                           tag_loc=[7.0,4.5],

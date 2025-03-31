@@ -12,12 +12,11 @@ import warnings
 import numpy             as     np
 import pandas            as     pd
 
+from   .grid             import GridData
+from   .grid             import GridBlock
 from   .io_binary        import read_int_bin
 from   .io_binary        import read_flt_bin
 from   .io_binary        import read_3Dflt_bin
-
-from   .grid             import GridData
-from   .grid             import GridBlock
 
 
 # ----------------------------------------------------------------------
@@ -327,7 +326,9 @@ class BlockData:
         """
         grads: list of strings, choose from 
         ['grad_rho', 'laplacian', 'grad_p', 'vorticity','Q_cr','lambda2','div',
-        'grad_rho_mod','Ducros']
+        'grad_rho_mod','Ducros','DS']
+        
+        Note: 'DS' will be computed with min=0.0, max=2.0
         """
         
         df = self.df
@@ -350,7 +351,7 @@ class BlockData:
 
 # ----- compute magnitude of density gradient
 
-        if 'grad_rho' in grads or 'grad_rho_mod' in grads:
+        if {'grad_rho', 'grad_rho_mod', 'DS'} & set(grads):
             
             rho = np.array( df['rho'] )
             
@@ -384,6 +385,14 @@ class BlockData:
                 grad_rho = np.sqrt( drho_dx**2 + drho_dy**2 )
                 
             df['grad_rho'] = grad_rho.flatten()
+            
+# ----- compute DS
+
+        if 'DS' in grads:
+            
+            grad_rho = np.array( df['grad_rho'] )
+            min = 0.0 ; max = 2.0
+            df['DS'] = 0.8*np.exp( -10.0*(grad_rho-min) / (max-min) )
             
 # ----- compute Laplacian of the density
 
