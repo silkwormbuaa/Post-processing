@@ -31,10 +31,10 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams(fontsize=20)
 # =============================================================================
 
-casedir = '/home/wencan/temp/smooth_mid/'
+casedir = '/home/wencan/temp/241030/'
 
 fs      = 100
-n_seg   = 3
+n_seg   = 8
 overlap = 0.5
 
 dirs    = Directories( casedir )
@@ -85,14 +85,18 @@ def analyze_3d_shock( shockpath ):
     
     shock_motion_psd( x_spanave )
     
-    u_spanave  = np.diff( x_spanave ) / np.diff( times ) / 5.2
-    u_mid      = np.diff( x_mid )     / np.diff( times ) / 5.2
+    times_u = times[:-1] + 0.5*np.diff(times)
+    u_spanave  = np.diff( x_spanave ) / np.diff( times ) / 507.0
+    u_mid      = np.diff( x_mid )     / np.diff( times ) / 507.0
     u_relative = u_mid - u_spanave
+    
+    plot_shock_velocity( times_u, u_mid,     'u_shock_mid.png' )
+    plot_shock_velocity( times_u, u_spanave, 'u_shock_spanave.png' )
+    plot_shock_velocity( times_u, u_relative, 'u_shock_relative.png' )
     
     u_rel_pos  = u_relative[ u_relative > 0 ]
     u_rel_neg  = u_relative[ u_relative < 0 ]
     
-    times_u = times[:-1] + 0.5*np.diff(times)
     
     print(f"Mean positive relative shock velocity: {np.mean(u_rel_pos)}")
     print(f"Mean negative relative shock velocity: {np.mean(u_rel_neg)}")
@@ -162,6 +166,24 @@ def shock_motion_psd( x_shocks ):
     
     plt.savefig( 'shock_pmpsd_spanave.png' )
     plt.close()  
+
+
+def plot_shock_velocity( times, u_shock, figname ):
+    
+    # - plot shock velocity
+    
+    fig, ax = plt.subplots( figsize=(12,6) )
+    
+    times = ( np.array(times) - 20.0 ) * 507.0 /5.2
+    
+    ax.plot( times, u_shock, 'b', lw=0.5 )
+    ax.set_title('Shock velocity')
+    ax.set_xlabel(r"$t u_{\infty}/\delta_0$")
+    ax.set_ylabel(r"$u_{shock}/u_{\infty}$")
+    ax.set_ylim( -0.15, 0.15 )
+    
+    plt.savefig( figname )
+    plt.close()
 
 
 def plot_spanwise_velocity_skewness( x_shocks, times ):
