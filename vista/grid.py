@@ -565,8 +565,10 @@ class GridData:
     def find_probe_index( self, xyz, buff=3 ):
         
         """
+        Parameters:
         xyz: [x,y,z] of the given point
-        return: bl_num, [i,j,k]
+        
+        Return: bl_num, [i,j,k]
         Note: i,j,k are the index when buffer layers are included
         """
 

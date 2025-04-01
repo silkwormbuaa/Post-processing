@@ -1504,6 +1504,49 @@ class Snapshot:
 
 
 # ----------------------------------------------------------------------
+# >>> get point probed                                           (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/04/01  - created
+#
+# Desc
+#   -  extract data from a point
+# ----------------------------------------------------------------------
+
+    def get_point_probed( self, xyz, vars, buff=3 ):
+        
+        """
+        Extract data from a nearest cell to the given point.
+        xyz : [x,y,z]
+        return : list of selected variables
+        """
+
+        # check if grid3d is available
+        if self.grid3d is None:
+            raise ValueError("Please read in grid file first!")
+        else: grid3d = self.grid3d
+        
+        # find the bl_num and the index of the cell
+        bl_num, indx = grid3d.find_probe_index( xyz, buff=buff )
+        
+        bl = self.snap_data[self.bl_nums.index(bl_num)]
+        
+        values = list()
+        
+        for var in vars:
+            
+            data = np.array( bl.df[var] )
+            data = data.reshape( bl.npz, bl.npy, bl.npx )
+            
+            values.append( data[indx[2],indx[1],indx[0]] )
+        
+        return values
+
+# ----------------------------------------------------------------------
 # >>> friction_projection                                        (Nr.)
 # ----------------------------------------------------------------------
 #
