@@ -135,6 +135,7 @@ for i, loc in enumerate(locs):
         mach_slice = np.array( df_slice['mach'] )
         tke_slice = np.array( df_slice['tke'] )
         RS_slice = np.array( df_slice['u`v`'] )
+        uu_slice = np.array( df_slice['u`u`'] )
         S_slice = np.array( df_slice['S'] )
         w1_slice = np.array( df_slice['w1'] )
         u_slice = np.array( df_slice['u'] )
@@ -165,6 +166,9 @@ for i, loc in enumerate(locs):
                         (zz,yy), method='linear')
 
         RS = griddata( (z_slice,y_slice), RS_slice,
+                        (zz,yy), method='linear')
+        
+        uu = griddata( (z_slice,y_slice), uu_slice,
                         (zz,yy), method='linear')
         
         S = griddata( (z_slice,y_slice), S_slice,
@@ -207,6 +211,7 @@ for i, loc in enumerate(locs):
             mach = np.concatenate(([np.zeros(len_ext)],mach),axis=0)
             tke = np.concatenate(([np.zeros(len_ext)],tke),axis=0)
             RS = np.concatenate(([np.zeros(len_ext)],RS),axis=0)
+            uu = np.concatenate(([np.zeros(len_ext)],uu),axis=0)
             S  = np.concatenate(([np.zeros(len_ext)],S),axis=0)
             w1 = np.concatenate(([w1[0,:]],w1),axis=0)
             u  = np.concatenate(([np.zeros(len_ext)],u),axis=0)
@@ -231,6 +236,7 @@ for i, loc in enumerate(locs):
             mach   = periodic_average(mach,n_period,axis=1)
             tke    = periodic_average(tke,n_period,axis=1)
             RS     = periodic_average(RS,n_period,axis=1)
+            uu     = periodic_average(uu,n_period,axis=1)
             w1     = periodic_average(w1,n_period,axis=1)
             p_fluc = periodic_average(p_fluc,n_period,axis=1)
             rho    = periodic_average(rho,n_period,axis=1)
@@ -362,6 +368,18 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           filename=casecode+'_RS_'+str(i+1),
                           cbar_label=cbar,
+                          col_map='RdBu_r',
+                          title=title)
+
+        cbar = r"$-\langle u^{'} u^{'} \rangle$"
+        cbar_levels = np.linspace(0.0,2.0,26)
+        cbar_ticks  = np.linspace(0.0,2.0,6)
+        plot_slicex_stat( zz, yy, uu/(u_ref**2)*100,
+                          tag=tag,
+                          filename=casecode+'_uu_'+str(i+1),
+                          cbar_label=cbar,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           col_map='RdBu_r',
                           title=title)
         
