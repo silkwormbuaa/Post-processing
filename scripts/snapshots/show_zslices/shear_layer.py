@@ -48,9 +48,9 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124'
+casedir  = '/home/wencan/temp/smooth_mid'
 
-vars_out = [ 'p_fluc' ]
+vars_out = [ 'rho' ]
 
 varslist = ['u',                'T',               'p',               'DS',      
             'p_fluc',           'rho',            'rho_fluc',        'u_r',
