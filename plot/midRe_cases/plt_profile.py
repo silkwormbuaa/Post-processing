@@ -36,15 +36,17 @@ plt_RS_uu          = False
 plt_RS_vv          = False
 plt_RS_ww          = False
 plt_RS_uv          = False
-plt_combined_RS    = True
-plt_combined_RS_sn = True
+plt_combined_RS    = False
+plt_combined_RS_sn = False
 plt_rho            = False
-plt_T              = False
+plt_T              = True
 plt_Mt             = False
+plt_Tt             = True
+plt_pt             = True
 
 pure = False
 
-fmt = '.pdf'
+fmt = '.png'
 
 # =============================================================================
 
@@ -785,7 +787,7 @@ if plt_rho :
 
 if plt_T :
     
-    fig, ax = plt.subplots(figsize=[8,8])
+    fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
 
     for line in lines:
         
@@ -795,29 +797,54 @@ if plt_T :
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-        
+
     ax.minorticks_on()
     
     ax.set_xscale( "symlog", linthresh = 1 )
-    ax.set_xlabel( "$y_s^+$" )  
-    ax.tick_params( axis='x' )
-    
-    ax.set_ylabel( r'$T/T_{\infty}$' )
-    ax.tick_params( axis='y' )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
     
     ax.set_xlim( [1,3000] )
+#    ax.set_ylim( [0,25] )
     
     x_minor = matplotlib.ticker.LogLocator( 
                         base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
     
     ax.xaxis.set_minor_locator( x_minor )
 
-#    ax.legend( ) 
-#    ax.set_title( r"$u^+_{VD}$ profile", size=20 )
 
-    ax.grid()
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
     
-    plt.savefig( "T_shifted_new" + fmt)
+    figname = 'T'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.set_ylabel( r'$T$' )
+        ax.tick_params( axis='x', pad = 15 )
+        ax.tick_params( axis='y', pad = 10 )
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
 
 # ----------------------------------------------------------------------
@@ -860,4 +887,154 @@ if plt_Mt :
     ax.grid()
     
     plt.savefig( "Mxt_profile_shifted" + fmt )
+    plt.show()
+    
+
+# ----------------------------------------------------------------------
+# >>> plot total temperature                                     (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/04/02  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_Tt:
+    fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
+    
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['Tt'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+
+    ax.minorticks_on()
+    
+    ax.set_xscale( "symlog", linthresh = 1 )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
+    
+    ax.set_xlim( [1,3000] )
+#    ax.set_ylim( [0,25] )
+    
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
+    
+    ax.xaxis.set_minor_locator( x_minor )
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'Tt'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.set_ylabel( r'$T_{t}$' )
+        ax.tick_params( axis='x', pad = 15 )
+        ax.tick_params( axis='y', pad = 10 )
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
+    plt.show()
+
+# ----------------------------------------------------------------------
+# >>> plot total pressure                                        (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/04/02  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_pt:
+    fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
+    
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['pt'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+
+    ax.minorticks_on()
+    
+    ax.set_xscale( "symlog", linthresh = 1 )
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='in',
+                   length=10,
+                   width=2.0)
+    ax.tick_params(which='minor',
+                   axis='both', 
+                   direction='in',
+                   length=5,
+                   width=1.5)
+    
+    ax.set_xlim( [1,3000] )
+#    ax.set_ylim( [0,25] )
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
+    
+    ax.xaxis.set_minor_locator( x_minor )
+
+
+    ax.grid(visible=True, which='both',axis='both',color='gray',
+            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'pt'
+    if pure:
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$", labelpad=-5 )  
+        ax.set_ylabel( r'$p_{t}$' )
+        ax.tick_params( axis='x', pad = 15 )
+        ax.tick_params( axis='y', pad = 10 )
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()
