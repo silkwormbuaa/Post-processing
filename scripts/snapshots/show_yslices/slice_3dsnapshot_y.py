@@ -31,9 +31,9 @@ mpi = MPIenv()
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/231124'
+casedir   = '/home/wencan/temp/smooth_mid'
 slic_type = 'Y'
-locs      = [0.0, 0.02, 0.10, 0.50]
+locs      = [0.025]
 locs      = np.array(locs) * 5.2
 bbox      = [-30.0,120.0,-1.0,31.0,-11.0,11.0]
 
