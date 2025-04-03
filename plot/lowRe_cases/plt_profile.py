@@ -30,25 +30,29 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw = True
-plt_u_vd    = True
-plt_u       = True
-plt_RS_uu   = True
-plt_RS_vv   = True
-plt_RS_ww   = True
-plt_RS_uv   = True
-plt_RS_DNS  = True
-plt_rho     = True
-plt_T       = True
-plt_Mt      = False
+plt_u_vd_lw        = False
+plt_u_vd           = False
+plt_u              = False
+plt_RS_uu          = False
+plt_RS_vv          = False
+plt_RS_ww          = False
+plt_RS_uv          = False
+plt_RS_DNS         = False
+plt_combined_RS    = False
+plt_combined_RS_sn = False
+plt_rho            = False
+plt_T              = False
+plt_Mt             = False
+plt_tke            = True
+plt_tke_sn         = True
 
 pure = False
 
-fmt = '.pdf'
+fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profile'
+OutPath  = '/home/wencan/temp/DataPost/lowRe/upstream_profile'
 
 data0 = '/media/wencan/Expansion/temp/smooth_isothermal/results/profile'
 data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/upstream_profile'
@@ -775,6 +779,169 @@ if plt_RS_DNS:
 
 
 # ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/04/03  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+
+if plt_combined_RS:
+    
+    fig = plt.figure(figsize=[20,12], constrained_layout=True)
+    gs  = fig.add_gridspec(2, 2)
+    
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax4 = fig.add_subplot(gs[1, 1])
+    
+    axs           = [ax1, ax2, ax3, ax4]
+    vars          = ['u`u`+', 'v`v`+', 'w`w`+', 'u`v`+']
+    y_lim         = [[-1,10], [-0.1,1.5], [-0.1,2.4], [-1,0.2]]
+    major_locator = [2.0, 0.4, 0.5, 0.4]
+    ylabels       = [r"$\langle \rho \rangle \langle u^{'} u^{'} \rangle / \tau_w$",
+                     r"$\langle \rho \rangle \langle v^{'} v^{'} \rangle / \tau_w$",
+                     r"$\langle \rho \rangle \langle w^{'} w^{'} \rangle / \tau_w$",
+                     r"$\langle \rho \rangle \langle u^{'} v^{'} \rangle / \tau_w$"]
+    
+    for i, ax in enumerate( axs ):
+    
+        for line in lines:
+            ax.plot( line.df['ys+'],
+                     line.df[vars[i]],
+                     line.color,
+                     label = line.label,
+                     ls    = line.lstyle,
+                     linewidth = line.width)
+    
+        ax.set_xscale( "symlog", linthresh=1 )
+        ax.set_xlim( [1,3000] )
+        ax.set_ylim( y_lim[i] )
+        ax.minorticks_on()
+        ax.tick_params( which='major',
+                        axis='both',
+                        direction='in',
+                        length=20,
+                        width=1.5,
+                        pad=10)
+        ax.tick_params( which='minor',
+                        axis='both', 
+                        direction='in',
+                        length=10,
+                        width=1.5)
+        if i == 0 or i == 1:
+            ax.set_xticklabels([])
+        x_minor = matplotlib.ticker.LogLocator( 
+                            base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+        ax.xaxis.set_minor_locator( x_minor )
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(major_locator[i]))
+        
+        ax.set_ylabel( ylabels[i] )
+        
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(3)
+    
+    ax1.legend( frameon=False, loc='upper right', fontsize=25 )
+    
+    ax3.set_xlabel( "$y_s^+$", labelpad=-5 )
+    ax4.set_xlabel( "$y_s^+$", labelpad=-5 )
+        
+    plt.savefig( "RS_combined_legend" + fmt )
+    plt.show()
+    
+
+# ----------------------------------------------------------------------
+# >>> plot combined Reynolds stresses (normalize with smooth wall) (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/03/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_combined_RS_sn:
+    
+    fig = plt.figure(figsize=[20,12], constrained_layout=True)
+    gs  = fig.add_gridspec(2, 2)
+    
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax4 = fig.add_subplot(gs[1, 1])
+    
+    axs           = [ax1, ax2, ax3, ax4]
+    vars          = ['u`u`+', 'v`v`+', 'w`w`+', 'u`v`+']
+    y_lim         = [[-1,10], [-0.1,1.8], [-0.1,2.5], [-1.4,0.2]]
+    major_locator = [2.0, 0.4, 0.5, 0.4]
+    ylabels       = [r"$\langle \rho \rangle \langle u^{'} u^{'} \rangle / \tau_{sw}$",
+                     r"$\langle \rho \rangle \langle v^{'} v^{'} \rangle / \tau_{sw}$",
+                     r"$\langle \rho \rangle \langle w^{'} w^{'} \rangle / \tau_{sw}$",
+                     r"$\langle \rho \rangle \langle u^{'} v^{'} \rangle / \tau_{sw}$"]
+    
+    for i, ax in enumerate( axs ):
+    
+        for j, line in enumerate(lines):
+            
+            value = line.df[vars[i]]* line.tau_ave / lines[0].tau_ave
+            
+            ax.plot( line.df['ys+'],
+                     value,
+                     line.color,
+                     label = line.label,
+                     ls    = line.lstyle,
+                     linewidth = line.width)
+    
+        ax.set_xscale( "symlog", linthresh=1 )
+        ax.set_xlim( [1,3000] )
+        ax.set_ylim( y_lim[i] )
+        ax.minorticks_on()
+        ax.tick_params( which='major',
+                        axis='both',
+                        direction='in',
+                        length=20,
+                        width=1.5,
+                        pad=10)
+        ax.tick_params( which='minor',
+                        axis='both', 
+                        direction='in',
+                        length=10,
+                        width=1.5)
+        if i == 0 or i == 1:
+            ax.set_xticklabels([])
+        x_minor = matplotlib.ticker.LogLocator( 
+                            base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+        ax.xaxis.set_minor_locator( x_minor )
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(major_locator[i]))
+        
+        ax.set_ylabel( ylabels[i] )
+        
+        ax.spines[:].set_color('black')
+        ax.spines[:].set_linewidth(3)
+    
+    ax1.legend( frameon=False, loc='upper right', fontsize=25 )
+    
+    ax3.set_xlabel( "$y_s^+$", labelpad=-5 )
+    ax4.set_xlabel( "$y_s^+$", labelpad=-5 )
+        
+    plt.savefig( "RS_combined_sn" + fmt )
+    plt.show()
+
+
+
+# ----------------------------------------------------------------------
 # >>> Plot rho profile                                           ( 4 )
 # ----------------------------------------------------------------------
 #
@@ -951,4 +1118,145 @@ if plt_Mt :
     ax.grid()
     
     plt.savefig( "Mxt_profile_shifted" + fmt )
+    plt.show()
+    
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/04/03  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_tke_sn:
+
+    fig, ax = plt.subplots( figsize=[9,8],constrained_layout=True )
+
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 (line.df['u`u`+']+line.df['v`v`+']+line.df['w`w`+'])*line.tau_ave/lines[0].tau_ave,
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,3000] )
+    ax.set_ylim( [-1,12]   )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=20,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1.5)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+    ax.xaxis.set_minor_locator( x_minor )
+
+    # set spacing between major tickers.
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'tke_sn'
+    
+    if pure:    
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$",labelpad=-5 )  
+        ax.set_ylabel( r"$\rho \langle tke \rangle / \tau_w$" )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y',pad = 10)
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
+    plt.show()
+
+# ----------------------------------------------------------------------
+if plt_tke:
+
+    fig, ax = plt.subplots( figsize=[9,8],constrained_layout=True )
+
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['u`u`+']+line.df['v`v`+']+line.df['w`w`+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,3000] )
+    ax.set_ylim( [-1,12]   )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=20,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1.5)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+    ax.xaxis.set_minor_locator( x_minor )
+
+    # set spacing between major tickers.
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'tke'
+    
+    if pure:    
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$",labelpad=-5 )  
+        ax.set_ylabel( r"$\rho \langle tke \rangle / \tau_w$" )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y',pad = 10)
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()

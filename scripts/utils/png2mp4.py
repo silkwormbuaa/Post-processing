@@ -25,7 +25,7 @@ from   vista.tools       import get_filelist
 
 # =============================================================================
 
-figpath = '/home/wencan/temp/220926/postprocess/snapshots/fricprj/figs_p'
+figpath = '/home/wencan/temp/241030/postprocess/snapshots/yslice/u_r/figs'
 
 outfile = 'output.mp4'
 
