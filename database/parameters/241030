@@ -37,9 +37,12 @@ SNAP_RANGE_Z = -10.4,  10.4 ,
 
 # Case specific flow conditions
 
+x_incip   = -11.08
 x_sep     = -10.36
 x_att     = 2.56
 x_pfmax   = -10.16
+
+pw_grad_max = 0.383
 
 prb_sep   = 117
 prb_att   = 271

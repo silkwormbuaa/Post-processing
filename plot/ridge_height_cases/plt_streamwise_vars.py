@@ -252,7 +252,7 @@ if plt_pw:
 
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
     ax.set_ylim([0.8,2.5])
-    ax.set_ylabel("$\langle p_w \rangle/p_{\infty}$")
+    ax.set_ylabel(r"$\langle p_w \rangle/p_{\infty}$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:

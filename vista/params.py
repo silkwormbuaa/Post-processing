@@ -241,6 +241,11 @@ class Params:
 # --------------- case specific flow conditions -----------------------
     
     @property
+    def x_incip( self ):
+        """in shifted and normalized coordinate"""
+        return float( self.params.get('x_incip') )
+    
+    @property
     def x_sep( self ):
         """in shifted and normalized coordinate"""
         return float( self.params.get('x_sep') )
@@ -264,6 +269,11 @@ class Params:
     def x_pfmax( self ):
         """in shifted and normalized coordinate"""
         return float( self.params.get('x_pfmax') )
+    
+    @property
+    def pw_grad_max( self ):
+        """float, max pressure gradient, Cp change per delta"""
+        return float( self.params.get('pw_grad_max') )
     
     @property
     def prb_sep( self ):
