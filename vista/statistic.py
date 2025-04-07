@@ -1648,6 +1648,82 @@ class StatisticData:
 
 
 # ----------------------------------------------------------------------
+# >>> integrate_var                                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/04/05  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def integrate_vol_var( self, blocklist, G:GridData, var=None, type='volume',
+                              bbox=None, buff=3 ):
+        
+        """
+        blocklist : blocks that apply spanwise average
+        G         : GridData instance, need vol_fra assigned.
+        var       : variable, e.g. 'u', 'p', 'u`u`', if None, var = 1.
+        type      : 'volume', 'density', or 'massflow'
+        bbox      : bounding box, [x0,x1,y0,y1,z0,z1], if None, use whole domain
+        
+        example: 
+        1. if just compute volume, var=None, type='volume'
+        2. if compute mass, var='rho', type='volume'; or var=None, type='density'
+        3. if compute momentum, var='u',  type='massflow'
+        4. if compute volume/density/massflow-weighted integral of a var, choose 
+           correponding var and type.
+        """
+        
+        # - check if grid info is already assigned to dataframe
+        
+        if 'vol_fra' not in self.bl[self.bl_nums.index(blocklist[0])].df.columns:
+            self.match_grid(blocklist, G, add_to_df=True)
+            print("Just assigned grid info to dataframe.")
+        else:
+            print("Grid info already assigned to dataframe.")
+        
+        integral = 0.0
+        
+        # - check if the ghost cells are dropped
+        
+        if len( self.bl_clean ) == 0:
+            self.drop_ghost( blocklist, buff=buff, mode='symmetry' )
+        
+        for num in blocklist:
+            
+            # - drop vars outof the bounding box
+            df = self.bl_clean[self.bl_nums_clean.index(num)].df
+            df = df.drop( df[ (df['x'] < bbox[0]) | (df['x'] > bbox[1]) |
+                              (df['y'] < bbox[2]) | (df['y'] > bbox[3]) |
+                              (df['z'] < bbox[4]) | (df['z'] > bbox[5]) ].index)
+
+            vol     = np.array( df['vol'] )
+            vol_fra = np.array( df['vol_fra'] )   
+            
+            if var is None:
+                var_data = 1.0
+            else:
+                var_data = np.array( df[var] )
+            
+            if   type    == 'volume':
+                integral += np.sum( vol_fra*vol * var_data )
+            elif type    == 'density':
+                rho      =  np.array( df['rho'] )
+                integral += np.sum( vol_fra*vol*rho * var_data )
+            elif type    == 'massflow':
+                rho      =  np.array( df['rho'] )
+                u        =  np.array( df['u'] )
+                integral += np.sum( vol_fra*vol*rho*u * var_data )
+
+        return integral
+    
+
+# ----------------------------------------------------------------------
 # >>> spanwise average                                                (Nr.)
 # ----------------------------------------------------------------------
 #
