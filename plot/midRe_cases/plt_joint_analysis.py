@@ -29,9 +29,9 @@ from   vista.tools        import create_linear_interpolator
 #set_plt_rcparams()
 # =============================================================================
 
-case_dir = '/media/wencan/Expansion/temp/smooth_mid'
+case_dir = '/media/wencan/Expansion/temp/241030'
 
-shockpath3d  = case_dir + '/postprocess/snapshots/shock_tracking/3d'
+shockpath3d  = case_dir + '/postprocess/shock/group1'
 bubblepath   = case_dir + '/postprocess/bubble/bubble_size.dat'
 pressurepath = case_dir + '/postprocess/probes/pre_ridge/pressure_ridge.pkl'
 
@@ -58,20 +58,13 @@ x_pfmax = params.x_pfmax
 # - read in the shock motion data
 # -----------------------------------------------------------------------------
 
-shock3d_files = get_filelist( shockpath3d, 'shock_tracking3d' )
+shock3d_file = get_filelist( shockpath3d, 'shock_tracking1' )[0]
 
-times = list()
-shocklines = list()
+with open(shock3d_file, 'rb') as f:
+    times      = pickle.load(f) 
+    shocklines = pickle.load(f)
 
-for shock3d_file in shock3d_files:
-    with open(shock3d_file, 'rb') as f:
-        time = pickle.load(f) 
-        shockline = pickle.load(f)
-
-    times = times + time
-    shocklines = shocklines + shockline
-
-x_shocks = list()
+x_shocks     = list()
 x_shocks_mid = list()
 
 for shockline in shocklines:
@@ -92,10 +85,9 @@ bb_size = np.array(bubble_df['bubble_volume'])
 bb_size_mean = bb_size.mean()
 bb_size_fluc = bb_size - bb_size_mean
 
-physical_time = times.copy()
 times = ( np.array(times) - 20.0 ) * 507.0 * (1.0/7.15)
 
-norm_shock = 0.5*(np.array(x_fluc).max() - np.array(x_fluc).min())
+norm_shock  = 0.5*(np.array(x_fluc).max() - np.array(x_fluc).min())
 norm_bbsize = 0.5*(np.array(bb_size_fluc).max() - np.array(bb_size_fluc).min())
 
 # -----------------------------------------------------------------------------
