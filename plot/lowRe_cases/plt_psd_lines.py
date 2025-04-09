@@ -14,6 +14,7 @@ import os
 import sys
 import pandas            as     pd
 import numpy             as     np
+import matplotlib.ticker as     ticker
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
@@ -26,16 +27,16 @@ from   vista.line        import data_bin_avg
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
-plt.rcParams['font.size']   = 30
+plt.rcParams['font.size']   = 20
 
 # =============================================================================
 
 loc = 'sep'
 independent_len = True
 outpath         = '/media/wencan/Expansion/temp/DataPost/lowRe/psd'
-figname         = 'psd_lines_034'
+figname         = 'psd_lines_04'
 fmt             = '.png'
-cases           = [0,3,4]
+cases           = [0,4]
 showlegend      = False
 normalize       = True
 
@@ -62,8 +63,8 @@ lstyles    = ['--',  ':',     '-.',
 widths     = [4.0, 4.0, 4.0,
               4.0, 4.0, 4.0,
               4.0]
-colors     = ['gray', 'green',  'blue', 
-              'black', 'red',  'purple', 
+colors     = ['gray', 'green',       'blue', 
+              'black', 'orangered',  'purple', 
               'yellow']
 withTs     = [True,  False, False, 
               False, False, True, 
@@ -102,7 +103,7 @@ with timer("reading probes"):
 
 os.chdir( outpath )
 
-fig, ax = plt.subplots( figsize=(12, 6), constrained_layout=True )
+fig, ax = plt.subplots( figsize=(6, 6), constrained_layout=True )
 
 for casenr in cases:
     
@@ -153,7 +154,7 @@ plt.close()
 # plot bin chart
 # =============================================================================
 
-fig, ax = plt.subplots( figsize=(12, 6), constrained_layout=True )
+fig, ax = plt.subplots( figsize=(7, 6), constrained_layout=True )
 
 for casenr in cases:
     
@@ -185,7 +186,7 @@ for casenr in cases:
 
 ax.set_xscale( 'log' )
 ax.set_xlim( [0.01,100] )
-# ax.set_ylim( [0.0, 0.5] )
+ax.set_ylim( [0.0, 0.5] )
 
 ax.minorticks_on()
 ax.tick_params( which='major',
@@ -199,6 +200,7 @@ ax.tick_params( which='minor',
                 direction='in',
                 length=10,
                 width=1)
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
 
 ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
 ax.set_ylabel( r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$' )
