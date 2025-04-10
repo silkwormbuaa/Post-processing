@@ -1662,7 +1662,7 @@ class StatisticData:
 # ----------------------------------------------------------------------
 
     def integrate_vol_var( self, blocklist, G:GridData, var=None, type='volume',
-                              bbox=None, buff=3 ):
+                              bbox=None, buff=3, machlimit=None ):
         
         """
         blocklist : blocks that apply spanwise average
@@ -1701,6 +1701,9 @@ class StatisticData:
             df = df.drop( df[ (df['x'] < bbox[0]) | (df['x'] > bbox[1]) |
                               (df['y'] < bbox[2]) | (df['y'] > bbox[3]) |
                               (df['z'] < bbox[4]) | (df['z'] > bbox[5]) ].index)
+
+            if machlimit is not None:
+                df = df.drop( df[ (df['mach'] > machlimit) ].index )
 
             vol     = np.array( df['vol'] )
             vol_fra = np.array( df['vol_fra'] )   
@@ -1971,7 +1974,7 @@ class StatisticData:
 #
 # ----------------------------------------------------------------------
 
-    def write_vtm( self, filename, vars, block_list, buff=3 ):
+    def write_vtm( self, filename, vars, block_list, buff=3, rescale=[0.0,0.0,0.0,1.0,1.0,1.0] ):
         
         """
         write statistics into vtm file (multiblock vtk)
@@ -1979,10 +1982,11 @@ class StatisticData:
         filename   : filename of output statistics
         vars       : list of variables to be written
         block_list : list of selected blocks' numbers
+        rescale    : rescale of the coordinates
         """
         
         # build the multiple blocks dataset     
-        dataset = self.create_vtk_multiblock( block_list, vars, buff=buff )
+        dataset = self.create_vtk_multiblock( block_list, vars, buff=buff, rescale=rescale )
         
         write_vtm_file( filename, dataset )
                     
@@ -2089,6 +2093,7 @@ class StatisticData:
 # ----- init a slice statistic instance
 
         stat_2d = StatisticData()
+        stat_2d.grid3d = grid3d
         
         # get sliced data from 3d statistic and fill in a 2d statistic
         
@@ -2128,6 +2133,7 @@ class StatisticData:
                 df_sol   = pd.DataFrame(sol.T, columns=vars)
                 
                 bl_slice = BlockData()
+                bl_slice.g = grd
                 bl_slice.fill_with_data( bl_num, dims, df_sol )
                 stat_2d.bl.append( bl_slice )
                 

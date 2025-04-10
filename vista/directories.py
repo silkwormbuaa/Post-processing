@@ -62,6 +62,7 @@ class Directories:
         self.wall_dist    = os.path.join( self.sup_dir, 'wall_dist' )
         self.stat_zslice  = os.path.join( self.sup_dir, 'stat_zslice.bin' )
         self.stat_yslice  = os.path.join( self.sup_dir, 'stat_yslice.bin' )
+        self.stat_incip   = os.path.join( self.sup_dir, 'stat_incip' )
 
 # - post processing directoris
         
