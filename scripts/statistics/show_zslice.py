@@ -28,18 +28,18 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/smooth_adiabatic/'
+    case_dir   = '/home/wencan/temp/241030/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv','uw','vw']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','DS','tke',
                  'u`u`','v`v`','w`w`','u`v`','p`']
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
-    clipbox    = [-15, -7, 0, 2.0, -1, 1]
-    cbar_ticks = np.linspace(0,7500,4, endpoint=True)
+    clipbox    = [-11.5, -9.5, 0, 0.5, -1, 1]
+    cbar_ticks = np.linspace(0.0,7500,4, endpoint=True)
     
     dataset, x_pfmax = data_preparation( case_dir, vars_read, vars_out, rescale )
     dataset = dataset.clip_box( clipbox, invert=False )
     
-    pv_visualize( dataset, 'u`u`', clipbox, cbar_ticks, x_pfmax )
+    pv_visualize( dataset, 'uu', clipbox, cbar_ticks, x_pfmax )
 
 def data_preparation( case_dir, vars_read, vars_out, rescale ):
 
