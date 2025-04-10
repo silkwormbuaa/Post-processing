@@ -103,7 +103,7 @@ def compute_tke_incip( case_dir ):
         # only blocks in the list will be filled data chunk
 
         S.read_statistic( block_list, vars )
-        S.compute_vars( block_list, ['RS'] )
+        S.compute_vars( block_list, ['RS','mach'] )
 
     # - assign vol_fra to grid, then match G to S
 
@@ -150,10 +150,10 @@ def compute_tke_incip( case_dir ):
 
     with timer("compute tke"):
         
-        tke      = S.integrate_vol_var( block_list, G, var='tke',  type='massflow', bbox=bbox )
-        massflow = S.integrate_vol_var( block_list, G, var=None,   type='massflow', bbox=bbox )
-        uu       = S.integrate_vol_var( block_list, G, var='u`u`', type='massflow', bbox=bbox )
-        momentum = S.integrate_vol_var( block_list, G, var='u',    type='massflow', bbox=bbox )
+        tke      = S.integrate_vol_var( block_list, G, var='tke',  type='massflow', bbox=bbox,machlimit=1.0 )
+        massflow = S.integrate_vol_var( block_list, G, var=None,   type='massflow', bbox=bbox,machlimit=1.0 )
+        uu       = S.integrate_vol_var( block_list, G, var='u`u`', type='massflow', bbox=bbox,machlimit=1.0 )
+        momentum = S.integrate_vol_var( block_list, G, var='u',    type='massflow', bbox=bbox,machlimit=1.0 )
         print(clr.fg.green,f"tke = {tke:.5f}.\n"    ,clr.reset)
         print(clr.fg.green,f"massflow = {massflow:.5f}.\n",clr.reset)
         print(clr.fg.green,f"tke/massflow = {tke/massflow:.5f}.\n",clr.reset)
