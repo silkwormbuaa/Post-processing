@@ -33,6 +33,10 @@ for i, path in enumerate( datapaths ):
     line = ProfileData( 'profile_mean_02.dat' )
     line.shift_y( dy[i] )
     
+    # drop some values at the tail
+    line.df = line.df.iloc[:-5]
+    line.df.reset_index(drop=True, inplace=True)
+    
     delta99,delta_star,theta = line.compute_boundary_layer_property(u_ref)
     
     h_factor = delta_star / theta

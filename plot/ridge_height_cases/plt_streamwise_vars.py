@@ -40,7 +40,7 @@ data4 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wa
 data5 = '/media/wencan/Expansion/temp/smooth_isothermal/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 datalist = [data1,   data2,   data3, data4]   #, data5 ]
-color    = ['black',  'black', 'black','black'] #, 'green' ]
+color    = ['black',  'red', 'blue','gray'] #, 'green' ]
 label    = ['0.05',   '0.1',  '0.2', 'smooth_awall','smooth_iwall']
 lstyle   = [':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), 'dashed', 'dotted']
 width    = [4.0,      4.0,    4.0 , 4.0, 4.0 ]
@@ -60,7 +60,7 @@ plt_Cf        = True
 figsize       = [15,8]
 
 pure          = False
-show_label    = True
+show_label    = False
 
 fmt           =  '.png' # or '.png'
 

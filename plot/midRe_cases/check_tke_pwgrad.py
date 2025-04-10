@@ -11,12 +11,11 @@
 
 import os
 import sys
-
-import matplotlib
+import numpy              as     np
+import pandas             as     pd
 import matplotlib.pyplot  as     plt
 import matplotlib.ticker  as     ticker
 import matplotlib.markers as     markers
-import numpy              as     np
 
 source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
@@ -53,11 +52,12 @@ def main():
         ax.plot( tke, pw_grad, 'o', label=case,
                  markersize=15, markerfacecolor='none')
     
-    
+    ax.legend()
     ax.set_xlabel( r"$tke_{max} \cdot 100 $" )
     ax.set_ylabel( r"$\nabla p$")
     plt.show()
-    
+
+        
 
 def get_tke_pwgrad( case_dir ):
     
@@ -83,11 +83,40 @@ def get_tke_pwgrad( case_dir ):
     
     tke = np.array( line.df['u`u`'] )[:index] * np.array( line.df['hy'] )[:index]
     
-    return np.max(tke), params.pw_grad_max
+    tke = np.max( line.df['u`u`'] )
+    
+    return tke, params.pw_grad_max
 
+
+def check_massflowtke_pwgrad():
+    
+    file  = '/home/wencan/temp/DataPost/midRe/tke_incip/tke_incip.dat'
+
+    df    = pd.read_csv( file, delimiter=r'\s+' )
+    
+    fig, ax = plt.subplots( figsize=(12, 8) )
+    
+    for i, row in df.iterrows():
+        case = row['case']
+        ave  = row['ave']
+        tke  = row['tke']
+        pwgrad = get_pwgrad(case)
+        ax.plot( ave, pwgrad, 'o', label=case,
+                 markersize=15, markerfacecolor='none')
+    
+    ax.set_xlabel( r"tke_ave" )
+    ax.set_ylabel( r"$\nabla p$")
+    ax.legend( fontsize=15 )
+    plt.show()
+
+def get_pwgrad(casecode):
+    
+    params = Params( source_dir + 'database/parameters/' + casecode )
+    
+    return params.pw_grad_max
 
 # =============================================================================
 if __name__ == "__main__":
 
     main()
-
+    #check_massflowtke_pwgrad()
