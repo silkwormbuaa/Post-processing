@@ -131,7 +131,7 @@ for i in range( len(cases) ):
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(rms_psds_lines[i])/p_ref, 
-             ls=lstyle[i], linewidth=2, color=colors[i] )
+             ls=lstyle[i], linewidth=4, color=colors[i] )
     
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}/p_{\infty}$" )
@@ -145,7 +145,7 @@ plt.close()
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(powers_lines[i])/p_ref**2, 
-             ls=lstyle[i], linewidth=2, color=colors[i] )
+             ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f/p^2_{\infty}$" )
@@ -161,7 +161,7 @@ plt.close()
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.sqrt(powers_lp_lines[i])/p_ref, 
-             ls=lstyle[i], linewidth=2, color=colors[i] )
+             ls=lstyle[i], linewidth=4, color=colors[i] )
     
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St<1}/p_{\infty}$" )
@@ -175,7 +175,7 @@ plt.close()
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.sqrt(powers_hp_lines[i])/p_ref, 
-             ls=lstyle[i], linewidth=2, color=colors[i] )
+             ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St>1}/p_{\infty}$" )
@@ -189,7 +189,7 @@ plt.close()
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_lines[i]), 
-             ls=lstyle[i], linewidth=2, color=colors[i] )
+             ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f$" )
@@ -205,7 +205,7 @@ plt.close()
 fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_hp_lines[i]), 
-             ls=lstyle[i], linewidth=2, color=colors[i] )
+             ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f_{|St>1}$" )
