@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   shear_layer.py
-@Time    :   2024/11/15 
+@File    :   inspect_near_wall.py
+@Time    :   2025/11/15 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   show shear layer vortices structure (relative velocity vector)
+@Desc    :   show near wall (near incipient point) flow structure (relative velocity vector)
 '''
 
 off_screen = True
@@ -48,9 +48,9 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_mid'
+casedir  = '/home/wencan/temp/231124'
 
-vars_out = [ 'rho' ]
+vars_out = [ 'u', 'u_r', 'p', 'p_fluc', 'DS' ]
 
 varslist = ['u',                'T',               'p',               'DS',      
             'p_fluc',           'rho',            'rho_fluc',        'u_r',
@@ -62,16 +62,16 @@ colmaps  = ['coolwarm',        'plasma',          'coolwarm',        'Greys_r',
             'coolwarm',        'plasma',          'coolwarm',       'coolwarm',
             'coolwarm',        'coolwarm',        'coolwarm']
 ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8], 
-            [-0.5,0.5],        [0.5,2.5],         [-0.25,0.25],      [-0.2,0.2],        
+            [-0.5,0.5],        [0.5,2.5],         [-0.25,0.25],      [-0.4,0.4],        
             [-0.2,0.2],        [-1.5,1.5],        [0.0,2.0]]
 vars_in  = ['u', 'v', 'w', 'T', 'p']
-cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
-clipbox  = [-12, 6, 0, 5, -1, 1]
+cutbox   = [-50.0, 50.0, -1.3, 20.0, 0.1, 0.11]
 
 # =============================================================================
 
 dirs     = Directories( casedir )
-out_dir  = dirs.pp_snp_zslice
+out_dir  = dirs.pp_snp_nearwall
+
 
 # allocate variable that will be broadcasted to all workers
 
@@ -88,7 +88,7 @@ if mpi.is_root:
     os.chdir( create_folder( out_dir ) )
     
     for var in vars_out:
-        create_folder( f'./{var}_vector/figs' )
+        create_folder( f'./{var}/figs' )
     
     print( dirs.case_para_file)
     params = Params( dirs.case_para_file )
@@ -100,7 +100,8 @@ if mpi.is_root:
     grid3d.read_grid()
     blocklist = grid3d.select_blockgrids( cutbox, mode='overlap' )
     
-    statz = StatisticData( dirs.stat_zslice )
+    statz        = StatisticData( dirs.stat_zslice )
+    statz.grid3d = grid3d
     statz.read_statistic(block_list=blocklist, vars_in=['u','v','p','rho'])
         
 params    = mpi.comm.bcast( params,    root=0 )
@@ -114,12 +115,15 @@ T_ref     = params.T_ref
 p_ref     = params.p_ref
 delta     = params.delta_0
 rho_ref   = params.rho_ref
+x_incip   = params.x_incip
+x_pfmax   = params.x_pfmax
 rescale   = [-params.x_imp, 0.0, 0.0, delta, delta, delta]
+clipbox  = [x_incip-2, x_incip+2, 0, 1, -1, 1]
 
 mpi.barrier()
 
 os.chdir( out_dir )
-clock = timer("show slices from snapshot_Z_xxxx.bin:")
+clock = timer("inspect near wall flow from snapshot_Z_xxxx.bin:")
 
 # read in the snapshots and show them
 
@@ -169,7 +173,7 @@ def show_slice( snapfile ):
 
     for var in vars_out:
         
-        os.chdir( f'./{var}_vector/figs' )
+        os.chdir( f'./{var}/figs' )
         p = pv.Plotter( off_screen=off_screen, window_size=[1920,1080], border=False )
 
 # ----- set color maps
@@ -184,23 +188,10 @@ def show_slice( snapfile ):
                     clim=ranges[varslist.index(var)],
                     lighting=False, 
                     show_scalar_bar=False )
-        
-        p.add_mesh( sepline, color='yellow', line_width=4.0 )
-        p.add_mesh( sonline, color='green',  line_width=4.0 )
-
-# ----- add the relative velocity vector
-
-        vector2d        = np.zeros((dataset.n_points,3))
-        vector2d[:,0]   = dataset['u_r']
-        vector2d[:,1]   = dataset['v_r']
-        mask            = np.zeros_like( vector2d, dtype=bool )
-        mask[::7,::]    = True
-        vector2d        = vector2d*mask
-        dataset['vector'] = vector2d
-        p.add_arrows( dataset.points, dataset['vector'], mag=0.7, color='black')
-        
-        # reference velocity vector of 0.5 u_ref
-        p.add_arrows( np.array([[-10.0,4,0.0]]), np.array([[0.5,0.0,0.0]]), mag=0.7, color='black', label='u_ref')
+        if sepline.n_points > 0:
+            p.add_mesh( sepline, color='yellow', line_width=4.0 )
+        if sonline.n_points > 0:
+            p.add_mesh( sonline, color='green',  line_width=4.0 )
 
 # ----- set the view and render the image
 
@@ -217,13 +208,13 @@ def show_slice( snapfile ):
 
         img = ax.imshow(image, extent=clipbox[:4], cmap=cmap, clim=ranges[varslist.index(var)])
 
+        ax.plot( x_pfmax, 0.0, '*', color='cyan' , markersize=20 )
         ax.set_xlabel(r'$(x-x_{imp})/\delta_0$')
         ax.set_ylabel(r'$y/\delta_0$')
 
         cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5 ) 
         cbar.ax.set_ylabel( labels[varslist.index(var)], loc='center')
 
-        ax.text(-11.0, 3.9, r"$0.5u_{\infty}$", fontsize=15, color='black')
         plt.title(f"t = {itime:.2f} ms", loc='center',y=1.05)
 
         if off_screen:
