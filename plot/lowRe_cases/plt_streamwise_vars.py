@@ -63,7 +63,7 @@ plt_Cf        = True
 pure          = False
 show_label    = False
 
-figsize       = [15,6]
+figsize       = [15,8]
 fmt           =  '.png' # or '.png'
 
 # - read in data files

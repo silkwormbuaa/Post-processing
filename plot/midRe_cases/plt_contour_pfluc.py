@@ -43,7 +43,7 @@ col_map     = 'coolwarm'  #'RdBu_r'
 cbar_label  = r'$\sqrt{\langle p ^\prime p ^\prime \rangle}/p_{\infty}$'
 cbar_levels = np.linspace(0,0.4,51)
 cbar_ticks  = np.linspace(0,0.4,5)
-figname     = 'contour_p_fluc'
+figname     = 'contour_p_fluc_2'
 format      = '.png'
 
 # =============================================================================
@@ -63,7 +63,7 @@ for i in range(1):
     
     fig, axs = plt.subplots(3,2,figsize=(24,15))
     
-    for j, ax_i in enumerate([0,2,1,3,5]):
+    for j, ax_i in enumerate([0,2,1,5,3]):
     
         # read in data and interpolate
         ax = axs.flat[ax_i]
