@@ -30,11 +30,11 @@ set_plt_rcparams( fontsize=20 )
 def main():
     case_dir   = '/home/wencan/temp/241030/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv','uw','vw']
-    vars_out   = ['u','v','w','p','T','mach','grad_rho','DS','tke',
+    vars_out   = ['u','v','w','p','T','mach','grad_rho','DS','tke','uu',
                  'u`u`','v`v`','w`w`','u`v`','p`']
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
-    clipbox    = [-11.5, -9.5, 0, 0.5, -1, 1]
-    cbar_ticks = np.linspace(0.0,7500,4, endpoint=True)
+    clipbox    = [-11.5, -7.5, 0, 0.5, -1, 1]
+    cbar_ticks = np.linspace(0.0,200000,4, endpoint=True)
     
     dataset, x_pfmax = data_preparation( case_dir, vars_read, vars_out, rescale )
     dataset = dataset.clip_box( clipbox, invert=False )
