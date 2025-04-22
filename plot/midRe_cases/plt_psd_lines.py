@@ -13,64 +13,64 @@ import os
 import sys
 import pandas            as     pd
 import numpy             as     np
+import matplotlib.pyplot as     plt
+import matplotlib.ticker as     ticker
 
 source_dir = os.path.realpath(__file__).split('plot')[0] 
 sys.path.append( source_dir )
 
-import matplotlib.pyplot as     plt
-import matplotlib.ticker as     ticker
 from   vista.probe       import ProbeData
 from   vista.timer       import timer
+from   vista.params      import Params
+from   vista.directories import Directories
 from   vista.line        import data_bin_avg
+from   vista.directories import create_folder
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size']   = 30
 
+# =============================================================================
 # option zone
 # =============================================================================
 
-loc     = 'pf_max'
 independent_len = False
-figname = 'psdlines'
-fmat    = '.png'
-cases   = [0,1,2]
-withT   = [True, True, True]
-color   = ['black','yellowgreen','steelblue']
-lstyle  = ['--', (0, (3, 1, 1, 1, 1, 1)), ':' ]
-width   = [4.0,  4.0, 4.0 ]
-label   = ['highRe smooth', 'rough_0.026', 'rough_0.1']
-showlegend  = False
-premultiply = True
-normalize   = True
+figname         = '0422psdlines'
+fmat            = '.png'
+cases_nr        = [0,1,2,3,4]
+showlegend      = False
+premultiply     = True
+normalize       = True
+outpath         = '/home/wencan/temp/DataPost/midRe/psd/'
+
+cases    = ['smooth_adiabatic','220927','smooth_mid','231124','241030']
+color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 
+label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
+lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
+lwidth   = [4.0,              4.0,               4.0,             4.0,                4.0,                  4.0]
+locs     = ['sep','sep','pfmax','pfmax','pfmax']
+
+os.chdir( create_folder(outpath) )
 
 # =============================================================================
+# un-binned plot
+# =============================================================================
 
-datapath0 = '/home/wencan/temp/smooth_mid/probes/'
-datapath1 = '/home/wencan/temp/241030/probes/'
-datapath2 = '/home/wencan/temp/231124/probes/'
+fig, ax = plt.subplots( figsize=(9, 8), constrained_layout=True )
 
-outpath  = '/home/wencan/temp/DataPost/midRe/psd'
-
-datapaths = [datapath0, datapath1, datapath2]
-
-prbfiles_sep   = ['probe_00098.dat', 'probe_00117.dat', 'probe_00067.dat']
-prbfiles_pfmax = ['probe_00084.dat', 'probe_00117.dat', 'probe_00047.dat']  
-
-if loc   == 'sep':    prbfiles = prbfiles_sep
-elif loc == 'pf_max': prbfiles = prbfiles_pfmax
-
-len_sep = [ 9.22, 12.92, 12.82 ]
-
-probes = []
-
-with timer("reading probes"):
+for nr in cases_nr:
     
-    for casenr in cases:
-        
-        os.chdir( datapaths[casenr] )
-        probe = ProbeData( prbfiles[casenr], withT=withT[casenr] )
+    case     = cases[nr]
+    casepath = '/home/wencan/temp/' + case
+    dirs     = Directories( casepath )
+    params   = Params( dirs.case_para_file )
+    
+    prbfile = dirs.fetch_prb_from_type( locs[nr] )
+
+    with timer("reading probes"):
+    
+        probe = ProbeData( prbfile, withT=params.prb_withT )
         probe.cleandata( t_start=20.0 )
         probe.get_fluc( 'p' )
         
@@ -81,35 +81,23 @@ with timer("reading probes"):
             probe.compute_psd( 'p_fluc', n_seg=8, overlap=0.5 )
             var = 'psd_p_fluc'
             
-        probes.append( probe )
 
-# =============================================================================
-# plot
-# =============================================================================
+    if premultiply:
+        if normalize: ylabel = r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$'
+        else:         ylabel = r'$f \cdot PSD(f)$'
+    else:             ylabel = r'$PSD(f)$'
 
-os.chdir( outpath )
 
-if premultiply:
-    if normalize: ylabel = r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$'
-    else:         ylabel = r'$f \cdot PSD(f)$'
-else:             ylabel = r'$PSD(f)$'
-
-fig, ax = plt.subplots( figsize=(9, 8), constrained_layout=True )
-
-for casenr in cases:
-    
-    probe = probes[casenr]
-    
-    if independent_len: lsep = len_sep[casenr]
-    else:               lsep = len_sep[0]
+    if independent_len: lsep = params.lsep
+    else:               lsep = 9.52
     
     st = probe.psd_df['freq'] * 5.2 / 507 * lsep
     
     ax.semilogx( st, probe.psd_df[var],
-                 color=color[casenr], 
-                 linestyle=lstyle[casenr], 
-                 linewidth=width[casenr], 
-                 label=label[casenr] )
+                 color    =color[nr], 
+                 linestyle=lstyle[nr], 
+                 linewidth=lwidth[nr], 
+                 label=label[nr] )
     
 ax.minorticks_on()
 ax.tick_params( which='major',
@@ -148,14 +136,40 @@ plt.close()
 # plot bin chart
 # =============================================================================
 
+
 fig, ax = plt.subplots( figsize=(9, 8), constrained_layout=True )
 
-for casenr in cases:
+for nr in cases_nr:
     
-    probe = probes[casenr]
+    case     = cases[nr]
+    casepath = '/home/wencan/temp/' + case
+    dirs     = Directories( casepath )
+    params   = Params( dirs.case_para_file )
     
-    if independent_len: lsep = len_sep[casenr]
-    else:               lsep = len_sep[0]
+    prbfile = dirs.fetch_prb_from_type( locs[nr] )
+
+    with timer("reading probes"):
+    
+        probe = ProbeData( prbfile, withT=params.prb_withT )
+        probe.cleandata( t_start=20.0 )
+        probe.get_fluc( 'p' )
+        
+        if premultiply: 
+            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5, normalize=normalize )
+            var = 'pmpsd_p_fluc'
+        else:         
+            probe.compute_psd( 'p_fluc', n_seg=8, overlap=0.5 )
+            var = 'psd_p_fluc'
+            
+
+    if premultiply:
+        if normalize: ylabel = r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$'
+        else:         ylabel = r'$f \cdot PSD(f)$'
+    else:             ylabel = r'$PSD(f)$'
+
+
+    if independent_len: lsep = params.lsep
+    else:               lsep = 9.52
     
     st = probe.psd_df['freq'] * 5.2 / 507 * lsep
     
@@ -173,10 +187,10 @@ for casenr in cases:
     barwidth = np.diff( bin_edges )
     
     ax.plot( df_bin['st_mid'], df_bin['psd'], 
-             color=color[casenr], 
-             linewidth=width[casenr], 
-             linestyle=lstyle[casenr],
-             label=label[casenr] )
+             color=color[nr], 
+             linewidth=lwidth[nr], 
+             linestyle=lstyle[nr],
+             label=label[nr] )
 
 ax.set_xscale( 'log' )
 ax.set_xlim( [0.01,100] )
