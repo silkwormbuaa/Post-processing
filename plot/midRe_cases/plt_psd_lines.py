@@ -38,6 +38,7 @@ plt.rcParams['font.size']   = 30
 independent_len = False
 figname         = '0422psdlines'
 fmat            = '.png'
+figsize         = (12,6)
 cases_nr        = [0,1,2,3,4]
 showlegend      = False
 premultiply     = True
@@ -57,7 +58,7 @@ os.chdir( create_folder(outpath) )
 # un-binned plot
 # =============================================================================
 
-fig, ax = plt.subplots( figsize=(9, 8), constrained_layout=True )
+fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
 for nr in cases_nr:
     
@@ -83,9 +84,9 @@ for nr in cases_nr:
             
 
     if premultiply:
-        if normalize: ylabel = r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$'
-        else:         ylabel = r'$f \cdot PSD(f)$'
-    else:             ylabel = r'$PSD(f)$'
+        if normalize: ylabel = r'$f \cdot \mathcal{P}(f)/ \int \mathcal{P}(f) \mathrm{d} f$'
+        else:         ylabel = r'$f \cdot \mathcal{P}(f)$'
+    else:             ylabel = r'$\mathcal{P}(f)$'
 
 
     if independent_len: lsep = params.lsep
@@ -137,7 +138,7 @@ plt.close()
 # =============================================================================
 
 
-fig, ax = plt.subplots( figsize=(9, 8), constrained_layout=True )
+fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
 
 for nr in cases_nr:
     
@@ -163,9 +164,9 @@ for nr in cases_nr:
             
 
     if premultiply:
-        if normalize: ylabel = r'$f \cdot PSD(f)/ \int PSD(f) \mathrm{d} f$'
-        else:         ylabel = r'$f \cdot PSD(f)$'
-    else:             ylabel = r'$PSD(f)$'
+        if normalize: ylabel = r'$f \cdot \mathcal{P}(f)/ \int \mathcal{P}(f) \mathrm{d} f$'
+        else:         ylabel = r'$f \cdot \mathcal{P}(f)$'
+    else:             ylabel = r'$\mathcal{P}(f)$'
 
 
     if independent_len: lsep = params.lsep
@@ -192,9 +193,11 @@ for nr in cases_nr:
              linestyle=lstyle[nr],
              label=label[nr] )
 
+ax.vlines( 0.4, -1.0, 1.0, linestyles='--', linewidth=2, color='black' )
+
 ax.set_xscale( 'log' )
 ax.set_xlim( [0.01,100] )
-# ax.set_ylim( [0.0, 0.5] )
+ax.set_ylim( [0.0, 0.5] )
 
 ax.minorticks_on()
 ax.tick_params( which='major',

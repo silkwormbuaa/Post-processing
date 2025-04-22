@@ -131,7 +131,7 @@ for i in range(5):
 
 axs[4].set_xlim([-15.0, 10.0])
     
-cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
+cbar_label = r'$f \cdot \mathcal{P}(f)/ \int \mathcal{P}(f) \mathrm{d} f$'
 cbar_ticks = np.linspace(0, 0.3, 4)
 cbar_ax = fig.add_subplot([0.3,0.03,0.6,0.1],visible=False)
 #cbar_ax.set_position([0.0, 0.0, 0.7, 0.03])

@@ -36,10 +36,12 @@ set_plt_rcparams()
 # option zone
 # =============================================================================
 
-cases  = ['smooth_adiabatic','220927','smooth_mid','231124',  '241030']
-colors = ['gray',  'orangered', 'black',    'steelblue','yellowgreen']
-lstyle = ['-',     '-.',        '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
-outdir = '/home/wencan/temp/DataPost/midRe/psd'
+cutoff_st       = 0.4
+independent_len = False
+cases     = ['smooth_adiabatic','220927','smooth_mid','231124',  '241030']
+colors    = ['gray',  'orangered', 'black',    'steelblue','yellowgreen']
+lstyle    = ['-',     '-.',        '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
+outdir    = '/home/wencan/temp/DataPost/midRe/psd'
 
 # =============================================================================
 
@@ -48,8 +50,12 @@ os.chdir( outdir )
 dirs = [ Directories( os.path.join( '/home/wencan/temp', case ) ) for case in cases ]
 
 params  = [ Params( dir.case_para_file ) for dir in dirs ]
-x_atts  = [ param.x_att for param in params ]
-x_seps  = [ param.x_sep for param in params ]
+
+if independent_len:
+    lseps   = [ param.lsep  for param in params ]
+else:
+    lseps   = [ 9.52 ]*len(cases)
+    
 x_imp   = params[0].x_imp
 delta_0 = params[0].delta_0
 u_ref   = params[0].u_ref
@@ -107,8 +113,8 @@ for i in range( len(cases) ):
         probe = ProbeData()
         probe.read_psd( psdfile )
         freq   = np.array( probe.psd_df['freq'] )
-        st     = freq*(x_atts[i]-x_seps[i])*delta_0/u_ref
-        _,i_cr = find_indices( st, 0.5 ) 
+        st     = freq*(lseps[i])*delta_0/u_ref
+        _,i_cr = find_indices( st, cutoff_st ) 
 #        _,i_cr = find_indices( freq, 10.575 )     # critical frequency St_smooth=1
         
         psd_p_fluc = np.array( probe.psd_df['psd_p_fluc'] )
@@ -164,7 +170,7 @@ for i in range( len(cases) ):
              ls=lstyle[i], linewidth=4, color=colors[i] )
     
 plot_style()
-ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St<1}/p_{\infty}$" )
+ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St<"+f"{cutoff_st}"+r"}/p_{\infty}$" )
 figname = "pressure_fluctuation_power_lp"
 plt.savefig( figname + '.png' )
 plt.close()
@@ -178,7 +184,7 @@ for i in range( len(cases) ):
              ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
-ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St>1}/p_{\infty}$" )
+ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St>"+f"{cutoff_st}"+r"}/p_{\infty}$" )
 figname = "pressure_fluctuation_power_hp"
 plt.savefig( figname + '.png' )
 plt.close()
@@ -192,7 +198,7 @@ for i in range( len(cases) ):
              ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
-ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f$" )
+ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<"+f"{cutoff_st}"+r"}/\int \mathcal{P}(f) \mathrm{d} f$" )
 ax.set_ylim([0,1])
 ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 figname = "pressure_fluctuation_power_lp_ratio"
@@ -208,7 +214,7 @@ for i in range( len(cases) ):
              ls=lstyle[i], linewidth=4, color=colors[i] )
 
 plot_style()
-ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<1}/\int \mathcal{P}(f) \mathrm{d} f_{|St>1}$" )
+ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<"+f"{cutoff_st}"+r"}/\int \mathcal{P}(f) \mathrm{d} f_{|St>"+f"{cutoff_st}"+r"}$" )
 ax.set_ylim([0,3.1])
 ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
 figname = "pressure_fluctuation_power_l2h_ratio"
