@@ -29,6 +29,7 @@ from   vista.tools        import find_indices
 from   vista.tools        import get_filelist
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
+from   vista.tools        import create_linear_interpolator
 
 set_plt_rcparams()
 
@@ -38,6 +39,7 @@ set_plt_rcparams()
 
 cutoff_st       = 0.4
 independent_len = False
+addmarker       = True
 cases     = ['smooth_adiabatic','220927','smooth_mid','231124',  '241030']
 colors    = ['gray',  'orangered', 'black',    'steelblue','yellowgreen']
 lstyle    = ['-',     '-.',        '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
@@ -55,7 +57,11 @@ if independent_len:
     lseps   = [ param.lsep  for param in params ]
 else:
     lseps   = [ 9.52 ]*len(cases)
-    
+
+x_sep   = [ param.x_sep   for param in params ]
+x_att   = [ param.x_att   for param in params ]
+x_pfmax = [ param.x_pfmax for param in params ]
+
 x_imp   = params[0].x_imp
 delta_0 = params[0].delta_0
 u_ref   = params[0].u_ref
@@ -88,6 +94,13 @@ def plot_style():
     # set the bounding box of axes
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(3)
+
+
+def add_sep_pfmax(i,x,y):
+    interpolator = create_linear_interpolator( x, y )
+    ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=colors[i], ms=20)
+    ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=colors[i], ms=20)
+    ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=colors[i], ms=20)
 
 
 # =============================================================================
@@ -138,10 +151,12 @@ fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(rms_psds_lines[i])/p_ref, 
              ls=lstyle[i], linewidth=4, color=colors[i] )
+    if addmarker:
+        add_sep_pfmax(i, x_locs_lines[i], np.array(rms_psds_lines[i])/p_ref)
     
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}/p_{\infty}$" )
-figname = "pressure_fluctuation_rms_psd"
+figname = "pf_rms_psd"
 plt.savefig( figname + '.png' )
 plt.close()
 
@@ -152,12 +167,14 @@ fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(powers_lines[i])/p_ref**2, 
              ls=lstyle[i], linewidth=4, color=colors[i] )
+    if addmarker:
+        add_sep_pfmax(i, x_locs_lines[i], np.array(powers_lines[i])/p_ref**2)
 
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f/p^2_{\infty}$" )
 ax.set_ylim([0,0.008])
 ax.yaxis.set_major_locator(ticker.MultipleLocator(0.002))
-figname = "pressure_fluctuation_power"
+figname = "pf_power"
 plt.savefig( figname + '.png' )
 plt.close()
 
@@ -168,10 +185,12 @@ fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.sqrt(powers_lp_lines[i])/p_ref, 
              ls=lstyle[i], linewidth=4, color=colors[i] )
+    if addmarker:
+        add_sep_pfmax(i, x_locs_lines[i], np.sqrt(powers_lp_lines[i])/p_ref)
     
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St<"+f"{cutoff_st}"+r"}/p_{\infty}$" )
-figname = "pressure_fluctuation_power_lp"
+figname = "pf_rms_lp"
 plt.savefig( figname + '.png' )
 plt.close()
 
@@ -182,10 +201,12 @@ fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.sqrt(powers_hp_lines[i])/p_ref, 
              ls=lstyle[i], linewidth=4, color=colors[i] )
-
+    if addmarker:
+        add_sep_pfmax(i, x_locs_lines[i], np.sqrt(powers_hp_lines[i])/p_ref)
+    
 plot_style()
 ax.set_ylabel(r"$\sqrt{\int \mathcal{P}(f) \mathrm{d} f}_{|St>"+f"{cutoff_st}"+r"}/p_{\infty}$" )
-figname = "pressure_fluctuation_power_hp"
+figname = "pf_rms_hp"
 plt.savefig( figname + '.png' )
 plt.close()
 
@@ -196,12 +217,14 @@ fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_lines[i]), 
              ls=lstyle[i], linewidth=4, color=colors[i] )
-
+    if addmarker:
+        add_sep_pfmax(i, x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_lines[i]))
+    
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<"+f"{cutoff_st}"+r"}/\int \mathcal{P}(f) \mathrm{d} f$" )
 ax.set_ylim([0,1])
 ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
-figname = "pressure_fluctuation_power_lp_ratio"
+figname = "pf_power_lp_ratio"
 plt.savefig( figname + '.png' )
 plt.close()
 
@@ -212,11 +235,13 @@ fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
 for i in range( len(cases) ):
     ax.plot( x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_hp_lines[i]), 
              ls=lstyle[i], linewidth=4, color=colors[i] )
-
+    if addmarker:
+        add_sep_pfmax(i, x_locs_lines[i], np.array(powers_lp_lines[i])/np.array(powers_hp_lines[i]))
+    
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<"+f"{cutoff_st}"+r"}/\int \mathcal{P}(f) \mathrm{d} f_{|St>"+f"{cutoff_st}"+r"}$" )
 ax.set_ylim([0,3.1])
 ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
-figname = "pressure_fluctuation_power_l2h_ratio"
+figname = "pf_power_l2h_ratio"
 plt.savefig( figname + '.png' )
 plt.close()

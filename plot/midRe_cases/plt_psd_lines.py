@@ -212,7 +212,7 @@ ax.tick_params( which='minor',
                 length=10,
                 width=1)
 
-ax.set_xlabel( r'$f L_{sep}/u_{\infty}$' )
+ax.set_xlabel( r'$St_{Lsep} = f L_{sep}/u_{\infty}$' )
 ax.set_ylabel( ylabel )
 
 ax.spines[:].set_color('black')
