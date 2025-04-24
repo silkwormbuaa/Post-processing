@@ -241,7 +241,7 @@ for i in range( len(cases) ):
 plot_style()
 ax.set_ylabel(r"$\int \mathcal{P}(f) \mathrm{d} f_{|St<"+f"{cutoff_st}"+r"}/\int \mathcal{P}(f) \mathrm{d} f_{|St>"+f"{cutoff_st}"+r"}$" )
 ax.set_ylim([0,3.1])
-ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(1.0))
 figname = "pf_power_l2h_ratio"
 plt.savefig( figname + '.png' )
 plt.close()

@@ -611,8 +611,10 @@ class StatisticData:
                 gamma = 1.40
                 R = 287.0508571
                 
-                mach = np.sqrt( u*u+v*v+w*w ) / np.sqrt( gamma*R*T )
+                a    = np.sqrt( gamma*R*T )
+                mach = np.sqrt( u*u+v*v+w*w ) / a
                 
+                self.bl[self.bl_nums.index(num)].df['a']    = a
                 self.bl[self.bl_nums.index(num)].df['mach'] = mach
 
 # ---------- compute turbulent kinetic energy

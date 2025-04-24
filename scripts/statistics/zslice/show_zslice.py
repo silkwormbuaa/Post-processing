@@ -28,18 +28,18 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/241030/'
+    case_dir   = '/home/wencan/temp/smooth_mid/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv','uw','vw']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','DS','tke','uu',
                  'u`u`','v`v`','w`w`','u`v`','p`']
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
-    clipbox    = [-11.5, -7.5, 0, 0.5, -1, 1]
-    cbar_ticks = np.linspace(0.0,200000,4, endpoint=True)
+    clipbox    = [-15, 10, 0, 10.0, -1, 1]
+    cbar_ticks = np.linspace(0.0,2.0,5, endpoint=True)
     
     dataset, x_pfmax = data_preparation( case_dir, vars_read, vars_out, rescale )
     dataset = dataset.clip_box( clipbox, invert=False )
     
-    pv_visualize( dataset, 'uu', clipbox, cbar_ticks, x_pfmax )
+    pv_visualize( dataset, 'mach', clipbox, cbar_ticks, x_pfmax )
 
 def data_preparation( case_dir, vars_read, vars_out, rescale ):
 
