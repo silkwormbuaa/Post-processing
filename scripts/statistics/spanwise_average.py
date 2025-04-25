@@ -32,7 +32,7 @@ from   vista.plot_setting import set_plt_rcparams
 
 def main():
 
-    case_dir   = '/home/wencan/temp/smooth_mid/'
+    case_dir   = '/home/wencan/temp/240211/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`']
     vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`']    
@@ -147,6 +147,8 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_load, var, lvls ):
     plt.savefig(var+'.png', dpi=300, bbox_inches='tight')
 
     plt.close()
+    
+    print(f"Output {var}.png to {os.getcwd()}")
 
 # =============================================================================
 
