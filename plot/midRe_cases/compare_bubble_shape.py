@@ -39,7 +39,12 @@ def main():
     
     print("========= spanwise average =========")
     
-    compute_slope_spanave()
+    compute_slope_rev_spanave()
+    
+    print("========= dividing streamline =========")
+    
+    compute_slope_divid_spanave()
+    print("========= done =========")
 
 
 def compute_slope(i,line):
@@ -48,10 +53,10 @@ def compute_slope(i,line):
     y = np.array(line[:,1])
     
     index_max      = np.argmax(y)-10
-    index_start, _ = find_indices( y[:index_max], 0.1, mode='sequential')
+    index_start, _ = find_indices( y[:index_max], 0.15, mode='sequential')
     
     slope = (y[index_max] - y[index_start]) / (x[index_max] - x[index_start])
-    print(f"{casename[i]} slope: {slope}")
+    print(f"{casename[i].ljust(20)} slope: {slope:10.4f}, angle: {np.degrees(np.arctan(slope)):10.4f}")
     
     return index_start, index_max
     
@@ -92,7 +97,7 @@ def compute_slope_local():
         plt.close()
 
 
-def compute_slope_spanave():
+def compute_slope_rev_spanave():
     
     fig, ax = plt.subplots( figsize=(9,6) )
     
@@ -121,8 +126,39 @@ def compute_slope_spanave():
     ax.spines[:].set_linewidth(2)
         
     plt.savefig( output_dir + 'spanave_bubble.png')
-    plt.close()            
+    plt.close() 
 
+
+def compute_slope_divid_spanave():
+    
+    fig, ax = plt.subplots( figsize=(9,6) )
+    
+    for i, case in enumerate(casename):
+        
+        dirs = Directories(f"/home/wencan/temp/{case}")
+        os.chdir( dirs.pp_z_average )
+        
+        with open('dividing_streamline.pkl','rb') as f:
+            lines = pickle.load(f)
+            
+            for line in lines:
+                
+                i_s,i_e = compute_slope(i,line)
+                
+                ax.plot( line[:,0], line[:,1], color=color[i], 
+                         linestyle=lstyle[i], linewidth=1.5 )
+
+                ax.plot( line[i_s:i_e,0], line[i_s:i_e,1], color=color[i], 
+                         markersize=3, marker='o', markerfacecolor=color[i] )
+                
+
+    ax.set_xlim([-18,10])
+    ax.set_ylim([-0.2, 1.5])
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(2)
+        
+    plt.savefig( output_dir + 'spanave_divid.png')
+    plt.close() 
 
 if __name__ == "__main__":
     main()

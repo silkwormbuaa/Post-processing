@@ -11,6 +11,7 @@
 
 import os
 import sys
+import pickle
 import numpy             as     np
 import pyvista           as     pv
 import matplotlib.pyplot as     plt
@@ -18,9 +19,7 @@ import matplotlib.pyplot as     plt
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.grid        import GridData
 from   vista.params      import Params
-from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.tools       import crop_to_rect_map
 from   vista.plot_setting import set_plt_rcparams
@@ -28,16 +27,17 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/smooth_mid/' 
+    case_dir   = '/home/wencan/temp/220927/' 
     clipbox    = [-15, 10, 0, 10.0, -1, 1]
     cbar_ticks = np.linspace(0.0,2.0,5, endpoint=True)
     
     dataset, x_pfmax = data_preparation( case_dir )
     dataset = dataset.clip_box( clipbox, invert=False )
     
-    line = dividing_streamline( dataset, np.array([-7.0,0.001,0.0]), step=0.1, forward=True )
+    dirs    = Directories( case_dir )
+    os.chdir( dirs.pp_z_average )
     
-    pv_visualize( dataset, 'mach', clipbox, cbar_ticks, x_pfmax, line=line )
+    pv_visualize( dataset, 'mach', clipbox, cbar_ticks, x_pfmax )
 
 
 def dividing_streamline( dataset:pv.UnstructuredGrid, point_start:np.ndarray, step=0.1, forward=True):
@@ -57,16 +57,14 @@ def dividing_streamline( dataset:pv.UnstructuredGrid, point_start:np.ndarray, st
         u, v = fetch_uv(dataset, point_start)
         i += 1
         
-        if i > 200:
+        if i > 3000:
             break
         
         if point_start[0] < -15.0 or point_start[0] > 10.0 or \
            point_start[1] < 0.0   or point_start[1] > 10.0:
             break
         
-        print(i, point_start, u, v)
-
-    return pts
+    return np.array(pts)
 
 def step_streamline( point_start, u, v, step=0.1, forward=True):
     """
@@ -117,11 +115,12 @@ def data_preparation( case_dir ):
         print("Found z_average.vtmb, loading it...\n")
         dataset = pv.read( filename )
         dataset = dataset.cell_data_to_point_data().combine()
+        print(dataset.array_names)
         print("Finished data preparation!")
     
     return dataset, x_pfmax
     
-def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax, line=None ):
+def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax ):
     
     pl = pv.Plotter(off_screen=True, window_size=[1920,1080], border=False)
     
@@ -133,8 +132,8 @@ def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax, line=None ):
     pl.add_mesh(dataset, scalars=varname, show_scalar_bar=False, cmap=cmap,
                 clim=clim)
     if sepline.n_points > 0:
-        pl.add_mesh(sepline, color='yellow', line_width=4.0 )
-    pl.add_mesh(sonline, color='lime',  line_width=4.0 )
+        pl.add_mesh(sepline, color='yellow', line_width=2.0 )
+    pl.add_mesh(sonline, color='lime',  line_width=2.0 )
     pl.view_vector([0.0,0.0,1.0],viewup=[0.0,1.0,0.0])
     pl.camera.tight()
     image = crop_to_rect_map(pl.screenshot(return_img=True), buff=100)
@@ -144,13 +143,27 @@ def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax, line=None ):
     img = ax.imshow(image, extent=clipbox[:4], cmap=cmap, clim=clim)
     
     ax.plot( x_pfmax, 0.0, '*', color='cyan' , markersize=20 )
+
+    lines = list()
+    x_sep = min( sepline.points[:,0] )
+    line = dividing_streamline( dataset, np.array([0.0,0.1,0.0]), step=0.05, forward=True )
+    lines.append( line )
+    line = dividing_streamline( dataset, np.array([x_sep,0.005,0.0]), step=0.1, forward=True )
+    lines.append( line )
     
-    if line is not None:
-        line = np.array(line)
-        ax.plot( line[:,0], line[:,1], color='black', linewidth=1.0 )
+    with open('dividing_streamline.pkl', 'wb') as f:
+        pickle.dump([line], f)
+    
+    if lines is not None:
+        for line in lines:
+            ax.plot( line[:,0], line[:,1], color='black', linewidth=1.0 )
     
     ax.set_xlabel(r'$(x-x_{imp})/\delta_0$')
     ax.set_ylabel(r'$y/\delta_0$')
+
+    ax.set_xlim(clipbox[0], clipbox[1])
+    ax.set_ylim(clipbox[2], clipbox[3])
+    ax.set_aspect('equal')
 
     cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5, extend='both' ) 
     cbar.ax.set_ylabel( varname, loc='center', labelpad=30)

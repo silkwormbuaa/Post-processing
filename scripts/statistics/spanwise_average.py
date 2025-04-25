@@ -13,7 +13,6 @@
 
 import os
 import sys
-import pickle
 import numpy              as     np
 import pyvista            as     pv
 import matplotlib.pyplot  as     plt
