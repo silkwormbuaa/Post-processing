@@ -105,6 +105,7 @@ class Directories:
         self.pp_snp_yslice  = os.path.join( self.pp_snapshots, 'yslice'  )
         self.pp_snp_probe   = os.path.join( self.pp_snapshots, 'probe'   )
         self.pp_snp_nearwall= os.path.join( self.pp_snapshots, 'nearwall')
+        self.pp_snp_incipsep= os.path.join( self.pp_snapshots, 'incip_sep')
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
