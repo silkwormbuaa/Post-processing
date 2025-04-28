@@ -25,9 +25,9 @@ from   vista.tools       import get_filelist
 
 # =============================================================================
 
-figpath = '/home/wencan/temp/241030/postprocess/snapshots/zslice/DS/figs'
+figpath = '/home/wencan/temp/smooth_adiabatic/postprocess/snapshots/fricprj/figs_cf'
 
-outfile = '241030_DS.mp4'
+outfile = 'smooth_adiabatic_cf.mp4'
 
 # =============================================================================
 
