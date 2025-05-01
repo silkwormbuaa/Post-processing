@@ -36,7 +36,7 @@ plt.rcParams['font.size']           = 30
 def main():
 # =============================================================================
 
-    case_folder = '/home/wencan/temp/smooth_mid/'
+    case_folder = '/home/wencan/temp/220927/'
     
     dirs         = Directories( case_folder )
     params       = Params( dirs.case_para_file )

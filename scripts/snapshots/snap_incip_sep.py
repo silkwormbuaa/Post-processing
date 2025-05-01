@@ -49,7 +49,7 @@ mpi = MPIenv()
 # option
 # =============================================================================
 
-casedir   = '/home/wencan/temp/smooth_mid'
+casedir   = '/home/wencan/temp/231124'
 bbox      = [-35.0, 40.0, -1.3, 20, -999.0, 999.0]
 vars_in   = ['u','p','T']
 vars_out  = ['u','p','T']

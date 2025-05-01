@@ -28,7 +28,7 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/smooth_adiabatic/'
+    case_dir   = '/home/wencan/temp/241030/'
     vars_read  = ['u','v','w','p','T']
     vars_out   = ['u','v','w','p','T','mach','a','DS']
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
@@ -40,7 +40,7 @@ def main():
     
     lines = list()
     
-    for x in np.linspace( -7.0, -6.0, 12, endpoint=True ):
+    for x in np.linspace( -8.8, -7.8, 12, endpoint=True ):
     
         line1 = c_line(dataset, np.array([x,2.0, 0.0]), step=0.11, forward=False, left=True)
         line2 = c_line(dataset, np.array([x,2.0, 0.0]), step=0.11, forward=False, left=False)
@@ -56,12 +56,17 @@ def c_line(dataset:pv.UnstructuredGrid, point_start:np.ndarray, step=0.1, forwar
     """
     u, v, a = fetch_uva(dataset, point_start)
     pts = [point_start]
+    time= 0.0
     
     i = 0
     while True:
         
         point_start = step_c(point_start, u, v, a, step=step, forward=forward, left=left)
         pts.append(point_start)
+        
+        ds = np.sqrt( (point_start[0]-pts[-2][0])**2 + (point_start[1]-pts[-2][1])**2 )
+        time += ds / np.sqrt(u**2+v**2+a**2)
+        
         u, v, a     = fetch_uva(dataset, point_start)
         i += 1
 
@@ -76,7 +81,9 @@ def c_line(dataset:pv.UnstructuredGrid, point_start:np.ndarray, step=0.1, forwar
            point_start[1] < 0.0 or point_start[1] > 10.0:
             break
         
-        print(i, point_start, u, v, a)
+#        print(i, point_start, u, v, a)
+    
+    print(f"total time: {time*5.2:.3f} ms")
     
     return pts
     

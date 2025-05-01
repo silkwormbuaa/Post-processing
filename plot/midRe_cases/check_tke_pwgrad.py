@@ -36,6 +36,8 @@ def main():
     case_dirs  =  [ 'smooth_adiabatic','221014','220926','220825','220927','221221',
                     '240210',          '240211']
     case_dirs  = ['smooth_mid',      '231124','241030','241018']
+    case_dirs  = ['smooth_adiabatic','221014','220926','220825','220927','221221',
+                  '240210',          '240211']
     
     tkes     = list()
     pw_grads = list()
@@ -81,9 +83,9 @@ def get_tke_pwgrad( case_dir ):
     y = np.array( line.df['y'] )
     _, index = find_indices( y, 10.4 )
     
-    tke = np.array( line.df['u`u`'] )[:index] * np.array( line.df['hy'] )[:index]
+    tke = np.array( line.df['u`u`+'] + line.df['v`v`+'] + line.df['w`w`+'] )[:index]# * np.array( line.df['hy'] )[:index]
     
-    tke = np.max( line.df['u`u`'] )
+    tke = np.max( tke )
     
     return tke, params.pw_grad_max
 
