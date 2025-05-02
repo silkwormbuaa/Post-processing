@@ -51,14 +51,14 @@ fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/home/wencan/temp/DataPost/midRe/upstream_profile/'
+OutPath  = '/home/wencan/temp/DataPost/midRe/profile_upstream/'
 
-data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
-data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/upstream_profile'
-data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
-data3 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/upstream_profile'
-data4 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/upstream_profile'
-data5 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/upstream_profile'
+data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_upstream'
+data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/profile_upstream'
+data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_upstream'
+data3 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/profile_upstream'
+data4 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/profile_upstream'
+data5 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/profile_upstream'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 

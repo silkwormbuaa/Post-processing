@@ -84,7 +84,8 @@ class Directories:
         self.pp_z_average     = os.path.join( self.pp_statistics, 'z_average' )
         self.pp_zslice        = os.path.join( self.pp_statistics, 'zslice' )
         self.pp_profile_incip = os.path.join( self.pp_statistics, 'profile_incip' )
-                
+        self.pp_profile_up    = os.path.join( self.pp_statistics, 'profile_upstream' )
+              
 # --- pp_probes subdirectories
         
         self.pp_psd_ridge  = os.path.join( self.pp_probes, 'psd_ridge'  )

@@ -52,15 +52,15 @@ fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/home/wencan/temp/DataPost/lowRe/upstream_profile'
+OutPath  = '/home/wencan/temp/DataPost/lowRe/profile_upstream'
 
 data0 = '/media/wencan/Expansion/temp/smooth_isothermal/results/profile'
-data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/upstream_profile'
-data2 = '/media/wencan/Expansion/temp/220926/postprocess/statistics/upstream_profile'
-data3 = '/media/wencan/Expansion/temp/220825/postprocess/statistics/upstream_profile'
-data4 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
-data5 = '/media/wencan/Expansion/temp/221221/postprocess/statistics/upstream_profile'
-data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
+data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/profile_upstream'
+data2 = '/media/wencan/Expansion/temp/220926/postprocess/statistics/profile_upstream'
+data3 = '/media/wencan/Expansion/temp/220825/postprocess/statistics/profile_upstream'
+data4 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_upstream'
+data5 = '/media/wencan/Expansion/temp/221221/postprocess/statistics/profile_upstream'
+data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_upstream'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 

@@ -37,12 +37,12 @@ fmt = '.png'
 OutPath  = '/home/wencanwu/my_simulation/temp/DataPost/profile/rf/'
 
 data0 = '/media/wencan/Expansion/temp/smooth_isothermal/results/profile'
-data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/upstream_profile'
-data2 = '/media/wencan/Expansion/temp/220926/postprocess/statistics/upstream_profile'
-data3 = '/media/wencan/Expansion/temp/220825/postprocess/statistics/upstream_profile'
-data4 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/upstream_profile'
-data5 = '/media/wencan/Expansion/temp/221221/postprocess/statistics/upstream_profile'
-data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/upstream_profile'
+data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/profile_upstream'
+data2 = '/media/wencan/Expansion/temp/220926/postprocess/statistics/profile_upstream'
+data3 = '/media/wencan/Expansion/temp/220825/postprocess/statistics/profile_upstream'
+data4 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_upstream'
+data5 = '/media/wencan/Expansion/temp/221221/postprocess/statistics/profile_upstream'
+data6 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_upstream'
 
 # option zone
 # =============================================================================

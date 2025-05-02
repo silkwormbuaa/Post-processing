@@ -19,7 +19,7 @@ sys.path.append( source_dir )
 from   vista.line        import ProfileData
 
 cases = ['smooth_adiabatic', '240211', '220927',  '240210']
-datapaths = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/upstream_profile' for case in cases]
+datapaths = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/profile_upstream' for case in cases]
 
 dy       = [0,  0.156, 0.312, 0.624]
 u_ref = 507.0
