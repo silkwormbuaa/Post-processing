@@ -28,7 +28,7 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dirs  = ['/home/wencan/temp/220927/']
+    case_dirs  = ['/home/wencan/temp/smooth_adiabatic/']
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv','uw','vw']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','DS','tke',
                  'u`u`','v`v`','w`w`','u`v`','p`']

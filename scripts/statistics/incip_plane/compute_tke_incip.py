@@ -40,14 +40,14 @@ def main():
     
     # case_dirs = ['smooth_adiabatic', '220927']
 
-    outfile = '/home/wencan/temp/DataPost/midRe/tke_incip/tke_incip.dat'
+    outfile = '/home/wencan/temp/DataPost/midRe/tke_incip/tke_incip_influence_region.dat'
     with open( outfile, 'w' ) as f:
-        f.write( "case     massflow       ave    uu    momen\n")
+        f.write( "case     massflow       tke/mf    uu/mf    momen/mf    tke     uu     momen \n")
         
         for case in case_dirs:
             
-            msss, ave, uu, momen = compute_tke_incip( '/home/wencan/temp/' + case )
-            f.write( f"{case}  {msss:10.5f} {ave:10.5f} {uu:10.5f} {momen:10.5f}\n" )
+            mass, tke, uu, momen = compute_tke_incip( '/home/wencan/temp/' + case )
+            f.write( f"{case}  {mass:10.5f} {tke:10.5f} {uu:10.5f} {momen:10.5f} {tke*mass:15.5f} {uu*mass:15.5f} {momen*mass:15.5f}\n" )
 
 # =============================================================================
 
@@ -79,7 +79,7 @@ def compute_tke_incip( case_dir ):
         
     print(f"Processing extracting profile at location: {loc}.\n")
     
-    bbox    = [ loc-2.5, loc+2.5, -1.2576, 5.2,  -11.0, 11.0]  # bounding box
+    bbox    = [ loc-2.5, loc+2.5, -1.2576, 8.3,  -11.0, 11.0]  # bounding box
 
     # - read in grid file
 
@@ -150,10 +150,10 @@ def compute_tke_incip( case_dir ):
 
     with timer("compute tke"):
         
-        tke      = S.integrate_vol_var( block_list, G, var='tke',  type='massflow', bbox=bbox,machlimit=1.0 )
-        massflow = S.integrate_vol_var( block_list, G, var=None,   type='massflow', bbox=bbox,machlimit=1.0 )
-        uu       = S.integrate_vol_var( block_list, G, var='u`u`', type='massflow', bbox=bbox,machlimit=1.0 )
-        momentum = S.integrate_vol_var( block_list, G, var='u',    type='massflow', bbox=bbox,machlimit=1.0 )
+        tke      = S.integrate_vol_var( block_list, G, var='tke',  type='massflow', bbox=bbox )
+        massflow = S.integrate_vol_var( block_list, G, var=None,   type='massflow', bbox=bbox )
+        uu       = S.integrate_vol_var( block_list, G, var='u`u`', type='massflow', bbox=bbox )
+        momentum = S.integrate_vol_var( block_list, G, var='u',    type='massflow', bbox=bbox )
         print(clr.fg.green,f"tke = {tke:.5f}.\n"    ,clr.reset)
         print(clr.fg.green,f"massflow = {massflow:.5f}.\n",clr.reset)
         print(clr.fg.green,f"tke/massflow = {tke/massflow:.5f}.\n",clr.reset)

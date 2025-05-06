@@ -35,15 +35,17 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-locs_delta = np.linspace(-20,-20,1)
-outfolder  = '/yz_planes'
+case_folder = '/home/wencan/temp/231124/'
+#locs_delta = np.linspace(-20,-20,1)
+
+outfolder  = '/pfmax_planes'
 periodic_ave = False
 
 # =============================================================================
 
 vars = ['u','v','w','uu','vv','ww','uv','vw','T','p','pp','rho']
 
-dirs = Directories( os.getcwd() )
+dirs = Directories( case_folder )
 
 datafile = dirs.statistics
 gridfile = dirs.grid
@@ -62,6 +64,7 @@ casecode = params.casecode
 n_period = params.n_period
 tag      = params.tag
 
+locs_delta = np.array([params.x_pfmax])
 locs = locs_delta*delta + x_imp
 
 
@@ -72,8 +75,7 @@ G.read_grid()
 
 # - enter outpath
 
-create_folder( outpath )
-os.chdir(outpath)
+os.chdir( create_folder( outpath ) )
 
 
 # - do slicing and output slices
@@ -97,7 +99,7 @@ for i, loc in enumerate(locs):
         # - read statistics data file
 
         S = StatisticData( datafile )
-        S.verbose = True
+        S.verbose = False
             
         S.read_statistic( block_list=block_list, vars_in=vars)
             
@@ -252,6 +254,7 @@ for i, loc in enumerate(locs):
         if 'smooth' in casecode:
             plot_slicex_stat( zz, yy, mach,
                               tag=tag,
+                              wall=True,
                               filename=casecode+'_Mach_'+str(i+1),
                               col_map='RdBu_r',
                               cbar_label=cbar,
@@ -262,6 +265,7 @@ for i, loc in enumerate(locs):
             plot_slicex_stat( zz, yy, mach,
                               vectors=[rho*w,rho*v],
                               tag=tag,
+                              wall=True,
                               filename=casecode+'_Mach_'+str(i+1),
                               col_map='RdBu_r',
                               cbar_label=cbar,
@@ -289,6 +293,7 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
+                          wall=True,
                           filename=casecode+'_vorticity_'+str(i+1),
                           col_map='RdBu_r',
                           cbar_label=cbar,
@@ -299,10 +304,11 @@ for i, loc in enumerate(locs):
 # ------ streamwise velocity u
 
         cbar = r'$\langle u \rangle /u_{\infty}$'
-        cbar_levels = np.linspace(0.0,1.0,21)
-        cbar_ticks  = np.linspace(0.0,1.0,5)
+        cbar_levels = np.linspace(-0.1,1.0,41)
+        cbar_ticks  = np.linspace(-0.1,1.0,5)
         plot_slicex_stat( zz, yy, u/u_ref,
                           tag=tag,
+                          wall=True,
                           filename=casecode+'_u_'+str(i+1),
                           cbar_label=cbar,
                           col_map='RdBu_r',
@@ -313,12 +319,13 @@ for i, loc in enumerate(locs):
 # ------ vertical velocity v
 
         cbar = r'$\frac{\langle v \rangle  \cdot 100}{u_{\infty}}$'
-        cbar_levels = np.linspace(-3.0,3.0,26)
-        cbar_ticks  = np.linspace(-3.0,3.0,5)
+        cbar_levels = np.linspace(-3.0,5.0,26)
+        cbar_ticks  = np.linspace(-3.0,5.0,5)
         plot_slicex_stat( zz, yy, v/u_ref*100,
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
+                          wall=True,
                           filename=casecode+'_v_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
@@ -337,6 +344,7 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
+                          wall=True,
                           filename=casecode+'_w_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
@@ -350,10 +358,11 @@ for i, loc in enumerate(locs):
 # ------ turbulent kinetic energy
 
         cbar = r'$\langle tke ^+ \rangle \cdot 100$'
-        cbar_levels = np.linspace(0.0,2.5,26)
-        cbar_ticks  = np.linspace(0.0,2.5,6)
+        cbar_levels = np.linspace(0.0,6.0,26)
+        cbar_ticks  = np.linspace(0.0,6.0,6)
         plot_slicex_stat( zz, yy, tke/(u_ref**2)*100,
                           tag=tag,
+                          wall=True,
                           filename=casecode+'_tke_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
@@ -364,18 +373,24 @@ for i, loc in enumerate(locs):
 # ------ Reynolds stresses
 
         cbar = r"$-\langle u^{'} v^{'} \rangle$"
-        plot_slicex_stat( zz, yy, -RS/(u_ref**2),
+        cbar_levels = np.linspace(0.0,0.8,26)
+        cbar_ticks  = np.linspace(0.0,0.8,6)
+        plot_slicex_stat( zz, yy, -RS/(u_ref**2)*100,
                           tag=tag,
+                          wall=True,
                           filename=casecode+'_RS_'+str(i+1),
                           cbar_label=cbar,
+                          cbar_levels=cbar_levels,
+                          cbar_ticks=cbar_ticks,
                           col_map='RdBu_r',
                           title=title)
 
         cbar = r"$-\langle u^{'} u^{'} \rangle$"
-        cbar_levels = np.linspace(0.0,2.0,26)
-        cbar_ticks  = np.linspace(0.0,2.0,6)
+        cbar_levels = np.linspace(0.0,3.2,26)
+        cbar_ticks  = np.linspace(0.0,3.2,6)
         plot_slicex_stat( zz, yy, uu/(u_ref**2)*100,
                           tag=tag,
+                          wall=True,
                           filename=casecode+'_uu_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
@@ -386,10 +401,11 @@ for i, loc in enumerate(locs):
 # ----- pressure fluctuation
 
         cbar = r"$\sqrt{\langle p^{'}p^{'}\rangle}\cdot 100$"
-        cbar_levels = np.linspace(0.0, 3.2,33)
-        cbar_ticks  = np.linspace(0.0,3.2,5)
+        cbar_levels = np.linspace(0.0,12.0,33)
+        cbar_ticks  = np.linspace(0.0,12.0,5)
         plot_slicex_stat( zz, yy, p_fluc/p_ref*100,
                           tag=tag,
+                          wall=True,
                           filename=casecode+'_p_fluc_'+str(i+1),
                           cbar_label=cbar,
                           cbar_levels=cbar_levels,
@@ -407,10 +423,10 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
+                          wall=True,
                           filename=casecode+'_Q_'+str(i+1),
                           col_map='RdBu_r',
                           cbar_label=cbar,
-                          wall=False,
                           cbar_levels=cbar_levels,
 #                          cbar_ticks=cbar_ticks,
                           title=title)
@@ -425,10 +441,10 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
+                          wall=True,
                           filename=casecode+'_l2_'+str(i+1),
                           col_map='RdBu_r',
                           cbar_label=cbar,
-                          wall=False,
                           cbar_levels=cbar_levels,
 #                          cbar_ticks=cbar_ticks,
                           title=title)    
@@ -443,6 +459,7 @@ for i, loc in enumerate(locs):
                           tag=tag,
                           vectors=[w,v],
                           arrow=True,
+                          wall=True,
                           filename=casecode+'_ke_'+str(i+1),
                           cbar_label=cbar,
                     #      cbar_levels=cbar_levels,
