@@ -29,11 +29,8 @@ from   vista.directories import create_folder
 
 def main():
    
-    case_dirs = ['smooth_mid', 'smooth_adiabatic',
-                 '221014',      '220926',      '220825',
-                 '220927',      '221221',      '240210',
-                 '240211',      '231124',      '241030',
-                 '241018']
+    case_dirs = ['smooth_adiabatic','220927',
+                 'smooth_mid','231124','241030']
     
     for case in case_dirs:
         
@@ -69,16 +66,21 @@ def compute_profile_local( case_folder, loc='upstream' ):
         cc_df.drop( columns=['fax0','faz0','fax1','faz1', 'processor']
                             , inplace=True )
     
-    bbox1     = [loc_x-0.2, loc_x+0.2, -0.1,    100, -0.1,         0.1]
-    bbox2     = [loc_x-0.2, loc_x+0.2, -H-0.1,  100, z_valley-0.1, z_valley+0.1]
-
+    xz_ridge  = np.array([loc_x, 0.001])
+    xz_valley = np.array([loc_x, z_valley+0.001])
+    
+    bbox_ridge  = [loc_x-0.1,loc_x+0.1, 0.0,100, -20, 20]
+    bbox_valley = [loc_x-0.1,loc_x+0.1, -H ,   100, -20, 20]
+    
 # =============================================================================
 
-    def process_stat(bbox, outfile):
+    def process_stat(xz, bbox, outfile):
 
-        bbox_full      = bbox[:4] + [-11,11]
-        blocklist_full = grid.select_blockgrids(bbox_full, mode='overlap')
-        blocklist      = grid.select_blockgrids(bbox, mode='overlap')
+        blocklist_full = grid.select_blockgrids(bbox, mode='overlap')
+        print( blocklist_full )
+        
+        
+        blocklist,_    = grid.select_probed_blockgrids('Y',xz, bbox=bbox, bbox_mode='overlap')
         
         stat_file      = dirs.statistics
         stat           = StatisticData(stat_file)
@@ -102,13 +104,17 @@ def compute_profile_local( case_folder, loc='upstream' ):
         # periodic averaging
         stat.spanwise_periodic_average( blocklist_full, vars_output, params.D )
         
-        stat.drop_ghost(blocklist)
-        stat.compute_profile( blocklist, bbox, vars_output, 
+        # stat.drop_ghost(blocklist)
+        # stat.compute_profile( blocklist, bbox, vars_output, 
+        #                       outfile=outfile, roughwall=roughwall)
+        
+        
+        stat.extract_profile( xz, bbox, 
                               outfile=outfile, roughwall=roughwall)
         print(f"Profile data saved to {outfile}.\n")
 
-    process_stat(bbox1, f'profile_{loc}_ridge.dat')
-    process_stat(bbox2, f'profile_{loc}_valley.dat')
+    process_stat(xz_ridge,  bbox_ridge,  f'profile_{loc}_ridge.dat')
+    process_stat(xz_valley, bbox_valley, f'profile_{loc}_valley.dat')
     
 
 

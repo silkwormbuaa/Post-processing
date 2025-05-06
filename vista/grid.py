@@ -440,14 +440,16 @@ class GridData:
 #
 # ----------------------------------------------------------------------
 
-    def select_probed_blockgrids( self, probe_type, loc, bbox=None, buff=3):
+    def select_probed_blockgrids( self, probe_type, loc, bbox=None, buff=3, bbox_mode='within' ):
         
         """
         probe_type: 'X', 'Y', or 'Z' (parallel direction of probing) \n
         loc       : [z,y],[x,z], or [x,y] (follow conventional order)\n
         bbox      : [xmin,xmax,ymin,ymax,zmin,zmax] \n
+        bbox_mode: 'within' or 'overlap' \n
         
-        return: a list of blocks and a list of indices tuple
+        return: a list of blocks and a list of indices tuple (Not including 
+                buffer layers)
         """
         
         selected_bls = []
@@ -458,7 +460,7 @@ class GridData:
             max  = float('inf')
             bbox = [min,max,min,max,min,max]
         
-        within_bbox_bls = self.select_blockgrids( bbox, mode='within' )
+        within_bbox_bls = self.select_blockgrids( bbox, mode=bbox_mode )
         
         
         for grd in self.g:

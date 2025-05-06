@@ -770,7 +770,7 @@ class StatisticData:
 # ----------------------------------------------------------------------
 
     def compute_profile( self, block_list, bbox, vars:list, 
-                         RS=True, outfile=False, roughwall=True ):
+                         RS=True, outfile=None, roughwall=True ):
         
         """
         block list: selected block list (within bounding box)\n
@@ -797,7 +797,7 @@ class StatisticData:
         df.drop( df[ (df['x'] < bbox[0]) | (df['x'] > bbox[1]) |
                      (df['y'] < bbox[2]) | (df['y'] > bbox[3]) |
                      (df['z'] < bbox[4]) | (df['z'] > bbox[5]) ].index,
-                 inplace=True )
+                 inplace=True )     
         
         print(df)
         
@@ -890,14 +890,102 @@ class StatisticData:
         
 # ----- output profile into txt
 
-        if outfile is False: outfile = 'profile_spanwisemean.dat'
+        if outfile is None: outfile = 'profile_spanwisemean.dat'
 
         df_profile.to_string( outfile,  
                               index=False,
                               float_format='%15.7f',
                               justify='left')
          
+
+# ----------------------------------------------------------------------
+# >>> extract profile                                             (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/05/06  - created
+#
+# Desc
+#      extract a line of profile from the statistics. 
+#      Compared to compute_profile, this method just extract a line.
+# ----------------------------------------------------------------------
+
+    def extract_profile( self, xz, bbox=None,
+                         RS=True, outfile=None, roughwall=True ):
+        
+        """
+        block_list: list of probed blocks.
+        G         : corresponding GridData instance.
+        
+        """
+        
+        grid = self.grid3d
+
+        blocklist, indxs = grid.select_probed_blockgrids('Y',xz, bbox=bbox, bbox_mode='overlap')
+        
+        df = self.get_probed_df( blocklist, grid, indxs, 'Y' )
+        
+        if RS:
+            df['u`u`']= np.array(df['uu']) - np.array(df['u'])**2
+            df['v`v`']= np.array(df['vv']) - np.array(df['v'])**2
+            df['w`w`']= np.array(df['ww']) - np.array(df['w'])**2
+            df['u`v`']= np.array(df['uv']) - np.array(df['u'])*np.array(df['v'])
+            df['tke'] = df['u`u`'] + df['v`v`'] + df['w`w`']
             
+            # delete some var in vars and add some
+            
+            print(df)
+
+# ----- compute total temperature and total pressure
+
+        ke = 0.5*(np.array(df['uu']) + np.array(df['vv']) + np.array(df['ww']))
+        R  = 287.0508571
+        gamma = 1.4
+        Cp = R*gamma/(gamma-1)
+        df['Tt'] = np.array(df['T']) + ke/Cp
+        df['pt'] = np.array(df['p'])*(np.array(df['Tt'])/np.array(df['T']))**(gamma/(gamma-1))
+        
+        vars_out = ['y','hy','u','v','w','p','rho','mu','T',
+                    'u`u`','v`v`','w`w`','u`v`','tke',
+                    'Tt','pt']
+        
+        for var in df.columns:
+            if var not in vars_out:
+                # drop the columns that are not in vars_out
+                df.drop( var, axis=1, inplace=True )        
+        
+        pd.set_option('display.max_rows', None)  # 显示所有行
+        
+        # drop point with y below bbox[2]
+        if bbox is not None:
+            df.drop( df[ (df['y'] < bbox[2]) ].index[:-1], inplace=True )
+        
+        df.reset_index( drop=True, inplace=True )
+        
+        if roughwall:
+            for var in vars_out:
+                if var not in ['p','rho','mu','T','Tt','pt']:
+                    df.loc[0,var] = 0.0
+        df.loc[0,'y']  = bbox[2]
+        df.loc[0,'hy'] = 0.0
+                
+        print("points below wall are droppped and u,v,w are set to zero at wall.")
+        print( df )    
+        pd.reset_option('display.max_rows')  # rest max_rows displayed
+        
+# ----- output profile into txt
+
+        if outfile is None: outfile = 'profile_Y.dat'
+
+        df.to_string( outfile,  
+                      index=False,
+                      float_format='%15.7f',
+                      justify='left') 
+        
+        
 # ----------------------------------------------------------------------
 # >>> get slice dataframe (statistics.bin)                        (Nr.)
 # ----------------------------------------------------------------------
