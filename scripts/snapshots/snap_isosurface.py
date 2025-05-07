@@ -26,7 +26,6 @@ import time
 import numpy             as     np
 import pyvista           as     pv
 import matplotlib.pyplot as     plt
-from   mpi4py            import MPI
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
