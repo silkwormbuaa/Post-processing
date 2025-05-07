@@ -44,16 +44,21 @@ def main():
     print("========= dividing streamline =========")
     
     compute_slope_divid_spanave()
+    
+    print("========= free-stream flow =========")
+    
+    compute_slope_free_stream()
+    
     print("========= done =========")
 
 
-def compute_slope(i,line):
+def compute_slope(i,line, v_start, buffer=10):
     
     x = np.array(line[:,0])
     y = np.array(line[:,1])
     
-    index_max      = np.argmax(y)-10
-    index_start, _ = find_indices( y[:index_max], 0.15, mode='sequential')
+    index_max      = np.argmax(y)-buffer
+    index_start, _ = find_indices( y[:index_max], v_start, mode='sequential')
     
     slope = (y[index_max] - y[index_start]) / (x[index_max] - x[index_start])
     print(f"{casename[i].ljust(20)} slope: {slope:10.4f}, angle: {np.degrees(np.arctan(slope)):10.4f}")
@@ -86,7 +91,7 @@ def compute_slope_local():
                 ax.plot( line[:,0], line[:,1], color=color[j], 
                         linestyle=lstyle[j], linewidth=1.5 )
                 
-                compute_slope(j,line)
+                compute_slope(j,line, 0.15)
 
         ax.set_xlim([-18,10])
         ax.set_ylim([-0.2, 1])
@@ -111,7 +116,7 @@ def compute_slope_rev_spanave():
             
             for line in lines:
                 
-                i_s,i_e = compute_slope(i,line)
+                i_s,i_e = compute_slope(i,line, 0.15)
                 
                 ax.plot( line[:,0], line[:,1], color=color[i], 
                          linestyle=lstyle[i], linewidth=1.5 )
@@ -143,7 +148,7 @@ def compute_slope_divid_spanave():
             
             for line in lines:
                 
-                i_s,i_e = compute_slope(i,line)
+                i_s,i_e = compute_slope(i,line, 0.15)
                 
                 ax.plot( line[:,0], line[:,1], color=color[i], 
                          linestyle=lstyle[i], linewidth=1.5 )
@@ -159,6 +164,38 @@ def compute_slope_divid_spanave():
         
     plt.savefig( output_dir + 'spanave_divid.png')
     plt.close() 
+    
+def compute_slope_free_stream():
+    
+    fig, ax = plt.subplots( figsize=(9,6) )
+    
+    for i, case in enumerate(casename):
+        
+        dirs = Directories(f"/home/wencan/temp/{case}")
+        os.chdir( dirs.pp_z_average )
+        
+        with open('boundary_edge_streamline.pkl','rb') as f:
+            lines = pickle.load(f)
+            
+            for line in lines:
+                
+                i_s,i_e = compute_slope(i,line, 2.2, buffer=0)
+                
+                ax.plot( line[:,0], line[:,1], color=color[i], 
+                         linestyle=lstyle[i], linewidth=1.5 )
+
+                ax.plot( line[i_s:i_e,0], line[i_s:i_e,1], color=color[i], 
+                         markersize=3, marker='o', markerfacecolor=color[i] )
+                
+
+    ax.set_xlim([-18,10])
+    ax.set_ylim([0.0, 4.0])
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(2)
+        
+    plt.savefig( output_dir + 'spanave_free_stream.png')
+    plt.close() 
+    
 
 if __name__ == "__main__":
     main()
