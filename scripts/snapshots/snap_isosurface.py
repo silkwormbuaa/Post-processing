@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = False
+off_screen = True
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -23,6 +23,7 @@ import os
 import gc
 import sys
 import time
+import numpy             as     np
 import pyvista           as     pv
 import matplotlib.pyplot as     plt
 from   mpi4py            import MPI
@@ -33,9 +34,13 @@ sys.path.append( source_dir )
 from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
+from   vista.params      import Params
+from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
+from   vista.material    import get_visc
 from   vista.directories import create_folder
+from   vista.tools       import crop_border
 
 # - build MPI communication environment
 
@@ -47,20 +52,27 @@ n_procs = comm.Get_size()
 # option 
 # =============================================================================
 
-bbox      = [-30, 999, -1.0, 31.0, -999, 999]
-gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
-vars_out  = ['u','Q_cr','div','vorticity','grad_rho_mod']
+casefolder = '/home/wencan/temp/231124'
 
-snaps_dir = '/home/wencan/temp/smooth_mid/snapshots'
-gridfile  = '/home/wencan/temp/smooth_mid/results/inca_grid.bin'
-outdir    = '/home/wencan/temp/smooth_mid/postprocess/snapshots/3d_shocks/'
+bbox      = [-30, 999, -1.3, 31.0, -999, 999]
+gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
+vars_out  = ['u','Q_cr','grad_rho_mod','p']
+
+dirs      = Directories( casefolder )
+snaps_dir = dirs.snp_dir
+gridfile  = dirs.grid
+outdir    = dirs.pp_snp_3dshock + '/figs'
 
 # =============================================================================
 
 # - get snapshot file list/grid and distribute the tasks
 
-snapfiles = None
-grid3d    = GridData()
+params     = None
+p_dyn      = None
+snapfiles  = None
+block_list = None
+snapwd     = None
+grid3d     = GridData()
 
 if rank == 0:
     
@@ -70,10 +82,41 @@ if rank == 0:
     grid3d = GridData( gridfile )
     grid3d.read_grid()
     
+    block_list = grid3d.select_blockgrids( bbox, mode='within' )
+    
+    params = Params( dirs.case_para_file )
+    u_ref     = params.u_ref
+    rho_ref   = params.rho_ref
+    p_dyn     = 0.5 * rho_ref * u_ref**2
+    
+    if params.roughwall:
+    
+        wdfile = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
+        snapwd = Snapshot( wdfile )
+        snapwd.read_snapshot(block_list, ['wd'])
+    
     create_folder(outdir)
     
-snapfiles = comm.bcast( snapfiles, root=0 )
-grid3d    = comm.bcast( grid3d,    root=0 )
+snapfiles  = comm.bcast( snapfiles,  root=0 )
+grid3d     = comm.bcast( grid3d,     root=0 )
+block_list = comm.bcast( block_list, root=0 )
+snapwd     = comm.bcast( snapwd,     root=0 )
+params     = comm.bcast( params,     root=0 )
+p_dyn      = comm.bcast( p_dyn,      root=0 )
+roughwall  = params.roughwall
+Re_ref     = params.Re_ref
+visc_law   = params.visc_law
+highRe     = True if Re_ref > 9000 else False
+
+if highRe: 
+    walldist = 0.005
+    grad_rho_limit = 0.2
+else: 
+    walldist = 0.019     
+    grad_rho_limit = 0.15
+
+if roughwall: vars_out += ['mu','wd']
+else:         vars_out += ['mu']
 
 n_snaps = len( snapfiles )
 i_start, i_end = distribute_mpi_work(n_snaps, n_procs, rank)
@@ -87,7 +130,6 @@ comm.barrier()
 # - read in snapshots and compute the gradients
 
 os.chdir( outdir )
-block_list = grid3d.select_blockgrids( bbox, mode='within' )
 clock = timer("show isosurface")
 
 for i,snapfile in enumerate(snapfiles):
@@ -96,6 +138,13 @@ for i,snapfile in enumerate(snapfiles):
     snap3d.verbose = False
     snap3d.grid3d = grid3d
     snap3d.read_snapshot( block_list )
+    if roughwall:
+        snap3d.copy_var_from( snapwd, ['wd'], block_list )
+
+    for bl in snap3d.snap_data:
+        if bl.num in block_list:
+            bl.df['mu'] = get_visc( np.array(bl.df['T']), Re_ref, law=visc_law )
+
     snap3d.compute_gradients( block_list, gradients )
 #    snap3d.write_szplt( "test.szplt", vars=vars_out, block_list=block_list )
 
@@ -103,21 +152,27 @@ for i,snapfile in enumerate(snapfiles):
 
     dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3, mode='symmetry' ))
     sys.stdout.flush()
-
-    dataset.set_active_scalars('u')
-    uslicez = dataset.slice(normal=[0,0,1], origin=[0,0,-10.3])
-    uslicey = dataset.slice(normal=[0,1,0], origin=[0,0,0.05])
-    
     point_data = dataset.cell_data_to_point_data().combine()
 
-    sep_bubble = point_data.contour( [0.0] )
+    point_data['p'] = point_data['p']/params.p_ref
+    point_data['u'] = point_data['u']/params.u_ref
+    point_data.set_active_scalars('p')
+    pslicez = point_data.slice(normal=[0,0,1], origin=[0,0,-10.3])
     
-    point_data.set_active_scalars('grad_rho_mod')
-    shock_front = point_data.contour( [0.2] )
+    sep_bubble = point_data.contour(  [0.0], scalars='u' )
+    shock_front = point_data.contour( [grad_rho_limit], scalars='grad_rho_mod' )
     
-    point_data.set_active_scalars('Q_cr')
-    vortices = point_data.contour( [50000.0] )
+    vortices = point_data.contour( [50000.0], scalars='Q_cr' )
     vortices.set_active_scalars('u')
+
+    if roughwall:
+        wallsurface = point_data.contour( [walldist], scalars='wd' )
+    else:
+        wallsurface = point_data.slice( normal=[0.0,1.0,0.0], origin=[0.0,walldist,0.0] )
+
+    friction    = wallsurface['mu']*wallsurface['u']*u_ref/walldist
+    wallsurface['cf'] = friction/p_dyn
+    wallsurface.set_active_scalars('cf')
 
 # -- plot
 
@@ -127,32 +182,44 @@ for i,snapfile in enumerate(snapfiles):
     # interactive window is not supported on remote servers, also there is a bug 
     # in vtk 9.x.x that the interactive window cannot be closed.
     
-    p = pv.Plotter(off_screen=off_screen)
-    cmapu = plt.get_cmap('RdBu_r',84)
-    p.add_mesh(uslicez, opacity=1.0, clim=[-320,510],show_scalar_bar=True, cmap=cmapu)
-    p.add_mesh(uslicey, opacity=1.0, clim=[-320,510],show_scalar_bar=True, cmap=cmapu)
+    p = pv.Plotter(off_screen=off_screen,window_size=[1920,1080])
+    
+    cmapp = plt.get_cmap('coolwarm',51)
+    p.add_mesh(pslicez,     opacity=1.0, clim=[1.0,3.5], show_scalar_bar=True, cmap=cmapp)
+    
+    cmapcf = plt.get_cmap('RdBu_r',51)
+    p.add_mesh(wallsurface, opacity=1.0, color='gray')
+    
     p.add_mesh(sep_bubble)
     p.add_mesh(shock_front, color='grey', opacity=0.5)
-    p.add_mesh(vortices, cmap=cmapu, clim=[-320,510], show_scalar_bar=True)
+    p.add_mesh(vortices, cmap=cmapp, clim=[-0.2,1.0], show_scalar_bar=True)
     p.add_axes()    # add a vtk axes widget to the scene
     
 # -- camera setting
 
     p.view_vector([0,0,0],viewup=[0.19,0.98,-0.18])
-    p.camera.position = (-100,61,120)
+    p.camera.position = (-100,61,100)
     p.camera.focal_point = (37.8,8.8,-12.3)
     
 # -- save the figure with matplotlib
 
     figname = f"isosurface_{snap3d.itstep:08d}"
     
-    p.show(screenshot=figname + ".png")
+    image = p.screenshot(return_img=True)
+    image = crop_border(image)
     
     if off_screen:
-        plt.imshow(p.image)
-        plt.axis('off')
+        fig = plt.figure(figsize=(6.4,3.6))
+        # set the scope of the image in plt
+        fig.subplots_adjust(left=0.0, right=1.0, top=0.9, bottom=0.0)
+        
+        ax = fig.add_subplot(111)
+        img = ax.imshow(image)
+        ax.axis('off')
+        
+        plt.title(f"time = {snap3d.itime:.2f} ms")
         plt.tight_layout()
-        plt.savefig(figname + ".png", dpi=600)
+        plt.savefig(figname + ".png", dpi=300)
         plt.close()
 
     p.close()
