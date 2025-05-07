@@ -31,28 +31,26 @@ from   mpi4py            import MPI
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
+from   vista.mpi         import MPIenv
 from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
 from   vista.params      import Params
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
-from   vista.tools       import distribute_mpi_work
 from   vista.material    import get_visc
 from   vista.directories import create_folder
 from   vista.tools       import crop_border
 
 # - build MPI communication environment
 
-comm    = MPI.COMM_WORLD
-rank    = comm.Get_rank()
-n_procs = comm.Get_size()
+mpi = MPIenv()
 
 # =============================================================================
 # option 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/231124'
+casefolder = '/home/wencan/temp/220927'
 
 bbox      = [-30, 999, -1.3, 31.0, -999, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
@@ -74,7 +72,7 @@ block_list = None
 snapwd     = None
 grid3d     = GridData()
 
-if rank == 0:
+if mpi.is_root:
     
     snapfiles = get_filelist( snaps_dir, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
@@ -97,12 +95,12 @@ if rank == 0:
     
     create_folder(outdir)
     
-snapfiles  = comm.bcast( snapfiles,  root=0 )
-grid3d     = comm.bcast( grid3d,     root=0 )
-block_list = comm.bcast( block_list, root=0 )
-snapwd     = comm.bcast( snapwd,     root=0 )
-params     = comm.bcast( params,     root=0 )
-p_dyn      = comm.bcast( p_dyn,      root=0 )
+snapfiles  = mpi.comm.bcast( snapfiles,  root=0 )
+grid3d     = mpi.comm.bcast( grid3d,     root=0 )
+block_list = mpi.comm.bcast( block_list, root=0 )
+snapwd     = mpi.comm.bcast( snapwd,     root=0 )
+params     = mpi.comm.bcast( params,     root=0 )
+p_dyn      = mpi.comm.bcast( p_dyn,      root=0 )
 roughwall  = params.roughwall
 Re_ref     = params.Re_ref
 visc_law   = params.visc_law
@@ -118,21 +116,15 @@ else:
 if roughwall: vars_out += ['mu','wd']
 else:         vars_out += ['mu']
 
-n_snaps = len( snapfiles )
-i_start, i_end = distribute_mpi_work(n_snaps, n_procs, rank)
-snapfiles = snapfiles[i_start:i_end]
-
-print(f"I am processor {rank:05d}, I take {len(snapfiles):5d} tasks.")
 sys.stdout.flush()
-
-comm.barrier()
+mpi.comm.barrier()
 
 # - read in snapshots and compute the gradients
 
 os.chdir( outdir )
 clock = timer("show isosurface")
 
-for i,snapfile in enumerate(snapfiles):
+def plot_isosurface( snapfile ):
     
     snap3d = Snapshot( snapfile )
     snap3d.verbose = False
@@ -170,7 +162,7 @@ for i,snapfile in enumerate(snapfiles):
     else:
         wallsurface = point_data.slice( normal=[0.0,1.0,0.0], origin=[0.0,walldist,0.0] )
 
-    friction    = wallsurface['mu']*wallsurface['u']*u_ref/walldist
+    friction    = wallsurface['mu']*wallsurface['u']*params.u_ref/walldist
     wallsurface['cf'] = friction/p_dyn
     wallsurface.set_active_scalars('cf')
 
@@ -213,7 +205,7 @@ for i,snapfile in enumerate(snapfiles):
         # set the scope of the image in plt
         fig.subplots_adjust(left=0.0, right=1.0, top=0.9, bottom=0.0)
         
-        ax = fig.add_subplot(111)
+        ax  = fig.add_subplot(111)
         img = ax.imshow(image)
         ax.axis('off')
         
@@ -226,15 +218,32 @@ for i,snapfile in enumerate(snapfiles):
     
 # - print the progress
     
-    progress = (i+1)/len(snapfiles)
-    print(f"Rank:{rank:05d},{i+1}/{len(snapfiles)} is done. " + clock.remainder(progress))
-    print("------------------\n")
-    
     del snap3d, dataset, p
     gc.collect()
 
 
-if rank == 0:
+if mpi.size == 1:
+    print("No workers available. Master should do all tasks.")
+    
+    for i, snapfile in enumerate(snapfiles):
+        plot_isosurface( snapfile )
+        clock.print_progress( i, len(snapfiles) )
+        
+else:
+    if mpi.rank == 0:
+        mpi.master_distribute( snapfiles )
+    else:
+        while True:
+            task_index = mpi.worker_receive()
+            
+            if task_index is None: break
+            else: 
+                plot_isosurface( snapfiles[task_index] )
+                clock.print_progress( task_index, len(snapfiles), rank=mpi.rank )
+
+mpi.barrier()
+
+if mpi.rank == 0:
 
     print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
-    sys.stdout.flush()       
+    sys.stdout.flush() 
