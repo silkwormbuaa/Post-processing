@@ -1849,7 +1849,7 @@ class StatisticData:
         
         # - drop ghost cells
         
-        self.drop_ghost( blocklist, buff=3, mode='symmetry' )
+        self.drop_ghost( blocklist, buff=buff, mode='symmetry' )
         
         # - get list of grouped block
         grouped_block_list = grid3d.group_by_range('xy', block_list=blocklist)
@@ -1872,7 +1872,7 @@ class StatisticData:
                 
                 for num in group:
                     bl_data = self.bl_clean[self.bl_nums_clean.index(num)].df[var]
-                    var_data.append( np.array(bl_data).reshape(g.nz,g.ny,g.nx).mean(axis=0) )
+                    var_data.append( np.array(bl_data).reshape(len(g.pz[buff:-buff])-1,len(py)-1,len(px)-1).mean(axis=0) )
                 
                 var_data = np.array(var_data).mean(axis=0)
                 

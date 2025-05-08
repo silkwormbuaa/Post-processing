@@ -31,7 +31,7 @@ from   vista.plot_setting import set_plt_rcparams
 
 def main():
 
-    case_dir   = '/home/wencan/temp/240211/'
+    case_dir   = '/home/wencan/temp/220927/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`']
     vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`']    
