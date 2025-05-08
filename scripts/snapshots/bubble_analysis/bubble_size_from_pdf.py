@@ -132,7 +132,7 @@ def main():
     dataset = snapshot_container.spanwise_average( blocklist, ['u','pdf_sep'], rescale=rescale )
     dataset = pv.MultiBlock( dataset )
 
-    post_process_dataset( dataset, ['u','pdf_sep'] )
+    post_process_dataset( dataset, ['u','pdf_sep'], dirs )
 
     # dataset = dataset.cell_data_to_point_data().combine()
 
@@ -154,7 +154,7 @@ def main():
 # =============================================================================
 # --- post process the dataset to show the bubble outline
 
-def post_process_dataset( dataset:pv.MultiBlock, vars_out ):
+def post_process_dataset( dataset:pv.MultiBlock, vars_out, dirs:Directories ):
 
     px   = np.linspace( -15, 10, 301, endpoint=True )
     py,_ = lin_grow( 0.0, 0.03, 1.04, upbound=6.0 )
@@ -178,9 +178,14 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_out ):
     c       = ax.contourf( x, y, pdf_sep,  levels=np.linspace(0,1.0,51),  cmap='Reds', extend='both')
     csepu   = ax.contour(  x, y, u,        linestyles='solid', levels=[0.0],  
                            colors='blue',  linewidths=1.5,     zorder=10)
-    cseppdf = ax.contour(  x, y, pdf_sep,  linestyles='dashed',levels=[0.5],  
+    cseppdf = ax.contour(  x, y, pdf_sep,  linestyles='dashed',levels=[0.01,0.5,0.8],  
                            colors='lime',  linewidths=1.5,     zorder=10)
     
+    with open(dirs.pp_z_average + '/dividing_streamline.pkl','rb') as f:
+        lines = pickle.load(f)
+        for line in lines:
+            ax.plot( line[:,0], line[:,1], color='black', linestyle='solid', linewidth=1.5 )
+     
     ax.set_aspect('equal')
     
     ax.set_xlabel(r'$(x-x_{imp})/\delta_0$')
@@ -188,8 +193,9 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_out ):
     
     ax.spines[:].set_linewidth(1.0)
     ax.tick_params( direction='out', length=5, width=1.5)
-    ax.set_xlim([-12,5])
-    ax.set_ylim([0,3])
+    ax.set_xlim([-12,6])
+    ax.set_ylim([0,2])
+    ax.set_aspect(3.0)
     
     cbar = fig.colorbar( c, 
                          ax=ax, 
@@ -203,7 +209,8 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_out ):
     cbar.ax.set_ylabel('p.d.f.', loc='center', labelpad=20)
     cbar.outline.set_linewidth(1.5)
     
-    plt.savefig('pdf_sep_averaged.png', dpi=300, bbox_inches='tight')
+#    plt.savefig('pdf_sep_averaged.png', dpi=300, bbox_inches='tight')
+    plt.savefig('pdf_sep_dividingline.png', dpi=300, bbox_inches='tight')
     plt.show()
 
     plt.close()
