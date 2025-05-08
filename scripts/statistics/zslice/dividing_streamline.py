@@ -28,7 +28,7 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/220927/' 
+    case_dir   = '/home/wencan/temp/231124/' 
     clipbox    = [-15, 10, 0, 10.0, -1, 1]
     cbar_ticks = np.linspace(0.0,2.0,5, endpoint=True)
     
@@ -175,9 +175,9 @@ def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax ):
     x_sep = min( sepline.points[:,0] )
     x_att = max( sepline.points[:,0] )
     bbox = [x_sep, clipbox[1], clipbox[2], clipbox[3]]
-    line = dividing_streamline( dataset, np.array([0.0,0.1,0.0]), bbox,step=0.001, forward=True )
+    line = dividing_streamline( dataset, np.array([-1.0,0.3,0.0]), bbox,step=0.002, forward=True )
     lines.append( line )
-    line = dividing_streamline( dataset, np.array([x_sep,0.005,0.0]), bbox, step=0.001, forward=True )
+    line = dividing_streamline( dataset, np.array([x_sep,0.005,0.0]), bbox, step=0.002, forward=True )
     lines.append( line )
     
     with open('dividing_streamline.pkl', 'wb') as f:

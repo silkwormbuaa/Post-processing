@@ -27,7 +27,7 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/smooth_adiabatic/' 
+    case_dir   = '/home/wencan/temp/241030/' 
     clipbox    = [-15, 10, 0, 10.0, -1, 1]
     cbar_ticks = np.linspace(0.0,2.0,5, endpoint=True)
     
@@ -65,7 +65,7 @@ def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax ):
     ax.plot( x_pfmax, 0.0, '*', color='cyan' , markersize=20 )
 
     lines = list()
-    for h in np.linspace(2.0,2.0,1, endpoint=True):
+    for h in np.linspace(1.4,1.4,1, endpoint=True):
         line = boundary_edge_streamline( dataset, np.array([-14.5,h,0.0]), step=0.05, forward=True )
         lines.append( line )
     

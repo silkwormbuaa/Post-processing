@@ -52,18 +52,19 @@ def main():
     print("========= done =========")
 
 
-def compute_slope(i,line, v_start, buffer=10):
+def compute_slope(i,line, v_start, v_end=0.7):
     
     x = np.array(line[:,0])
     y = np.array(line[:,1])
     
-    index_max      = np.argmax(y)-buffer
+    index_max      = np.argmax(y)
+    index_end,_    = find_indices( y[:index_max], v_end*max(y), mode='sequential')
     index_start, _ = find_indices( y[:index_max], v_start, mode='sequential')
     
-    slope = (y[index_max] - y[index_start]) / (x[index_max] - x[index_start])
+    slope = (y[index_end] - y[index_start]) / (x[index_end] - x[index_start])
     print(f"{casename[i].ljust(20)} slope: {slope:10.4f}, angle: {np.degrees(np.arctan(slope)):10.4f}")
     
-    return index_start, index_max
+    return index_start, index_end
     
 def compute_slope_local():
         
@@ -88,10 +89,11 @@ def compute_slope_local():
             
             with open(seplinefile,'rb') as f: lines = pickle.load(f)
             for line in lines:
+                i_s,i_e = compute_slope(j,line, 0.15, v_end=0.8)
                 ax.plot( line[:,0], line[:,1], color=color[j], 
                         linestyle=lstyle[j], linewidth=1.5 )
-                
-                compute_slope(j,line, 0.15)
+                ax.plot( line[i_s:i_e,0], line[i_s:i_e,1], color=color[j], 
+                         markersize=3, marker='o', markerfacecolor=color[j] )
 
         ax.set_xlim([-18,10])
         ax.set_ylim([-0.2, 1])
@@ -179,7 +181,7 @@ def compute_slope_free_stream():
             
             for line in lines:
                 
-                i_s,i_e = compute_slope(i,line, 2.2, buffer=0)
+                i_s,i_e = compute_slope(i,line, 1.7, v_end=0.98 )
                 
                 ax.plot( line[:,0], line[:,1], color=color[i], 
                          linestyle=lstyle[i], linewidth=1.5 )
