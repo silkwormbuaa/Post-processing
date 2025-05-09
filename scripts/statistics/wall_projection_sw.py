@@ -16,6 +16,7 @@ import pickle
 import time
 import numpy             as     np
 import pandas            as     pd
+import matplotlib.pyplot as     plt
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -27,6 +28,7 @@ from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.directories import create_folder
 from   vista.plane_analy import save_isolines
+from   vista.plane_analy import periodic_average
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import compute_separation_ratio
 from   vista.plot_style  import plot_wall_projection
@@ -159,6 +161,53 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           filename='pressure_fluc' )
 
+    fric = periodic_average( fric, period )
+    
+    save_isolines( xx, zz, fric, 1.0, "separationline_xz_periodic.pkl" )
+
+
+    fig, ax = plt.subplots(1,1,figsize=(8.27,5))
+    cs = ax.contourf( xx, zz, fric/dyn_p*1000.0, levels=np.linspace(-3.0,6.0,51), 
+                     cmap='coolwarm', extend='both')
+    cbar = fig.colorbar( cs, ax=ax, pad=0.250, shrink=0.5, 
+                         orientation='horizontal', ticks=np.linspace(-3.0,6.0,7))
+    cbar.ax.tick_params( direction='in', length=5.0, width=1.0, labelsize=10)
+    cbar.ax.set_ylabel(r'$C_f\times 10^3$', loc='center', 
+                       labelpad=20, fontsize=10)
+
+    cbar.outline.set_linewidth(1.0)
+    
+    with open("separationline_xz_periodic.pkl",'rb') as f:
+        
+        lines = pickle.load( f )
+        for line in lines:
+            x_sep = line[:,0]
+            z_sep = line[:,1]
+            ax.plot(x_sep,z_sep,'black',linewidth=1.0)
+
+    ax.set_xlim([-13.0,5.0])
+    ax.set_ylim([0.0,0.50])
+    ax.set_xlabel(r'$(x-x_{imp})/\delta_0$', fontsize=10)
+    ax.set_ylabel(r'$y/\delta_0$', fontsize=10)
+    ax.set_aspect(4.0)
+    ax.minorticks_on()
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='out',
+                    length=5,
+                    width=1)
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='out',
+                    length=3,
+                    width=1)
+
+    ax.tick_params(axis='x',labelsize=10,pad=5)
+    ax.tick_params(axis='y',labelsize=10,pad=5)
+    ax.spines[:].set_linewidth(1.0)
+    ax.text(4,0.3, params.tag, fontsize=10)
+    
+    plt.savefig('fric_periodic_zoom.png', dpi=300)
 
 # --- output separation area ratio and length ratio distribution
 
