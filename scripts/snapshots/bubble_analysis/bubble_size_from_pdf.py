@@ -34,7 +34,7 @@ from   vista.tools        import lin_grow
 from   vista.plane_analy  import pv_interpolate
 from   vista.plot_setting import set_plt_rcparams
 
-set_plt_rcparams(latex=False,fontsize=15)
+set_plt_rcparams(latex=True,fontsize=8)
 
 def main():
 
@@ -174,43 +174,45 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_out, dirs:Directories ):
     u        = np.array( df['u']      ).reshape( (len(py),len(px)) )
     pdf_sep  = np.array( df['pdf_sep']).reshape( (len(py),len(px)) )
 
-    fig, ax = plt.subplots(1,1,figsize=(12.8,7.2))
+    fig, ax = plt.subplots(1,1,figsize=(3.4,2.5))
     c       = ax.contourf( x, y, pdf_sep,  levels=np.linspace(0,1.0,51),  cmap='Reds', extend='both')
     csepu   = ax.contour(  x, y, u,        linestyles='solid', levels=[0.0],  
-                           colors='blue',  linewidths=1.5,     zorder=10)
+                           colors='blue',  linewidths=1.0,     zorder=10)
     cseppdf = ax.contour(  x, y, pdf_sep,  linestyles='dashed',levels=[0.01,0.5,0.8],  
-                           colors='lime',  linewidths=1.5,     zorder=10)
+                           colors='lime',  linewidths=1.0,     zorder=10)
     
     with open(dirs.pp_z_average + '/dividing_streamline.pkl','rb') as f:
         lines = pickle.load(f)
         for line in lines:
-            ax.plot( line[:,0], line[:,1], color='black', linestyle='solid', linewidth=1.5 )
+            ax.plot( line[:,0], line[:,1], color='black', linestyle='solid', linewidth=1.0 )
      
-    ax.set_aspect('equal')
-    
     ax.set_xlabel(r'$(x-x_{imp})/\delta_0$')
     ax.set_ylabel(r'$y/\delta_0$')
     
+    params = Params( dirs.case_para_file )
+    ax.text(-11,1.6, params.tag, fontsize=10)
+    
     ax.spines[:].set_linewidth(1.0)
-    ax.tick_params( direction='out', length=5, width=1.5)
+    ax.spines[:].set_zorder(11)
+    ax.tick_params( direction='out', length=2.5, width=1.0)
     ax.set_xlim([-12,6])
     ax.set_ylim([0,2])
-    ax.set_aspect(3.0)
+    ax.set_aspect(5.0)
     
     cbar = fig.colorbar( c, 
                          ax=ax, 
-                         pad=0.20,
+                         pad=0.250,
                          shrink=0.5,
                          orientation='horizontal',
                          ticks=np.linspace(0,1.0,5))
     cbar.ax.tick_params( direction='in',
-                         length=5,
-                         width=1.5)
+                         length=2.5,
+                         width=1.0)
     cbar.ax.set_ylabel('p.d.f.', loc='center', labelpad=20)
-    cbar.outline.set_linewidth(1.5)
+    cbar.outline.set_linewidth(1.0)
     
 #    plt.savefig('pdf_sep_averaged.png', dpi=300, bbox_inches='tight')
-    plt.savefig('pdf_sep_dividingline.png', dpi=300, bbox_inches='tight')
+    plt.savefig('pdf_sep_dividingline.png', dpi=600, bbox_inches='tight')
     plt.show()
 
     plt.close()
