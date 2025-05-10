@@ -16,6 +16,7 @@ import time
 import numpy             as     np
 import pandas            as     pd
 import matplotlib.pyplot as     plt
+import matplotlib.colors as     colors
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -236,10 +237,11 @@ with timer("plotting"):
 # =============================================================================
 
     fig, ax = plt.subplots(1,1,figsize=(8.27,5))
-    cs = ax.contourf( xx, zz, fric/dyn_p*1000.0, levels=np.linspace(-3.0,6.0,51), 
-                     cmap='coolwarm', extend='both')
+    divnorm = colors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=6)
+    cs = ax.contourf( xx, zz, fric/dyn_p*1000.0, levels=np.linspace(-2.0,6.0,121), 
+                     cmap='RdBu_r', extend='both',norm=divnorm)
     cbar = fig.colorbar( cs, ax=ax, pad=0.250, shrink=0.5, 
-                         orientation='horizontal', ticks=np.linspace(-3.0,6.0,7))
+                         orientation='horizontal', ticks=np.linspace(-2.0,6.0,5))
     cbar.ax.tick_params( direction='in', length=5.0, width=1.0, labelsize=10)
     cbar.ax.set_ylabel(r'$C_f\times 10^3$', loc='center', 
                        labelpad=20, fontsize=10)
@@ -257,7 +259,7 @@ with timer("plotting"):
     ax.set_xlim([-13.0,5.0])
     ax.set_ylim([0.0,0.50])
     ax.set_xlabel(r'$(x-x_{imp})/\delta_0$', fontsize=10)
-    ax.set_ylabel(r'$y/\delta_0$', fontsize=10)
+    ax.set_ylabel(r'$z/\delta_0$', fontsize=10)
     ax.set_aspect(4.0)
     ax.minorticks_on()
     ax.tick_params( which='major',
@@ -276,7 +278,7 @@ with timer("plotting"):
     ax.spines[:].set_linewidth(1.0)
     ax.text(4,0.3, params.tag, fontsize=10)
     
-    plt.savefig('fric_periodic_zoom.png', dpi=300)
+    plt.savefig(f'fric_periodic_zoom_{params.casecode}.png', dpi=300)
 
 # --- output separation area ratio and length ratio distribution
 
