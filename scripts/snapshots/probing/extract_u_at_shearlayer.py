@@ -24,6 +24,7 @@ from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.params      import Params
 from   vista.snapshot    import Snapshot
+from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.directories import create_folder
@@ -44,6 +45,8 @@ grd       = None
 snapfiles = None
 len_prb   = 0
 dz        = 0.0
+u_stat    = None
+p_stat    = None
 
 print(f"Rank {mpi.rank} is working on {dirs.case_dir}.")
 sys.stdout.flush()
@@ -69,7 +72,14 @@ if mpi.is_root:
         dz = grd.g[blocklist[0]-1].dz[0]
             
     print(f"Root reports: snapshots number: {len(snapfiles)}, probe length: {len_prb}, min length: {dz}.")
-            
+    
+    with timer('load statistic data'):
+        stat = StatisticData( dirs.statistics )
+        stat.read_statistic( blocklist, vars_in=['u','p'] )
+        df_stat = stat.get_probed_df( blocklist, grd, indx_probe, 'Z' )
+        u_stat  = df_stat['u'].mean()
+        p_stat  = df_stat['p'].mean()
+    
     sys.stdout.flush()
     
 # - broadcast grid data to all processors
@@ -79,12 +89,18 @@ grd       = mpi.comm.bcast( grd,       root=0 )
 snapfiles = mpi.comm.bcast( snapfiles, root=0 )
 len_prb   = mpi.comm.bcast( len_prb,   root=0 )
 dz        = mpi.comm.bcast( dz,        root=0 )
+u_stat    = mpi.comm.bcast( u_stat,    root=0 )
+p_stat    = mpi.comm.bcast( p_stat,    root=0 )
 
 n_snaps    = len(snapfiles)
 u_corrs    = np.zeros( (n_snaps,len_prb), dtype=float )
 p_corrs    = np.zeros( (n_snaps,len_prb), dtype=float )
 snap_steps = np.zeros( n_snaps,           dtype=int   )
 snap_times = np.zeros( n_snaps,           dtype=float )
+std_u_t    = np.zeros( n_snaps,           dtype=float ) # std of u at an instantaneous time
+std_p_t    = np.zeros( n_snaps,           dtype=float ) # std of p at an instantaneous time
+u_avgs     = np.zeros( n_snaps,           dtype=float ) # spanwise average u
+p_avgs     = np.zeros( n_snaps,           dtype=float ) # spanwise average p
 
 # - compute the correlation of velocity and pressure in z direction at shear layer
 
@@ -116,6 +132,12 @@ def compute_correlation_at_shear_layer( snapfile ):
     # plt.plot(np.arange(len(u_corr)), u_corr, label='u')
     # plt.savefig(f'u_cor_{index}.png', dpi=300)
     # plt.close()
+    
+    # compute the std 
+    std_u_t[index] = np.std( df_snap['u'] )
+    std_p_t[index] = np.std( df_snap['p'] )
+    u_avgs[index]  = df_snap['u'].mean()
+    p_avgs[index]  = df_snap['p'].mean()
     
 
 def get_auto_correlation( array:np.ndarray ):
@@ -162,6 +184,10 @@ snap_steps = mpi.comm.reduce( snap_steps, root=0, op=mpi.MPI.SUM )
 snap_times = mpi.comm.reduce( snap_times, root=0, op=mpi.MPI.SUM )
 u_corrs    = mpi.comm.reduce( u_corrs,    root=0, op=mpi.MPI.SUM )
 p_corrs    = mpi.comm.reduce( p_corrs,    root=0, op=mpi.MPI.SUM )
+std_u_t    = mpi.comm.reduce( std_u_t,    root=0, op=mpi.MPI.SUM )
+std_p_t    = mpi.comm.reduce( std_p_t,    root=0, op=mpi.MPI.SUM )
+u_avgs     = mpi.comm.reduce( u_avgs,     root=0, op=mpi.MPI.SUM )
+p_avgs     = mpi.comm.reduce( p_avgs,     root=0, op=mpi.MPI.SUM )
 
 # - write out the results
 
@@ -197,6 +223,27 @@ if mpi.is_root:
     with open('integral_length.dat','w') as f:
         f.write("L_u  :".rjust(15) + f"{L_u:15.6f}\n")
         f.write("L_p  :".rjust(15) + f"{L_p:15.6f}\n")
+        
+    # std
+    
+    # average of std of u and p (spanwise locally)
+    std_u = np.mean(std_u_t)
+    std_p = np.mean(std_p_t)
+    
+    # std of spanwise averaged u and p (large scale)
+    std_u_avg = np.std(u_avgs)
+    std_p_avg = np.std(p_avgs)
+    
+    u_avg = np.mean(u_avgs)
+    p_avg = np.mean(p_avgs)
+    
+    with open('std.dat','w') as f:
+        f.write("std_u  :".rjust(15) + f"{std_u:15.6f}\n")
+        f.write("std_p  :".rjust(15) + f"{std_p:15.6f}\n")
+        f.write("std_u_avg  :".rjust(15) + f"{std_u_avg:15.6f}\n")
+        f.write("std_p_avg  :".rjust(15) + f"{std_p_avg:15.6f}\n")
+        f.write("u_avg  :".rjust(15) + f"{u_avg:15.6f}" + f"{u_stat:15.6f}\n")
+        f.write("p_avg  :".rjust(15) + f"{p_avg:15.6f}" + f"{p_stat:15.6f}\n")
         
     print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}.")
     sys.stdout.flush()
