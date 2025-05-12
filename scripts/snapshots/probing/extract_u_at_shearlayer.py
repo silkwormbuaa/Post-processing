@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   extract_pressure_at_pfmax.py
+@File    :   compute_correlation_at_shear_layer.py
 @Time    :   2025/05/12 
 @Author  :   Wencan WU 
 @Version :   1.0
@@ -33,7 +33,7 @@ from   vista.directories import create_folder
 mpi = MPIenv()
 # =============================================================================
 
-casefolder = '/home/wencan/temp/smooth_mid/'
+casefolder = '/home/wencan/temp/220927/'
 
 # =============================================================================
 
@@ -86,9 +86,9 @@ p_corrs    = np.zeros( (n_snaps,len_prb), dtype=float )
 snap_steps = np.zeros( n_snaps,           dtype=int   )
 snap_times = np.zeros( n_snaps,           dtype=float )
 
-# - extract the spanwise averaged pressure at pfmax location
+# - compute the correlation of velocity and pressure in z direction at shear layer
 
-def extract_pressure_at_pfmax( snapfile ):
+def compute_correlation_at_shear_layer( snapfile ):
     
     index = snapfiles.index( snapfile )
     loc   = [params.loc_sl[0]*params.delta_0 + params.x_imp, params.loc_sl[1]*params.delta_0]
@@ -99,13 +99,23 @@ def extract_pressure_at_pfmax( snapfile ):
 
     df_snap   = snap.get_probed_df( blocklist, grd, indx_probe, 'Z' )
 
-    u_corr = get_auto_correlation( np.array(df_snap['u']) )
-    p_corr = get_auto_correlation( np.array(df_snap['p']) )
+    u_corr = get_auto_correlation( np.array(df_snap['u'])-df_snap['u'].mean() )
+    p_corr = get_auto_correlation( np.array(df_snap['p'])-df_snap['p'].mean() )
+    
+    # plt.figure(figsize=(8,6))
+    # plt.plot(df_snap['z'], df_snap['u']-df_snap['u'].mean(), label='u')
+    # plt.savefig(f'u_{index}.png', dpi=300)
+    # plt.close()
 
     snap_steps[index]   = snap.itstep
     snap_times[index]   = snap.itime
     u_corrs   [index,:] = u_corr
     p_corrs   [index,:] = p_corr
+    
+    # plt.figure(figsize=(8,6))
+    # plt.plot(np.arange(len(u_corr)), u_corr, label='u')
+    # plt.savefig(f'u_cor_{index}.png', dpi=300)
+    # plt.close()
     
 
 def get_auto_correlation( array:np.ndarray ):
@@ -129,7 +139,7 @@ if mpi.size == 1:
     print("No workers available. Master should do all tasks.")
     
     for i, snapfile in enumerate(snapfiles):
-        extract_pressure_at_pfmax( snapfile )
+        compute_correlation_at_shear_layer( snapfile )
         clock.print_progress( i, len(snapfiles), rank=mpi.rank )
 
 else:
@@ -141,7 +151,7 @@ else:
             
             if task_index is None: break
             else:
-                extract_pressure_at_pfmax( snapfiles[task_index] )
+                compute_correlation_at_shear_layer( snapfiles[task_index] )
                 clock.print_progress( task_index, len(snapfiles), rank=mpi.rank )
                 
 # - gather results
@@ -179,9 +189,10 @@ if mpi.is_root:
     plt.savefig('auto_correlation.png', dpi=300)
     plt.close()
     
-    L_u = np.trapz(u_corrs, lags)
-    L_p = np.trapz(p_corrs, lags)
-    
+    first_u_neg = np.where(u_corrs < 0)[0][0]
+    L_u = np.trapz(u_corrs[:first_u_neg], lags[:first_u_neg])
+    first_p_neg = np.where(p_corrs < 0)[0][0]
+    L_p = np.trapz(p_corrs[:first_p_neg], lags[:first_p_neg])
     
     with open('integral_length.dat','w') as f:
         f.write("L_u  :".rjust(15) + f"{L_u:15.6f}\n")
