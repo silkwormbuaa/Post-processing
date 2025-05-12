@@ -37,6 +37,8 @@ x_sep     = -7.33    # normalized
 x_att     = 1.89     # normalized
 x_pfmax   = -8.53    # normalized
 
+loc_sl    = -5.0, 0.95
+
 pw_grad_max = 0.536
 
 prb_sep   = 98

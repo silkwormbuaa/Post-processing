@@ -49,7 +49,7 @@ mpi = MPIenv()
 # option
 # =============================================================================
 
-casedir   = '/home/wencan/temp/231124'
+casedir   = '/home/wencan/temp/241030/'
 bbox      = [-35.0, 40.0, -1.3, 20, -999.0, 999.0]
 vars_in   = ['u','p','T']
 vars_out  = ['u','p','T']
@@ -134,7 +134,6 @@ def show_slice( snapfile ):
         if bl.num in blocklist:
             bl.df['mu'] = get_visc( np.array(bl.df['T']), Re_ref, law=visc_law )
             
-
     itstep  = snap.itstep
     itime   = snap.itime
     figname = f'incip_sep_{itstep:08d}.png'
@@ -157,7 +156,19 @@ def show_slice( snapfile ):
 
     wallsurface['cf'] = friction/p_dyn
     wallsurface.set_active_scalars('cf')
-
+    
+    ruler_ticks = np.linspace(-15,-5,41, endpoint=True)
+    points = list()
+    for x_norm in ruler_ticks:
+        x = x_norm * delta0 + x_imp
+        if x > bbox[0] and x < bbox[1]:
+            point1 = [x, walldist, -2.0*delta0]
+            point2 = [x, walldist,  2.0*delta0]
+            points.append( point1 )
+            points.append( point2 )
+    
+    points = np.array(points)
+    
     bubble = point_data.contour( [0.0], scalars='u' )
     bubble.set_active_scalars('p')
     
@@ -168,11 +179,11 @@ def show_slice( snapfile ):
     cmap = plt.get_cmap('RdBu_r',51)
     p.add_mesh( wallsurface, cmap=cmap, 
                 clim=[-0.007,0.007], show_scalar_bar=True,lighting=False)
+    p.add_lines( points, color='black', width=1.0 )
 
     cmap = plt.get_cmap('coolwarm',51)
     p.add_mesh( bubble, cmap=cmap, clim=[40000,90000], show_scalar_bar=True,
                 lighting=True)
-    
     
     camera_pos = [(x_incip-25.0,31.0,25.0),(x_incip+10,0.0,0.0),(0.52,0.79,-0.33)]
     p.camera_position = camera_pos

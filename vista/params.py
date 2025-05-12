@@ -289,6 +289,11 @@ class Params:
     def prb_pfmax( self ):
         """file index of the probe data at peak pressure point"""
         return int( self.params.get('prb_pfmax') )
+    
+    @property
+    def loc_sl( self ):
+        """float, location of shear layer"""
+        return self.__range_to_list__( self.params.get('loc_sl') )
 
 # ------------------- INCA version led difference ------------------------
     

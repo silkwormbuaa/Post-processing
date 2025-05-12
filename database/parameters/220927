@@ -37,6 +37,8 @@ x_sep     = -10.84
 x_att     = 2.45
 x_pfmax   = -10.06
 
+loc_sl    = -5.0, 0.95
+
 pw_grad_max = 0.219
 
 prb_sep   = 118
