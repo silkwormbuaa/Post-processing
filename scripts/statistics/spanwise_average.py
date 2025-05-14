@@ -23,6 +23,7 @@ sys.path.append( source_dir )
 from   vista.grid         import GridData
 from   vista.statistic    import StatisticData
 from   vista.directories  import Directories
+from   vista.params       import Params
 from   vista.tools        import lin_grow
 from   vista.directories  import create_folder
 from   vista.plane_analy  import save_isolines
@@ -37,20 +38,24 @@ def main():
     vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`','p`']    
     bbox       = [-57.5,120,0,100,0.0,20]
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
-    clean      = True
+    clean      = False
     
-    vars_show  = ['tke','u`u`','u`v`','p`']
-    cbar_lvls  = [[0,15000],[0,10000],[-5000,0],[0,6000]]
+    vars_show  = ['p`']
+    cbar_lvls  = [[0,0.15]]
+    labels     = [r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$"]
 
-    dirs = Directories( case_dir )
+    dirs       = Directories( case_dir )
+    params     = Params( dirs.case_para_file )
+    
     os.chdir( create_folder(dirs.pp_z_average) )
 
+    norms      = [params.p_ref]
     dataset = load_dataset( dirs, bbox, vars_read, vars_out, rescale, clean )
-    set_plt_rcparams(latex=True,fontsize=20)
+    set_plt_rcparams(latex=True,fontsize=25)
     
     os.chdir( create_folder(dirs.pp_z_average) )
     for i, var in enumerate(vars_show):
-        post_process_dataset( dataset, vars_load, var, cbar_lvls[i] )
+        post_process_dataset( params, dataset, vars_load, var, cbar_lvls[i], norms[i], labels[i] )
 #    visualize( dataset, 'u`u`' )
 
 # =============================================================================
@@ -88,7 +93,7 @@ def load_dataset( dirs:Directories, bbox, vars_read, vars_out, rescale, clean=Fa
 
 # =============================================================================
 
-def post_process_dataset( dataset:pv.MultiBlock, vars_load, var, lvls ):
+def post_process_dataset( params:Params, dataset:pv.MultiBlock, vars_load, var, lvls, norm=1.0, label=None):
 
     px   = np.linspace( -15, 10, 301, endpoint=True )
     py,_ = lin_grow( 0.0, 0.01, 1.04, upbound=11.0 )
@@ -108,7 +113,7 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_load, var, lvls ):
     u        = np.array( df['u']    ).reshape( (len(py),len(px)) )
     mach     = np.array( df['mach'] ).reshape( (len(py),len(px)) )
     grad_rho = np.array( df['grad_rho'] ).reshape( (len(py),len(px)) )
-    var_data = np.array( df[var] ).reshape( (len(py),len(px)) )
+    var_data = np.array( df[var] ).reshape( (len(py),len(px)) ) / norm
 
     save_isolines( x, y, u,        0.0,  'sepline.pkl'   )
     save_isolines( x, y, mach,     1.0,  'sonicline.pkl' )
@@ -116,20 +121,22 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_load, var, lvls ):
 
     fig, ax = plt.subplots(1,1,figsize=(12.8,7.2))
     c    = ax.contourf( x, y, var_data, levels=np.linspace(lvls[0],lvls[1],51), cmap='coolwarm', extend='both')
-    csep = ax.contour(  x, y, u,        levels=[0.0],  colors='red',   linewidths=1.5, zorder=10)
-    cson = ax.contour(  x, y, mach,     levels=[1.0],  colors='lime',  linewidths=1.5, zorder=10)
+    csep = ax.contour(  x, y, u,        levels=[0.0],  colors='red',   linewidths=3.0, zorder=10)
+    cson = ax.contour(  x, y, mach,     levels=[1.0],  colors='lime',  linewidths=3.0, zorder=10)
     cshk = ax.contour(  x[20:,:], y[20:,:], grad_rho[20:,:], 
-                        levels=[0.15], colors='black', linewidths=1.0, zorder=9)
+                        levels=[0.15], colors='black', linewidths=2.0, zorder=9)
+    ax.plot( params.x_pfmax, 0.0, '*', color='black', ms=20, zorder=11)
     
     ax.set_aspect('equal')
     
     ax.set_xlabel(r'$(x-x_{imp})/\delta_0$')
     ax.set_ylabel(r'$y/\delta_0$')
+    ax.text(-12.5, 2.5, params.tag, fontsize=30 )
     
-    ax.spines[:].set_linewidth(1.0)
-    ax.tick_params( direction='out', length=5, width=1.5)
-    ax.set_xlim([-15,10])
-    ax.set_ylim([0,6])
+    ax.spines[:].set_linewidth(2.0)
+    ax.tick_params( direction='out', length=10, width=2.0)
+    ax.set_xlim([-13,-2.5])
+    ax.set_ylim([0,3])
     
     cbar = fig.colorbar( c, 
                          ax=ax, 
@@ -140,7 +147,7 @@ def post_process_dataset( dataset:pv.MultiBlock, vars_load, var, lvls ):
     cbar.ax.tick_params( direction='in',
                          length=5,
                          width=1.5)
-    cbar.ax.set_ylabel(var, loc='center', labelpad=20)
+    cbar.ax.set_xlabel(label, loc='center', labelpad=20)
     cbar.outline.set_linewidth(1.5)
     
     plt.savefig(var+'.png', dpi=300, bbox_inches='tight')
