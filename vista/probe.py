@@ -219,9 +219,39 @@ class ProbeFile:
         
         plt.show()
 
+# ----------------------------------------------------------------------
+# >>> find the nearest probe                                       (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/05/14  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def find_nearest( self, xyz ):
+        """
+        xyz: [x,y,z] location of the probe
+        
+        return: index of the nearest probe
+        """
+        
+        dist = list()
+        
+        for i, probe in enumerate(self.probes):
+            
+            dist.append( np.linalg.norm( np.array(probe.xyz) - np.array(xyz) ) )
+        
+        return np.argmin( dist ), dist[np.argmin(dist)]
+
+
 
 # ----------------------------------------------------------------------
-# >>> Function Name                                                (Nr.)
+# >>> ProbeData                                                (Nr.)
 # ----------------------------------------------------------------------
 #
 # Wencan Wu : w.wu-3@tudelft.nl
@@ -683,13 +713,14 @@ def parse_float(value, i, index):
 
 def Testing():
     
-    filename = '/home/wencanwu/temp/probe/probe_00001.dat'
+    filename = '/home/wencan/temp/smooth_mid/setup/inca_probes.inp'
 
     with timer("Read probe data"):
-        probe = ProbeData( filename, withT=True )
+        probes = ProbeFile( filename )
     
-    probe.cleandata(15.0)
-
+    index,_ = probes.find_nearest( [0.0, 0.0, 0.0] )
+    print(f"Nearest probe index: {index}, distance: {_:.3f}")
+    
 """
 # test finding index from given time points
 

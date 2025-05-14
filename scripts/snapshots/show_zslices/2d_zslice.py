@@ -49,7 +49,9 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 casedir  = '/home/wencan/temp/smooth_mid/'
 
-vars_out = [ 'w3_r' ]
+vars_out = [ 'u',                'T',               'p',               'DS',      
+            'p_fluc',            'u_r',             'v_r',              'w3',
+            'mach']
 
 varslist = ['u',                'T',               'p',               'DS',      
             'p_fluc',           'rho',            'rho_fluc',        'u_r',
@@ -66,7 +68,7 @@ ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8],
 vars_in  = ['u', 'v', 'w', 'T', 'p']
 cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
-clipbox  = [-12, 6, 0, 5, -1, 1]
+#clipbox  = [-12, 6, 0, 5, -1, 1]
 
 # =============================================================================
 
