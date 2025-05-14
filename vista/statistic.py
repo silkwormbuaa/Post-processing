@@ -827,6 +827,11 @@ class StatisticData:
         df['pt'] = np.array(df['p'])*(np.array(df['Tt'])/np.array(df['T']))**(gamma/(gamma-1))
         vars += ['Tt','pt']
 
+# ----- compute the pressure fluctuation
+
+        df['p`'] = np.sqrt( abs(np.array(df['pp']) - np.array(df['p'])**2) )
+        vars += ['p`']
+
 # ----- do averaging in x-z plane
 
         # check if 'vol_fra' is in df.columns (so that smooth wall case
@@ -947,10 +952,14 @@ class StatisticData:
         Cp = R*gamma/(gamma-1)
         df['Tt'] = np.array(df['T']) + ke/Cp
         df['pt'] = np.array(df['p'])*(np.array(df['Tt'])/np.array(df['T']))**(gamma/(gamma-1))
-        
+
+# ----- compute the pressure fluctuation
+
+        df['p`'] = np.sqrt( abs(np.array(df['pp']) - np.array(df['p'])**2) )
+
         vars_out = ['y','hy','u','v','w','p','rho','mu','T',
                     'u`u`','v`v`','w`w`','u`v`','tke',
-                    'Tt','pt']
+                    'Tt','pt','p`']
         
         for var in df.columns:
             if var not in vars_out:

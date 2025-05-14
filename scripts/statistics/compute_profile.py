@@ -36,7 +36,9 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # option zone
 # =============================================================================
 
-locs = [-110, -79.6, -53.6, -27.6, 76.4, 102.4]
+#locs = [-110, -79.6, -53.6, -27.6, 76.4, 102.4]
+
+locs  = [-53.6]
 
 ## locs in dimensionless [-31.33, -25, -20,-15, 5, 10 ] 
 
@@ -44,7 +46,7 @@ locs = [-110, -79.6, -53.6, -27.6, 76.4, 102.4]
 
 dirs = Directories( os.getcwd() )
 
-outpath  = dirs.pp_profile_array
+outpath  = dirs.pp_profile_up
 datafile = dirs.statistics
 gridfile = dirs.grid
 ccfile   = dirs.cc_setup

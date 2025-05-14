@@ -333,9 +333,10 @@ class ProfileData( LineData ):
             self.u_tau   = float( lines[3].strip().split()[1] )
             self.lv      = float( lines[4].strip().split()[1] )
     
-        self.df['y+']  = np.array( self.df['y'] ) / self.lv
-        self.df['ys+'] = np.array( self.df['ys'] ) / self.lv
-        self.df['u+']  = np.array( self.df['u']) / self.u_tau
+        self.df['y+' ] = np.array( self.df['y' ])  / self.lv
+        self.df['ys+'] = np.array( self.df['ys'])  / self.lv
+        self.df['u+' ] = np.array( self.df['u' ])  / self.u_tau
+        self.df['p`+'] = np.array( self.df['p`'])  / self.tau_ave
         
         rho = np.array( self.df['rho'] )
         

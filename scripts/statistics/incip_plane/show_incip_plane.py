@@ -28,11 +28,11 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dirs  = ['/home/wencan/temp/smooth_adiabatic/']
+    case_dirs  = ['/home/wencan/temp/smooth_mid/']
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv','uw','vw']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','DS','tke',
                  'u`u`','v`v`','w`w`','u`v`','p`']
-    clipbox    = [-100, 100, -0.25, 0.2, 0, 0.5]
+    clipbox    = [-100, 100, 0.0, 1.0, 0, 0.5]
 
     for case_dir in case_dirs:
         print(f"Start processing {case_dir}.\n")
@@ -42,6 +42,10 @@ def main():
         dataset  = pv.read( dirs.stat_incip + '/stat_incip.vtm' )
         dataset  = dataset.cell_data_to_point_data().combine()
         dataset  = dataset.clip_box( clipbox, invert=False )
+        
+        cmap = 'coolwarm'
+        cbar_ticks = np.linspace(0,1500, 5, endpoint=True)
+        pv_visualize( dataset, 'p`', clipbox, cbar_ticks, cmap )
         
         cmap = 'coolwarm'
         cbar_ticks = np.linspace(0,8000, 4, endpoint=True)

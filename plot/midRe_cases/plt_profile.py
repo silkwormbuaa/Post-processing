@@ -43,7 +43,8 @@ plt_T              = False
 plt_Mt             = False
 plt_Tt             = False
 plt_pt             = False
-plt_tke            = True
+plt_tke            = False
+plt_p_fluc         = True
 
 pure = False
 
@@ -1109,6 +1110,83 @@ if plt_tke:
         ax.set_ylabel( r"$\rho \langle tke \rangle / \tau_w$" )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y',pad = 10)
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
+    plt.show()
+
+# ----------------------------------------------------------------------
+# >>> plot p`                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/05/14  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+if plt_p_fluc:
+
+    fig, ax = plt.subplots( figsize=[9,8],constrained_layout=True )
+
+    for line in lines:
+        
+        ax.plot( line.df['ys+'], 
+                 line.df['p`+'],
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,20000] )
+    ax.set_ylim( [-1,5]   )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=20,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1.5)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+    ax.xaxis.set_minor_locator( x_minor )
+
+    # set spacing between major tickers.
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'p_fluc'
+    
+    if pure:    
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticklabels([])
+        figname += '_pure'
+    else:
+        ax.set_xlabel( "$y_s^+$",labelpad=-5 )  
+        ax.set_ylabel( r"$\sqrt{\langle p'p' \rangle} / \tau_w$" )
+        ax.tick_params( axis='x', pad=15 )
+        ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
 
     # set the bounding box of axes

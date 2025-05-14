@@ -31,16 +31,16 @@ from   vista.plot_setting import set_plt_rcparams
 
 def main():
 
-    case_dir   = '/home/wencan/temp/220927/'
+    case_dir   = '/home/wencan/temp/231124/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv']
-    vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`']
-    vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`']    
+    vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`','p`']
+    vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`','p`']    
     bbox       = [-57.5,120,0,100,0.0,20]
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
     clean      = True
     
-    vars_show  = ['tke','u`u`','u`v`']
-    cbar_lvls  = [[0,15000],[0,10000],[-5000,0]]
+    vars_show  = ['tke','u`u`','u`v`','p`']
+    cbar_lvls  = [[0,15000],[0,10000],[-5000,0],[0,6000]]
 
     dirs = Directories( case_dir )
     os.chdir( create_folder(dirs.pp_z_average) )
@@ -72,7 +72,7 @@ def load_dataset( dirs:Directories, bbox, vars_read, vars_out, rescale, clean=Fa
         stat = StatisticData( dirs.statistics )
         stat.grid3d = grid
         stat.read_statistic(    blocklist, vars_read )
-        stat.compute_vars(      blocklist, vars_new=['mach'] )
+        stat.compute_vars(      blocklist, vars_new=['mach','p`'] )
         stat.compute_gradients( blocklist, grads=['grad_rho'] )
         stat.compute_vars(      blocklist, vars_new=['RS'])
         dataset = pv.MultiBlock(stat.spanwise_average( blocklist, vars_out, rescale=rescale ))
