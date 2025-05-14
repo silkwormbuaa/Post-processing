@@ -48,18 +48,20 @@ plt_p_fluc         = True
 
 pure = False
 
+location = 'incip'   # 'upstream' or 'incip' 
+
 fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/home/wencan/temp/DataPost/midRe/profile_upstream/'
+OutPath  = f'/home/wencan/temp/DataPost/midRe/profile_{location}/'
 
-data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_upstream'
-data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/profile_upstream'
-data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_upstream'
-data3 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/profile_upstream'
-data4 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/profile_upstream'
-data5 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/profile_upstream'
+data0 = f'/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_{location}'
+data1 = f'/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/profile_{location}'
+data2 = f'/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_{location}'
+data3 = f'/media/wencan/Expansion/temp/241030/postprocess/statistics/profile_{location}'
+data4 = f'/media/wencan/Expansion/temp/231124/postprocess/statistics/profile_{location}'
+data5 = f'/media/wencan/Expansion/temp/241018/postprocess/statistics/profile_{location}'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
@@ -1140,7 +1142,7 @@ if plt_p_fluc:
     for line in lines:
         
         ax.plot( line.df['ys+'], 
-                 line.df['p`+'],
+                 line.df['p`']/45447.289,
                  line.color,   
                  label = line.label, 
                  ls    = line.lstyle,
@@ -1150,7 +1152,7 @@ if plt_p_fluc:
 
 
     ax.set_xlim( [1,20000] )
-    ax.set_ylim( [-1,5]   )
+    ax.set_ylim( [0.0,0.04]   )
 
     ax.minorticks_on()
     ax.tick_params(which='major',
@@ -1168,14 +1170,14 @@ if plt_p_fluc:
     ax.xaxis.set_minor_locator( x_minor )
 
     # set spacing between major tickers.
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.01))
 
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
-    figname = 'p_fluc'
+    figname = 'p_fluc_not_normalized'
     
     if pure:    
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
@@ -1184,7 +1186,7 @@ if plt_p_fluc:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$",labelpad=-5 )  
-        ax.set_ylabel( r"$\sqrt{\langle p'p' \rangle} / \tau_w$" )
+        ax.set_ylabel( r"$\sqrt{\langle p'p' \rangle} / p_{\infty}$" )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 

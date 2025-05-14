@@ -72,8 +72,8 @@ def compute_profile_incip( case_dir ):
 
     os.chdir( create_folder(outpath) )
 
-    outfile        = f'incip_profile_mean.dat'
-    wall_stat_file = f'incip_wall_statistics.dat'
+    outfile        = f'profile_mean.dat'
+    wall_stat_file = f'wall_statistics.dat'
 
 # =============================================================================
         
