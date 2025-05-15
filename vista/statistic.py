@@ -599,6 +599,7 @@ class StatisticData:
         for num in block_list:
             
             df = self.bl[self.bl_nums.index(num)].df
+            g  = self.grid3d.g[num-1]
             
 # --------- compute Mach number 
 
@@ -657,8 +658,28 @@ class StatisticData:
                 df['u_favre'] = np.array( df['urho'] ) / rho
                 df['v_favre'] = np.array( df['vrho'] ) / rho
                 df['w_favre'] = np.array( df['wrho'] ) / rho
-                
+            
+# ---------- compute production term of tke ( spanwise homogeneous flow )
 
+            if "production" in vars_new:
+                
+                npz = self.bl[self.bl_nums.index(num)].npz
+                npy = self.bl[self.bl_nums.index(num)].npy
+                npx = self.bl[self.bl_nums.index(num)].npx
+                
+                u = np.array( df['u'] ).reshape( npz, npy, npx )
+                v = np.array( df['v'] ).reshape( npz, npy, npx )
+                
+                du_dx = np.gradient( u, g.gx, axis=2 ).flatten()
+                du_dy = np.gradient( u, g.gy, axis=1 ).flatten()
+                dv_dx = np.gradient( v, g.gx, axis=2 ).flatten()
+                dv_dy = np.gradient( v, g.gy, axis=1 ).flatten()
+                
+                df['Px'] = - df['u`u`'] * du_dx
+                df['Py'] = - df['v`v`'] * dv_dy
+                df['Ps'] = - df['u`v`'] * (du_dy + dv_dx)
+                df['Pk'] = df['Px'] + df['Py'] + df['Ps']
+                
 # ----------------------------------------------------------------------
 # >>> compute gradients of variables                              (Nr.)
 # ----------------------------------------------------------------------

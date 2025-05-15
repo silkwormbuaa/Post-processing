@@ -32,24 +32,24 @@ from   vista.plot_setting import set_plt_rcparams
 
 def main():
 
-    case_dir   = '/home/wencan/temp/231124/'
+    case_dir   = '/home/wencan/temp/smooth_mid/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv']
-    vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`','p`']
-    vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`','p`']    
+    vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`','p`','Px','Py','Ps','Pk']
+    vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`','p`','Px','Py','Ps','Pk']    
     bbox       = [-57.5,120,0,100,0.0,20]
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
     clean      = False
     
-    vars_show  = ['p`']
-    cbar_lvls  = [[0,0.15]]
-    labels     = [r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$"]
-
     dirs       = Directories( case_dir )
     params     = Params( dirs.case_para_file )
     
     os.chdir( create_folder(dirs.pp_z_average) )
 
-    norms      = [params.p_ref]
+    vars_show  = ['p`','Px','Py','Ps','Pk']
+    cbar_lvls  = [[0,0.15],[0,400_000],[0,400_000],[0,400_000],[0,400_000]]
+    labels     = [r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$",r'$P_x$',r'$P_y$',r'$P_s$',r'$P_k$']
+    norms      = [params.p_ref,1.0,1.0,1.0,1.0]
+    
     dataset = load_dataset( dirs, bbox, vars_read, vars_out, rescale, clean )
     set_plt_rcparams(latex=True,fontsize=25)
     
@@ -62,7 +62,7 @@ def main():
 
 def load_dataset( dirs:Directories, bbox, vars_read, vars_out, rescale, clean=False):
     
-    if clean: os.system( f'rm -rf {dirs.pp_z_average}' )
+    if clean: os.system( f'rm -rf {dirs.pp_z_average}/z_average*' )
     
     if not os.path.exists( dirs.pp_z_average + '/z_average.vtmb' ):
 
@@ -79,7 +79,7 @@ def load_dataset( dirs:Directories, bbox, vars_read, vars_out, rescale, clean=Fa
         stat.read_statistic(    blocklist, vars_read )
         stat.compute_vars(      blocklist, vars_new=['mach','p`'] )
         stat.compute_gradients( blocklist, grads=['grad_rho'] )
-        stat.compute_vars(      blocklist, vars_new=['RS'])
+        stat.compute_vars(      blocklist, vars_new=['RS','production'])
         dataset = pv.MultiBlock(stat.spanwise_average( blocklist, vars_out, rescale=rescale ))
         dataset.save( dirs.pp_z_average + '/z_average.vtmb', binary=True )
 
@@ -93,7 +93,7 @@ def load_dataset( dirs:Directories, bbox, vars_read, vars_out, rescale, clean=Fa
 
 # =============================================================================
 
-def post_process_dataset( params:Params, dataset:pv.MultiBlock, vars_load, var, lvls, norm=1.0, label=None):
+def post_process_dataset( params:Params, dataset:pv.MultiBlock, vars_load, var, lvls=None, norm=1.0, label=None):
 
     px   = np.linspace( -15, 10, 301, endpoint=True )
     py,_ = lin_grow( 0.0, 0.01, 1.04, upbound=11.0 )
@@ -120,7 +120,10 @@ def post_process_dataset( params:Params, dataset:pv.MultiBlock, vars_load, var, 
     save_isolines( x, y, grad_rho, 0.15, 'shockshape.pkl')
 
     fig, ax = plt.subplots(1,1,figsize=(12.8,7.2))
-    c    = ax.contourf( x, y, var_data, levels=np.linspace(lvls[0],lvls[1],51), cmap='coolwarm', extend='both')
+    if lvls is None:
+        c    = ax.contourf( x, y, var_data, cmap='coolwarm', extend='both')
+    else:
+        c    = ax.contourf( x, y, var_data, levels=np.linspace(lvls[0],lvls[1],51), cmap='coolwarm', extend='both')
     csep = ax.contour(  x, y, u,        levels=[0.0],  colors='red',   linewidths=3.0, zorder=10)
     cson = ax.contour(  x, y, mach,     levels=[1.0],  colors='lime',  linewidths=3.0, zorder=10)
     cshk = ax.contour(  x[20:,:], y[20:,:], grad_rho[20:,:], 
@@ -142,8 +145,10 @@ def post_process_dataset( params:Params, dataset:pv.MultiBlock, vars_load, var, 
                          ax=ax, 
                          pad=0.20,
                          shrink=0.5,
-                         orientation='horizontal',
-                         ticks=np.linspace(lvls[0],lvls[1],6))
+                         orientation='horizontal')
+    if lvls is not None:
+        cbar.set_ticks( np.linspace(lvls[0],lvls[1],6) )
+        
     cbar.ax.tick_params( direction='in',
                          length=5,
                          width=1.5)
