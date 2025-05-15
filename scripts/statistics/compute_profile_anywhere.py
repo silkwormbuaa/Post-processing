@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   compute_profile_incip.py
-@Time    :   2025/04/04 
+@File    :   compute_profile_anywhere.py
+@Time    :   2025/05/15 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   Extract profile at the incipient interaction location
-             from statistic binary data.
+@Desc    :   Extract profile at any x location from statistic binary data.
            ! Set the headers for cutcell_setup first
-           ! Need x_incip ready in parameters file
 '''
 
 import os
 import sys
-import time
 
 source_dir = os.path.realpath(__file__).split('scripts')[0] 
 sys.path.append( source_dir )
@@ -41,20 +38,24 @@ def main():
     case_dirs = ['smooth_mid',      '231124','241030','241018',
                  'smooth_adiabatic','221014','220926','220825','220927','221221',
                  '240210',          '240211']
+    
+    x_loc     = -5.0 # normalized location
+    
+    outfolder = 'profile_shearlayer'
 
     for case in case_dirs:
         
-        compute_profile_incip( '/home/wencan/temp/' + case )
+        compute_profile_incip( '/home/wencan/temp/' + case, x_loc, outfolder )
 
 # =============================================================================
 
-def compute_profile_incip( case_dir ):
+def compute_profile_incip( case_dir, x_loc, outfolder ):
     
     print(f"\nStart processing {case_dir}.\n")
         
     dirs = Directories( case_dir )
 
-    outpath  = dirs.pp_profile_incip
+    outpath  = os.path.join( dirs.pp_statistics, outfolder )
     datafile = dirs.statistics
     gridfile = dirs.grid
     ccfile   = dirs.cc_setup
@@ -63,7 +64,7 @@ def compute_profile_incip( case_dir ):
 
     params     = Params( dirs.case_para_file )
     roughwall  = params.roughwall
-    loc        = (params.x_incip - 2.0)*params.delta_0 + params.x_imp
+    loc        = x_loc*params.delta_0 + params.x_imp
 
     if roughwall:
         snapshotfile = get_filelist(dirs.wall_dist,key='snapshot.bin')[0]
@@ -79,9 +80,9 @@ def compute_profile_incip( case_dir ):
         
     print(f"Processing extracting profile at location: {loc}.\n")
     
-    bbox    = [ loc-2.5, loc+2.5, -1.2576, 86.0,  -11.0, 11.0]  # bounding box
-    wbox    = [ loc-2.5, loc+2.5, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
-    wbox_sw = [ loc-2.5, loc+2.5, 0.0,     0.01,  -11.0, 11.0]
+    bbox    = [ loc-1.25, loc+1.25, -1.2576, 86.0,  -11.0, 11.0]  # bounding box
+    wbox    = [ loc-1.25, loc+1.25, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
+    wbox_sw = [ loc-1.25, loc+1.25, 0.0,     0.01,  -11.0, 11.0]
 
     # - read in grid file
 

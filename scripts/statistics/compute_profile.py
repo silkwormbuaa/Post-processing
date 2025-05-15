@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   read_statbin.py
+@File    :   compute_profile.py
 @Time    :   2023/02/01 
 @Author  :   Wencan WU 
 @Version :   1.0
