@@ -1141,8 +1141,10 @@ if plt_p_fluc:
 
     for line in lines:
         
+        p_fluc = np.array(line.df['p`'])
+        
         ax.plot( line.df['ys+'], 
-                 line.df['p`']/45447.289,
+                 (p_fluc/line.tau_ave)**2,
                  line.color,   
                  label = line.label, 
                  ls    = line.lstyle,
@@ -1152,7 +1154,7 @@ if plt_p_fluc:
 
 
     ax.set_xlim( [1,20000] )
-    ax.set_ylim( [0.0,0.04]   )
+    ax.set_ylim( [0.0,15]   )
 
     ax.minorticks_on()
     ax.tick_params(which='major',
@@ -1170,14 +1172,14 @@ if plt_p_fluc:
     ax.xaxis.set_minor_locator( x_minor )
 
     # set spacing between major tickers.
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.01))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
 
 #    ax.grid(visible=True, which='both',axis='both',color='gray',
 #            linestyle='--',linewidth=0.2)
 
     # Adjust the spacing around the plot to remove the white margin
     
-    figname = 'p_fluc_not_normalized'
+    figname = 'p_fluc_squared'
     
     if pure:    
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
@@ -1186,7 +1188,7 @@ if plt_p_fluc:
         figname += '_pure'
     else:
         ax.set_xlabel( "$y_s^+$",labelpad=-5 )  
-        ax.set_ylabel( r"$\sqrt{\langle p'p' \rangle} / p_{\infty}$" )
+        ax.set_ylabel( r"$\langle p'p' \rangle / {\tau_w}^2$" )
         ax.tick_params( axis='x', pad=15 )
         ax.tick_params( axis='y', pad=10 )
 #        ax.legend( ) 
