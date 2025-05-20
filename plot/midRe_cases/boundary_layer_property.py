@@ -18,10 +18,9 @@ sys.path.append( source_dir )
 
 from   vista.line        import ProfileData
 
-outpath   = '/media/wencan/Expansion/temp/DataPost/midRe/profile_arrays'
-cases     = ['smooth_mid', '231124', '241030'] #
-datapaths = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/profile_array' for case in cases]
-dy        = [0, 0.312, 0.07921]
+cases     = ['smooth_mid', '231124', '241030','smooth_adiabatic','220927'] #
+datapaths = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/profile_incip' for case in cases]
+dy        = [0, 0.312, 0.07921,0.0,0.312]
 u_ref     = 507.0
 
 # =============================================================================
@@ -30,7 +29,7 @@ for i, path in enumerate( datapaths ):
     
     os.chdir( path )
     
-    line = ProfileData( 'profile_mean_02.dat' )
+    line = ProfileData( 'profile_mean.dat' )
     line.shift_y( dy[i] )
     
     # drop some values at the tail
@@ -41,7 +40,7 @@ for i, path in enumerate( datapaths ):
     
     h_factor = delta_star / theta
     
-    with open("boundary_layer_property_02.dat", "w") as f:
+    with open("boundary_layer_property_incip.dat", "w") as f:
         f.write(f"delta99    = {delta99:10.5f}\n")
         f.write(f"delta_star = {delta_star:10.5f}\n")
         f.write(f"theta      = {theta:10.5f}\n")

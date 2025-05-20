@@ -277,6 +277,7 @@ class ProfileData( LineData ):
         self.mu_ave  = None
         self.u_tau   = None
         self.lv      = None
+        self.delta   = None
 
 
 # ----------------------------------------------------------------------

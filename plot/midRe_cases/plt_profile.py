@@ -22,6 +22,7 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line         import ProfileData
+from   vista.tools        import find_indices
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
@@ -44,11 +45,12 @@ plt_Mt             = False
 plt_Tt             = False
 plt_pt             = False
 plt_tke            = False
-plt_p_fluc         = True
+plt_p_fluc         = False
+compute_p_fluc_w   = True    # compute the normalized pressure fluctuation
 
 pure = False
 
-location = 'incip'   # 'upstream' or 'incip' 
+location = 'upstream'   # 'upstream' or 'incip' 
 
 fmt = '.png'
 
@@ -73,6 +75,7 @@ color    = ['gray',            'orangered',       'black',           'steelblue'
 label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$',r'$\mathcal{HR}2$'     ]
 lstyle   = ['-',               '-.',              '--',              ':'               ,(0, (3, 1, 1, 1, 1, 1))]
 width    = [4.0,               4.0,               4.0,               4.0               ,4.0                    ]
+deltas   = [6.6732,            6.2661,            6.5022,            6.2369,           6.4216]
 lines = []
 
 # ----------------------------------------------------------------------
@@ -98,10 +101,11 @@ for i, datapath in enumerate(datalist):
     line.inner_normalize('wall_statistics.dat')
     line.vd_transform()
     
-    line.label = label[i]
-    line.color = color[i]
-    line.width = width[i]
+    line.label  = label[i]
+    line.color  = color[i]
+    line.width  = width[i]
     line.lstyle = lstyle[i]
+    line.delta  = deltas[i]
     
     line.df.to_string( "profile_normalized.dat",
                        index=False, 
@@ -1199,3 +1203,30 @@ if plt_p_fluc:
     
     plt.savefig( figname + fmt )
     plt.show()
+    
+if compute_p_fluc_w:
+    
+    for line in lines:
+        
+        il, ir = find_indices(line.df['ys+'],15.0, mode='sequential')
+        
+        rho15 = line.df['rho'][il] + (line.df['rho'][ir]-line.df['rho'][il]) * (15.0-line.df['ys+'][il])/(line.df['ys+'][ir]-line.df['ys+'][il])
+        mu15  = line.df['mu'][il] + (line.df['mu'][ir]-line.df['mu'][il]) * (15.0-line.df['ys+'][il])/(line.df['ys+'][ir]-line.df['ys+'][il])
+        
+        u_taw15 = np.sqrt(line.tau_ave/rho15)
+        
+        Re15 = rho15 * u_taw15 * line.delta / mu15
+        
+        T_w = line.df['T'][0]
+        c_w = np.sqrt(1.4 * 287.0508571 * T_w)
+        
+        mach_tau = line.u_tau / c_w
+        
+        pp_w_plus = 20.25 + \
+                    (-87.3*Re15**(-0.25) + 94.09*Re15**(-0.5)) + \
+                    2.4 * mach_tau ** 2  + 8312.5 * mach_tau ** 4
+        
+        print(f"line {line.label} : p'p' = {pp_w_plus:.2f}")
+        
+        
+        
