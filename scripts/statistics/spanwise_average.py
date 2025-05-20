@@ -32,10 +32,10 @@ from   vista.plot_setting import set_plt_rcparams
 
 def main():
 
-    case_dir   = '/home/wencan/temp/smooth_mid/'
+    case_dir   = '/home/wencan/temp/smooth_adiabatic/'
     vars_read  = ['u','v','w','p','T','pp','uu','vv','ww','uv']
     vars_out   = ['u','v','w','p','T','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`','p`','Px','Py','Ps','Pk']
-    vars_load  = ['u','mach','grad_rho','tke','u`u`','u`v`','p`','Px','Py','Ps','Pk']    
+    vars_load  = ['u','mach','grad_rho','tke','u`u`','v`v`','w`w`','u`v`','p`','Px','Py','Ps','Pk']    
     bbox       = [-57.5,120,0,100,0.0,20]
     rescale    = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
     clean      = False
@@ -45,10 +45,10 @@ def main():
     
     os.chdir( create_folder(dirs.pp_z_average) )
 
-    vars_show  = ['p`','Px','Py','Ps','Pk']
-    cbar_lvls  = [[0,0.15],[0,400_000],[0,400_000],[0,400_000],[0,400_000]]
-    labels     = [r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$",r'$P_x$',r'$P_y$',r'$P_s$',r'$P_k$']
-    norms      = [params.p_ref,1.0,1.0,1.0,1.0]
+    vars_show  = ['u`u`','v`v`','w`w`','tke','p`','Px','Py','Ps','Pk']
+    cbar_lvls  = [[0,9_000],[0,3_000],[0,5_000],[0,15_000],[0,0.15],[0,400_000],[0,400_000],[0,400_000],[0,400_000]]
+    labels     = [r"$u'u'$",r"$v'v'$",r"$w'w'$",'tke',r"$\sqrt{\langle p'p' \rangle}/p_{\infty}$",r'$P_x$',r'$P_y$',r'$P_s$',r'$P_k$']
+    norms      = [1.0,1.0,1.0,1.0,params.p_ref,1.0,1.0,1.0,1.0,1.0]
     
     dataset = load_dataset( dirs, bbox, vars_read, vars_out, rescale, clean )
     set_plt_rcparams(latex=True,fontsize=25)
