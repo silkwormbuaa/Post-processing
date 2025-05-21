@@ -10,6 +10,8 @@
 
 import os
 import sys
+import time
+import atexit
 
 class Logger:
     
@@ -20,7 +22,10 @@ class Logger:
             
         self.terminal = sys.stdout
         name, _ = os.path.splitext( filename )
-        self.log = open(f"{name}.log", "a")
+        self.log = open( os.path.join( os.getcwd(), f"{name}.log"), "a")
+        
+        sys.stdout = self
+        atexit.register(self._on_exit)
    
     def write(self, message):
         self.terminal.write(message)
@@ -30,7 +35,14 @@ class Logger:
         # this flush method is needed for python 3 compatibility.
         # this handles the flush command by doing nothing.
         # you might want to specify some extra behavior here.
-        pass    
+        pass
+
+    def _on_exit(self):
+        
+        # write time in year-month-day hour:minute:second format
+        exit_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        self.log.write(f"\n=== Program exited at {exit_time} ===\n\n")
+        self.log.close()
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
