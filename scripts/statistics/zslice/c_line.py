@@ -140,7 +140,7 @@ def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax, clines, dirs )
     sepline = dataset.contour( [-0.1], scalars='u' )
     sonline = dataset.contour( [1.0] , scalars='mach' )
     pl.add_mesh(dataset, scalars=varname, show_scalar_bar=False, cmap=cmap,
-                clim=clim)
+                clim=clim,lighting=False)
     # pl.add_mesh(sonline, color='lime',  line_width=4.0 )
     # if sepline.n_points > 0:
     #     pl.add_mesh(sepline, color='red', line_width=4.0 )
@@ -179,9 +179,13 @@ def pv_visualize( dataset, varname, clipbox, cbar_ticks, x_pfmax, clines, dirs )
     ax.spines[:].set_linewidth(2.0)
     ax.tick_params( direction='out', length=10, width=2.0)
 
-    cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5, extend='both' ) 
+    cbar = fig.colorbar( img, orientation='horizontal', ax=ax, shrink=0.5, extend='both', pad=0.2 ) 
     cbar.ax.set_ylabel( varname, loc='center', labelpad=50)
     cbar.ax.set_xticks(cbar_ticks)
+    # move cbar away from the axes of image
+    cbar.ax.tick_params( direction='in', length=5, width=1.5 )
+    cbar.outline.set_linewidth(1.5)
+    plt.tight_layout()
     
     plt.show()
     

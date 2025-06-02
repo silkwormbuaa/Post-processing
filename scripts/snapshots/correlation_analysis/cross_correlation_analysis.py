@@ -23,21 +23,25 @@ sys.path.append( source_dir )
 from   vista.params       import Params
 from   vista.probe        import ProbeData
 from   vista.directories  import Directories
+from   vista.log          import Logger
 from   vista.psd          import pre_multi_psd
 from   vista.math_opr     import find_parabola_max
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
 
-set_plt_rcparams(fontsize=30)
+set_plt_rcparams(fontsize=10)
 # =============================================================================
 
 def main():
     
-    case_dir = '/home/wencan/temp/231124/'
+    case_dir = '/home/wencan/temp/241030/'
+    axis     = True
+    
     dirs     = Directories( case_dir )
     params   = Params( dirs.case_para_file )
     
     os.chdir( create_folder(dirs.pp_correlation))
+    Logger( 'correlation_analysis.log' )
     
     dfsk1 = read_shock_loc( dirs.pp_shock + '/group1/shock_tracking1.pkl' )
     dfsk2 = read_shock_loc( dirs.pp_shock + '/group2/shock_tracking2.pkl' )
@@ -47,15 +51,19 @@ def main():
     
     times = ( dfsk1['itime'] - 20.0 ) * 507.0 / 5.2
     
-    # plot_bubble_size_fluc( times, dfbb['fluc_thr'],            params, showaxis=True)
-    # plot_shock_loc(        times, dfsk1['x_fluc_spanave'], params, showaxis=True )
-    # plot_shock_loc(        times, dfsk2['x_fluc_spanave'],   params, showaxis=True )
-    # plot_pressure_fluc(    times, dfp['p_spanave_pfmax'],  params, showaxis=True )
+    plot_bubble_size_fluc( times, dfbb['fluc_thr'],        params, figname='fluc_bb.png',     showaxis=axis )
+    plot_bubble_size_fluc( times, dfbb['fluc'],            params, figname='fluc_bb_all.png', showaxis=axis )
+    plot_shock_loc(        times, dfsk1['x_fluc_spanave'], params, figname='fluc_sk1.png', showaxis=axis )
+    plot_shock_loc(        times, dfsk2['x_fluc_spanave'], params, figname='fluc_sk2.png', showaxis=axis )
+    plot_pressure_fluc(    times, dfp['p_spanave_pfmax'],  params, figname='fluc_pw.png',  showaxis=axis )
     
-    # do_psd( dfbb['fluc_thr'], params )
-    # do_psd( dfsk1['x_fluc_spanave'], params )
-    # do_psd( dfp['p_fluc'], params )
+    # print( dfbb.iloc[:10] )
     
+    do_psd( dfbb['fluc_thr'],        params, figname='psd_bb.png',     showaxis=axis )
+    do_psd( dfbb['fluc'],            params, figname='psd_bb_all.png', showaxis=axis )
+    do_psd( dfsk1['x_fluc_spanave'], params, figname='psd_sk.png',  showaxis=axis )
+    do_psd( dfp['p_fluc'],           params, figname='psd_pw.png',  showaxis=axis )
+    do_psd( dfsk2['x_fluc_spanave'], params, figname='psd_sk2.png', showaxis=axis )
     
     # plot_fluc( times, dfsk1['x_fluc_spanave'], 'shock1 spanave' )
     # plot_fluc( times, dfp['p_fluc'],           'pressure at pfmax' )
@@ -63,17 +71,16 @@ def main():
     # plot_fluc( times, dfbb['fluc'],            'bubble size fluctuation' )
     # plot_fluc( times, dfprb['p_fluc'],         'pressure fluctuation' )
     
-#    corr( dfp['p_fluc'],           dfbb['fluc_thr'], 'p_vs_bb' )
+    corr( dfp['p_fluc'],           dfbb['fluc_thr'], 'p_vs_bb' )
+    corr( dfsk1['x_fluc_spanave'], dfp ['p_fluc'],   'shock motion vs pressure' )
 #    corr( dfp['p_fluc'],           dfbb['fluc'],     'pressure vs bubble size(all)' )
     corr( dfsk1['x_fluc_spanave'], dfbb['fluc_thr'], 'shock motion vs bubble size(y>0)' )
-    sys.exit()
-    corr( dfsk1['x_fluc_spanave'], dfp ['p_fluc'],   'shock motion vs pressure' )
+#    corr( dfsk1['x_fluc_spanave'], dfsk2['x_fluc_spanave'],'shock motion vs shock motion2' )
 #    corr( dfsk1['x_fluc_spanave'], dfbb['fluc'],     'shock motion vs bubble size(all)' )
     
 #    corr( dfbb['fluc'], dfprb['p_fluc'], 'bubble size vs pressure' )
 #    corr( dfsk1['x_fluc_spanave'], dfprb['p_fluc'], 'shock1 spanave vs pressure' )
     
-    plot_fluc( times, dfsk2['x_fluc_spanave'], 'shock2 spanave' )
     corr( dfsk1['x_fluc_spanave'], dfsk2['x_fluc_spanave'], 'shock at 2 delta vs shock at 6 delta' )
     
 
@@ -155,7 +162,7 @@ def corr( data1, data2, title, mode='full', method='auto' ):
     
     lag_at_max_corr, max_corr = find_parabola_max( p1, p2, p3 )
 
-    print(f"lag at max correlation: {lag_at_max_corr}")
+    print(f"lag at max correlation: {lag_at_max_corr}, max correlation: {max_corr} of {title}")
     
     plot_corr( lags, correlation, lag_at_max_corr, title )
     
@@ -164,7 +171,7 @@ def corr( data1, data2, title, mode='full', method='auto' ):
 
 def plot_corr( lags, correlation, lag_at_max_corr, title='' ):
 
-    fig, axs = plt.subplots( 1,2, figsize=(12,6) )
+    fig, axs = plt.subplots( 1,2, figsize=(8,6) )
     axs[0].plot( lags, correlation )
     axs[0].axvline( lag_at_max_corr, color='r', ls='--' )
     # axs[0].set_title( title )
@@ -182,7 +189,7 @@ def plot_corr( lags, correlation, lag_at_max_corr, title='' ):
 
 def plot_fluc( times, fluc, title='' ):
     
-    fig, ax = plt.subplots( figsize=(15,8) )
+    fig, ax = plt.subplots( figsize=(8,4) )
 
     norm = 0.5*(np.array(fluc).max() - np.array(fluc).min())
     ax.plot( times, np.array(fluc)/norm,'b' )
@@ -197,19 +204,19 @@ def adjust_fluctuation_plots( ax: plt.Axes ):
 
     # ax.set_title('bubble size fluctuation')
 
-    ax.tick_params(axis='both', which='major', length=10, width=2)
-    ax.tick_params(axis='both', which='minor', length=5,  width=2)
-    ax.tick_params(axis='both', which='both',  direction='in', zorder=10, pad=10)
-    ax.xaxis.set_tick_params(width=2)
+    ax.tick_params(axis='both', which='major', length=5,   width=1)
+    ax.tick_params(axis='both', which='minor', length=2.5, width=1)
+    ax.tick_params(axis='both', which='both',  direction='in', zorder=10, pad=5)
+    ax.xaxis.set_tick_params(width=1)
 
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines[:].set_linewidth(2)
+    ax.spines[:].set_linewidth(1)
     ax.spines[:].set_zorder(10)
 
-def plot_bubble_size_fluc(times, fluc, params:Params, showaxis=True):
+def plot_bubble_size_fluc(times, fluc, params:Params, showaxis=True, figname=None):
     
-    fig, ax = plt.subplots( figsize=(15,4) ,constrained_layout=True )
+    fig, ax = plt.subplots( figsize=(5,1.5) ,constrained_layout=True )
 
     fluc = np.array(fluc) - np.mean(fluc)
     
@@ -219,7 +226,7 @@ def plot_bubble_size_fluc(times, fluc, params:Params, showaxis=True):
     
     ax.plot( np.array([times[0],times[-1]]),  np.array([0.0,0.0]), 
             'gray', ls='--', linewidth=1.0, zorder=1 )
-    ax.plot( times, np.array(fluc)/norm,'black' )
+    ax.plot( times, np.array(fluc)/norm,'black', linewidth=1.0 )
 
     ax.set_xlim( 0, times[-1] )
 
@@ -235,14 +242,15 @@ def plot_bubble_size_fluc(times, fluc, params:Params, showaxis=True):
 
     adjust_fluctuation_plots( ax )
 
-    plt.savefig( 'bubble_size_fluc.png', dpi=300 )
+    if figname is not None:
+        plt.savefig( figname, dpi=600 )
     plt.show()
     plt.close()
 
 
-def plot_shock_loc(times, fluc, params:Params, showaxis=True):
+def plot_shock_loc(times, fluc, params:Params, showaxis=True, figname=None):
     
-    fig, ax = plt.subplots( figsize=(15,4) ,constrained_layout=True )
+    fig, ax = plt.subplots( figsize=(5,1.5) ,constrained_layout=True )
 
     fluc = np.array(fluc) - np.mean(fluc)
     
@@ -252,7 +260,7 @@ def plot_shock_loc(times, fluc, params:Params, showaxis=True):
     
     ax.plot( np.array([times[0],times[-1]]),  np.array([0.0,0.0]), 
             'gray', ls='--', linewidth=1.0, zorder=1 )
-    ax.plot( times, np.array(fluc)/norm,'black' )
+    ax.plot( times, np.array(fluc)/norm,'black', linewidth=1.0 )
 
     ax.set_xlim( 0, times[-1] )
     # ax.set_title('bubble size fluctuation')
@@ -269,13 +277,14 @@ def plot_shock_loc(times, fluc, params:Params, showaxis=True):
 
     adjust_fluctuation_plots( ax )
 
-    plt.savefig( 'shock_loc_fluc.png', dpi=300 )
+    if figname is not None:
+        plt.savefig( figname, dpi=600 )
     plt.show()
     plt.close()
 
-def plot_pressure_fluc(times, fluc, params:Params, showaxis=True):
+def plot_pressure_fluc(times, fluc, params:Params, showaxis=True, figname=None):
 
-    fig, ax = plt.subplots( figsize=(15,4) ,constrained_layout=True )
+    fig, ax = plt.subplots( figsize=(5,1.5) ,constrained_layout=True )
 
     fluc = np.array(fluc) - np.mean(fluc)
     
@@ -285,7 +294,7 @@ def plot_pressure_fluc(times, fluc, params:Params, showaxis=True):
     
     ax.plot( np.array([times[0],times[-1]]),  np.array([0.0,0.0]), 
             'gray', ls='--', linewidth=1.0, zorder=1  )
-    ax.plot( times, np.array(fluc)/norm,'black' )
+    ax.plot( times, np.array(fluc)/norm,'black', linewidth=1.0 )
 
     ax.set_xlim( 0, times[-1] )
     # ax.set_title('bubble size fluctuation')
@@ -302,18 +311,19 @@ def plot_pressure_fluc(times, fluc, params:Params, showaxis=True):
 
     adjust_fluctuation_plots( ax )
     
-    plt.savefig( 'pressure_fluc.png', dpi=300 )
+    if figname is not None:
+        plt.savefig( figname, dpi=600 )
     plt.show()
     plt.close()
 
-def do_psd( fluc, params:Params, showaxis=True ):
+def do_psd( fluc, params:Params, showaxis=True, figname=None ):
     
     freq, pm_psd = pre_multi_psd( fluc, 100, 8, 0.5, nfft=len(fluc) )
     
     freq = freq * 9.22 * params.delta_0 / params.u_ref
     
-    fig, ax = plt.subplots( figsize=(9,5), constrained_layout=True )
-    ax.semilogx( freq, pm_psd, color='black', linestyle='-', linewidth=1.5 ) 
+    fig, ax = plt.subplots( figsize=(2,1.5), constrained_layout=True )
+    ax.semilogx( freq, pm_psd, color='black', linestyle='-', linewidth=1.0 ) 
     ax.fill_between( freq, np.zeros_like(pm_psd), pm_psd, color='gray', alpha=0.1 )
     
     if showaxis:
@@ -329,6 +339,8 @@ def do_psd( fluc, params:Params, showaxis=True ):
     ax.set_xlim( [1e-3, 1] )
     adjust_fluctuation_plots( ax )
     
+    if figname is not None:
+        plt.savefig( figname, dpi=600 )
     plt.show()
     plt.close()
 

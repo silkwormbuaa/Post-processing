@@ -24,13 +24,13 @@ from   vista.directories import create_folder
 
 # =============================================================================
 
-file       = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble/bubble_size.dat'
-outputpath = '/media/wencan/Expansion/temp/smooth_mid/postprocess/bubble_size'
-lsep       = 47.944
+file       = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/bubble/bubble_size.dat'
+outputpath = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/bubble'
+lsep       = 49.504  # 47.944
 delta0     = 5.2
 
 files = [file]
-tags  = ['midRe_smooth'] 
+tags  = ['lowRe_smooth'] 
 color    = ['blue']
 lstyle   = ['-']
 
