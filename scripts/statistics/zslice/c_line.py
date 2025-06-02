@@ -52,6 +52,13 @@ def main():
         lines.append( line1 )
 #        lines.append( line2 )
     
+    dirs   = Directories( case_dir )
+    params = Params( dirs.case_para_file )
+    
+    x_start = -2.5
+    x_stop  = params.x_pfmax
+    line_wall = c_line_wall(dataset, np.array([x_start,0.05, 0.0]), x_stop=x_stop, step=0.05, forward=False)
+    
     pv_visualize( dataset, 'DS', clipbox, cbar_ticks, x_pfmax, lines, case_dir )
 
     
@@ -92,7 +99,42 @@ def c_line(dataset:pv.UnstructuredGrid, point_start:np.ndarray, step=0.1, forwar
     
     return pts
     
+def c_line_wall(dataset:pv.UnstructuredGrid, point_start:np.ndarray, x_stop:float, step=0.1, forward=False):
+    """
+    compute the reversed characteristic line
+    """
+    u, v, a = fetch_uva(dataset, point_start)
+    pts = [point_start]
+    time= 0.0
     
+    i = 0
+    while True:
+        
+        point_start = step_c_wall(point_start, step=step, forward=forward)
+        pts.append(point_start)
+        
+        ds = step
+        if forward:
+            time += ds / (a+u)
+        else:
+            time += ds / (a-u)
+            print(f"{ds / (a-u):.7f} ms")
+        
+        u, v, a     = fetch_uva(dataset, point_start)
+        i += 1
+        
+        if i > 1000:
+            break
+        
+        if point_start[0] < x_stop:
+            break
+        
+#        print(i, point_start, u, v, a)
+    
+    print(f"total time on wall: {time*5.2:.4f} ms")
+    
+    return pts
+
     
 def step_c( point_start, u, v, a, step=0.1, forward=True, left=True ):
     """
@@ -116,7 +158,24 @@ def step_c( point_start, u, v, a, step=0.1, forward=True, left=True ):
     point_end = np.array([point_start[0]+dx, point_start[1]+dy, point_start[2]])
 
     return point_end    
+
+
+def step_c_wall( point_start, step=0.1, forward=True ):
+    """
+    step forward/backward in space
+    """
+    # - compute the backward step
     
+    
+    if not forward:
+        step = -step
+    
+    dx = step 
+    
+    point_end = np.array([point_start[0]+dx, point_start[1], point_start[2]])
+
+    return point_end    
+
 
 def fetch_uva( dataset:pv.UnstructuredGrid, point:np.ndarray ):
     """
