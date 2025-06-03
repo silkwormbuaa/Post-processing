@@ -35,11 +35,14 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-case_folder = '/home/wencan/temp/231124/'
-#locs_delta = np.linspace(-20,-20,1)
+case_folder = '/home/wencan/temp/smooth_adiabatic/'
+locs_delta  = np.linspace(-20,-20,1)
 
-outfolder  = '/pfmax_planes'
-periodic_ave = False
+outfolder  = '/yz_planes_dles14/'
+periodic_ave = True
+x_lim = [0,0.5]
+y_lim = [-0.15,0.5]
+
 
 # =============================================================================
 
@@ -64,7 +67,7 @@ casecode = params.casecode
 n_period = params.n_period
 tag      = params.tag
 
-locs_delta = np.array([params.x_pfmax])
+#locs_delta = np.array([params.x_pfmax])
 locs = locs_delta*delta + x_imp
 
 
@@ -100,6 +103,7 @@ for i, loc in enumerate(locs):
 
         S = StatisticData( datafile )
         S.verbose = False
+        S.grid3d = G
             
         S.read_statistic( block_list=block_list, vars_in=vars)
             
@@ -319,8 +323,8 @@ for i, loc in enumerate(locs):
 # ------ vertical velocity v
 
         cbar = r'$\frac{\langle v \rangle  \cdot 100}{u_{\infty}}$'
-        cbar_levels = np.linspace(-3.0,5.0,26)
-        cbar_ticks  = np.linspace(-3.0,5.0,5)
+        cbar_levels = np.linspace(-3.0,3.0,26)
+        cbar_ticks  = np.linspace(-3.0,3.0,5)
         plot_slicex_stat( zz, yy, v/u_ref*100,
                           tag=tag,
                           vectors=[w,v],
@@ -331,6 +335,8 @@ for i, loc in enumerate(locs):
                           cbar_levels=cbar_levels,
                           cbar_ticks=cbar_ticks,
                           col_map='RdBu_r',
+                          x_lim=x_lim,
+                          y_lim=y_lim,
                           title=title)
 
         print(f"vmax = {np.max(v):10.2f} (vmax/u_ref*100 ={np.max(v/u_ref*100):10.2f})")

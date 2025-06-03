@@ -22,14 +22,15 @@ from   vista.directories import Directories
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/220927/'
+casedir   = '/home/wencan/temp/240210/'
 slic_type = 'X'
 locs      = [-14.98,-10.36,-10.16,2.56,8.0]
 locs      = np.array(locs) * 5.2 + 50.4
 outfiles  = [f'/stat_xslice_{i:03d}.bin' for i in range(len(locs))]
 
-#locs      = [-20.0]
-#outfiles  = ['/stat_xslice_upstream.bin']
+locs      = [-20.0]
+locs      = np.array(locs) * 5.2 + 50.4
+outfiles  = ['/stat_xslice_upstream.bin']
 
 # =============================================================================
 
