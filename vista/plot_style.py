@@ -878,9 +878,9 @@ def plot_slicex_stat( zz, yy, v,
     """
 
     if figsize is None:
-        figsize = (15,10)
+        figsize = (15,9)
     
-    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )
+    fig, ax = plt.subplots( figsize=figsize )
 
     if col_map is None: col_map='RdBu_r'
     
@@ -895,7 +895,7 @@ def plot_slicex_stat( zz, yy, v,
     if pure:
         textfontsize = 80
     else:
-        textfontsize = 40
+        textfontsize = 50
 
     if sonic: 
         with open('soniclines.pkl','rb') as f:
@@ -919,30 +919,30 @@ def plot_slicex_stat( zz, yy, v,
     if vectors is not None:
         
         if arrow:
-            ax.quiver( zz[::7,::6],yy[::7,::6], 
-                    vectors[0][::7,::6], vectors[1][::7,::6],
-                    width=0.0060,
+            ax.quiver( zz[::8,::6],yy[::8,::6], 
+                    vectors[0][::8,::6], vectors[1][::8,::6],
+                    width=0.0020,
                     angles='xy',
                     scale_units='xy', 
-                    scale = 140,
+                    scale = 80,
                     headwidth=5,
                     headlength=7)
             
-            rect = matplotlib.patches.Rectangle( (0.01,0.425), 0.24,0.05, 
+            rect = matplotlib.patches.Rectangle( (-0.85,0.875), 0.60,0.15, 
                                                 facecolor='white',
                                                 alpha=0.8 ) # transpanrency
             ax.add_patch(rect)
             
-            ax.quiver(0.01,0.45,
+            ax.quiver(-0.84,0.95,
                     15.21,0.0,    # 3% of u_infty
-                    width=0.0060,
+                    width=0.0020,
                     angles='xy',
                     scale_units='xy',
-                    scale = 140,
+                    scale = 80,
                     headwidth=5,
                     headlength=7)
             
-            ax.text( 0.13,0.45,
+            ax.text( -0.61,0.94,
                      r"$3\%u_{\infty}$",
                      va='center',
                      fontsize=textfontsize)
@@ -961,7 +961,7 @@ def plot_slicex_stat( zz, yy, v,
         z_wall = np.array(df_wall['x'])
         y_wall = np.array(df_wall['y'])
 #        ax.plot(z_wall,y_wall,'black')
-        ax.fill_between(z_wall,-0.25,y_wall,color='grey',zorder=10)
+        ax.fill_between(z_wall,-0.1,y_wall,color='grey',zorder=10)
 
     if tag:
 #        rect2 = matplotlib.patches.Rectangle( (0.20,0.85), 0.7,0.20, 
@@ -970,7 +970,7 @@ def plot_slicex_stat( zz, yy, v,
 #                                              zorder=100 ) # transpanrency
 #        ax.add_patch( rect2 )
         
-        ax.text( 0.49, 0.45,
+        ax.text( 0.92, 0.95,
                  tag,
                  va='center',
                  ha='right',
@@ -1015,25 +1015,20 @@ def plot_slicex_stat( zz, yy, v,
 
         # set ticks on the main xy axises
         
-        ax.tick_params(axis='x',labelsize=textfontsize,pad=10)
-        ax.tick_params(axis='y',labelsize=textfontsize,pad=10)
+        ax.tick_params(axis='x',labelsize=30,pad=10)
+        ax.tick_params(axis='y',labelsize=30,pad=10)
 
         plt.gca().set_aspect('equal', adjustable='box')
 
     # set axises stay with contour and x,y unit length equal
     
 #    plt.axis('scaled')
-    if x_lim is not None: ax.set_xlim(x_lim)
-    if y_lim is not None: ax.set_ylim(y_lim)
 
     ax.set_xlabel(r"$z/\delta_0$")
     ax.set_ylabel(r"$y_s/\delta_0$")
     ax.tick_params(axis='both', length=10, width=2, pad=10)
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(2)
-    ax.spines[:].set_zorder(100)
-    ax.xaxis.set_ticks([0.0,0.25,0.5])
-    ax.yaxis.set_ticks([-0.15,0.0,0.15,0.30,0.45])
 
     if filename:
         if pure: 

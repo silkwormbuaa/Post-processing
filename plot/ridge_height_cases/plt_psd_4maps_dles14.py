@@ -25,7 +25,7 @@ from   vista.tools       import get_filelist
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
-plt.rcParams['font.size']   = 20
+plt.rcParams['font.size']   = 40
 
 figname = 'psd_4maps_dles14'
 fmt = '.pdf'
@@ -48,9 +48,9 @@ label    = ['smooth',  r'$H/\delta_0=0.05$', r'$H/\delta_0=0.10$', r'$H/\delta_0
 
 # subplots position and size
 
-fig = plt.figure( figsize=(15, 6.25) )
+fig = plt.figure( figsize=(30, 12.5) )
 gs = GridSpec(2,20)
-ax_ranges = [0,10,0,10]
+ax_ranges = [0,11,0,10]
 ax_rangee = [9,20,9,20]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs = list()
@@ -129,7 +129,7 @@ for i in range(4):
     
     axs.append(ax)
     
-axs[1].set_xlim([-15.0, 10.0])        
+        
 axs[3].set_xlim([-15.0, 10.0])
 
 cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
