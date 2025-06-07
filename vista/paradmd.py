@@ -610,6 +610,9 @@ class ParaDmd:
         
         Rprime =  init_1Dflt_empty( Ns*Ns*n_procs, self.kind )
 
+            # ! be careful with the dimension of Ai(m,n) with m>n, otherwise,
+            # you will get an error in broadcasting Ri into slice of Rprime.
+
         Rprime[ Ns*Ns*rank : Ns*Ns*(rank+1) ] = Ri.ravel()
         
         for r in range( n_procs ):
