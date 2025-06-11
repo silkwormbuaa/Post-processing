@@ -22,6 +22,7 @@ from   .timer            import timer
 from   .colors           import colors   as col
 from   .tools            import get_filelist
 from   .tools            import to_dictionary
+from   .tools            import distribute_mpi_work
 from   .init_empty       import init_1Dflt_empty
 from   .init_empty       import init_1Dcmx_empty
 from   .init_empty       import init_2Dflt_empty
@@ -78,7 +79,7 @@ class ParaDmd:
         
         # - snap_info variables
         
-        self.kind = None
+        self.kind = 4
         self.n_bl = None
         self.type = None
         self.slic_type = None
@@ -559,6 +560,133 @@ class ParaDmd:
         
 
 # ----------------------------------------------------------------------
+# >>> Non-blocking data exchange                               (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/06/11  - created
+#
+# Desc
+#    - mpi non-blocking snapshot data exchange 
+#    - data are read from each snapshot which composes a long vector,
+#      each processor may read different number of snapshots, but in a card
+#      shuffling way, so that each processor will have nearly equal number of 
+#      snapshots.
+# 
+#    - after reading, the snapshots are stacked together like below:
+#      (n,m) n-number of snapshots, m-length of each snapshot data vector  
+#   
+#              CPU1           CPU2         CPU3
+#
+#           s1  s2  s3      s4  s5       s6  s7
+#            |   |   |       |   |        |   |
+#            |   |   |       |   |        |   |
+#            |   |   |       |   |        |   |
+#
+#    - after the data exchange, each processor will have part of all the snapshots. 
+#
+#            s1  s2  s3  s4  s5  s6  s7
+#    
+#      CPU1   |   |   |   |   |   |   |
+#    
+#      CPU2   |   |   |   |   |   |   |
+#    
+#      CPU3   |   |   |   |   |   |   |
+#
+# ----------------------------------------------------------------------
+
+    def non_blocking_data_exchange( self, data ):
+        
+        comm = self.comm
+        rank = self.rank
+        size = self.n_procs
+
+        def debug_print(message, flush=False):
+            if flush:
+                print(f"[Rank {rank}] {message}")
+                sys.stdout.flush()
+            else:pass
+        
+        send_requests = []
+        recv_requests = []
+        
+        # check if the input data is 2d np.ndarray
+        if not isinstance(data, np.ndarray) or data.ndim != 2:
+            raise ValueError("Input data before data exchange must be a 2D numpy array.")
+
+        # local size of the data
+        n_cols, n_rows = data.shape
+        
+        if size == 1:
+            self.snapshots = data.copy()
+            debug_print(f"Single processor mode. Data shape: {data.shape}")
+            return
+        
+        else:
+        
+            debug_print(f"Data exchange started. Local shape: {data.shape}")
+
+            # communicate the number of columns (snapshots) on each processor to everyone
+            global_n_cols       = np.zeros(size, dtype=int) 
+            global_n_cols[rank] = n_cols
+            global_n_cols       = comm.allreduce(global_n_cols, op=MPI.SUM)
+            
+            debug_print(f"Global number of columns (snapshots): {global_n_cols}")
+            
+            # start sending data
+            for target in range(size):
+                
+                # index of the vector segment to be sent
+                i_s, i_e = distribute_mpi_work( n_rows, size, target )
+                
+                # extract the segment to be sent
+                # slice must be copied to avoid issues with non-blocking send
+                send_data = data[:,i_s:i_e].copy() 
+                debug_print(f"Rank {rank} sending data to Rank {target}, shape: {send_data.shape}")
+                req       = comm.Isend((send_data, MPI.FLOAT), dest=target, tag=target)
+                debug_print(f"Rank {rank} sent data to Rank {target}")
+                send_requests.append(req)
+                
+            
+            # build the receive buffer
+            
+            i_s, i_e  = distribute_mpi_work( n_rows, size, rank )
+            recv_buff = init_2Dflt_empty( np.sum(global_n_cols), i_e-i_s, 4)
+            
+            debug_print(f"Rank {rank} preparing receive buffer with shape: {recv_buff.shape}")
+            
+            # start receiving data
+            for source in range(size):
+                
+                i_s, i_e = distribute_mpi_work( recv_buff.shape[0], size, source )
+                debug_print(f"Rank {rank} receiving data from Rank {source}, shape: {recv_buff[i_s:i_e,:].shape}")
+                req      = comm.Irecv((recv_buff[i_s:i_e,:], MPI.FLOAT), source=source, tag=rank)
+                debug_print(f"Rank {rank} received data from Rank {source}, shape: {recv_buff[i_s:i_e,:].shape}")
+                recv_requests.append(req)
+            
+            # wait for all sends and receives to complete
+            
+            debug_print("Waiting for all send requests to complete...")
+            if send_requests:
+                MPI.Request.Waitall(send_requests)
+            debug_print("Waiting for all receive requests to complete...")
+            if recv_requests:
+                MPI.Request.Waitall(recv_requests)
+                
+            debug_print("All send and receive requests completed.")
+            
+            comm.barrier()
+            
+            self.snapshots = recv_buff
+            
+            debug_print(f"Data exchange complete. Received shape: {self.snapshots.shape}")
+        
+            return
+        
+# ----------------------------------------------------------------------
 # >>> Parallel DMD                                                (Nr.)
 # ----------------------------------------------------------------------
 #
@@ -581,7 +709,7 @@ class ParaDmd:
         # Check if the snapshots data are available
         
         self.N_t, self.len_snap_local = np.shape( self.snapshots )
-        
+  
         if self.N_t == 0 or self.N_t < 2 :
             
             raise ValueError('Please read snapshots first!')     
@@ -716,7 +844,6 @@ class ParaDmd:
         
         
         # Build Vandermonde matrix
-        
         Vand = init_2Dcmx_empty( Ns, Ns, self.kind*2 )
         
         Vand[:,0] = 1.0
