@@ -815,7 +815,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def assemble_block( self ):
+    def assemble_block( self, buff=3 ):
         
         """
         self.snap_cleandata should be ready!
@@ -842,9 +842,9 @@ class Snapshot:
                 
                 bl_number.append( snap_bl.num )
                 
-                x_bl = snap_bl.g.gx
-                y_bl = snap_bl.g.gy
-                z_bl = snap_bl.g.gz
+                x_bl = snap_bl.g.gx[buff:-buff]
+                y_bl = snap_bl.g.gy[buff:-buff]
+                z_bl = snap_bl.g.gz[buff:-buff]
                 
                 # Notice the order of output X,Y,Z !
                 # https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
@@ -897,10 +897,10 @@ class Snapshot:
                     
                     # GX => snap_bl[4] 
                     # For slice, only two coordinates vectors
-                    
-                    y_bl = snap_bl.g.gy
-                    z_bl = snap_bl.g.gz
-                    
+
+                    y_bl = snap_bl.g.gy[buff:-buff]
+                    z_bl = snap_bl.g.gz[buff:-buff]
+
                     Y, Z = np.meshgrid( y_bl, z_bl )
                     
                     y = y + np.ravel( Y ).tolist()
@@ -943,8 +943,8 @@ class Snapshot:
                     
                     bl_number.append(snap_bl.num)
                     
-                    x_bl = snap_bl.g.gx
-                    z_bl = snap_bl.g.gz
+                    x_bl = snap_bl.g.gx[buff:-buff]
+                    z_bl = snap_bl.g.gz[buff:-buff]
                     
                     X, Z = np.meshgrid( x_bl, z_bl )
                     
@@ -987,10 +987,10 @@ class Snapshot:
                     
                     
                     bl_number.append(snap_bl.num)
-                    
-                    x_bl = snap_bl.g.gx
-                    y_bl = snap_bl.g.gy
-                    
+
+                    x_bl = snap_bl.g.gx[buff:-buff]
+                    y_bl = snap_bl.g.gy[buff:-buff]
+
                     X, Y = np.meshgrid( x_bl, y_bl )
                     
                     x = x + np.ravel( X ).tolist()
@@ -1052,6 +1052,8 @@ class Snapshot:
                 
                 df.sort_values(by=['y','x'],inplace=True)
         
+        # reset index
+        df.reset_index(drop=True, inplace=True)
         
         self.df = df
 

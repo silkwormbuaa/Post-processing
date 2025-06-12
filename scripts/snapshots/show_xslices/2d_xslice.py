@@ -48,9 +48,9 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124/'
+casedir  = '/home/wencan/temp/smooth_mid/'
 
-locs     = [0.0]
+locs     = [8.0]
 locs     = np.array(locs) * 5.2 + 50.4
 
 vars_out = ['u',                'v',               'w',                'p',
@@ -115,7 +115,7 @@ if mpi.is_root:
     grid3d.read_grid()
     
     statxs = []
-    stat_xslice_files = get_filelist( dirs.sup_dir, 'xslice' )
+    stat_xslice_files = get_filelist( dirs.sup_dir, 'stat_xslice_004.bin' )
     
     for i,loc in enumerate(locs):
         statx = StatisticData( stat_xslice_files[i] )
@@ -156,7 +156,7 @@ def show_slice( snapdir ):
     seplines = []
     sonlines = []
 
-    snapfiles = get_filelist( snapdir, '_X_' )
+    snapfiles = get_filelist( snapdir, '_X_004' )
 
     for i, loc in enumerate(locs):
 

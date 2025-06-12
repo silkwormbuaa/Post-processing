@@ -45,12 +45,12 @@ def main():
     # 231124     : -9.9, -9.4
     # 241030     : -8.4, -7.9
     
-    for x in np.linspace( -6.9, -6.5, 12, endpoint=True ):
+    for x in np.linspace( -5.0, 0.0, 21, endpoint=True ):
     
-        line1 = c_line(dataset, np.array([x,2.0, 0.0]), step=0.05, forward=False, left=True)
-        line2 = c_line(dataset, np.array([x,2.0, 0.0]), step=0.11, forward=False, left=False)
+        line1 = c_line(dataset, np.array([x,3.0, 0.0]), step=0.05, forward=True, left=True)
+        line2 = c_line(dataset, np.array([x,3.0, 0.0]), step=0.11, forward=True, left=False)
         lines.append( line1 )
-#        lines.append( line2 )
+        lines.append( line2 )
     
     dirs   = Directories( case_dir )
     params = Params( dirs.case_para_file )

@@ -35,11 +35,11 @@ sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-case_folder = '/home/wencan/temp/231124/'
-#locs_delta = np.linspace(-20,-20,1)
+case_folder = '/home/wencan/temp/220927/'
+locs_delta = np.linspace(-10.84,-10.84,1)
 
-outfolder  = '/pfmax_planes'
-periodic_ave = False
+outfolder  = '/yz_planes_sep'
+periodic_ave = True
 
 # =============================================================================
 
@@ -64,7 +64,7 @@ casecode = params.casecode
 n_period = params.n_period
 tag      = params.tag
 
-locs_delta = np.array([params.x_pfmax])
+#locs_delta = np.array([params.x_pfmax])
 locs = locs_delta*delta + x_imp
 
 
@@ -100,6 +100,7 @@ for i, loc in enumerate(locs):
 
         S = StatisticData( datafile )
         S.verbose = False
+        S.grid3d = G
             
         S.read_statistic( block_list=block_list, vars_in=vars)
             

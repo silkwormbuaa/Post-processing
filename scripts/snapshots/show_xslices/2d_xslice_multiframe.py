@@ -49,9 +49,9 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124/'
+casedir  = '/home/wencan/temp/smooth_mid/'
 
-locs     = [-14.98,-11.58,-9.96,2.86,8.0]
+locs     = [-14.98,-8.53,-7.33,1.89,8.0]
 locs     = np.array(locs) * 5.2 + 50.4
 
 vars_out = ['u',                'v',               'w',                'p',
@@ -81,7 +81,7 @@ ranges   = [[-0.4,1.0],        [-0.3,0.3],        [-0.3,0.3],        [1.0,2.5],
 
 vars_in  = ['u', 'v', 'w', 'T', 'p']
 
-clipbox  = [-999, 999, -0.11, 2, -2.0, 2.0]
+clipbox  = [-999, 999, 0.0, 2, -2.0, 2.0]
 bbox     = [-50, 120, -2.0, 31.0, -11, 11]
 # =============================================================================
 
@@ -241,9 +241,10 @@ def show_slice( snapdir ):
                         clim=ranges[varslist.index(var)],
                         lighting=False, 
                         show_scalar_bar=False )
-            
-            p.add_mesh( seplines[i], color='yellow', line_width=5.0 )
-            p.add_mesh( sonlines[i], color='green',  line_width=5.0 )
+            if seplines[i].n_points > 0:
+                p.add_mesh( seplines[i], color='yellow', line_width=5.0 )
+            if sonlines[i].n_points > 0:
+                p.add_mesh( sonlines[i], color='green',  line_width=5.0 )
 
             p.view_vector([1.0,0.0,0.0],viewup=[0.0,1.0,0.0])
             
