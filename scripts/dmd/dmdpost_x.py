@@ -50,7 +50,7 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124/'
+casedir  = '/home/wencan/temp/smooth_adiabatic/'
 clipbox  = [-100.0, 150.0, 0.0, 2.0, -2.0, 2.0]
 colmap   = 'coolwarm'
 vars     = ['u','v','w','p']
