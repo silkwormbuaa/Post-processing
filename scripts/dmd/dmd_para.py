@@ -28,35 +28,41 @@ from   vista.directories import create_folder
 
 def main():
 
-    case_dir = '/home/wencan/temp/220927/'
+    case_dir = '/home/wencan/temp/231124/'
+    vars     = ['u','v','w','p']
+    
     dirs     = Directories( case_dir )
     
     snap_dir = dirs.snp_dir
     
     paradmd  = ParaDmd( snap_dir )
     
+    snapfiles_x = None
     snapfiles_z = None
     snapfiles_y = None
     params      = None
     
     if paradmd.rank == 0:
-
-        snapfiles_z = get_filelist( snap_dir, 'snapshot_Z_001' )
-        snapfiles_y = get_filelist( snap_dir, 'snapshot_Y_003' )
+        
+        snapfiles_x = get_filelist( snap_dir, 'snapshot_X_004.bin' )
+        snapfiles_y = get_filelist( snap_dir, 'snapshot_Y_000.bin' )
+        snapfiles_z = get_filelist( snap_dir, 'snapshot_Z_001.bin' )
         params      = Params( dirs.case_para_file )
-            
-    snap_files_z = paradmd.comm.bcast( snapfiles_z, root=0 )
-    snap_files_y = paradmd.comm.bcast( snapfiles_y, root=0 )
-    params       = paradmd.comm.bcast( params, root=0 )
 
-    i_s, i_e = distribute_mpi_work( len(snap_files_z), paradmd.n_procs, paradmd.rank )
+    snapfiles_x = paradmd.comm.bcast( snapfiles_x, root=0 )            
+    snapfiles_y = paradmd.comm.bcast( snapfiles_y, root=0 )
+    snapfiles_z = paradmd.comm.bcast( snapfiles_z, root=0 )
+    params      = paradmd.comm.bcast( params,      root=0 )
+
+    i_s, i_e = distribute_mpi_work( len(snapfiles_z), paradmd.n_procs, paradmd.rank )
     
     data_lists = []
     
     for i in range( i_s, i_e ):
 
-        data_vector = np.concatenate( [data_from_snapshots( snap_files_z[i],vars=['u'] ), 
-                                       data_from_snapshots( snap_files_y[i],vars=['u'] )] )
+        data_vector = np.concatenate( [data_from_snapshots( snapfiles_x[i],vars=vars ),
+                                       data_from_snapshots( snapfiles_y[i],vars=vars ), 
+                                       data_from_snapshots( snapfiles_z[i],vars=vars )] )
         data_lists.append( data_vector )
 
     data = np.array( data_lists )
@@ -75,22 +81,35 @@ def main():
         paradmd.para_write_modes()
         
         os.chdir( dirs.pp_dmd )
-    
-    if paradmd.rank == 0:
+        paradmd.save_reconstruct()
         
-        paradmd.save_Pqs()
-    
-        print("DMD analysis completed.")
-    
+    else:
         
+        if paradmd.rank == 0:
+            paradmd.save_Pqs()
+            print("DMD analysis completed.")
+
+
 def data_from_snapshots( snapfile, blocklist=None, vars=None ):
     
-    snp = Snapshot( snapfile )
-    snp.read_snapshot(var_read=vars, block_list=blocklist)
-    snp.drop_ghost()
-    snp.assemble_block()
+    snap = Snapshot( snapfile )
+    snap.read_snapshot(var_read=vars, block_list=blocklist)
+    snap.drop_ghost(block_list=blocklist)
     
-    return snp.df[vars].values.ravel()
+    data_snap = []
+    for num in snap.bl_nums_clean:
+        
+        block = snap.snap_cleandata[snap.bl_nums_clean.index(num)]
+        
+        for var in vars:
+            if var in ['u','v','w']:
+                block.df[var] /= 507.0
+            elif var == 'p':
+                block.df[var] /= 45447.289
+                
+        data_snap.append( block.df[vars].values.T.ravel() )
+    
+    return np.concatenate([data for data in data_snap])
         
         
 

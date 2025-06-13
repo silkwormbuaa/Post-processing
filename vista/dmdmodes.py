@@ -311,6 +311,7 @@ class DMDModes:
 
     def mode_to_vtk( self, indx, vars, block_list, snap_type, grid3d, 
                      i_phase=0, n_phases=8,
+                     phi_displace=0,
                      rescale=[0.0,0.0,0.0,1.0,1.0,1.0], 
                      buff=3):
         """
@@ -338,7 +339,7 @@ class DMDModes:
 # ----- setup vtk blocks
 
         vtk_blocks = list()
-        i_start    = 0
+        i_start    = phi_displace
         
         for bl_num in block_list:
             
@@ -359,8 +360,11 @@ class DMDModes:
             n_cells = bl_vtk.GetNumberOfCells()
             
 # --------- modes
-
-            header = f"mode_{indx:05d}"
+            if   snap_type == 'block': header = f"mode_bl_{indx:05d}"
+            elif snap_type == 'X':     header = f"mode_x_{indx:05d}"
+            elif snap_type == 'Z':     header = f"mode_z_{indx:05d}"
+            elif snap_type == 'Y':     header = f"mode_y_{indx:05d}"
+            elif snap_type == 'W':     header = f"mode_y_{indx:05d}"
 
             for j, var in enumerate(vars):
             
