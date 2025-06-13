@@ -201,7 +201,10 @@ os.chdir( create_folder(dirs.pp_dmd + '/modes_figs') )
 
 def postprocess_dmd_x( indx ):
     
-    clipbox  = [-15.0, 10.0, 0.0, 2.0, -2.0, 2.0]
+    if 'smooth' in params.casecode:
+        clipbox  = [-15.0, 10.0, 0.0, 2.0, -2.0, 2.0]
+    else:
+        clipbox  = [-15.0, 10.0, -0.6, 4.0, -2.0, 2.0]
 
     df = modes_temp.df_ind.copy()
     df.reset_index( inplace=True, drop=True )
