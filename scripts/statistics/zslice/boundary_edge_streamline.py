@@ -27,7 +27,7 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams( fontsize=20 )
 
 def main():
-    case_dir   = '/home/wencan/temp/241030/' 
+    case_dir   = '/home/wencan/temp/220927/' 
     clipbox    = [-15, 10, 0, 10.0, -1, 1]
     cbar_ticks = np.linspace(0.0,2.0,5, endpoint=True)
     

@@ -144,7 +144,7 @@ def compute_slope_divid_spanave():
         
         dirs = Directories(f"/home/wencan/temp/{case}")
         os.chdir( dirs.pp_z_average )
-        
+        print(f"Working on {case} ...")
         with open('dividing_streamline.pkl','rb') as f:
             lines = pickle.load(f)
             

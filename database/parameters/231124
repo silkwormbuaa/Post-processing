@@ -36,6 +36,7 @@ x_incip   = -12.50
 x_sep     = -9.96
 x_att     = 2.86
 x_pfmax   = -11.58
+x_pw_grad_max = -11.7
 
 pw_grad_max = 0.394
 

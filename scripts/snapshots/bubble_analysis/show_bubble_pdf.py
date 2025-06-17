@@ -39,7 +39,7 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 def main():
    
-    case_dir = '/home/wencan/temp/250120/'
+    case_dir = '/home/wencan/temp/smooth_adiabatic/'
     clipbox  = [-32.8,102.4,-2,15,-11,11]
     dirs = Directories( case_dir )
     

@@ -40,7 +40,7 @@ def main():
 
 # =============================================================================
 
-    case_dir = '/home/wencan/temp/smooth_adiabatic/'
+    case_dir = '/home/wencan/temp/smooth_mid/'
     var_out  = ['u','n_sep','pdf_sep','wd']
     rescale  = [-50.4, 0.0, 0.0, 5.2, 5.2, 5.2]
 

@@ -41,6 +41,7 @@ x_incip   = -11.08
 x_sep     = -10.36
 x_att     = 2.56
 x_pfmax   = -10.16
+x_pw_grad_max = -10.29
 
 loc_sl    = -5.0, 0.95
 
