@@ -102,8 +102,10 @@ def data_from_snapshots( snapfile, blocklist=None, vars=None ):
         block = snap.snap_cleandata[snap.bl_nums_clean.index(num)]
         
         for var in vars:
-            if var in ['u','v','w']:
+            if var == 'u':
                 block.df[var] /= 507.0
+            elif var in ['v', 'w']:
+                block.df[var] /= 50.70
             elif var == 'p':
                 block.df[var] /= 45447.289
                 
