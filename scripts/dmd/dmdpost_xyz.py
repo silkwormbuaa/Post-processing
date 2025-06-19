@@ -49,7 +49,7 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124/'
+casedir  = '/home/wencan/temp/smooth_mid/'
 
 snaptags = ['snapshot_X_004.bin',
             'snapshot_Y_000.bin',
@@ -77,6 +77,7 @@ zlist       = None
 wallshape   = None
 vars_snap   = None
 displaces   = None
+params      = None
 
 # root does the preparation
 
@@ -178,6 +179,7 @@ zlist      = mpi.comm.bcast( zlist,      root=0 )
 wallshape  = mpi.comm.bcast( wallshape,  root=0 )
 vars_snap  = mpi.comm.bcast( vars_snap,  root=0 )
 displaces  = mpi.comm.bcast( displaces,  root=0 )
+params     = mpi.comm.bcast( params,     root=0 )
 
 clock = timer(f"dmdpost of x slices:")
 

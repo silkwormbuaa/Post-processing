@@ -28,7 +28,7 @@ from   vista.directories import create_folder
 
 def main():
 
-    case_dir = '/home/wencan/temp/231124/'
+    case_dir = '/home/wencan/temp/241030/'
     vars     = ['u','v','w','p']
     
     dirs     = Directories( case_dir )
