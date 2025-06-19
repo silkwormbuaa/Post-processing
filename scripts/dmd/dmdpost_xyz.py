@@ -12,10 +12,12 @@
 off_screen = True
 
 if off_screen:
+    import atexit
     from xvfbwrapper import Xvfb
     vdisplay = Xvfb(width=1920, height=1080)
     vdisplay.start()
-
+    atexit.register(vdisplay.stop)
+    
 import os
 import sys
 import time
@@ -49,7 +51,7 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_mid/'
+casedir  = '/home/wencan/temp/241030/'
 
 snaptags = ['snapshot_X_004.bin',
             'snapshot_Y_000.bin',

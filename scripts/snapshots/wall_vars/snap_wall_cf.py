@@ -15,9 +15,11 @@
 off_screen = True
 
 if off_screen:
+    import atexit
     from xvfbwrapper import Xvfb
     vdisplay = Xvfb(width=1920, height=1080)
     vdisplay.start()
+    atexit.register(vdisplay.stop)
     
 import os
 import gc
