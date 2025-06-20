@@ -25,6 +25,7 @@ from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.params      import Params
 from   vista.tools       import define_wall_shape
+from   vista.directories import create_folder
 from   vista.plane_analy import pv_interpolate
 
 plt.rcParams["text.usetex"]         = True
@@ -38,13 +39,17 @@ def main():
 
     case_folder = '/home/wencan/temp/220927/'
     
-    dirs         = Directories( case_folder )
-    params       = Params( dirs.case_para_file )
+    stat_file   = 'stat_xslice_pwgradmax.bin'
+    outfolder   = 'yz_planes_pwgradmax'
+    
+    dirs        = Directories( case_folder )
+    params      = Params( dirs.case_para_file )
     
     vars_read   = ['u','v','w','T','uu','vv','ww','uv']
-    vars_output = ['u','v','w','T','mach','tke','u`u`','u`v`']
+    vars_output = ['u',    'v',   'w',    'T',
+                   'mach', 'tke', 'u`u`', 'u`v`']
     cbar_range  = [[0.0,1.0],[-2.0,2.0],[-2.0,2.0], [1.0,1.8],
-                   [0,2.0],   [0,2.5],   [0,2.0],   [-2.5,0]]
+                   [0,2.0],   [0,4.0],   [0,3.0],   [-3.6,0]]
     cbar_label  = [r'$\langle u \rangle / u_{\infty}$',
                    r'$\langle v \rangle / u_{\infty}\cdot 100$',
                    r'$\langle w \rangle / u_{\infty}\cdot 100$',
@@ -55,7 +60,7 @@ def main():
                    r'$\langle u^{\prime}v^{\prime}\rangle /u_{\infty}^2\cdot 1000$']
     norm        = [params.u_ref, params.u_ref/100, params.u_ref/100, params.T_ref,
                    1.0, params.u_ref**2/100, params.u_ref**2/100, params.u_ref**2/1000]
-    bbox        = [-100,0,-2,10,-20,20]
+    bbox        = [-100,20,-2,10,-20,20]
     streamline  = False
     D_norm      = False
 
@@ -63,9 +68,9 @@ def main():
 
     grid         = GridData( dirs.grid )
     grid.read_grid()
-    blocklist, _ = grid.select_sliced_blockgrids('X', -53.6, bbox=bbox)
+    blocklist, _ = grid.select_sliced_blockgrids('X', params.x_pw_grad_max*5.2+50.4, bbox=bbox)
 
-    stat_file    = dirs.sup_dir + '/stat_xslice_upstream.bin'
+    stat_file    = os.path.join(dirs.sup_dir, stat_file)
     stat         = StatisticData(stat_file)
     stat.grid3d  = grid
     stat.read_statistic(blocklist,vars_in=vars_read)
@@ -86,7 +91,7 @@ def main():
     px = np.array([0.0])
     df = pv_interpolate( dataset, vars_output, [px,py,pz] )
     
-    os.chdir( dirs.pp_statistics + '/yz_planes' )
+    os.chdir( create_folder(os.path.join(dirs.pp_statistics, outfolder)) )
     
     for i, var in enumerate(vars_output):
         output_var_fig( var, df, params, norm[i],  cbar_range[i], cbar_label[i],  D_norm=D_norm, streamline=streamline )

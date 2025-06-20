@@ -271,6 +271,11 @@ class Params:
         return float( self.params.get('x_pfmax') )
     
     @property
+    def x_pw_grad_max( self ):
+        """in shifted and normalized coordinate"""
+        return float( self.params.get('x_pw_grad_max') )
+    
+    @property
     def pw_grad_max( self ):
         """float, max pressure gradient, Cp change per delta"""
         return float( self.params.get('pw_grad_max') )
