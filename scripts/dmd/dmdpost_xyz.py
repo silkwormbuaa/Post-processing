@@ -51,11 +51,12 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/241030/'
+casedir  = '/home/wencan/temp/smooth_mid/'
 
 snaptags = ['snapshot_X_004.bin',
             'snapshot_Y_000.bin',
             'snapshot_Z_001.bin']
+
 vars_snap_smooth  = [['u','v','w','p'],['u','v','w','p'],['u','v','w','p']]
 vars_snap_rough   = [['u','v','w','p'],['u','v','w','p'],['u','v','w','p']]
 colmap   = 'RdBu_r'
