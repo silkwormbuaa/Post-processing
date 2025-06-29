@@ -27,6 +27,21 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 40
 
+
+def set_jfm_style():
+
+    plt.rcParams.update({
+        "font.size": 10,                   # control the font size
+        "axes.labelsize": 10,              # x/y axis label font size
+        "xtick.labelsize": 9,              # x axis tick label font size
+        "ytick.labelsize": 9,              # y axis tick label font size
+        "legend.fontsize": 9,              # legend font size
+        "axes.titlesize": 10,              # axes title font size
+        "font.family": "Times New Roman",  # use times_new_roman font family
+        "text.usetex": True                # use LaTeX for text rendering
+    })
+
+
 # ----------------------------------------------------------------------
 # >>> Plot eigen values around a unit circle                     (Nr.)
 # ----------------------------------------------------------------------
@@ -297,6 +312,8 @@ def plot_psi_st( st, psi1, psi2=None,
                  xlim=None,
                  gray=None):
     
+    set_jfm_style()
+    
     if psi1 is None:
         
         raise ValueError('Please compute amplitude first.')
@@ -306,9 +323,9 @@ def plot_psi_st( st, psi1, psi2=None,
         
         # Set default figure size
         
-        figsize = (15,9) 
+        figsize = (2.4,2.0) 
         
-    fig, ax = plt.subplots( figsize=figsize )      
+    fig, ax = plt.subplots( figsize=figsize, constrained_layout=True )      
         
     # Plot the first amplitudes
     df = pd.DataFrame( st, columns=['st'])
@@ -329,14 +346,14 @@ def plot_psi_st( st, psi1, psi2=None,
     ax.tick_params( which='major',
                     axis='both',
                     direction='out',
-                    length=20,
-                    width=2)
+                    length=3,
+                    width=1)
     
     ax.tick_params( which='minor',
                     axis='both', 
                     direction='out',
-                    length=10,
-                    width=1.5)
+                    length=1.5,
+                    width=0.5)
 
     # set major tick on y axis is 0.0001,0.001,0.01,0.1,1.0
     ax.yaxis.set_major_locator(ticker.LogLocator(base=10.0, numticks=5))
@@ -380,7 +397,7 @@ def plot_psi_st( st, psi1, psi2=None,
             plt.vlines( st1[i],
                         0.0,
                         v_psi1[i],
-                        linewidth=1,
+                        linewidth=0.5,
                         alpha= value,
                         colors='black')
     
@@ -389,7 +406,7 @@ def plot_psi_st( st, psi1, psi2=None,
         plt.vlines( df['st'],
                     0.0,
                     df['psi1'], 
-                    linewidth=1,
+                    linewidth=0.5,
                     alpha=1.0,
                     colors='black')
     
@@ -405,7 +422,7 @@ def plot_psi_st( st, psi1, psi2=None,
         plt.vlines( np.array( df2['st'] ),
                     0.0, 
                     np.array( df2['psi2'] ), 
-                    linewidth=3,
+                    linewidth=1,
                     colors='red',
                     alpha=1.0,
                     label='Sparsity-promoting' )
@@ -414,18 +431,18 @@ def plot_psi_st( st, psi1, psi2=None,
                   np.array( df2['psi2']),
                   'o',
                   color='red',
-                  markersize=8)
+                  markersize=2)
         
     # set the bounding box of axes
     ax.spines[:].set_color('black')
-    ax.spines[:].set_linewidth(3)
+    ax.spines[:].set_linewidth(1)
 
     # Save figure
     
     if filename: 
         
-        fig.subplots_adjust(left=0.125, right=0.9375, bottom=0.1667, top=0.9167)
-        plt.savefig( filename )
+        # fig.subplots_adjust(left=0.125, right=0.9375, bottom=0.1667, top=0.9167)
+        plt.savefig( filename, dpi=600 )
         print(f"{filename} is saved.\n")
         
 

@@ -45,19 +45,20 @@ from   vista.tools        import crop_to_rect_map
 from   vista.directories  import create_folder
 from   vista.plot_setting import set_plt_rcparams
 
-set_plt_rcparams(latex=False,fontsize=15)
+set_plt_rcparams(latex=False,fontsize=18)
 mpi = MPIenv()
 
 # =============================================================================
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_adiabatic/'
+casedir  = '/home/wencan/temp/231124/'
 clipbox  = [-100.0, 150.0, 0.0, 2.0, -2.0, 2.0]
 colmap   = 'coolwarm'
 vars     = ['u','v','w','p']
 n_frames = 64
 snaptag  = 'snapshot_X_004.bin'
+outdir   = '/modes_figs_jfm'
 
 # =============================================================================
 
@@ -172,7 +173,7 @@ wallshape  = mpi.comm.bcast( wallshape,  root=0 )
 
 clock = timer(f"dmdpost of x slices:")
 
-os.chdir( create_folder(dirs.pp_dmd + '/modes_figs') )
+os.chdir( create_folder(dirs.pp_dmd + outdir) )
 
 # - loop over each mode
 
@@ -192,7 +193,7 @@ def postprocess_dmd_x( indx ):
                                          j, 8, rescale=[0,0,0,5.2,5.2,5.2])
         dataset = pv.MultiBlock( dataset )
         
-        varname_list = [f'mode_{indx:05d}_{var}_{j:03d}' for var in vars]
+        varname_list = [f'mode_x_{indx:05d}_{var}_{j:03d}' for var in vars]
         range_vars   = [ dataset.get_data_range(varname) for varname in varname_list ]
         ranges       = [ ( min(ranges[k][0],range_vars[k][0]),
                            max(ranges[k][1],range_vars[k][1]) ) 
@@ -216,7 +217,7 @@ def postprocess_dmd_x( indx ):
         
         # set vector [u,v,w]
         
-        vel_vars = [f'mode_{indx:05d}_{var}_{j:03d}' for var in ['u','v','w']]
+        vel_vars = [f'mode_x_{indx:05d}_{var}_{j:03d}' for var in ['u','v','w']]
         
         dataset = add_velocity_vector( vel_vars, dataset )
         
@@ -235,7 +236,7 @@ def postprocess_dmd_x( indx ):
 
         for k, var in enumerate(vars):
         
-            dataset.set_active_scalars(f'mode_{indx:05d}_{var}_{j:03d}')
+            dataset.set_active_scalars(f'mode_x_{indx:05d}_{var}_{j:03d}')
     
             p = pv.Plotter(off_screen=off_screen,window_size=[1920,1080],border=False)
             
@@ -251,10 +252,10 @@ def postprocess_dmd_x( indx ):
                         lighting=False,
                         show_scalar_bar=False)
             
-            if k == 0:
+            # if k == 0:
                 
-                p.add_arrows( dataset.points, dataset['velocity'],
-                              mag=40, color='black')
+            #     p.add_arrows( dataset.points, dataset['velocity'],
+            #                   mag=40, color='black')
                 # p.add_mesh(streamlines.tube(radius=0.01), 
                 #         color='black',
                 #         line_width=0.01)
@@ -269,8 +270,8 @@ def postprocess_dmd_x( indx ):
 
 # --- plot mode shape of each variable
 
-        fig = plt.figure(figsize=(12.8,7.2))
-        fig.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1)
+        fig = plt.figure(figsize=(8.5,5.6))
+        fig.subplots_adjust(left=0.10, right=0.98, top=0.9, bottom=0.12)
         gs  = GridSpec(2,2, figure=fig)
         
         for k, image in enumerate(images):
@@ -353,8 +354,8 @@ if mpi.size == 1:
     
     print("No worker available. Master should do all tasks.")
     
-    for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
-        
+    #for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
+    for i, indx in enumerate( [3301,3357] ):    
         postprocess_dmd_x( indx )
         clock.print_progress( i, len(modes_temp.df_ind['indxes']))
         
