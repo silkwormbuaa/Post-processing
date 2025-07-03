@@ -305,6 +305,7 @@ class Mesh_bloxx:
         
         """
         resort grids in self.grids based on (lx1,ly1,lz1)
+        it is fine to just rename grid.filename
         """
         
         lx1 = [grid.LX[1] for grid in self.grids]
@@ -424,6 +425,34 @@ def Testing():
     pass
 
 # Example usages:
+
+# =============================================================================
+
+# -- shift selected grids in x,y,z direction
+
+    # file_path = '/home/wencanwu/my_simulation/STBLI_herringbone_patch/250702/grid'
+    
+    # x_shift = -11.0625
+    
+    # os.chdir(file_path.split('grid')[0])
+
+    # mesh = Mesh_bloxx(file_path)
+    
+    # num = 0 
+    # for grid in mesh.grids:
+        
+    #     if grid.LY[0] < 0.0:
+            
+    #         print(grid.LX, grid.LY, grid.LZ)
+    #         new_LX = f'{grid.LX[0]+x_shift:.8f}, {grid.LX[1]+x_shift:.8f}'
+    #         print(new_LX)
+    #         grid.variables['LX'] = new_LX
+    #         num += 1
+    
+    # print(f"Number of grids shifted: {num}")
+
+    # mesh.sort_grids()
+    # mesh.save_grid( create_folder('./new_grid') )
 
 # =============================================================================
 
