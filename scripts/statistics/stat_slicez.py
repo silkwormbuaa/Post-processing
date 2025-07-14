@@ -98,6 +98,7 @@ for i, loc in enumerate( locs ):
         # - read statistics data file
 
         S = StatisticData( datafile )
+        S.grid3d = G
 
         with timer("read selected blocks "):
             
