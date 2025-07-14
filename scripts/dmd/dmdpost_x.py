@@ -354,8 +354,8 @@ if mpi.size == 1:
     
     print("No worker available. Master should do all tasks.")
     
-    #for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
-    for i, indx in enumerate( [3301,3357] ):    
+    for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
+#    for i, indx in enumerate( [3305] ):    
         postprocess_dmd_x( indx )
         clock.print_progress( i, len(modes_temp.df_ind['indxes']))
         
