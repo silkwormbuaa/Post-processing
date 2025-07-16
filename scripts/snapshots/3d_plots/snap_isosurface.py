@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = True
+off_screen = False
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -40,6 +40,7 @@ from   vista.tools       import get_filelist
 from   vista.material    import get_visc
 from   vista.directories import create_folder
 from   vista.tools       import crop_border
+from   vista.plane_analy import compute_DS
 
 # - build MPI communication environment
 
@@ -51,14 +52,14 @@ mpi = MPIenv()
 
 casefolder = '/home/wencan/temp/220927'
 
-bbox      = [-30, 999, -1.3, 31.0, -999, 999]
+bbox      = [-30, 999, -1.3, 50.0, -999, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
-vars_out  = ['u','Q_cr','grad_rho_mod','p']
+vars_out  = ['u','Q_cr','grad_rho','grad_rho_mod','p']
 
 dirs      = Directories( casefolder )
 snaps_dir = dirs.snp_dir
 gridfile  = dirs.grid
-outdir    = dirs.pp_snp_3dshock + '/figs'
+outdir    = dirs.pp_snp_3dshock + '/figs_jfm'
 
 # =============================================================================
 
@@ -110,7 +111,7 @@ if highRe:
     grad_rho_limit = 0.2
 else: 
     walldist = 0.019     
-    grad_rho_limit = 0.15
+    grad_rho_limit = 0.10
 
 if roughwall: vars_out += ['mu','wd']
 else:         vars_out += ['mu']
@@ -141,13 +142,15 @@ def plot_isosurface( snapfile ):
 
 # -- generate the vtk dataset
 
-    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3, mode='symmetry' ))
+    dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3, mode='oneside' ))
     sys.stdout.flush()
     point_data = dataset.cell_data_to_point_data().combine()
+    point_data = point_data.clip(normal=[0,1,0], origin=[0,35,0])
 
     point_data['p'] = point_data['p']/params.p_ref
     point_data['u'] = point_data['u']/params.u_ref
-    point_data.set_active_scalars('p')
+    point_data['DS'] = compute_DS( point_data['grad_rho'], min=0.0, max=2.0 )
+    point_data.set_active_scalars('DS')
     pslicez = point_data.slice(normal=[0,0,1], origin=[0,0,-10.3])
     
     sep_bubble = point_data.contour(  [0.0], scalars='u' )
@@ -175,15 +178,23 @@ def plot_isosurface( snapfile ):
     
     p = pv.Plotter(off_screen=off_screen,window_size=[1920,1080])
     
-    cmapp = plt.get_cmap('coolwarm',51)
-    p.add_mesh(pslicez,     opacity=1.0, clim=[1.0,3.5], show_scalar_bar=True, cmap=cmapp)
+    cmapp  = plt.get_cmap('coolwarm',51)
+    cmapds = plt.get_cmap('Greys_r',256)
+    p.add_mesh(pslicez, opacity=1.0, clim=[0.0,0.8], show_scalar_bar=False, cmap=cmapds, lighting=False)
     
     cmapcf = plt.get_cmap('RdBu_r',51)
     p.add_mesh(wallsurface, opacity=1.0, color='gray')
     
-    p.add_mesh(sep_bubble)
-    p.add_mesh(shock_front, color='grey', opacity=0.5)
-    p.add_mesh(vortices, cmap=cmapp, clim=[-0.2,1.0], show_scalar_bar=True)
+    # only show half the shock front
+    sep_bubble = sep_bubble.clip(normal=[0,0,1], origin=[0,0,0.0])
+    sep_bubble = sep_bubble.clip(normal=[0,-1,0], origin=[0.0,-0.52,0.0])
+    p.add_mesh(sep_bubble, show_scalar_bar=False)
+    
+    shock_front = shock_front.clip(normal=[0,0,1], origin=[0,0,0.0])
+    p.add_mesh(shock_front, color='grey', opacity=0.3)
+    
+    vortices = vortices.clip(normal=[0,0,1], origin=[0,0,0.0])
+    p.add_mesh(vortices, cmap=cmapp, clim=[-0.2,1.0], show_scalar_bar=False)
     p.add_axes()    # add a vtk axes widget to the scene
     
 # -- camera setting
@@ -195,6 +206,8 @@ def plot_isosurface( snapfile ):
 # -- save the figure with matplotlib
 
     figname = f"isosurface_{snap3d.itstep:08d}"
+    
+    p.show()
     
     image = p.screenshot(return_img=True)
     image = crop_border(image)

@@ -2535,7 +2535,7 @@ class Snapshot:
             
             px = (g.px[buffl:-buffr]+rescale[0])/rescale[3]
             py = (g.py[buffl:-buffr]+rescale[1])/rescale[4]
-            pz = (g.pz[buffl:-buffr]+rescale[2])/rescale[5]
+            pz = (g.pz[buffl:-buffl]+rescale[2])/rescale[5]
             
             # modify the grid points arrays based on snapshot type
             if self.type == 'block':

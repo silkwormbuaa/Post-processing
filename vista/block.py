@@ -239,7 +239,7 @@ class BlockData:
             if block_type == 'block':
                 bl_clean.g.gx = self.g.gx[buffl:-buffr]
                 bl_clean.g.gy = self.g.gy[buffl:-buffr]
-                bl_clean.g.gz = self.g.gz[buffl:-buffr]
+                bl_clean.g.gz = self.g.gz[buffl:-buffl]
             elif block_type == 'X':
                 bl_clean.g.gy = self.g.gy[buffl:-buffr]
                 bl_clean.g.gz = self.g.gz[buffl:-buffr]
@@ -258,10 +258,10 @@ class BlockData:
             
             Nx = N1 - (buffl+buffr)
             Ny = N2 - (buffl+buffr)
-            Nz = N3 - (buffl+buffr)
+            Nz = N3 - (buffl+buffl)
             
             sol_buff = (self.df.values).T.reshape( n_var, N3, N2, N1 )
-            sol_buff = sol_buff[ :, buffl:-buffr, buffl:-buffr, buffl:-buffr ]
+            sol_buff = sol_buff[ :, buffl:-buffl, buffl:-buffr, buffl:-buffr ]
 
         elif block_type == 'X':
             
