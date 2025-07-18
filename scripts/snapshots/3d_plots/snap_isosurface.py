@@ -142,9 +142,14 @@ def plot_isosurface( snapfile ):
 # -- generate the vtk dataset
 
     dataset = pv.MultiBlock(snap3d.create_vtk_multiblock( vars=vars_out, block_list=block_list, buff=3, mode='symmetry' ))
+    
+    # delete the unneeded variables to save memory
+    itstep = snap3d.itstep
+    itime  = snap3d.itime
+    del snap3d ; gc.collect()
     sys.stdout.flush()
+    
     point_data = dataset.cell_data_to_point_data().combine()
-
     point_data['p'] = point_data['p']/params.p_ref
     point_data['u'] = point_data['u']/params.u_ref
     point_data.set_active_scalars('p')
@@ -194,7 +199,7 @@ def plot_isosurface( snapfile ):
     
 # -- save the figure with matplotlib
 
-    figname = f"isosurface_{snap3d.itstep:08d}"
+    figname = f"isosurface_{itstep:08d}"
     
     image = p.screenshot(return_img=True)
     image = crop_border(image)
@@ -208,7 +213,7 @@ def plot_isosurface( snapfile ):
         img = ax.imshow(image)
         ax.axis('off')
         
-        plt.title(f"time = {snap3d.itime:.2f} ms")
+        plt.title(f"time = {itime:.2f} ms")
         plt.tight_layout()
         plt.savefig(figname + ".png", dpi=300)
         plt.close()
