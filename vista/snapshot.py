@@ -16,6 +16,7 @@ import sys
 
 import numpy             as     np
 import pandas            as     pd
+import pyvista           as     pv
 import tecplot           as     tp
 from   tecplot.constant  import FieldDataType
 from   copy              import deepcopy
@@ -1316,6 +1317,8 @@ class Snapshot:
 # ----- init a slice snapshot 
         
         snap_2d = Snapshot()
+        
+        snap_2d.grid3d = self.grid3d
 
         # Get sliced data from 3d snapshot and fill in 2d snapshot
         
@@ -2667,6 +2670,49 @@ class Snapshot:
         dataset = create_multiblock_dataset( vtk_blocks )
         
         return dataset
+
+
+# ----------------------------------------------------------------------
+# >>> get contour                                             (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/08/04  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+    def get_contour( self, var, value, 
+                     blocklist=None, 
+                     buff=3, 
+                     mode='symmetry',
+                     rescale=[0,0,0,1,1,1] ):
+        
+        """
+        get contour surface/line of a variable at a given value.
+        
+        var       : variable name
+        value     : value of the isosurfaces/isolines
+        blocklist : list of blocks to be considered
+        buff      : number of ghost layers
+        mode      : 'symmetry' or 'oneside'
+        rescale   : rescale the grid points.
+        """
+        
+        dataset = pv.MultiBlock( self.create_vtk_multiblock(
+                                 vars=[var], block_list=blocklist, 
+                                 buff=buff,  mode=mode, 
+                                 rescale=rescale))
+        dataset = dataset.cell_data_to_point_data().combine()
+        
+        contour = dataset.contour( [value], scalars=var )
+        
+        return contour
+
 
 # ----------------------------------------------------------------------
 # >>> Testing section                                           ( -1 )
