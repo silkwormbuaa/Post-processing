@@ -23,23 +23,23 @@ from   vista.directories import Directories
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/241030/'
+casedir   = '/home/wencan/temp/250120/'
 slic_type = 'X'
 
 # locs      = [-14.98,-8.53,-7.33,1.89,8.0]
 #outfiles  = [f'/stat_xslice_{i:03d}.bin' for i in range(len(locs))]
 
-#locs      = [-20.0]
-#outfiles  = ['/stat_xslice_upstream.bin']
+locs = [-20.0]
+locs = np.array(locs) * 5.2 + 50.4
+outfiles  = ['/stat_xslice_upstream.bin']
 
-outfiles   = ['/stat_xslice_pwgradmax.bin']
+# outfiles   = ['/stat_xslice_pwgradmax.bin']
 
 # =============================================================================
 
 os.chdir( casedir)
 dirs = Directories( casedir )
 params = Params( dirs.case_para_file )
-locs = np.array([params.x_pw_grad_max]) * 5.2 + 50.4
 
 grid = GridData( dirs.grid )
 grid.read_grid()

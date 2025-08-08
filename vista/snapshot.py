@@ -1196,7 +1196,7 @@ class Snapshot:
 #
 # ----------------------------------------------------------------------
 
-    def get_slice( self, slic_type, loc:float, buff=3 ):
+    def get_slice( self, slic_type, loc:float, bbox=None, buff=3 ):
         
         """
         slic_type : 'X','Y' or 'Z'
@@ -1226,7 +1226,15 @@ class Snapshot:
             raise ValueError("Please read in grid file first!")
         
         else: grid3d = self.grid3d   
+
+# ----- check if the slice location is within the bounding box
+
+        if bbox is None: 
+            min  = float('-inf')
+            max  = float('inf')
+            bbox = [min,max,min,max,min,max]
         
+        within_bbox_bls = grid3d.select_blockgrids( bbox, mode='within' )
 
 # ----- select the blocks that intersect the plane
         # keep 1. intersected blocks' number  2. indexes of sliced location
@@ -1240,6 +1248,9 @@ class Snapshot:
             
             bl_num = bl_data.num      # block number starts from 1
             grd = grid3d.g[bl_num-1]  # index of grid starts from 0
+            
+            if bl_num not in within_bbox_bls:
+                continue
             
             if slic_type == 'X':
                 
@@ -2689,7 +2700,7 @@ class Snapshot:
     def get_contour( self, var, value, 
                      blocklist=None, 
                      buff=3, 
-                     mode='symmetry',
+                     mode='oneside',
                      rescale=[0,0,0,1,1,1] ):
         
         """
@@ -2707,11 +2718,21 @@ class Snapshot:
                                  vars=[var], block_list=blocklist, 
                                  buff=buff,  mode=mode, 
                                  rescale=rescale))
+        
         dataset = dataset.cell_data_to_point_data().combine()
         
         contour = dataset.contour( [value], scalars=var )
         
-        return contour
+        # # for debug
+        # p = pv.Plotter()
+        # p.add_mesh(contour, color='red', line_width=2, name='contour')
+        # p.show()
+        
+        point_array = np.array(contour.points)
+        contour_df = pd.DataFrame(point_array, columns=['x', 'y', 'z'])
+        contour_df.sort_values(by=['z'], inplace=True)
+        
+        return contour_df.values
 
 
 # ----------------------------------------------------------------------

@@ -21,9 +21,11 @@ source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.grid        import GridData
+from   vista.snapshot    import Snapshot
 from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.params      import Params
+from   vista.tools       import get_filelist
 from   vista.tools       import define_wall_shape
 from   vista.directories import create_folder
 from   vista.plane_analy import pv_interpolate
@@ -37,10 +39,12 @@ plt.rcParams['font.size']           = 30
 def main():
 # =============================================================================
 
-    case_folder = '/home/wencan/temp/220927/'
+    case_folder = '/home/wencan/temp/250120/'
     
-    stat_file   = 'stat_xslice_pwgradmax.bin'
-    outfolder   = 'yz_planes_pwgradmax'
+    stat_file   = 'stat_xslice_upstream.bin'
+    outfolder   = 'yz_planes_upstream'
+    
+    loc         = -20.0 * 5.2 + 50.4
     
     dirs        = Directories( case_folder )
     params      = Params( dirs.case_para_file )
@@ -68,7 +72,7 @@ def main():
 
     grid         = GridData( dirs.grid )
     grid.read_grid()
-    blocklist, _ = grid.select_sliced_blockgrids('X', params.x_pw_grad_max*5.2+50.4, bbox=bbox)
+    blocklist, _ = grid.select_sliced_blockgrids('X', loc, bbox=bbox)
 
     stat_file    = os.path.join(dirs.sup_dir, stat_file)
     stat         = StatisticData(stat_file)
@@ -76,7 +80,14 @@ def main():
     stat.read_statistic(blocklist,vars_in=vars_read)
     stat.match_grid(blocklist, grid, add_to_df=True )
     stat.compute_vars(blocklist,['mach','RS'])
-
+    
+    wdfile = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
+    wdsnap = Snapshot(wdfile)
+    wdsnap.grid3d = grid
+    wdsnap.read_snapshot(block_list=blocklist, var_read=['wd'])
+    wdsnap = wdsnap.get_slice('X',loc, bbox=[-100,20,-2,0.5,0.0,5.2])
+    wall   = wdsnap.get_contour('wd',0.0, blocklist=blocklist)
+    
     # periodic averaging
 
     stat.spanwise_periodic_average( blocklist, vars_output, params.D )
@@ -86,18 +97,18 @@ def main():
 
     # interpolate into a whole cartesian grid
 
-    pz = np.linspace( 0.0, 1.3, 81,  endpoint=True)
-    py = np.linspace(-0.6, 2.4, 201, endpoint=True)
+    pz = np.linspace( 0.0, 5.2, 101,  endpoint=True)
+    py = np.linspace(-0.6, 5.2, 201,  endpoint=True)
     px = np.array([0.0])
     df = pv_interpolate( dataset, vars_output, [px,py,pz] )
     
     os.chdir( create_folder(os.path.join(dirs.pp_statistics, outfolder)) )
     
     for i, var in enumerate(vars_output):
-        output_var_fig( var, df, params, norm[i],  cbar_range[i], cbar_label[i],  D_norm=D_norm, streamline=streamline )
+        output_var_fig( var, df, params, norm[i],  cbar_range[i], cbar_label[i],  wall=wall, D_norm=D_norm, streamline=streamline )
     
 
-def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, D_norm=False, streamline=False):
+def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, wall=None, D_norm=False, streamline=False):
 
     py = np.unique(df['y'])
     pz = np.unique(df['z'])
@@ -121,14 +132,14 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, D_norm=
     else     : 
         length_unit = params.delta_0
         y_bottom    = -0.12
-        x_lim       = [0.0,0.25]
-        y_lim       = [-0.12,0.4]
-        x_ticks     = [0.0,0.125,0.25]
-        x_ticklabels= [r'$0.00$',r'$0.125$',r'$0.25$']
-        y_ticks     = [-0.1,0.0,0.1,0.2,0.3,0.4]
+        x_lim       = [0.0,1.0]
+        y_lim       = [-0.12,1.0]
+        x_ticks     = [0.0,0.5,1.0]
+        x_ticklabels= [r'$0.00$',r'$0.5$',r'$1.0$']
+        y_ticks     = [-0.1,0.0,0.5,1.0]
         x_label     = r'$z/\delta_0$'
         y_label     = r'$y/\delta_0$'
-        loc_tag     = [0.23, 0.35]
+        loc_tag     = [0.8, 0.8]
     
     ywall = define_wall_shape(pz, casecode=params.casecode, write=False)/length_unit
     z     = np.array( df['z']    ).reshape( (len(py),len(pz)) )/length_unit
@@ -136,8 +147,8 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, D_norm=
 
     # visualization
 
-    fig = plt.figure(figsize=(8,6))
-    ax  = fig.add_axes([0.1,0.2,0.95,0.7])
+    fig = plt.figure(figsize=(10,6))
+    ax  = fig.add_axes([0.1,0.2,0.90,0.7])
 
     cbar_levels = np.linspace( cbar_range[0], cbar_range[1], 51)
     cbar_ticks  = np.linspace( cbar_range[0], cbar_range[1], 5)
@@ -151,7 +162,9 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, D_norm=
         ax.streamplot(z,y, w, v, color='black', linewidth=0.5, density=1.0)
         #ax.quiver(z[::4,::4], y[::4,::4], w[::4,::4], v[::4,::4], color='black', scale=100)
 
-    ax.fill_between( pz/length_unit, y_bottom, y2=ywall, color='gray', zorder=10 )
+#    ax.fill_between( pz/length_unit, y_bottom, y2=ywall, color='gray', zorder=10 )
+    ax.fill_between( wall[:,2]/length_unit, y_bottom, y2=wall[:,1]/length_unit, color='gray', zorder=10 )
+#    ax.plot( wall[:,2]/length_unit, wall[:,1]/length_unit, zorder=10 )
     ax.set_aspect('equal')
 
     cbar = plt.colorbar( cs, 
