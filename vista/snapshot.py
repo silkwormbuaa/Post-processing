@@ -103,7 +103,8 @@ class Snapshot:
         self.pos_var_start = []
   
         # Characteristics
-  
+
+        self.hformat      = 0
         self.kind          = 4
         self.itstep        = 0
         self.itstep_check  = -1
@@ -386,155 +387,170 @@ class Snapshot:
         sfl = 8
   
         # Header format
-  
-        hformat = read_int_bin( file.read(sin), sin )
+        self.hformat = read_int_bin( file.read(sin), sin )
   
         # Floating point precision format
-  
-        kind    = read_int_bin( file.read(sin), sin )
-    
+        self.kind    = read_int_bin( file.read(sin), sin )
+        
         # Just in case
-  
-        if kind != 4 and kind != 8: kind = 4
+        if self.kind != 4 and self.kind != 8: self.kind = 4
   
         # Time step
-  
-        itstep  = read_int_bin( file.read(sin), sin )
+        self.itstep  = read_int_bin( file.read(sin), sin )
   
         # Number of species
+        self.nspec   = read_int_bin( file.read(sin), sin )
+        
+        if self.hformat > 1:
+            self.nscalars = read_int_bin( file.read(sin), sin )
+            self.header_size += 5*sin
+        else: 
+            self.nscalars = 0
+            self.header_size += 4*sin
   
-        nspec   = read_int_bin( file.read(sin), sin )
-  
-        self.header_size += 4*sin
-
         # Simulation time
-  
-        itime   = read_flt_bin( file.read(sfl), sfl )
+        self.itime   = read_flt_bin( file.read(sfl), sfl )
   
         self.header_size += sfl
   
         # Content
+        # Read logicals
+        n_log = 8 if self.type == 'block' else 10
+        if self.hformat  > 1: n_log += 2
   
-        buf_log = read_log_bin( file.read(10*slg), slg )
-  
-        # Assign to class variables
-  
-        self.hformat       = hformat
-        self.kind          = kind
-        self.itstep        = itstep
-        self.itime         = itime
-        self.n_species     = nspec
+        buf_log = read_log_bin( file.read(n_log*slg), slg )
   
         self.snap_lean     = buf_log[0]
         self.compressible  = buf_log[1]
-        self.snap_with_gx  = buf_log[2]
-        self.snap_with_tp  = buf_log[3]
-        self.snap_with_vp  = buf_log[4]
-        self.snap_with_cp  = buf_log[5]
-        self.snap_with_mu  = buf_log[6]
-
-#        if not self.snap_lean   : self.snap_lean     = True
-#  
-#        if not self.compressible: self.compressible  = True
-#  
-#        if not self.snap_with_gx: self.snap_with_gx  = True
-#  
-#        if not self.snap_with_tp: self.snap_with_tp  = True
+        
+        if self.hformat > 1:
+            self.mpp_state_TTV = buf_log[2]
+            self.pressure_eq   = buf_log[3]
+            a = 2
+        else:
+            self.mpp_state_TTV = False
+            self.pressure_eq   = False
+            a = 0
+        
+        self.snap_with_gx  = buf_log[a+2]
+        self.snap_with_tp  = buf_log[a+3]
+        self.snap_with_vp  = buf_log[a+4]
+        self.snap_with_cp  = buf_log[a+5]
+        self.snap_with_mu  = buf_log[a+6]
 
         # Block-snapshots
-  
         if self.type == 'block':
-  
-            self.snap_with_wd  = buf_log[7]
-  
-            self.header_size += 8*slg
+            self.snap_with_cf  = False
+            self.snap_with_wd  = buf_log[a+7]
+            self.snap_with_bg  = False
   
         # Slice-snapshots
-  
         else:
+            self.snap_with_cf  = buf_log[a+7]
+            self.snap_with_wd  = buf_log[a+8]
+            self.snap_with_bg  = buf_log[a+9]
   
-            self.snap_with_cf  = buf_log[7]
-            self.snap_with_wd  = buf_log[8]
-            self.snap_with_bg  = buf_log[9]
-  
-            self.header_size += 10*slg
-  
+        self.header_size += n_log*slg
         
         # Count variables
   
-        if self.snap_lean: 
-            
+        if self.compressible:
+            if self.snap_lean: 
+                self.n_var += 3
+                self.vars_name += ['u', 'v', 'w']
+            else: 
+                self.n_var += 5
+                self.vars_name += ['rhou', 'rhov', 'rhow', 'rho', 'rhoE']
+                if self.mpp_state_TTV:
+                    self.n_var += 1
+                    self.vars_name += ['rhoEV']
+        else:
             self.n_var += 3
             self.vars_name += ['u', 'v', 'w']
   
-        else: 
-            
-            self.n_var += 5
-            self.vars_name += ['u', 'v', 'w', 'xx', 'xx']
-            
-  
+        # passive scalars
+        if self.nscalars > 0:
+            self.n_var += self.nscalars
+            for i in range( self.nscalars ):
+                self.vars_name.extend( [ f"rhoC{'0'[:-len(str(i+1))]}{i+1}" ])
+        
+        # species
+        if self.nspec > 1:
+            self.n_var += self.nspec
+            for i in range( self.nspec ):
+                self.vars_name.extend( [ f"rhoY{'0'[:-len(str(i+1))]}{i+1}" ])
+
+        # temperature, pressure
         if self.snap_with_tp: 
-            
             self.n_var += 2
             self.vars_name += ['T', 'p']
             
-  
+        # vapor
         if self.snap_with_vp: 
-            
             self.n_var += 1
-            self.vars_name += ['vapor']
+            self.vars_name += ['vp']
             
-            
+        # cp & gamma
         if self.snap_with_cp: 
-            
             self.n_var += 2
-            self.vars_name += ['cappa', 'cp']
+            self.vars_name += ['gamma', 'cp']
             
-  
+        # viscosity, thermal conductivity, diffusivity
         if self.snap_with_mu: 
-            
-            self.n_var += 1
-            self.vars_name += ['mu']
-        
-        
-        # Special case - skin-friction
+            self.n_var += 1 + self.nscalars
+            visc = 'mu' if self.compressible else 'nu'; self.vars_name += [visc]
+            if self.compressible:
+                self.n_var += 1
+                self.vars_name += ['k']    
+            if self.nscalars > 0:
+                for i in range( self.nscalars ):
+                    self.vars_name.extend( [ f"diff_sc{'0'[:-len(str(i+1))]}{i+1}" ])
+            if self.nspec > 1:
+                self.n_var += self.nspec
+                for i in range( self.nspec ):
+                    self.vars_name.extend( [ f"diff_sp{'0'[:-len(str(i+1))]}{i+1}" ])
+                    
+        # skin-friction
   
         if self.snap_with_cf and self.type == 'slice':
-  
             if self.slic_type == 'W': 
-                
                 self.n_var += 1
                 self.vars_name += ['cf']
-            
-            
+        
+        # wall distance          
         if self.snap_with_wd: 
-            
             self.n_var += 1
             self.vars_name += ['wd']
             
-
+        # derivatives for bi-global stability analysis on 2D slices
+        if self.type != 'block' and self.snap_with_bg:
+            # probably update in the future
+            pass
+        
         # Inform user
-  
         if self.verbose:
   
             print( '' )
             print( 'Current snapshot: ...' + self.dir[-50:] )
             print( ' - File size is %d Mb (%d B)'%(self.fsize/(1000000),self.fsize) )
+            print( ' - hformat:= %d' %(self.hformat) )
             print( ' - Kind   := %d' %(self.kind  ) )
             print( ' - Fields := %d' %(self.n_var) )
             print( ' - Time   := %.4e'%(self.itime ) )
             print( ' - Step   := %d' %(self.itstep) )
-            print( ' - lean   := %d' %(self.snap_lean) )
-            print( ' - compressible := %d' %(self.compressible) )
-            print( ' - gx     := %d' %(self.snap_with_gx) )
-            print( ' - tp     := %d' %(self.snap_with_tp) )
-            print( ' - vp     := %d' %(self.snap_with_vp) )
-            print( ' - cp     := %d' %(self.snap_with_cp) )
-            print( ' - mu     := %d' %(self.snap_with_mu) )
-            print( ' - wd     := %d' %(self.snap_with_wd) )
-            print( ' - Cf     := %d' %(self.snap_with_cf) )
-            print( ' - n_var  := %d' %(self.n_var) )
-   
+            print( 'Flags     :')
+            print(f" - lean         :={'yes' if self.snap_lean     else 'no' }")
+            print(f" - compressible :={'yes' if self.compressible  else 'no' }")
+            print(f" - mpp_state_TTV:={'yes' if self.mpp_state_TTV else 'no' }")
+            print(f" - pressure_eq  :={'yes' if self.pressure_eq   else 'no' }")
+            print(f" - gx           :={'yes' if self.snap_with_gx  else 'no' }")
+            print(f" - tp           :={'yes' if self.snap_with_tp  else 'no' }")
+            print(f" - vp           :={'yes' if self.snap_with_vp  else 'no' }")
+            print(f" - cp           :={'yes' if self.snap_with_cp  else 'no' }")
+            print(f" - mu           :={'yes' if self.snap_with_mu  else 'no' }")
+            print(f" - wd           :={'yes' if self.snap_with_wd  else 'no' }")
+            print(f" - Cf           :={'yes' if self.snap_with_cf  else 'no' }")
+            print(f" - bg           :={'yes' if self.snap_with_bg  else 'no' }")
             print( '' ); sys.stdout.flush()
           
 
@@ -2535,6 +2551,12 @@ class Snapshot:
         if vars is None:
             vars = self.snap_cleandata[0].df.columns.tolist()
             
+# ----- specify the data type of the variables
+
+        if   self.kind == 4: data_type = np.float32
+        elif self.kind == 8: data_type = np.float64
+        else: raise ValueError("Unsupported data type for vtk file, only float32 and float64 are supported.")
+
 # ----- setup vtk file
         
         vtk_blocks = list()
@@ -2564,8 +2586,8 @@ class Snapshot:
             
             for var in vars:
                 
-                var_data = np.array(snap_bl.df[var])
-                
+                var_data = np.array(snap_bl.df[var], dtype=data_type)
+                                
                 if len(var_data) != snap_bl.npx*snap_bl.npy*snap_bl.npz:
                     raise ValueError(f"Data length not match for variable {var} in block {bl_num}.")
                 elif len(var_data) == 0:
