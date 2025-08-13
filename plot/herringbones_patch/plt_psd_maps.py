@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 '''
 @File    :   plt_psd_maps.py
-@Time    :   2025/02/13 
+@Time    :   2025/08/11 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
@@ -31,28 +31,26 @@ plt.rcParams['font.size']   = 30
 outpath = '/media/wencan/Expansion/temp/DataPost/cdriblets/psd'
 
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencan/Expansion/temp/250120/postprocess/probes/psd_valley'
-datapath2 = '/media/wencan/Expansion/temp/250218/postprocess/probes/psd_valley'
-datapath3 = '/media/wencan/Expansion/temp/250304/postprocess/probes/psd_valley'
-datapaths = [datapath0, datapath1, datapath2, datapath3]
+datapath1 = '/media/wencan/Expansion/temp/250710/postprocess/probes/psd_valley'
+datapaths = [datapath0, datapath1]
 
 # separation range in normalized unit
-x_separs = [-8.42  ,-13.10, -7.28, -8.99]
-x_reatts = [1.06795,3.86  , 1.82 , 1.57 ]
-x_ppmaxs = [-7.3333,-13.95, -8.58, -8.01]
+x_separs = [-8.42,-7.94]
+x_reatts = [1.07, 1.74]
+x_ppmaxs = [-7.33,-9.87]
 
 # labels
-label    = ['lowRe_smooth', 'R1', 'R2', 'R3']
+label    = ['lowRe_smooth', 'cdriblet']
 
 # subplots position and size
 
-fig       = plt.figure( figsize=(15, 20) )
-gs        = GridSpec(4,10)
-ax_range  = [0,0,0,0]
+fig       = plt.figure( figsize=(15, 18) )
+gs        = GridSpec(2,10)
+ax_range  = [0,0]
 colornorm = Normalize( vmin=0, vmax=0.3 )
 axs       = list()
 
-for i in range(4):
+for i in range(2):
     
     psdfilelist = get_filelist( datapaths[i] )
     
@@ -141,4 +139,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'psd_herringbone_all.png' )
+plt.savefig( 'psd_herringbone_patch_valley.png' )

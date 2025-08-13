@@ -190,10 +190,10 @@ with timer("plotting"):
                           cbar_ticks=cbar_ticks,
                           label=casecode)
     
-    cbar_levels = np.linspace(0.020,0.090,36)
-    cbar_ticks  = np.linspace(0.020,0.090,8)
+    cbar_levels = np.linspace(0.020,0.120,36)
+    cbar_ticks  = np.linspace(0.020,0.120,8)
     plot_wall_projection( xx, zz, p_fluc/p_ref,
-                          separation="separationline_xz.pkl", 
+#                          separation="separationline_xz.pkl", 
                           filename='pressure_fluc',
                           cbar_label=r"$\sqrt{\langle p'p'\rangle}/p_{\infty}$",
                           cbar_levels=cbar_levels,

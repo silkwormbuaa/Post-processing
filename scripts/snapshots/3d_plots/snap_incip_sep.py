@@ -49,8 +49,8 @@ mpi = MPIenv()
 # option
 # =============================================================================
 
-casedir   = '/home/wencan/temp/241030/'
-bbox      = [-35.0, 40.0, -1.3, 20, -999.0, 999.0]
+casedir   = '/home/wencan/temp/250710/'
+bbox      = [-17.0, 61.0, -1.3, 23, -999.0, 999.0]
 vars_in   = ['u','p','T']
 vars_out  = ['u','p','T']
 #gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
@@ -88,6 +88,7 @@ if mpi.rank == 0:
 
     if roughwall:
         snapwd = Snapshot( get_filelist(dirs.wall_dist, 'snapshot.bin')[0] )
+        snapwd.verbose = True
         snapwd.read_snapshot( block_list=blocklist, var_read=['wd'] )
         print(f"Read in wall distance data from snapshot_{snapwd.itstep}.\n")
 
