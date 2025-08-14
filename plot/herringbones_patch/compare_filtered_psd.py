@@ -86,7 +86,7 @@ def plot_style():
                     length=10,
                     width=1)
 
-    ax.set_xlim([-15,10])
+    ax.set_xlim([-20,10])
     ax.set_ylim([0.00,0.09])
     ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
     ax.tick_params(axis='x', pad=15)

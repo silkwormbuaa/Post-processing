@@ -44,8 +44,8 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-casepath = '/home/wencan/temp/241030' 
-bbox     = [ -30.0, 108.0, -1.3, 0.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
+casepath = '/home/wencan/temp/250710' 
+bbox     = [ -17.0, 120.0, -1.3, 2.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
 
 # =============================================================================
 # preparation
@@ -196,7 +196,7 @@ for i, snap_file in enumerate(snapfiles):
     save_isolines( xx, zz, fric, 0.0, f"sep_line_{itstep:08d}.pkl")
 
     figname = f'cf_{itstep:08d}.png'
-    cbar_levels = np.linspace(-6.0,6.0,41)
+    cbar_levels = np.linspace(-6.0,6.0,81)
     cbar_ticks  = np.linspace(-6.0,6.0,5)
     plot_wall_projection( xx, zz, fric/dyn_p*1000.0, 
                           separation=f"sep_line_{itstep:08d}.pkl",
@@ -211,7 +211,7 @@ for i, snap_file in enumerate(snapfiles):
 
     os.chdir( outpath_p )
     
-    cbar_levels = np.linspace(0.8,2.4,41)
+    cbar_levels = np.linspace(0.8,2.4,81)
     cbar_ticks  = np.linspace(0.8,2.4,5)
     plot_wall_projection( xx, zz, p/p_ref,
                           filename = f'p_{itstep:08d}.png',
@@ -223,7 +223,7 @@ for i, snap_file in enumerate(snapfiles):
 
     os.chdir( outpath_pf )
 
-    cbar_levels = np.linspace(-0.4,0.4,41)
+    cbar_levels = np.linspace(-0.4,0.4,81)
     cbar_ticks  = np.linspace(-0.4,0.4,5)
     plot_wall_projection( xx, zz, p_fluc/p_ref,
                           filename = f'p_fluc_{itstep:08d}.png',
