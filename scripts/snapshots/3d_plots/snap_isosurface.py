@@ -40,6 +40,7 @@ from   vista.tools       import get_filelist
 from   vista.material    import get_visc
 from   vista.directories import create_folder
 from   vista.tools       import crop_border
+from   vista.plot_setting import cpos_callback
 
 # - build MPI communication environment
 
@@ -49,9 +50,9 @@ mpi = MPIenv()
 # option 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/220927'
+casefolder = '/home/wencan/temp/250710'
 
-bbox      = [-30, 999, -1.3, 31.0, -999, 999]
+bbox      = [-58.0, 999, -1.3, 31.0, -999, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','grad_rho_mod','p']
 
@@ -166,9 +167,9 @@ def plot_isosurface( snapfile ):
     else:
         wallsurface = point_data.slice( normal=[0.0,1.0,0.0], origin=[0.0,walldist,0.0] )
 
-    friction    = wallsurface['mu']*wallsurface['u']*params.u_ref/walldist
-    wallsurface['cf'] = friction/p_dyn
-    wallsurface.set_active_scalars('cf')
+#    friction    = wallsurface['mu']*wallsurface['u']*params.u_ref/walldist
+#    wallsurface['cf'] = friction/p_dyn
+#    wallsurface.set_active_scalars('cf')
 
 # -- plot
 
@@ -184,7 +185,7 @@ def plot_isosurface( snapfile ):
     p.add_mesh(pslicez,     opacity=1.0, clim=[1.0,3.5], show_scalar_bar=True, cmap=cmapp)
     
     cmapcf = plt.get_cmap('RdBu_r',51)
-    p.add_mesh(wallsurface, opacity=1.0, color='gray')
+    p.add_mesh(wallsurface, opacity=1.0, color='gray', lighting=True )
     
     p.add_mesh(sep_bubble)
     p.add_mesh(shock_front, color='grey', opacity=0.5)
@@ -193,9 +194,12 @@ def plot_isosurface( snapfile ):
     
 # -- camera setting
 
-    p.view_vector([0,0,0],viewup=[0.19,0.98,-0.18])
-    p.camera.position = (-100,61,100)
-    p.camera.focal_point = (37.8,8.8,-12.3)
+    p.view_vector([0,0,0],viewup=[0.39,0.90,-0.20])
+    p.camera.position = (-120,50,25)
+    p.camera.focal_point = (20,-18,-5)
+    
+    # cpos_callback( p )
+    # p.show()
     
 # -- save the figure with matplotlib
 
@@ -222,7 +226,7 @@ def plot_isosurface( snapfile ):
     
 # - print the progress
     
-    del snap3d, dataset, p
+    del dataset, p
     gc.collect()
 
 

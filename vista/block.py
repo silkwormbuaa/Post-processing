@@ -656,7 +656,7 @@ class SnapBlock(BlockData):
         """
         file         : opened file object
         block_list   : list of blocks's numbers
-        n_var       : number vars in the stored blocks
+        n_var        : number vars in the stored blocks
         vars         : list of selected variable name strings
         snap_with_gx : if contain grids
         type         : snapshot type, 'block' or 'slice'

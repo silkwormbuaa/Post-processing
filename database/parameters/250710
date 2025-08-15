@@ -2,7 +2,7 @@
 
 casecode = cdriblet_2
 tag      = $\mathcal{CD}2$
-roughwall = False
+roughwall = True
 
 # Flow setup parameters
 
