@@ -1,241 +1,119 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   slice_3dsnapshot.py
+@File    :   slice_3dsnapshot_z.py
 @Time    :   2023/08/01 
 @Author  :   Wencan WU 
-@Version :   1.0
+@Version :   2.0
 @Email   :   w.wu-3@tudelft.nl
-@Desc    :   slice_3dsnapshot -> interpolate_zslice -> zslice_from_pkl
+@Desc    :   slice 3d snapshot write out 2d slices
 '''
 
 
 import os
 import sys
-import gc
 import time
-from   mpi4py            import MPI
+import numpy             as     np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
-from   vista.snapshot    import Snapshot
+from   vista.mpi         import MPIenv
 from   vista.grid        import GridData
 from   vista.timer       import timer
 from   vista.tools       import get_filelist
-from   vista.tools       import distribute_mpi_work
-from   vista.log         import Logger
-sys.stdout = Logger( os.path.basename(__file__) )
+from   vista.snapshot    import Snapshot
+from   vista.directories import Directories
 
+# =============================================================================
+# - build MPI communication environment
+
+mpi = MPIenv()
 
 # =============================================================================
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-n_procs = comm.Get_size()
+casedir   = '/home/wencan/temp/250710'
+slic_type = 'Z'
+locs      = [2.6]
+file_tags = ['Z_002']
+bbox      = [-58.0,125.0,-1.3,50.0,-11.0,11.0]
 
+# =============================================================================
 
-slic_type   = 'Y'
-loc         = 10.4
-output_file = '/snapshot_Y_003.bin'
+dirs      = Directories( casedir )
 
-# --- Root gets all the files and broadcast to other processors
+# allocate variables that will be broadcasted to all workers
 
-filelist = None
+grid3d    = None
+snapfiles = None
 
-if rank == 0:
-    filelist = get_filelist( '.', 'snapshot.bin' )
+# root does the preparation
 
-filelist = comm.bcast( filelist, root=0 )
-
-
-# --- Distribute the tasks (evenly as much as possible)
+if mpi.is_root:
     
-n_snaps = len( filelist )
-
-i_start, i_end = distribute_mpi_work(n_snaps, n_procs, rank)
-
-filelist = filelist[i_start:i_end]
-
-print(f"I am processor {rank}, I take below tasks:")
-
-for file in filelist:
+    # get all snapshot files
     
-    print(file)
+    snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
+    print(f"I am root, just found {len(snapfiles)} snapshot files")
+    
+    grid3d = GridData( dirs.grid )
+    grid3d.read_grid()
+    
+grid3d    = mpi.comm.bcast( grid3d, root=0 )
+snapfiles = mpi.comm.bcast( snapfiles, root=0 )
 
-print("=========="); sys.stdout.flush()
+clock = timer(f"slice 3d snapshot in case {casedir}:")
 
-comm.barrier()
+# =============================================================================
+# - action on one snapshot file
 
-# Root read in grid file and broadcast to other processors
-
-grid3d = None
-block_list = None
-
-# ----- check if the grid file is available and read in grid then broadcast
-
-if rank == 0:
+def slice_snapshot( snapfile ):
+    
+    # loop over all x locations
+    
+    for i, loc in enumerate(locs):
         
-    if not os.path.exists('inca_grid.bin'):
-        raise FileNotFoundError("Please check inca_grid.bin!")
+        outfile = os.path.dirname( snapfile ) + f"/snapshot_{file_tags[i]}.bin"
+        
+        blocklist, _ = grid3d.select_sliced_blockgrids( slic_type, loc, bbox )
+        
+        snap = Snapshot( snapfile )
+        snap.read_snapshot( blocklist )
+        snap.grid3d = grid3d
+        snap2d = snap.get_slice( slic_type, loc )
+        snap2d.write_snapshot( outfile )
+        
+        print(f"Finish writing slice {snap2d.itstep:08d}_{i:03d}.")
+        
+        del snap, snap2d        
+        
+
+# =============================================================================
+
+if mpi.size == 1:
     
+    print("No worker available. Master should do all tasks.")
+    
+    for i, snapfile in enumerate(snapfiles):
+        
+        slice_snapshot( snapfile )
+        clock.print_progress( i, len(snapfiles) )
+    
+else:
+    if mpi.rank == 0:
+        mpi.master_distribute( snapfiles )
     else:
-        
-        grid3d = GridData('inca_grid.bin')
-        grid3d.verbose = False
-        grid3d.read_grid()
-        block_list, indx_slic = grid3d.select_sliced_blockgrids(slic_type,loc)
-        
-    sys.stdout.flush()
-    
-grid3d = comm.bcast( grid3d, root=0 )
-block_list = comm.bcast( block_list, root=0 )
-
-
-# ----- Slice snapshot one by one
-
-i = 0
-
-slice_size = None
-
-for snapshot_file in filelist:
-    
-    # check if the snapshot slice already exists
-    # if exists and slice file is complete(size equals), do not do slice
-    
-    do_slice = True
-    
-    slicefile = os.path.dirname(snapshot_file)+output_file
-    
-    if i > 0:
-    
-        file_is_there = os.path.exists(slicefile)
-        
-        if file_is_there: 
+        while True:
+            task_index = mpi.worker_receive()
             
-            slice_size = os.stat( slicefile ).st_size
-            
-            if slice_size == size_std: do_slice = False
+            if task_index is None: break
+            else: 
+                slice_snapshot( snapfiles[task_index] )
+                clock.print_progress( task_index, len(snapfiles), rank=mpi.rank )
 
-    if do_slice:
-    
-        with timer("reading one snapshot and writing out slice"):
+mpi.barrier()
 
-            # read in snapshot
-            
-            snapshot3d = Snapshot( snapshot_file )
-            
-            snapshot3d.verbose = False
-            
-            snapshot3d.read_snapshot( block_list )
-            
-            # write the slice
-        
-            snapshot3d.grid3d = grid3d
-            
-            snapshot2d = snapshot3d.get_slice( slic_type, loc )
-                    
-#            print(f"writing {slicefile}")
-            
-            snapshot2d.write_snapshot( slicefile )
-            
-            print(f"finish writing slice {snapshot2d.itstep}.")
-            
-            del snapshot3d,snapshot2d
-            gc.collect()
-    
-    if i == 0: size_std = os.stat( slicefile ).st_size
-    
-    i += 1
-    
-    print(f"Rank {rank } progress: {i/len(filelist)*100:10.2f}%.",end='')
-    print(f"  Finish file {snapshot_file[-30:]}")
-        
+if mpi.rank == 0:
 
-# print out the time finishing the job
-
-print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
-    
-sys.stdout.flush()     
-
-
-# get a slice from a known folder
-
-""" 
-snapdir = '/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block'
-
-os.chdir( snapdir )
-
-snapshot3d = Snapshot( 'snapshot.bin' )
-
-snapshot3d.verbose = True
-
-with timer("\nread 3d snapshot and get snapshot struct"):
-    
-    snapshot3d.get_snapshot_struct()
-
-# write snapshot
-
-with timer("\nwrite 3d snapshot"):
-    
-    snapshot3d.write_snapshot("snapshot3d.bin")
-
-# get slice of snapshot3d
-
-with timer("\ndo slice"):
-    
-    snapshot3d.grid3d = GridData('inca_grid.bin')
-    snapshot3d.grid3d.verbose = True
-    snapshot3d.grid3d.read_grid()
-        
-    snapshot2d = snapshot3d.get_slice( 'Y', 0.0 )
-    
-    snapshot2d.verbose = True
-    
-# write snapshots
-    
-with timer("\nwrite 2d snapshot"):
-    
-    snapshot2d.write_snapshot("snapshot2d.bin") 
- """
-
-"""
-# just show a slice that already there; !! only applicable to uniform mesh.
-
-#os.chdir("/home/wencanwu/my_simulation/temp/220926_lowRe/snapshots/snapshot_00452401/snapshot_block")
-
-with timer("\nread in new snapshot and show"):
-    
-    snapshot2d_new = Snapshot("snapshot_Y_003.bin")
-    
-    snapshot2d_new.verbose = False
-    
-    snapshot2d_new.read_snapshot()
-    
-    snapshot2d_new.drop_ghost( buff=3 )
-    
-    snapshot2d_new.assemble_block()
-    
-    print(snapshot2d_new.df)
-    
-    x = np.array( snapshot2d_new.df['x'] )
-    
-    z = np.array( snapshot2d_new.df['z'] )
-    
-    p = np.array( snapshot2d_new.df['p'] )
-
-    N_x = len(np.unique(x))
-    N_z = len(np.unique(z))
-    
-    x = x.reshape(N_z,N_x)
-    z = z.reshape(N_z,N_x)
-    p = p.reshape(N_z,N_x)
-    
-    fig, ax = plt.subplots()
-    contour = ax.pcolor(x,z,p)
-    ax.set_title('pressure')
-    plt.show()
-"""
-
-
-
+    print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    sys.stdout.flush()     

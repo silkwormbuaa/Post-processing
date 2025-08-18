@@ -104,15 +104,18 @@ class Snapshot:
   
         # Characteristics
 
-        self.hformat      = 0
+        self.hformat       = 0
         self.kind          = 4
         self.itstep        = 0
         self.itstep_check  = -1
         self.itime         = 0.0
-        self.n_species     = 0
+        self.nspec         = 0
+        self.nscalars      = 0
   
         self.snap_lean     = False
         self.compressible  = False
+        self.mpp_state_TTV = False
+        self.pressure_eq   = False
         self.snap_with_gx  = False
         self.snap_with_tp  = False
         self.snap_with_vp  = False
@@ -1399,7 +1402,7 @@ class Snapshot:
         snap_2d.hformat      = self.hformat
         snap_2d.kind         = self.kind
         snap_2d.itstep       = self.itstep
-        snap_2d.n_species    = self.n_species
+        snap_2d.nspec        = self.nspec
         snap_2d.itime        = self.itime
         snap_2d.snap_lean    = self.snap_lean
         snap_2d.compressible = self.compressible
@@ -2095,23 +2098,24 @@ class Snapshot:
             pos = 0
             
             # header format
-            
             write_int_bin( self.hformat, f, sin )
             
             # floating point precision format
-            
             write_int_bin( self.kind, f, sin )
             
             # time step 
-            
             write_int_bin( self.itstep, f, sin )
             
             # number of species
-            
-            write_int_bin( self.n_species, f, sin )
+            write_int_bin( self.nspec, f, sin )
             
             pos += 4*sin
 
+            # check hformat
+            if self.hformat > 1:
+                write_int_bin( self.nscalars, f, sin )
+                pos += sin
+            
             # simulation time
             
             write_flt_bin( self.itime, f, sfl )
@@ -2120,39 +2124,30 @@ class Snapshot:
             
             # compose logicals
             
-            if self.type == 'block':
-                
-                buf_log = [ self.snap_lean,
-                            self.compressible,
-                            self.snap_with_gx,
-                            self.snap_with_tp,
-                            self.snap_with_vp,
-                            self.snap_with_cp,
-                            self.snap_with_mu,
-                            self.snap_with_wd ]
-                
-                write_log_bin( buf_log, f, slg )
-                
-                pos += slg*8
+            buf_log = [ self.snap_lean,
+                        self.compressible]
             
-            elif self.type == 'slice':
-                
-                buf_log = [ self.snap_lean,
-                            self.compressible,
-                            self.snap_with_gx,
-                            self.snap_with_tp,
-                            self.snap_with_vp,
-                            self.snap_with_cp,
-                            self.snap_with_mu,
-                            self.snap_with_cf,
-                            self.snap_with_wd,
-                            self.snap_with_bg ]
-
-                write_log_bin( buf_log, f, slg )
-                
-                pos += slg*10
-                                
-            else: raise ValueError("snapshot type not supported.")
+            if self.hformat > 1:
+                buf_log += [ self.mpp_state_TTV,
+                             self.pressure_eq   ]
+            
+            buf_log += [ self.snap_with_gx,
+                         self.snap_with_tp,
+                         self.snap_with_vp,
+                         self.snap_with_cp,
+                         self.snap_with_mu ]
+            
+            if self.type == 'block':
+                buf_log += [ self.snap_with_wd ]
+            
+            else:
+                buf_log += [ self.snap_with_cf,
+                             self.snap_with_wd,
+                             self.snap_with_bg ]
+            
+            write_log_bin( buf_log, f, slg )
+            
+            pos += slg*len( buf_log )
             
             if verbose: 
                 print(f"Finish writing snapshot header, pos = {pos}.")
