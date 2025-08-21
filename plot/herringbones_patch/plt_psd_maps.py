@@ -28,29 +28,30 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 30
 
-outpath = '/media/wencan/Expansion/temp/DataPost/cdriblets/psd'
+outpath = '/media/wencan/Expansion/temp/DataPost/cdriblets/psd/psd_without_normalization/'
 
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
-datapath1 = '/media/wencan/Expansion/temp/250710/postprocess/probes/psd_valley'
-datapaths = [datapath0, datapath1]
+datapath1 = '/media/wencan/Expansion/temp/250710/postprocess/probes/psd_ridge'
+datapath2 = '/media/wencan/Expansion/temp/250710/postprocess/probes/psd_valley'
+datapaths = [datapath0, datapath1, datapath2]
 
 # separation range in normalized unit
-x_separs = [-8.42,-7.94]
-x_reatts = [1.07, 1.74]
-x_ppmaxs = [-7.33,-9.87]
+x_separs = [-8.42,-7.94,-7.94]
+x_reatts = [1.07, 1.74 ,1.74 ]
+x_ppmaxs = [-7.33,-9.87,-9.87]
 
 # labels
-label    = ['lowRe_smooth', 'cdriblet']
+label    = [r'$\mathcal{S}$', r'$\mathcal{D}$', r'$\mathcal{C}$']
 
 # subplots position and size
 
-fig       = plt.figure( figsize=(15, 18) )
-gs        = GridSpec(2,10)
-ax_range  = [0,0]
-colornorm = Normalize( vmin=0, vmax=0.3 )
+fig       = plt.figure( figsize=(15, 15) )
+gs        = GridSpec(3,10)
+ax_range  = [0,0,0]
+colornorm = Normalize( vmin=0, vmax=3*10**6 )
 axs       = list()
 
-for i in range(2):
+for i in range(3):
     
     psdfilelist = get_filelist( datapaths[i] )
     
@@ -64,7 +65,8 @@ for i in range(2):
         probe.read_psd( psdfile )
         st_probe = np.array( probe.psd_df['freq'] )*5.2/507.0
         x_probe  = [(probe.xyz[0]-50.4)/5.2]*len(st_probe)
-        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
+#        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
+        pmpsd_probe = np.array( probe.psd_df['psd_p_fluc'] )*np.array(probe.psd_df['freq'])
 
         x.append( x_probe )
         st.append( st_probe )
@@ -82,11 +84,11 @@ for i in range(2):
     
     ax.plot([x_separs[i], x_separs[i]], [0.001, 100], 'r', lw=3.0)
     ax.plot([x_reatts[i], x_reatts[i]], [0.001, 100], 'r', lw=3.0)
-    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b', lw=3.0)
+    ax.plot([x_ppmaxs[i], x_ppmaxs[i]], [0.001, 100], 'b','--', lw=3.0)
     
     ax.text( 4.0, 0.02, label[i] )
     
-    ax.set_xlim([-18.0, 10.0])
+    ax.set_xlim([-15.0, 10.0])
     ax.set_yscale('log')
     ax.set_ylim([0.01, 100])
     ax.minorticks_on()
@@ -125,9 +127,9 @@ for i in range(2):
     
     axs.append(ax)
 
-cbar_label = r'$f \cdot \mathrm{PSD}(f)/ \int \mathrm{PSD}(f) \mathrm{d} f$'
-cbar_ticks = np.linspace(0, 0.3, 7)
-cbar_ax = fig.add_subplot([0.4,0.05,0.6,0.1],visible=False)
+cbar_label = r'$f \cdot \mathrm{PSD}(f)$'
+cbar_ticks = np.linspace(0, 3*10**6, 4)
+cbar_ax    = fig.add_subplot([0.4,0.05,0.6,0.1],visible=False)
 #cbar_ax.set_position([0.0, 0.0, 0.7, 0.03])
 cbar = fig.colorbar(pmpsd, ax=cbar_ax, orientation='horizontal', shrink=0.8,
                     ticks=cbar_ticks)
@@ -139,4 +141,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'psd_herringbone_patch_valley.png' )
+plt.savefig( 'pm_psd_p_riblets.png' )
