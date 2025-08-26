@@ -1,0 +1,68 @@
+# Basic info
+
+casecode = cdriblet_3
+tag      = $\mathcal{CD}3$
+roughwall = False
+
+# Flow setup parameters
+
+u_ref     = 507.0
+p_ref     = 45447.289
+rho_ref   = 0.9886
+T_ref     = 160.15
+delta_0   = 5.2
+Re_ref    = 2230.0
+visc_law  = P05
+
+# Numerical setup parameters
+
+dt_snap   = 0.01  
+
+# Geometric setup parametrs
+
+H         = 0.00
+H_md      = 0.00
+x_imp     = 50.4
+n_period  = 4
+D         = 5.2
+
+# Computational domain parameters (normalized)
+
+y_min     = 0.0
+
+# Case specific flow conditions
+
+x_incip   = -10.85
+x_sep     = -7.23
+x_att     = 1.64
+x_pfmax   = -8.68
+x_pw_grad_max = -9.15
+
+loc_sl    = -5.0, 0.95
+
+pw_grad_max = 0.287
+
+prb_sep   = 144
+prb_att   = 391
+prb_pfmax = 158
+
+# Shock tracking range
+
+# group 1, y = 10.4 (2.00 delta)
+# group 2, y = 30.0 (5.77 delta)
+# y_location, range_start, range_end
+shock_range_1 =  10.4,  8.0, 24.0
+shock_range_2 =  30.0, 30.0, 45.0
+
+# INCA version led different setting
+
+prb_withT = True
+
+# probe groups
+
+prb_ridge_index     = [1..425]
+prb_valley_index    = [426..850]
+prb_upspan_index    = []
+prb_downspan_index  = []
+prb_upvline_index   = []
+prb_downvline_index = []
