@@ -19,6 +19,8 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line        import LineData
+from   vista.params      import Params
+from   vista.directories import Directories
 from   vista.tools       import create_linear_interpolator
 from   vista.directories import create_folder
 
@@ -28,26 +30,31 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family']         = "Times New Roman"
 plt.rcParams['font.size']           = 40
 
-OutPath  = "/media/wencan/Expansion/temp/DataPost/herringbones_patch/averaged_streamwise_vars2"
+OutPath  = "/media/wencan/Expansion/temp/DataPost/herringbones_patch/averaged_streamwise_vars_h10_h03"
 
 # sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 # sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
 # sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
-data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data1 = '/media/wencan/Expansion/temp/250623/postprocess/statistics/wall_projection/streamwise_vars.pkl'
-data2 = '/media/wencan/Expansion/temp/250710/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+cases = ['smooth_adiabatic','250710','250821']
 
-datalist = [data0,   data1, data2]
+casepaths = [f'/media/wencan/Expansion/temp/{case}' for case in cases]
+datapaths = [f'{casepath}/postprocess/statistics/wall_projection/streamwise_vars.pkl' for casepath in casepaths]
+
 dy       = [0.0,       0.0, 0.0]
 color    = ['gray', 'blue', 'red']
 label    = ['smooth',   'cd1', 'cd2']
 lstyle   = [':',     '-.', '--']
 width    = [4.0,      4.0, 4.0]
 
-x_sep    = [-8.42,  -6.73, -7.94] 
-x_att    = [1.10 ,   1.60, 1.74]
-x_pfmax  = [-7.136,  -9.41, -9.87] 
+x_sep, x_att, x_pfmax = [], [], []
+
+for casepath in casepaths:
+    dirs   = Directories( casepath )
+    params = Params( dirs.case_para_file )
+    x_sep.append(params.x_sep)
+    x_att.append(params.x_att)
+    x_pfmax.append(params.x_pfmax) 
 
 lines    = []
 
@@ -65,7 +72,7 @@ fmt           =  '.png' # or '.png'
 
 # - read in data files
 
-for i, datafile in enumerate( datalist ):
+for i, datafile in enumerate( datapaths ):
     
     line = LineData()
     

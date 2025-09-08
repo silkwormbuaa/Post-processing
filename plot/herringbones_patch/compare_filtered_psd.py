@@ -40,11 +40,11 @@ set_plt_rcparams()
 cutoff_st       = 0.4
 independent_len = False
 addmarker       = True
-cases     = ['smooth_adiabatic','250710','250710']
+cases     = ['smooth_adiabatic','250821','250821']
 colors    = ['gray',  'red', 'blue']
 lstyle    = ['-',     '-.',  '--'] 
 locations = ['ridge', 'ridge', 'valley']
-outdir    = '/home/wencan/temp/DataPost/cdriblets/psd'
+outdir    = '/home/wencan/temp/DataPost/herringbones_patch/psd'
 
 # =============================================================================
 

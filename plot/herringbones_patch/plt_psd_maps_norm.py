@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   plt_psd_maps.py
+@File    :   plt_psd_maps_norm.py
 @Time    :   2025/08/11 
 @Author  :   Wencan WU 
 @Version :   1.0
@@ -30,7 +30,7 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 30
 
-outpath = '/media/wencan/Expansion/temp/DataPost/herringbones_patch/psd/psd/'
+outpath = '/media/wencan/Expansion/temp/DataPost/herringbones_patch/psd/psd_normalization/'
 
 cases = ['smooth_adiabatic','250821','250710']
 locs  = ['ridge', 'valley', 'valley']
@@ -57,7 +57,7 @@ label    = [r'$\mathcal{S}$', r'$\mathcal{C}\mathcal{D}1$', r'$\mathcal{C}\mathc
 fig       = plt.figure( figsize=(15, 15) )
 gs        = GridSpec(3,10)
 ax_range  = [0,0,0]
-colornorm = Normalize( vmin=0, vmax=3*10**6 )
+colornorm = Normalize( vmin=0, vmax=0.3 )
 axs       = list()
 
 for i in range(3):
@@ -74,14 +74,14 @@ for i in range(3):
         probe.read_psd( psdfile )
         st_probe = np.array( probe.psd_df['freq'] )*5.2/507.0
         x_probe  = [(probe.xyz[0]-50.4)/5.2]*len(st_probe)
-#        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
-        pmpsd_probe = np.array( probe.psd_df['psd_p_fluc'] )*np.array(probe.psd_df['freq'])
+        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
+#        pmpsd_probe = np.array( probe.psd_df['psd_p_fluc'] )*np.array(probe.psd_df['freq'])
 
         x.append( x_probe )
         st.append( st_probe )
         pmpsd.append( pmpsd_probe )
     
-    print(f"finish loading {i+1} case.")
+    print(f"finish loading {i+1} cases.")
     
     st_sep = np.array( st ) * (x_att[i]-x_sep[i])
     
@@ -91,9 +91,9 @@ for i in range(3):
                           cmap='Greys',
                           norm=colornorm)
     
-    ax.plot([x_sep[i], x_sep[i]], [0.001, 100], 'r', lw=3.0)
-    ax.plot([x_att[i], x_att[i]], [0.001, 100], 'r', lw=3.0)
-    ax.plot([x_pfmax[i], x_pfmax[i]], [0.001, 100], 'b','--', lw=3.0)
+    ax.plot([x_sep[i],   x_sep[i]],   [0.001, 100], 'r', lw=3.0)
+    ax.plot([x_att[i],   x_att[i]],   [0.001, 100], 'r', lw=3.0)
+    ax.plot([x_pfmax[i], x_pfmax[i]], [0.001, 100], 'b', '--', lw=3.0)
     
     ax.text( 4.0, 0.02, label[i] )
     
@@ -136,8 +136,8 @@ for i in range(3):
     
     axs.append(ax)
 
-cbar_label = r'$f \cdot \mathcal{P}(f)$'
-cbar_ticks = np.linspace(0, 3*10**6, 4)
+cbar_label = r'$f \cdot \mathcal{P}(f)/ \int \mathcal{P}(f) \mathrm{d} f$'
+cbar_ticks = np.linspace(0, 0.3, 4)
 cbar_ax    = fig.add_subplot([0.4,0.05,0.6,0.1],visible=False)
 #cbar_ax.set_position([0.0, 0.0, 0.7, 0.03])
 cbar = fig.colorbar(pmpsd, ax=cbar_ax, orientation='horizontal', shrink=0.8,
@@ -150,4 +150,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.18, top=0.98, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'pm_psd_p_riblets_con.png' )
+plt.savefig( 'pm_norm_psd_p_riblets_con.png' )
