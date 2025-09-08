@@ -35,13 +35,11 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    case_dirs = ['smooth_mid',      '231124','241030','241018',
-                 'smooth_adiabatic','221014','220926','220825','220927','221221',
-                 '240210',          '240211']
+    case_dirs = ['smooth_adiabatic', '250710'] 
     
-    x_loc     = -5.0 # normalized location
+    x_loc     = -12.0 # normalized location
     
-    outfolder = 'profile_shearlayer'
+    outfolder = '_-12'
 
     for case in case_dirs:
         
@@ -80,7 +78,7 @@ def compute_profile_incip( case_dir, x_loc, outfolder ):
         
     print(f"Processing extracting profile at location: {loc}.\n")
     
-    bbox    = [ loc-1.25, loc+1.25, -1.2576, 86.0,  -11.0, 11.0]  # bounding box
+    bbox    = [ loc-1.25, loc+1.25, 0.0, 86.0,  -11.0, 11.0]  # bounding box
     wbox    = [ loc-1.25, loc+1.25, -1.2576, 0.0,   -11.0, 11.0]  # bounding box for rough wall
     wbox_sw = [ loc-1.25, loc+1.25, 0.0,     0.01,  -11.0, 11.0]
 

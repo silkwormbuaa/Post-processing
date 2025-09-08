@@ -39,32 +39,37 @@ plt.rcParams['font.size']           = 30
 def main():
 # =============================================================================
 
-    case_folder = '/home/wencan/temp/250120/'
+    case_folder = '/home/wencan/temp/smooth_adiabatic/'
     
-    stat_file   = 'stat_xslice_upstream.bin'
-    outfolder   = 'yz_planes_upstream'
+    stat_file   = 'stat_xslice_-12.bin'
+    outfolder   = 'yz_planes_-12'
+    loc         = -12.0
     
-    loc         = -20.0 * 5.2 + 50.4
+    loc         = loc * 5.2 + 50.4
     
     dirs        = Directories( case_folder )
     params      = Params( dirs.case_para_file )
     
-    vars_read   = ['u','v','w','T','uu','vv','ww','uv']
+    vars_read   = ['u','v','w','p','T','uu','vv','ww','uv','pp']
     vars_output = ['u',    'v',   'w',    'T',
-                   'mach', 'tke', 'u`u`', 'u`v`']
-    cbar_range  = [[0.0,1.0],[-2.0,2.0],[-2.0,2.0], [1.0,1.8],
-                   [0,2.0],   [0,4.0],   [0,3.0],   [-3.6,0]]
+                   'mach', 'tke', 'u`u`', 'u`v`',
+                   'p`']
+    cbar_range  = [[0.0,1.0],[-4.0,4.0],[-2.0,2.0], [1.0,1.8],
+                   [0,2.0],   [0,4.0],   [0,3.0],   [-3.6,0],
+                   [0,0.08]]
     cbar_label  = [r'$\langle u \rangle / u_{\infty}$',
                    r'$\langle v \rangle / u_{\infty}\cdot 100$',
                    r'$\langle w \rangle / u_{\infty}\cdot 100$',
                    r'$\langle T \rangle / T_{\infty}$',
                    r'$\mathrm{Mach}$',
-                   r'$tke$',
+                   r'$tke/u_{\infty}^2*100$',
                    r'$\langle u^{\prime}u^{\prime}\rangle /u_{\infty}^2\cdot 100$',
-                   r'$\langle u^{\prime}v^{\prime}\rangle /u_{\infty}^2\cdot 1000$']
+                   r'$\langle u^{\prime}v^{\prime}\rangle /u_{\infty}^2\cdot 1000$',
+                   r'$\sqrt{\langle p^{\prime}p^{\prime}\rangle} / p_{\infty}$']
     norm        = [params.u_ref, params.u_ref/100, params.u_ref/100, params.T_ref,
-                   1.0, params.u_ref**2/100, params.u_ref**2/100, params.u_ref**2/1000]
-    bbox        = [-100,20,-2,10,-20,20]
+                   1.0, params.u_ref**2/100, params.u_ref**2/100, params.u_ref**2/1000,
+                   params.p_ref]
+    bbox        = [-100,20,-2,12,-20,20]
     streamline  = False
     D_norm      = False
 
@@ -79,14 +84,19 @@ def main():
     stat.grid3d  = grid
     stat.read_statistic(blocklist,vars_in=vars_read)
     stat.match_grid(blocklist, grid, add_to_df=True )
-    stat.compute_vars(blocklist,['mach','RS'])
+    stat.compute_vars(blocklist,['mach','RS','p`'])
     
-    wdfile = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
-    wdsnap = Snapshot(wdfile)
-    wdsnap.grid3d = grid
-    wdsnap.read_snapshot(block_list=blocklist, var_read=['wd'])
-    wdsnap = wdsnap.get_slice('X',loc, bbox=[-100,20,-2,0.5,0.0,5.2])
-    wall   = wdsnap.get_contour('wd',0.0, blocklist=blocklist)
+    roughwall = params.roughwall
+    
+    if roughwall:
+        wdfile = get_filelist( dirs.wall_dist, 'snapshot.bin' )[0]
+        wdsnap = Snapshot(wdfile)
+        wdsnap.grid3d = grid
+        wdsnap.read_snapshot(block_list=blocklist, var_read=['wd'])
+        wdsnap = wdsnap.get_slice('X',loc, bbox=[-100,20,-2,0.5,0.0,5.2])
+        wall   = wdsnap.get_contour('wd',0.0, blocklist=blocklist)
+    else:
+        wall   = np.array([[0,0,-100],[0,0,100]],dtype=float) 
     
     # periodic averaging
 
@@ -141,7 +151,7 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, wall=No
         y_label     = r'$y/\delta_0$'
         loc_tag     = [0.8, 0.8]
     
-    ywall = define_wall_shape(pz, casecode=params.casecode, write=False)/length_unit
+#    ywall = define_wall_shape(pz, casecode=params.casecode, write=False)/length_unit
     z     = np.array( df['z']    ).reshape( (len(py),len(pz)) )/length_unit
     y     = np.array( df['y']    ).reshape( (len(py),len(pz)) )/length_unit
 
@@ -219,6 +229,7 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, wall=No
     figname    += '.png'
 
     plt.savefig(figname, dpi=300)
+    # plt.show()
     plt.close()
     print(f"Figure saved to {os.getcwd()}/{figname}.")
 

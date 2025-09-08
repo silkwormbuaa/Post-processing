@@ -47,7 +47,7 @@ set_plt_rcparams(latex=False,fontsize=15)
 
 # =============================================================================
 
-casedir  = '/home/wencan/temp/smooth_mid/'
+casedir  = '/home/wencan/temp/250710/'
 
 vars_out = [ 'u',                'T',               'p',               'DS',      
             'p_fluc',            'u_r',             'v_r',              'w3',
@@ -66,7 +66,8 @@ ranges   = [[-0.4,1.0],        [1.0,2.0],         [1.0,3.5],         [0.0,0.8],
             [-0.5,0.5],        [0.5,2.5],         [-0.25,0.25],      [-0.2,0.2],        
             [-0.2,0.2],        [-1.5,1.5],        [0.0,2.0],         [-6,6]]
 vars_in  = ['u', 'v', 'w', 'T', 'p']
-cutbox   = [-120.0, 120.0, -1.3, 86.0, 0.1, 0.11]
+loc      = 2.601
+cutbox   = [-58.0, 120.0, -1.3, 50.0, -11, 11]
 clipbox  = [-20, 12, 0, 10, -1, 1]
 #clipbox  = [-12, 6, 0, 5, -1, 1]
 
@@ -95,12 +96,12 @@ if mpi.is_root:
     print( dirs.case_para_file)
     params = Params( dirs.case_para_file )
     
-    snapfiles = get_filelist( dirs.snp_dir, 'snapshot_Z' )
+    snapfiles = get_filelist( dirs.snp_dir, 'snapshot_Z_002.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot Z files.")
     
     grid3d = GridData( dirs.grid )
     grid3d.read_grid()
-    blocklist = grid3d.select_blockgrids( cutbox, mode='overlap' )
+    blocklist,_ = grid3d.select_sliced_blockgrids( 'Z', loc, cutbox)
     
     statz = StatisticData( dirs.stat_zslice )
     statz.read_statistic(block_list=blocklist, vars_in=['u','v','p','rho'])

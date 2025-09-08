@@ -36,9 +36,9 @@ sys.stdout = Logger( os.path.basename(__file__) )
 # =============================================================================
 
 case_folder = '/home/wencan/temp/220927/'
-locs_delta = np.linspace(-10.84,-10.84,1)
+locs_delta  = np.linspace(-20,-20,1)
 
-outfolder  = '/yz_planes_sep'
+outfolder  = '/yz_planes'
 periodic_ave = True
 
 # =============================================================================
