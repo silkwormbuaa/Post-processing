@@ -1,7 +1,7 @@
 # Basic info
 
-casecode = cdriblet_3
-tag      = $\mathcal{CD}3$
+casecode = 250821
+tag      = $\mathcal{CD}1$
 roughwall = False
 
 # Flow setup parameters
