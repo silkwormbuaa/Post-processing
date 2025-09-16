@@ -29,7 +29,7 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family']         = "Times New Roman"
 plt.rcParams['font.size']           = 40
 
-OutPath  = "/home/wencan/temp/DataPost/midRe/averaged_streamwise_vars/with_241028"
+OutPath  = "/home/wencan/temp/DataPost/midRe/averaged_streamwise_vars/"
 
 data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/wall_projection/streamwise_vars.pkl'
@@ -47,7 +47,7 @@ add_sw_luis = False
 # color, label, lstyle, width's order will be adjusted automatically
 # x_sep, x_att, x_pfmax should be carefully checked. 
 
-datalist = [data0,              data2,             data1,             data4,              data3                  ,data5]
+datalist = [data0,              data2,             data1,             data4,              data3                  ]
 color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 
 label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
 lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
@@ -58,11 +58,11 @@ x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,   
 
 lines    = []
 
-plt_pwfluc     = True     # pressure fluctuation
-plt_pwfluc_ln  = True     # locally normalized
-plt_pw         = True     # wall pressure
+plt_pwfluc     = False     # pressure fluctuation
+plt_pwfluc_ln  = False     # locally normalized
+plt_pw         = False     # wall pressure
 plt_pwg        = True     # pressure gradient
-plt_Cf         = True
+plt_Cf         = False
 
 pure       = False
 show_label = False
@@ -343,7 +343,7 @@ if plt_pwg:
     ax.set_ylim([-0.1,0.6])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
-    ax.set_ylabel(r"$\frac{d \langle p_w \rangle }{dx}/p_{\infty}$")
+    ax.set_ylabel(r"$\frac{d\langle p_w \rangle}{dx}/\frac{p_{\infty}}{\delta_0}$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:

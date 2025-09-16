@@ -310,7 +310,7 @@ if plt_pwg:
     ax.set_ylim([-0.1,0.6])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
 
-    ax.set_ylabel(r"$\frac{d \langle p_w \rangle}{dx}/p_{\infty}$")
+    ax.set_ylabel(r"$\frac{d\langle p_w \rangle}{dx}/\frac{p_{\infty}}{\delta_0}$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:

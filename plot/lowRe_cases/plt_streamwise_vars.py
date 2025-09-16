@@ -54,9 +54,9 @@ x_pfmax  = [-7.712,  -7.49 ,  -8.71,                  -10.06,       -8.93 ,  -7.
 
 lines    = []
 
-plt_pwfluc    = True
-plt_pwfluc_ln = True
-plt_pw        = True
+plt_pwfluc    = False
+plt_pwfluc_ln = False
+plt_pw        = False
 plt_pwg       = True
 plt_Cf        = True
 
@@ -307,7 +307,7 @@ if plt_pwg:
 
     ax.set_ylim([-0.1,0.6])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
-    ax.set_ylabel(r"$\frac{d\langle p_w \rangle}{dx}/p_{\infty}$")
+    ax.set_ylabel(r"$\frac{d\langle p_w \rangle}{dx}/\frac{p_{\infty}}{\delta_0}$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:
