@@ -6,6 +6,9 @@
     "files.associations": {
         "*.py": "python",
         "*.f90": "fortran-modern",
-    }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python-envs.pythonProjects": []
 }
 

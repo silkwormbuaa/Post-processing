@@ -422,7 +422,7 @@ class Mesh_bloxx:
 
 def Testing():
 
-    pass
+    # pass
 
 # Example usages:
 
@@ -505,11 +505,19 @@ def Testing():
 
 # # -- modifiy boundary conditions
 
-#     for grid in mesh.grids:
+    file_path = '/home/wencanwu/my_simulation/STBLI_mid_Re/smooth_adiabtic/grid_x2'
+    os.chdir( file_path )
+    
+    mesh = Mesh_bloxx(file_path)
+
+    for grid in mesh.grids:
         
-#         if grid.LY[0] == 0.0:
-#             grid.variables['BY1'] = 'AWALL     '
-#             print(grid.BC)
+        if grid.LY[0] == 0.0:
+            grid.variables['BY1'] = 'AWALL     '
+            print(grid.BC)
+    
+    mesh.sort_grids()
+    mesh.save_grid( create_folder('./new_grid') )
 
 # =============================================================================
 
