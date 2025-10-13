@@ -35,19 +35,21 @@ set_plt_rcparams()
 
 # =============================================================================
 # option zone
+# ! 220927: do not have probe data in the valley.
 # =============================================================================
 
 cutoff_st       = 0.4
 independent_len = False
 addmarker       = True
-cases     = ['smooth_adiabatic','220927','smooth_mid','231124',  '241030']
-colors    = ['gray',  'orangered', 'black',    'steelblue','yellowgreen']
-lstyle    = ['-',     '-.',        '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
-outdir    = '/home/wencan/temp/DataPost/midRe/psd'
+cases     = ['smooth_adiabatic','smooth_mid','231124',  '241030']
+colors    = ['gray',   'black',    'steelblue','yellowgreen']
+lstyle    = ['-',      '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
+loc       = 'valley' # 'ridge' or 'valley'
+outdir    = '/home/wencan/temp/DataPost/midRe/psd/'+loc
 
 # =============================================================================
 
-os.chdir( outdir )
+os.chdir( create_folder(outdir) )
 
 dirs = [ Directories( os.path.join( '/home/wencan/temp', case ) ) for case in cases ]
 
@@ -115,7 +117,10 @@ powers_hp_lines = []
 
 for i in range( len(cases) ):
 
-    psdfilelist = get_filelist( dirs[i].pp_psd_ridge )
+    if loc == 'ridge' or (not params[i].roughwall):
+        psdfilelist = get_filelist( dirs[i].pp_psd_ridge )
+    else:
+        psdfilelist = get_filelist( dirs[i].pp_psd_valley )
 
     x_locs = []; rms_psds = []; powers = []; powers_lp = []; powers_hp = []
 

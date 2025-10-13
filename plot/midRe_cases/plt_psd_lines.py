@@ -36,13 +36,13 @@ plt.rcParams['font.size']   = 30
 # =============================================================================
 
 independent_len = False
-figname         = '0422psdlines'
+figname         = 'psdlines_pfmax'
 fmat            = '.png'
 figsize         = (12,6)
 cases_nr        = [0,1,2,3,4]
 showlegend      = False
 premultiply     = True
-normalize       = True
+normalize       = False
 outpath         = '/home/wencan/temp/DataPost/midRe/psd/'
 
 cases    = ['smooth_adiabatic','220927','smooth_mid','231124','241030']
@@ -50,7 +50,7 @@ color    = ['gray',             'orangered',       'black',           'steelblue
 label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
 lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
 lwidth   = [4.0,              4.0,               4.0,             4.0,                4.0,                  4.0]
-locs     = ['sep','sep','pfmax','pfmax','pfmax']
+locs     = ['pfmax','pfmax','pfmax','pfmax','pfmax']
 
 os.chdir( create_folder(outpath) )
 
@@ -197,7 +197,7 @@ ax.vlines( 0.4, -1.0, 1.0, linestyles='--', linewidth=2, color='black' )
 
 ax.set_xscale( 'log' )
 ax.set_xlim( [0.01,100] )
-ax.set_ylim( [0.0, 0.5] )
+if normalize: ax.set_ylim( [0.0,0.5] )
 
 ax.minorticks_on()
 ax.tick_params( which='major',
