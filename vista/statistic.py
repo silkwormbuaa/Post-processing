@@ -994,11 +994,14 @@ class StatisticData:
             df.drop( df[ (df['y'] < bbox[2]) ].index[:-1], inplace=True )
         
         df.reset_index( drop=True, inplace=True )
+        first_row_copy = df.iloc[[0]].copy()
+        df = pd.concat( [first_row_copy, df], ignore_index=True )
+        df.reset_index( drop=True, inplace=True )        
         
-        if roughwall:
-            for var in vars_out:
-                if var not in ['p','rho','mu','T','Tt','pt']:
-                    df.loc[0,var] = 0.0
+        for var in vars_out:
+            if var not in ['p','rho','mu','T','Tt','pt']:
+                df.loc[0,var] = 0.0
+                
         df.loc[0,'y']  = bbox[2]
         df.loc[0,'hy'] = 0.0
                 

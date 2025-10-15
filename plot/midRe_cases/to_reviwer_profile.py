@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-@File    :   plt_profile_local.py
-@Time    :   2025/05/02 
+@File    :   to_reviewer_profile.py
+@Time    :   2025/10/15 
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
@@ -44,25 +44,22 @@ plt_T              = True
 plt_tke            = True
 
 pure  = False
-ridge = False
 
 fmt = '.png'
 
 # =============================================================================
 
-OutPath  = '/home/wencan/temp/DataPost/midRe/profile_local/upstream_plane/'
+OutPath  = '/home/wencan/temp/DataPost/midRe/profile_local/upstream_plane/jfm_reviewer'
 
-if ridge: OutPath += 'ridge/'
-else:     OutPath += 'valley/'
-
-cases = ['smooth_adiabatic', '220927', 'smooth_mid', '231124','241030']
+cases = ['smooth_adiabatic', '220927', '220927','smooth_mid', '231124','231124','241030','241030']
 
 #dy       = [0.0,               0.312,             0.0,               0.312             ,0.07921                ]
-dy       = [0.0,               0.52,             0.0,                 0.52,             0.13679                ]
-color    = ['gray',            'orangered',       'black',           'steelblue'       ,'yellowgreen'          ]
-label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$',r'$\mathcal{HR}2$'     ]
-lstyle   = ['-',               '-.',              '--',              ':'               ,(0, (3, 1, 1, 1, 1, 1))]
-width    = [4.0,               4.0,               4.0,               4.0               ,4.0                    ]
+dy       = [0.0,               0.0,              0.52,               0.0,               0.0               ,0.52              ,0.0               ,0.13679           ]
+color    = ['gray',            'orangered',       'orangered',       'black',           'steelblue'       ,'steelblue'       ,'yellowgreen'     ,'yellowgreen'     ]
+label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}_r$', r'$\mathcal{LR}_v$', r'$\mathcal{HS}$', r'$\mathcal{HR}1_r$',r'$\mathcal{HR}1_v$',r'$\mathcal{HR}2_r$',r'$\mathcal{HR}2_v$']
+locs     = ['ridge',          'ridge',           'valley',           'ridge',           'ridge'           ,'valley'          ,     'ridge'      ,'valley'          ]
+lstyle   = ['-',               '-',               '--',              '--',              '-'               ,'--'              , '-'              , '--'             ]
+width    = [4.0,               4.0,               4.0,               4.0,               4.0               ,4.0               ,4.0               ,4.0               ]
 lines = []
 
 
@@ -84,14 +81,14 @@ for i, datapath in enumerate(cases):
     
     os.chdir('/home/wencan/temp/'+datapath+'/postprocess/statistics/profile_upstream')
     
-    if ridge:
+    if locs[i] == 'ridge':
         datafile = 'profile_upstream_ridge.dat'
         line = ProfileData( datafile )
-        line.shift_y( 0.0 )
     else:
         datafile = 'profile_upstream_valley.dat'
         line = ProfileData( datafile )
-        line.shift_y( dy[i] )
+    
+    line.shift_y( dy[i] )
     line.inner_normalize('wall_statistics.dat')
     line.vd_transform()
     
@@ -100,7 +97,7 @@ for i, datapath in enumerate(cases):
     line.width = width[i]
     line.lstyle = lstyle[i]
     
-    if ridge:
+    if locs[i] == 'ridge':
         normalized_file = 'profile_normalized_ridge.dat'
     else:
         normalized_file = 'profile_normalized_valley.dat'
@@ -182,7 +179,7 @@ if plt_u_vd :
         ax.tick_params( axis='x', pad=15 )
         ax.set_ylabel( r'$\langle u \rangle ^+_{vD}$' )
         ax.tick_params( axis='y', pad=10 )
-        ax.legend( fontsize=30,frameon=False ) 
+        ax.legend( fontsize=20,frameon=False, loc='lower right' ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
