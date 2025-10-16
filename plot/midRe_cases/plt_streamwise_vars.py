@@ -58,10 +58,10 @@ x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,   
 
 lines    = []
 
-plt_pwfluc     = False     # pressure fluctuation
+plt_pwfluc     = True     # pressure fluctuation
 plt_pwfluc_ln  = False     # locally normalized
 plt_pw         = False     # wall pressure
-plt_pwg        = True     # pressure gradient
+plt_pwg        = False    # pressure gradient
 plt_Cf         = False
 
 pure       = False
@@ -141,6 +141,16 @@ if plt_pwfluc:
                  ls = line.lstyle,
                  label = line.label,
                  linewidth = line.width)
+        
+    # compute the area under the curve as response to the jfm reviewer 2 comment
+    
+    for i,line in enumerate( lines ):
+        
+        # only integrate from -20 to 10.
+        mask = (line.df['x'] >= -16) & (line.df['x'] <= 10)
+        line.df = line.df[mask]
+        area = np.trapz( line.df['p_fluc'], line.df['x'] )
+        print( f"{line.label.ljust(10)} area under pwfluc curve = {area:.4f}" )
     
     # to avoid line overlapped on marker
     
