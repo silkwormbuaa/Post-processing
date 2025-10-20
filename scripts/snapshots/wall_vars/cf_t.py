@@ -51,6 +51,12 @@ def main():
     dirs       = Directories( case_dir )
     ccfile     = dirs.cc_setup
     outpath    = dirs.pp_snp_fricprj
+    
+    if mpi.rank == 0:
+        os.chdir( create_folder(outpath) )
+        if os.path.exists( 'cf_t.pkl' ):
+            read_plot()
+            return
 
     # --- broadcast the parameters
 
@@ -242,14 +248,51 @@ def main():
         print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
         sys.stdout.flush()
 
+def read_plot():
+    
+    print("cf_t.pkl already exists. Just plot it directly.")
+    
+    with open('cf_t.pkl','rb') as f:
+        x_coords   = pickle.load(f)
+        merged     = pickle.load(f)
+        
+    itimes = np.array( [ item[1] for item in merged ] )
+    cf_t   = np.array( [ item[2] for item in merged ] )
+    p_t    = np.array( [ item[3] for item in merged ] )
+    pf_t   = np.array( [ item[4] for item in merged ] )
+    
+    xx,zz = np.meshgrid( x_coords, itimes )
+    
+    plot_breathing( xx, zz, cf_t, 
+                    cbar_label=r'$C_f\times 10^3$',
+                    cbar_levels=np.linspace(-3.0,3.0,81),
+                    figname='cf_t',
+                    extend='both',
+                    u0=True)
+    
+    plot_breathing( xx, zz, p_t, 
+                    cbar_label=r'$p/p_{\infty}$',
+                    cbar_levels=np.linspace(0.8,2.4,81),
+                    figname='p_t',
+                    extend='both' )
+    
+    plot_breathing( xx, zz, pf_t, 
+                    cbar_label=r'$p^{\prime}/p_{\infty}$',
+                    cbar_levels=np.linspace(-0.4,0.4,81),
+                    figname='pf_t',
+                    extend='both' )
+
 def plot_breathing( xx, zz, v, 
                     cbar_label, cbar_levels, 
                     figname,
-                    extend='both'):
+                    extend='both',
+                    u0=False):
     
-    fig, ax = plt.subplots( figsize=(15, 8), constrained_layout=True )
+    fig, ax = plt.subplots( figsize=(15, 50), constrained_layout=True )
     
     cs = ax.contourf( xx, zz, v, levels=cbar_levels, extend=extend, cmap='RdBu_r' )
+    if u0:
+        u0line = ax.contour( xx, zz, v, levels=[0.0], colors='black', linewidths=0.2 )
     cbar = fig.colorbar( cs, ax=ax, orientation='vertical', pad=0.02 )
     cbar.set_label( cbar_label, fontsize=16 )
     cbar.ax.tick_params( labelsize=14 )
