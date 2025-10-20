@@ -31,9 +31,10 @@ plt.rcParams['font.size']           = 40
 
 # =============================================================================
 
-plt_u       = False
+plt_u       = True
 plt_u_vd    = True
 plt_RS      = True
+plt_p_fluc  = True
 
 fmt = '.png'
 
@@ -59,7 +60,7 @@ color    = ['gray',         'black',       'orangered',  'yellowgreen', 'steelbl
 label    = ['lowRe_smooth', 'midRe_smooth','lowRe_rough','midRe_0.026', 'midRe_0.1', 'mid_x2']
 lstyle   = ['-',            '--',             '-.',      (0, (3, 1, 1, 1, 1, 1)),  ':', ':']
 width    = [4.0,            4.0,           4.0,        4.0,        4.0,    4.0]
-selected = [ data5 ]
+selected = [ data1, data5 ]
 lines    = []
 
 # ----------------------------------------------------------------------
@@ -311,33 +312,34 @@ if plt_RS:
              fillstyle='none',
              linestyle='None')
     
-    ax.plot( lines[0].df['y+'], 
-             lines[0].df['u`u`+'],
-             lines[0].color, 
-             label = lines[0].label, 
-             ls    = lines[0].lstyle,
-             linewidth = lines[0].width)
+    for line in lines:
+        ax.plot(line.df['y+'], 
+                line.df['u`u`+'],
+                line.color, 
+                label     = line.label, 
+                ls        = line.lstyle,
+                linewidth = line.width)
 
-    ax.plot( lines[0].df['y+'], 
-             lines[0].df['v`v`+'],
-             lines[0].color, 
-             label = lines[0].label, 
-             ls    = lines[0].lstyle,
-             linewidth = lines[0].width)
+        ax.plot(line.df['y+'], 
+                line.df['v`v`+'],
+                line.color, 
+                label     = line.label, 
+                ls        = line.lstyle,
+                linewidth = line.width)
 
-    ax.plot( lines[0].df['y+'], 
-             lines[0].df['w`w`+'],
-             lines[0].color, 
-             label = lines[0].label, 
-             ls    = lines[0].lstyle,
-             linewidth = lines[0].width)
+        ax.plot(line.df['y+'], 
+                line.df['w`w`+'],
+                line.color, 
+                label     = line.label, 
+                ls        = line.lstyle,
+                linewidth = line.width)
 
-    ax.plot( lines[0].df['y+'], 
-             lines[0].df['u`v`+'],
-             lines[0].color, 
-             label = lines[0].label, 
-             ls    = lines[0].lstyle,
-             linewidth = lines[0].width)
+        ax.plot(line.df['y+'], 
+                line.df['u`v`+'],
+                line.color, 
+                label     = line.label, 
+                ls        = line.lstyle,
+                linewidth = line.width)
     
     adjust_plot( ax )
     
@@ -359,4 +361,78 @@ if plt_RS:
 
     plt.savefig( figname + fmt )
     print(f"{figname.ljust(15)} is output.")
+    plt.show()
+
+# ----------------------------------------------------------------------
+# >>> Function Name                                                (Nr.)
+# ----------------------------------------------------------------------
+#
+# Wencan Wu : w.wu-3@tudelft.nl
+#
+# History
+#
+# 2025/10/17  - created
+#
+# Desc
+#
+# ----------------------------------------------------------------------
+
+
+if plt_p_fluc:
+
+    fig, ax = plt.subplots( figsize=[9,8],constrained_layout=True )
+
+    for line in lines:
+        
+        p_fluc = np.array(line.df['p`'])
+        
+        ax.plot( line.df['ys+'], 
+                 (p_fluc/line.tau_ave)**2,
+                 line.color,   
+                 label = line.label, 
+                 ls    = line.lstyle,
+                 linewidth = line.width)
+
+    ax.set_xscale( "symlog", linthresh=1 )
+
+
+    ax.set_xlim( [1,20000] )
+    ax.set_ylim( [0.0,20]   )
+
+    ax.minorticks_on()
+    ax.tick_params(which='major',
+                    axis='both',
+                    direction='in',
+                    length=20,
+                    width=2)
+    ax.tick_params(which='minor',
+                    axis='both', 
+                    direction='in',
+                    length=10,
+                    width=1.5)
+    x_minor = matplotlib.ticker.LogLocator( 
+                        base = 10.0, subs = np.arange(1.0,10.0), numticks=100 )
+    ax.xaxis.set_minor_locator( x_minor )
+
+    # set spacing between major tickers.
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
+
+#    ax.grid(visible=True, which='both',axis='both',color='gray',
+#            linestyle='--',linewidth=0.2)
+
+    # Adjust the spacing around the plot to remove the white margin
+    
+    figname = 'p_fluc_squared'
+    
+    ax.set_xlabel( "$y_s^+$",labelpad=-5 )  
+    ax.set_ylabel( r"$\langle p'p' \rangle / {\tau_w}^2$" )
+    ax.tick_params( axis='x', pad=15 )
+    ax.tick_params( axis='y', pad=10 )
+#        ax.legend( ) 
+
+    # set the bounding box of axes
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(3)
+    
+    plt.savefig( figname + fmt )
     plt.show()

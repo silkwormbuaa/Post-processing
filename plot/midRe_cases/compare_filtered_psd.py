@@ -40,12 +40,19 @@ set_plt_rcparams()
 
 cutoff_st       = 0.4
 independent_len = False
-addmarker       = True
-cases     = ['smooth_adiabatic','smooth_mid','231124',  '241030']
-colors    = ['gray',   'black',    'steelblue','yellowgreen']
-lstyle    = ['-',      '--',       ':',        (0, (3, 1, 1, 1, 1, 1))] 
-loc       = 'valley' # 'ridge' or 'valley'
-outdir    = '/home/wencan/temp/DataPost/midRe/psd/'+loc
+addmarker       = False
+cases     = ['231124'   ,'231124'   ,'241030'     ,'241030'     ]
+colors    = ['steelblue','steelblue','yellowgreen','yellowgreen']
+lstyle    = ['-'        ,'--'       ,'-'          ,'--'         ] 
+locs       =['ridge'    ,'valley'   ,'ridge'      ,'valley'     ] # 'ridge' or 'valley'
+
+cases     = ['smooth_mid','smooth_mid_x2']
+colors    = ['black'     ,'black'        ]
+lstyle    = ['--'        ,':'            ]
+locs       =['ridge'     ,'valley'       ]
+
+
+outdir    = '/home/wencan/temp/DataPost/midRe/psd/grid_study/'
 
 # =============================================================================
 
@@ -117,7 +124,7 @@ powers_hp_lines = []
 
 for i in range( len(cases) ):
 
-    if loc == 'ridge' or (not params[i].roughwall):
+    if locs[i] == 'ridge' or (not params[i].roughwall):
         psdfilelist = get_filelist( dirs[i].pp_psd_ridge )
     else:
         psdfilelist = get_filelist( dirs[i].pp_psd_valley )

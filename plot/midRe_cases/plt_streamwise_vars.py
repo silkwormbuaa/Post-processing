@@ -29,7 +29,7 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family']         = "Times New Roman"
 plt.rcParams['font.size']           = 40
 
-OutPath  = "/home/wencan/temp/DataPost/midRe/averaged_streamwise_vars/"
+OutPath  = "/home/wencan/temp/DataPost/midRe/averaged_streamwise_vars/grid_study/"
 
 data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/wall_projection/streamwise_vars.pkl'
@@ -37,6 +37,7 @@ data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/wall_project
 data3 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data4 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 data5 = '/media/wencan/Expansion/temp/241018/postprocess/statistics/wall_projection/streamwise_vars.pkl'
+data6 = '/media/wencan/Expansion/temp/smooth_mid_x2/postprocess/statistics/wall_projection/streamwise_vars.pkl'
 
 sw_iw_pw_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_SBLI_B2.dat'
 sw_iw_pwrms_file = '/media/wencan/Expansion/temp/data_luis/midRe_streamwise/pw_rms_SBLI_B2.dat'
@@ -47,22 +48,23 @@ add_sw_luis = False
 # color, label, lstyle, width's order will be adjusted automatically
 # x_sep, x_att, x_pfmax should be carefully checked. 
 
-datalist = [data0,              data2,             data1,             data4,              data3                  ]
-color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 
-label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
-lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
-width    = [4.0,                 4.0,               4.0,                 4.0,                4.0                 ,4.0]
-x_sep    = [-8.42,              -10.84,            -7.33,              -9.96,             -10.36                 ,-15.03]
-x_att    = [1.10,                 2.45,             1.89,               2.86,               2.56                 ,3.57]
-x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,             -10.16                 ,-14.75]
+datalist = [data0,              data2,             data1,             data4,              data3                  ,data5             ,data6]
+color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red',            'blue'] 
+label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$',r'$\mathcal{HS}_{x2}$']
+lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--'              ,':']
+width    = [4.0,                 4.0,               4.0,                 4.0,                4.0                 ,4.0               ,4.0]
+x_sep    = [-8.42,              -10.84,            -7.33,              -9.96,             -10.36                 ,-15.03            ,-7.33]
+x_att    = [1.10,                 2.45,             1.89,               2.86,               2.56                 ,3.57              , 1.89]
+x_pfmax  = [-7.136,             -10.06,            -8.53,             -11.58,             -10.16                 ,-14.75            ,-8.53]
 
+selected = [ data1, data6 ]
 lines    = []
 
 plt_pwfluc     = True     # pressure fluctuation
 plt_pwfluc_ln  = False     # locally normalized
-plt_pw         = False     # wall pressure
-plt_pwg        = False    # pressure gradient
-plt_Cf         = False
+plt_pw         = True     # wall pressure
+plt_pwg        = True    # pressure gradient
+plt_Cf         = True
 
 pure       = False
 show_label = False
@@ -72,7 +74,9 @@ fmt        =  '.png' # or '.png'
 
 # - read in data files
 
-for i, datafile in enumerate( datalist ):
+for datafile in selected:
+    
+    i = datalist.index( datafile )
     
     line = LineData()
     
@@ -81,6 +85,9 @@ for i, datafile in enumerate( datalist ):
     line.label  = label[i]
     line.lstyle = lstyle[i]
     line.width  = width[i]
+    line.x_sep  = x_sep[i]
+    line.x_att  = x_att[i]
+    line.x_pfmax= x_pfmax[i] 
     
     lines.append( line )
 
@@ -154,11 +161,11 @@ if plt_pwfluc:
     
     # to avoid line overlapped on marker
     
-    for i,line in enumerate( lines ):
+    for line in lines:
         interpolator = create_linear_interpolator( line.df['x'], line.df['p_fluc'])
-        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=15)
+        ax.plot( line.x_sep,   interpolator(line.x_sep),   'p', color=line.color, ms=15)
+        ax.plot( line.x_att,   interpolator(line.x_att),   'p', color=line.color, ms=15)
+        ax.plot( line.x_pfmax, interpolator(line.x_pfmax), '*', color=line.color, ms=20)
 
     if add_sw_luis:
         swdf = pd.read_csv(sw_iw_pwrms_file, delimiter=r'\s+')
@@ -217,11 +224,11 @@ if plt_pwfluc_ln:
     
     # to avoid line overlapped on marker
     
-    for i,line in enumerate( lines ):
+    for line in lines:
         interpolator = create_linear_interpolator( line.df['x'], line.df['p_fluc']/line.df['Cp'])
-        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=15)
+        ax.plot( line.x_sep,   interpolator(line.x_sep),   'p', color=line.color, ms=15)
+        ax.plot( line.x_att,   interpolator(line.x_att),   'p', color=line.color, ms=15)
+        ax.plot( line.x_pfmax, interpolator(line.x_pfmax), '*', color=line.color, ms=15)
 
     if add_sw_luis:
         swdf = pd.read_csv(sw_iw_pwrms_file, delimiter=r'\s+')
@@ -279,11 +286,11 @@ if plt_pw:
 
     # to avoid line overlapped on marker
     
-    for i,line in enumerate( lines ):
+    for line in lines:
         interpolator = create_linear_interpolator(line.df['x'], line.df['Cp'])
-        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
+        ax.plot( line.x_sep,   interpolator(line.x_sep),   'p', color=line.color, ms=15)
+        ax.plot( line.x_att,   interpolator(line.x_att),   'p', color=line.color, ms=15)
+        ax.plot( line.x_pfmax, interpolator(line.x_pfmax), '*', color=line.color, ms=20)
         
     if add_sw_luis:
         swdf = pd.read_csv(sw_iw_pw_file, delimiter=r'\s+')
@@ -342,13 +349,12 @@ if plt_pwg:
 
     # to avoid line overlapped on marker
     
-    for i,line in enumerate( lines ):
-        
+    for line in lines:
         pwg = np.gradient( line.df['Cp'], line.df['x'] )
         interpolator = create_linear_interpolator(line.df['x'], pwg)
-        ax.plot( x_sep[i],   interpolator(x_sep[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
-        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
+        ax.plot( line.x_sep,   interpolator(line.x_sep),   'p', color=line.color, ms=15)
+        ax.plot( line.x_att,   interpolator(line.x_att),   'p', color=line.color, ms=15)
+        ax.plot( line.x_pfmax, interpolator(line.x_pfmax), '*', color=line.color, ms=20)
 
     ax.set_ylim([-0.1,0.6])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
@@ -397,9 +403,9 @@ if plt_Cf:
 
     # to avoid line overlapped on marker
     
-    for i,line in enumerate( lines ):
+    for line in lines:
         interpolator = create_linear_interpolator(line.df['x'], line.df['Cf'])
-        ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
+        ax.plot( line.x_pfmax, interpolator(line.x_pfmax), '*', color=line.color, ms=20)
 
     if add_sw_luis:
         swdf = pd.read_csv(sw_iw_Cf_file, delimiter=r'\s+')

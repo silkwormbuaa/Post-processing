@@ -43,14 +43,14 @@ cases_nr        = [0,1,2,3,4]
 showlegend      = False
 premultiply     = True
 normalize       = False
-outpath         = '/home/wencan/temp/DataPost/midRe/psd/'
+outpath         = '/home/wencan/temp/DataPost/midRe/psd/nfft/'
 
 cases    = ['smooth_adiabatic','220927','smooth_mid','231124','241030']
 color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 
 label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
 lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
 lwidth   = [4.0,              4.0,               4.0,             4.0,                4.0,                  4.0]
-locs     = ['pfmax','pfmax','pfmax','pfmax','pfmax']
+locs     = ['sep','sep','pfmax','pfmax','pfmax']
 
 os.chdir( create_folder(outpath) )
 
@@ -76,7 +76,7 @@ for nr in cases_nr:
         probe.get_fluc( 'p' )
         
         if premultiply: 
-            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5, normalize=normalize )
+            probe.pre_multi_psd( 'p_fluc', n_seg=8, overlap=0.5, normalize=normalize, nfft=None )
             var = 'pmpsd_p_fluc'
         else:         
             probe.compute_psd( 'p_fluc', n_seg=8, overlap=0.5 )
