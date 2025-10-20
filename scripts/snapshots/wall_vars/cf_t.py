@@ -39,7 +39,7 @@ def main():
 
     mpi = MPIenv()
     
-    case_dir = '/home/wencan/temp/smooth_mid'
+    case_dir = '/home/wencan/temp/smooth_adiabatic'
     
     # be careful with the range of bounding box
     bbox     = [ -30.0, 120.0, -1.3, 0.5, -11.0, 11.0]
@@ -265,7 +265,7 @@ def read_plot():
     
     plot_breathing( xx, zz, cf_t, 
                     cbar_label=r'$C_f\times 10^3$',
-                    cbar_levels=np.linspace(-3.0,3.0,81),
+                    cbar_levels=np.linspace(-3.5,3.5,71),
                     figname='cf_t',
                     extend='both',
                     u0=True)

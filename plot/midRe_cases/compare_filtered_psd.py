@@ -47,9 +47,9 @@ lstyle    = ['-'        ,'--'       ,'-'          ,'--'         ]
 locs       =['ridge'    ,'valley'   ,'ridge'      ,'valley'     ] # 'ridge' or 'valley'
 
 cases     = ['smooth_mid','smooth_mid_x2']
-colors    = ['black'     ,'black'        ]
-lstyle    = ['--'        ,':'            ]
-locs       =['ridge'     ,'valley'       ]
+colors    = ['black'     ,'blue'        ]
+lstyle    = ['--'        ,'-'            ]
+locs       =['ridge'     ,'ridge'        ]
 
 
 outdir    = '/home/wencan/temp/DataPost/midRe/psd/grid_study/'

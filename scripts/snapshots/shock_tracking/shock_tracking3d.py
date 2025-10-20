@@ -37,7 +37,7 @@ def main():
     
     mpi = MPIenv()
     
-    case_dir = '/home/wencan/temp/smooth_adiabatic/'
+    case_dir = '/home/wencan/temp/smooth_mid_x2/'
     
     dirs     = Directories( case_dir )
     params   = Params( dirs.case_para_file )
@@ -221,7 +221,7 @@ def mpi_shock_tracking( mpi, grd, snapfiles, ranges, outfile ):
 # - do shock tracking on a single snapshot
 
 def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
-                         tolerance=3.0, half_width=3.0 ):
+                         tolerance=2.0, half_width=2.5 ):
     
     # - read snapshot file
 
@@ -290,16 +290,18 @@ def snap_shock_tracking( snap_file, grid, blocklist, ranges, x_last_shock,
 # - check if any element of x_shock is 'tolerance' away from x_last_shock
 # ------------------------------------------------------------------------------    
     
+    # if this is the first snapshot in this mpi process
     if x_last_shock is None: 
-        
         x_last_shock = x_temp
-        if np.any( np.abs(x_temp - np.mean(x_last_shock))  > tolerance ):
-            print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
-            # - cut off the extreme values
-            x_temp[np.abs(x_temp - np.mean(x_last_shock))  > tolerance] = np.mean(x_last_shock)
-            x_last_shock = np.array([np.mean(x_temp)]*len(x_last_shock))
 
     else: x_last_shock = x_last_shock['x'].values
+
+    # if any element is far away from last shock, apply special treatment
+    if np.any( np.abs(x_temp - np.mean(x_last_shock))  > tolerance ):
+        print("Warning: the shock front is not continuous! Special treatment will be applied.\n")
+        # - cut off the extreme values
+        x_temp[np.abs(x_temp - np.mean(x_last_shock))  > tolerance] = np.mean(x_last_shock)
+        x_last_shock = np.array([np.mean(x_temp)]*len(x_last_shock))
     
     indx_s    = np.array( [find_indices(xx[0,:], x-half_width)[0] for x in x_last_shock] )
     indx_e    = indx_s + int( 2*half_width//abs(xx[0,1]-xx[0,0]) )
