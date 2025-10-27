@@ -10,9 +10,10 @@
 
 import cmath
 import pickle
-import numpy             as     np
-import pandas            as     pd
-from   scipy.interpolate import griddata
+import numpy                         as     np
+import pandas                        as     pd
+from   scipy.interpolate             import griddata
+from   vtkmodules.util.numpy_support import vtk_to_numpy
 
 from   .plot_style       import plot_dmd_mode 
 from   .io_vtk           import create_multiblock_dataset
@@ -312,7 +313,8 @@ class DMDModes:
     def mode_to_vtk( self, indx, vars, block_list, snap_type, grid3d, 
                      i_phase=0, n_phases=8,
                      phi_displace=0,
-                     rescale=[0.0,0.0,0.0,1.0,1.0,1.0], 
+                     rescale=[0.0,0.0,0.0,1.0,1.0,1.0],
+                     compute_vorticity=False, 
                      buff=3):
         """
         transform the dmd modes into vtk multiblock vtk \n
@@ -374,7 +376,20 @@ class DMDModes:
                 databuff = mode.real[i_s:i_e]
                 
                 bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, databuff)
-
+            
+# ---------- compute vorticity if needed
+            
+            if compute_vorticity:
+                
+                if snap_type == 'X':
+                    data_header = header + '_w1_' + f'{i_phase:03d}'
+                    v = vtk_to_numpy( bl_vtk.GetCellData().GetArray( f"{header}_v_{i_phase:03d}" ) ).reshape(g.nz,g.ny)
+                    w = vtk_to_numpy( bl_vtk.GetCellData().GetArray( f"{header}_w_{i_phase:03d}" ) ).reshape(g.nz,g.ny)
+                    dv_dz = np.gradient(v, g.gz[3:-3], axis=0)
+                    dw_dy = np.gradient(w, g.gy[3:-3], axis=1)
+                    w1 = dw_dy - dv_dz
+                    bl_vtk = add_var_vtkRectilinearGrid( bl_vtk, data_header, w1.ravel() )            
+            
             vtk_blocks.append( bl_vtk )
             i_start += len(vars)*n_cells
             

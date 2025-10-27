@@ -52,13 +52,13 @@ mpi = MPIenv()
 # read in one snapshot file to get grid vectors
 # =============================================================================
 
-casedir  = '/home/wencan/temp/231124/'
+casedir  = '/home/wencan/temp/241030/'
 clipbox  = [-100.0, 150.0, 0.0, 2.0, -2.0, 2.0]
 colmap   = 'coolwarm'
 vars     = ['u','v','w','p']
 n_frames = 64
 snaptag  = 'snapshot_X_004.bin'
-outdir   = '/modes_figs_jfm'
+outdir   = '/modes_figs_jfm_r2'
 
 # =============================================================================
 
@@ -190,14 +190,20 @@ def postprocess_dmd_x( indx ):
     for j in range(8):
         
         dataset = modes_temp.mode_to_vtk(indx, vars, block_list, 'X', grid3d,
-                                         j, 8, rescale=[0,0,0,5.2,5.2,5.2])
+                                         j, 8, 
+                                         compute_vorticity=True,
+                                         rescale=[0,0,0,5.2,5.2,5.2])
         dataset = pv.MultiBlock( dataset )
         
         varname_list = [f'mode_x_{indx:05d}_{var}_{j:03d}' for var in vars]
+        varname_list.append( f'mode_x_{indx:05d}_w1_{j:03d}' )
         range_vars   = [ dataset.get_data_range(varname) for varname in varname_list ]
         ranges       = [ ( min(ranges[k][0],range_vars[k][0]),
                            max(ranges[k][1],range_vars[k][1]) ) 
-                          for k in range(len(vars)) ]
+                          for k in range(len(range_vars)) ]
+        
+        ranges[-1] = (ranges[-1][0]*0.1,ranges[-1][1]*0.1)
+        print( ranges )
         
 # -- loop over every phase  
 
@@ -207,7 +213,9 @@ def postprocess_dmd_x( indx ):
     for j in range( n_frames ):
     
         dataset = modes_temp.mode_to_vtk(indx, vars, block_list, 'X', grid3d,
-                                         j, n_frames, rescale=[0,0,0,5.2,5.2,5.2])
+                                         j, n_frames, 
+                                         compute_vorticity=True,
+                                         rescale=[0,0,0,5.2,5.2,5.2])
 
         dataset = pv.MultiBlock( dataset )
         
@@ -234,7 +242,7 @@ def postprocess_dmd_x( indx ):
 
         images  = list()
 
-        for k, var in enumerate(vars):
+        for k, var in enumerate(vars+['w1']):
         
             dataset.set_active_scalars(f'mode_x_{indx:05d}_{var}_{j:03d}')
     
@@ -270,14 +278,14 @@ def postprocess_dmd_x( indx ):
 
 # --- plot mode shape of each variable
 
-        fig = plt.figure(figsize=(8.5,5.6))
+        fig = plt.figure(figsize=(12.75,5.6))
         fig.subplots_adjust(left=0.10, right=0.98, top=0.9, bottom=0.12)
-        gs  = GridSpec(2,2, figure=fig)
+        gs  = GridSpec(2,3, figure=fig)
         
         for k, image in enumerate(images):
             
-            n_row = k//2
-            n_col = k%2
+            n_row = k//3
+            n_col = k%3
             
             ax = fig.add_subplot(gs[n_row,n_col])
             
@@ -288,7 +296,10 @@ def postprocess_dmd_x( indx ):
 
             ax.fill_between( zlist, wallshape, -0.3, color='gray' )
             ax.set_ylim( [-0.3,2])
-            ax.text(1.6,1.8,vars[k])
+            if k==4:
+                ax.text(1.6,1.8,r'$\omega_x$')
+            else:
+                ax.text(1.6,1.8,vars[k])
             
             if n_row==1: ax.set_xlabel(r'$z/\delta_0$')
             if n_col==0: ax.set_ylabel(r'$y/\delta_0$')
@@ -306,6 +317,7 @@ def postprocess_dmd_x( indx ):
         
         print(f"Save {figname} done.") 
         sys.stdout.flush()
+
 
 # -- convert png image to mp4
 
@@ -354,8 +366,8 @@ if mpi.size == 1:
     
     print("No worker available. Master should do all tasks.")
     
-    for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
-#    for i, indx in enumerate( [3305] ):    
+#    for i, indx in enumerate( modes_temp.df_ind['indxes'][1:] ):
+    for i, indx in enumerate( [3756] ):    
         postprocess_dmd_x( indx )
         clock.print_progress( i, len(modes_temp.df_ind['indxes']))
         

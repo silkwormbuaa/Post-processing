@@ -110,6 +110,7 @@ class Directories:
         self.pp_snp_3dshock = os.path.join( self.pp_snapshots, '3d_shock' )
         self.pp_snp_sl_prb  = os.path.join( self.pp_snapshots, 'sl_prb'  )
         self.pp_snp_sl_iso  = os.path.join( self.pp_snapshots, 'sl_iso'  )
+        self.pp_snp_tbl     = os.path.join( self.pp_snapshots, 'tbl_vortices' )
 
 # ----------------------------------------------------------------------
 # >>> Dynamic files                                            (Nr.)
