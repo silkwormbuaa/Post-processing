@@ -26,9 +26,10 @@ from   vista.snapshot    import Snapshot
 from   vista.statistic   import StatisticData
 from   vista.directories import Directories
 from   vista.tools       import get_filelist
+from   vista.directories import create_folder
 #sys.stdout = Logger( os.path.basename(__file__) )
 
-case_folder = '/home/wencan/temp/241030/'
+case_folder = '/home/wencan/temp/smooth_mid_x2/'
 
 bbox = [-60.0, 100.0, -1.5, 10.0, -11.0, 11.0]
 
@@ -80,7 +81,7 @@ with timer('compute bubble volume'):
 
 print(f"case {dirs.case_dir} bubble volume (threshold y>0): {vol1:.2f} ({vol2:.2f})")
 
-os.chdir( dirs.pp_bubble )
+os.chdir( create_folder(dirs.pp_bubble) )
 with open(f"{dirs.pp_bubble}/bubble_size_stat.dat", 'w') as f:
     f.write(f"bubble volume (threshold y>0): {vol1:.2f} ({vol2:.2f})\n")
 
