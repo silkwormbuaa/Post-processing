@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = True
+off_screen = False
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -50,13 +50,13 @@ mpi = MPIenv()
 # option 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/241030'
+casefolder = '/home/wencan/temp/220926'
 
 bbox      = [-30.0, 0.0, -1.3, 31.0, -999, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','grad_rho_mod','p']
-q_crit    = 100000.0    # for high Re boundary layer
-#q_crit    = 50000.0     # for low Re boundary layer
+q_crit    = 200000.0    # for high Re boundary layer
+q_crit    = 50000.0     # for low Re boundary layer
 
 dirs      = Directories( casefolder )
 snaps_dir = dirs.snp_dir

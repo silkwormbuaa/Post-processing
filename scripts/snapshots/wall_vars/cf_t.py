@@ -39,7 +39,7 @@ def main():
 
     mpi = MPIenv()
     
-    case_dir = '/home/wencan/temp/smooth_adiabatic'
+    case_dir = '/home/wencan/temp/220927'
     
     # be careful with the range of bounding box
     bbox     = [ -30.0, 120.0, -1.3, 0.5, -11.0, 11.0]
@@ -188,10 +188,14 @@ def main():
         
     # --- save original wall projection results
 
-        data.append((itstep, itime, 
-                     np.mean(fric,axis=0)/dyn_p*1000,
+        data.append((itstep, 
+                     itime, 
+                     np.mean(fric,axis=0)/dyn_p*1000, # spanwise average
+                     fric[npz//2,:]/dyn_p*1000,       # centerline
                      np.mean(p,axis=0)/p_ref,
-                     np.mean(p_fluc,axis=0)/p_ref ))
+                     p[npz//2,:]/p_ref,
+                     np.mean(p_fluc,axis=0)/p_ref,
+                     p_fluc[npz//2,:]/p_ref ))
 
     # - print the progress
 
@@ -215,35 +219,9 @@ def main():
         
         os.chdir( outpath )
         
-        itimes = np.array( [ item[1] for item in merged ] )
-        cf_t   = np.array( [ item[2] for item in merged ] )
-        p_t    = np.array( [ item[3] for item in merged ] )
-        pf_t   = np.array( [ item[4] for item in merged ] )
-        
         with open('cf_t.pkl','wb') as f:
             pickle.dump( np.unique(xx),f )
             pickle.dump( merged, f )
-            
-        xx,zz = np.meshgrid( np.unique(xx), itimes )
-        
-        plot_breathing( xx, zz, cf_t, 
-                        cbar_label=r'$C_f\times 10^3$',
-                        cbar_levels=np.linspace(-6.0,6.0,81),
-                        figname='cf_t',
-                        extend='both' )
-        
-        plot_breathing( xx, zz, p_t, 
-                        cbar_label=r'$p/p_{\infty}$',
-                        cbar_levels=np.linspace(0.8,2.4,81),
-                        figname='p_t',
-                        extend='both' )
-        
-        plot_breathing( xx, zz, pf_t, 
-                        cbar_label=r'$p^{\prime}/p_{\infty}$',
-                        cbar_levels=np.linspace(-0.4,0.4,81),
-                        figname='pf_t',
-                        extend='both' )
-        
 
         print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
         sys.stdout.flush()
@@ -257,29 +235,55 @@ def read_plot():
         merged     = pickle.load(f)
         
     itimes = np.array( [ item[1] for item in merged ] )
-    cf_t   = np.array( [ item[2] for item in merged ] )
-    p_t    = np.array( [ item[3] for item in merged ] )
-    pf_t   = np.array( [ item[4] for item in merged ] )
+    cf_t_m = np.array( [ item[2] for item in merged ] )
+    cf_t_0 = np.array( [ item[3] for item in merged ] )
+    p_t_m  = np.array( [ item[4] for item in merged ] )
+    p_t_0  = np.array( [ item[5] for item in merged ] )
+    pf_t_m = np.array( [ item[6] for item in merged ] )
+    pf_t_0 = np.array( [ item[7] for item in merged ] )
     
     xx,zz = np.meshgrid( x_coords, itimes )
+
+# --- spanwise averaged 
     
-    plot_breathing( xx, zz, cf_t, 
+    plot_breathing( xx, zz, cf_t_m, 
                     cbar_label=r'$C_f\times 10^3$',
                     cbar_levels=np.linspace(-3.5,3.5,71),
-                    figname='cf_t',
+                    figname='cf_t_m',
                     extend='both',
                     u0=True)
     
-    plot_breathing( xx, zz, p_t, 
+    plot_breathing( xx, zz, p_t_m, 
                     cbar_label=r'$p/p_{\infty}$',
                     cbar_levels=np.linspace(0.8,2.4,81),
-                    figname='p_t',
+                    figname='p_t_m',
                     extend='both' )
     
-    plot_breathing( xx, zz, pf_t, 
+    plot_breathing( xx, zz, pf_t_m, 
                     cbar_label=r'$p^{\prime}/p_{\infty}$',
                     cbar_levels=np.linspace(-0.4,0.4,81),
-                    figname='pf_t',
+                    figname='pf_t_m',
+                    extend='both' )
+
+# --- center line
+
+    plot_breathing( xx, zz, cf_t_0, 
+                    cbar_label=r'$C_f\times 10^3$',
+                    cbar_levels=np.linspace(-3.5,3.5,71),
+                    figname='cf_t_0',
+                    extend='both',
+                    u0=True)
+
+    plot_breathing( xx, zz, p_t_0, 
+                    cbar_label=r'$p/p_{\infty}$',
+                    cbar_levels=np.linspace(0.8,2.4,81),
+                    figname='p_t_0',
+                    extend='both' )
+    
+    plot_breathing( xx, zz, pf_t_0,
+                    cbar_label=r'$p^{\prime}/p_{\infty}$',
+                    cbar_levels=np.linspace(-0.4,0.4,81),
+                    figname='pf_t_0',
                     extend='both' )
 
 def plot_breathing( xx, zz, v, 
@@ -293,7 +297,7 @@ def plot_breathing( xx, zz, v,
     cs = ax.contourf( xx, zz, v, levels=cbar_levels, extend=extend, cmap='RdBu_r' )
     if u0:
         u0line = ax.contour( xx, zz, v, levels=[0.0], colors='black', linewidths=0.2 )
-    cbar = fig.colorbar( cs, ax=ax, orientation='vertical', pad=0.02 )
+    cbar = fig.colorbar( cs, ax=ax, orientation='vertical', pad=0.02, shrink=0.1 )
     cbar.set_label( cbar_label, fontsize=16 )
     cbar.ax.tick_params( labelsize=14 )
     
@@ -303,7 +307,7 @@ def plot_breathing( xx, zz, v,
     
     plt.savefig( figname + '.png' )
     plt.close()
-    
+    print(f"Figure {figname}.png is saved {os.getcwd()}.")
 
 # =============================================================================
 if __name__ == "__main__":
