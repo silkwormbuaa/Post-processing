@@ -109,19 +109,15 @@ for i,loc in enumerate(locs):
     
     with timer("read selected blocks and match grid"):
         
-        with open( datafile, 'br' ) as f:
-            
-            S.read_stat_header( f )
-            
-            vars = ['v','w','rho']
-            
-            S.read_stat_body( f, block_list, vars )
-            
-            S.match_grid( block_list, G )
-            
-            dfs = S.get_slice_df( block_list, G, indx_slic, 'X' )
-            
-            dfs.drop( dfs[ dfs['y'] > y_lim ].index, inplace=True )
+        vars = ['v','w','rho']
+        
+        S.read_statistic( block_list, vars )
+        
+        S.match_grid( block_list, G )
+
+        dfs = S.get_slice_df( block_list, G, indx_slic, 'X' )
+        
+        dfs.drop( dfs[ dfs['y'] > y_lim ].index, inplace=True )
     
     # - compute secondary flow intensity
     
