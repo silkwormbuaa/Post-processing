@@ -1,0 +1,74 @@
+# Basic info
+
+casecode  = 241030_z2
+tag       = $\mathcal{HR}$2_z2
+roughwall = True
+
+# Flow setup parameters
+
+u_ref     = 507.0
+p_ref     = 45447.289
+rho_ref   = 0.9886
+T_ref     = 160.15
+delta_0   = 5.2
+Re_ref    = 9636.0
+visc_law  = P07
+
+# Numerical setup parameters
+
+dt_snap   = 0.01  
+
+# Geometric setup parametrs
+
+H         = 0.13679
+H_md      = 0.05758
+x_imp     = 50.4
+n_period  = 64
+D         = 0.325
+
+# Computational domain parameters (normalized)
+
+y_min        = -0.03
+
+SNAP_RANGE_X = -30.0,  120.0,
+SNAP_RANGE_Y =  -1.3,  31.0 ,
+SNAP_RANGE_Z = -10.4,  10.4 ,
+
+
+# Case specific flow conditions
+
+x_incip   = 0.0
+x_sep     = 0.0
+x_att     = 0.0
+x_pfmax   = 0.0
+x_pw_grad_max = 0.0
+
+loc_sl    = -5.0, 0.95
+
+pw_grad_max = 0.383
+
+prb_sep   = 117
+prb_att   = 271
+prb_pfmax = 117
+
+# Shock tracking range
+
+# group 1, y = 10.4 (2.00 delta)
+# group 2, y = 30.0 (5.77 delta)
+# y_location, range_start, range_end
+shock_range_1 =  10.4, 0.0,  18.0
+shock_range_2 =  30.0, 24.0, 39.0
+
+
+# INCA version led different setting
+
+prb_withT = True
+
+# probe groups
+
+prb_ridge_index     = [1..389]
+prb_valley_index    = [390..778]
+prb_upspan_index    = [779..859]
+prb_downspan_index  = [860..940]
+prb_upvline_index   = [941..1018]
+prb_downvline_index = []
