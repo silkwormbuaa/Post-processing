@@ -52,12 +52,6 @@ def main():
     ccfile     = dirs.cc_setup
     outpath    = dirs.pp_snp_fricprj
     
-    if mpi.rank == 0:
-        os.chdir( create_folder(outpath) )
-        if os.path.exists( 'cf_t.pkl' ):
-            read_plot()
-            return
-
     # --- broadcast the parameters
 
     params     = None
@@ -72,9 +66,12 @@ def main():
     
     if mpi.rank == 0:
         
-        create_folder( outpath )
-        
         params    = Params( dirs.case_para_file )
+        os.chdir( create_folder(outpath) )
+        if os.path.exists( 'cf_t.pkl' ):
+            read_plot( params )
+            return
+        
         roughwall = params.roughwall
         
         snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
@@ -188,14 +185,28 @@ def main():
         
     # --- save original wall projection results
 
-        data.append((itstep, 
-                     itime, 
-                     np.mean(fric,axis=0)/dyn_p*1000, # spanwise average
-                     fric[npz//2,:]/dyn_p*1000,       # centerline
-                     np.mean(p,axis=0)/p_ref,
-                     p[npz//2,:]/p_ref,
-                     np.mean(p_fluc,axis=0)/p_ref,
-                     p_fluc[npz//2,:]/p_ref ))
+        if roughwall:
+            data.append((itstep, 
+                        itime, 
+                        np.mean(fric,axis=0) / dyn_p * 1000, # spanwise average
+                        fric[npz//2,:] / dyn_p * 1000,       # centerline
+                        np.mean(p,axis=0) / p_ref,
+                        p[npz//2,:] / p_ref,
+                        np.mean(p_fluc,axis=0) / p_ref,
+                        p_fluc[npz//2,:]/p_ref,
+                        fric  [npz//2+int(npz/params.n_period/2),:] / dyn_p * 1000,
+                        p     [npz//2+int(npz/params.n_period/2),:] / p_ref,
+                        p_fluc[npz//2+int(npz/params.n_period/2),:] / p_ref))
+        else:
+            data.append((itstep, 
+                        itime, 
+                        np.mean(fric,axis=0)/dyn_p*1000, # spanwise average
+                        fric[npz//2,:]/dyn_p*1000,       # centerline
+                        np.mean(p,axis=0)/p_ref,
+                        p[npz//2,:]/p_ref,
+                        np.mean(p_fluc,axis=0)/p_ref,
+                        p_fluc[npz//2,:]/p_ref ))
+        
 
     # - print the progress
 
@@ -226,7 +237,7 @@ def main():
         print(f"Finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
         sys.stdout.flush()
 
-def read_plot():
+def read_plot( params:Params ):
     
     print("cf_t.pkl already exists. Just plot it directly.")
     
@@ -241,6 +252,13 @@ def read_plot():
     p_t_0  = np.array( [ item[5] for item in merged ] )
     pf_t_m = np.array( [ item[6] for item in merged ] )
     pf_t_0 = np.array( [ item[7] for item in merged ] )
+
+    if params.roughwall:
+        
+        cf_t_v = np.array( [ item[8 ] for item in merged ] )
+        p_t_v  = np.array( [ item[9 ] for item in merged ] )
+        pf_t_v = np.array( [ item[10] for item in merged ] )
+
     
     xx,zz = np.meshgrid( x_coords, itimes )
 
@@ -285,6 +303,29 @@ def read_plot():
                     cbar_levels=np.linspace(-0.4,0.4,81),
                     figname='pf_t_0',
                     extend='both' )
+    
+# --- in the valley, if rough wall case
+
+    if params.roughwall:
+        
+        plot_breathing( xx, zz, cf_t_v, 
+                        cbar_label=r'$C_f\times 10^3$',
+                        cbar_levels=np.linspace(-3.5,3.5,71),
+                        figname='cf_t_v',
+                        extend='both',
+                        u0=True)
+
+        plot_breathing( xx, zz, p_t_v, 
+                        cbar_label=r'$p/p_{\infty}$',
+                        cbar_levels=np.linspace(0.8,2.4,81),
+                        figname='p_t_v',
+                        extend='both' )
+        
+        plot_breathing( xx, zz, pf_t_v,
+                        cbar_label=r'$p^{\prime}/p_{\infty}$',
+                        cbar_levels=np.linspace(-0.4,0.4,81),
+                        figname='pf_t_v',
+                        extend='both' )
 
 def plot_breathing( xx, zz, v, 
                     cbar_label, cbar_levels, 
