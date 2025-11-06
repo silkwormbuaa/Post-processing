@@ -18,6 +18,8 @@ import time
 import numpy             as     np
 import pandas            as     pd
 import matplotlib.pyplot as     plt
+import matplotlib.ticker as     ticker
+import matplotlib.colors as     mcolors
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
@@ -31,15 +33,19 @@ from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
 from   vista.material    import get_visc
+from   vista.plot_style  import set_jfm_style
 from   vista.directories import create_folder
 from   vista.plane_analy import save_isolines
 from   vista.plane_analy import shift_coordinates
 
+fmt = '.png'
+
 def main():
 
     mpi = MPIenv()
+    set_jfm_style()
     
-    case_dir = '/home/wencan/temp/220927'
+    case_dir = '/home/wencan/temp/241030'
     
     # be careful with the range of bounding box
     bbox     = [ -30.0, 120.0, -1.3, 0.5, -11.0, 11.0]
@@ -259,6 +265,9 @@ def read_plot( params:Params ):
         p_t_v  = np.array( [ item[9 ] for item in merged ] )
         pf_t_v = np.array( [ item[10] for item in merged ] )
 
+    # normalize time
+    
+    itimes = (itimes - 20.0)*507.0/5.2
     
     xx,zz = np.meshgrid( x_coords, itimes )
 
@@ -266,20 +275,25 @@ def read_plot( params:Params ):
     
     plot_breathing( xx, zz, cf_t_m, 
                     cbar_label=r'$C_f\times 10^3$',
-                    cbar_levels=np.linspace(-3.5,3.5,71),
+                    cbar_levels=np.linspace(-3.6,6.0,49),
+                    cbar_ticks=np.array([-3.0,0.0,3.0,6.0]),
                     figname='cf_t_m',
                     extend='both',
-                    u0=True)
+                    u0=True,
+                    twoslope=True)
+    
     
     plot_breathing( xx, zz, p_t_m, 
                     cbar_label=r'$p/p_{\infty}$',
                     cbar_levels=np.linspace(0.8,2.4,81),
+                    cbar_ticks=np.linspace(0.8,2.4,5),
                     figname='p_t_m',
                     extend='both' )
     
     plot_breathing( xx, zz, pf_t_m, 
                     cbar_label=r'$p^{\prime}/p_{\infty}$',
                     cbar_levels=np.linspace(-0.4,0.4,81),
+                    cbar_ticks=np.linspace(-0.4,0.4,5),
                     figname='pf_t_m',
                     extend='both' )
 
@@ -287,20 +301,24 @@ def read_plot( params:Params ):
 
     plot_breathing( xx, zz, cf_t_0, 
                     cbar_label=r'$C_f\times 10^3$',
-                    cbar_levels=np.linspace(-3.5,3.5,71),
+                    cbar_levels=np.linspace(-3.6,6.0,49),
+                    cbar_ticks=np.array([-3.0,0.0,3.0,6.0]),
                     figname='cf_t_0',
                     extend='both',
-                    u0=True)
+                    u0=True,
+                    twoslope=True)
 
     plot_breathing( xx, zz, p_t_0, 
                     cbar_label=r'$p/p_{\infty}$',
                     cbar_levels=np.linspace(0.8,2.4,81),
+                    cbar_ticks=np.linspace(0.8,2.4,5),
                     figname='p_t_0',
                     extend='both' )
     
     plot_breathing( xx, zz, pf_t_0,
                     cbar_label=r'$p^{\prime}/p_{\infty}$',
                     cbar_levels=np.linspace(-0.4,0.4,81),
+                    cbar_ticks=np.linspace(-0.4,0.4,5),
                     figname='pf_t_0',
                     extend='both' )
     
@@ -310,45 +328,75 @@ def read_plot( params:Params ):
         
         plot_breathing( xx, zz, cf_t_v, 
                         cbar_label=r'$C_f\times 10^3$',
-                        cbar_levels=np.linspace(-3.5,3.5,71),
+                        cbar_levels=np.linspace(-3.6,6.0,49),
+                        cbar_ticks=np.array([-3.0,0.0,3.0,6.0]),
                         figname='cf_t_v',
                         extend='both',
-                        u0=True)
+                        u0=True,
+                        twoslope=True)
 
         plot_breathing( xx, zz, p_t_v, 
                         cbar_label=r'$p/p_{\infty}$',
                         cbar_levels=np.linspace(0.8,2.4,81),
+                        cbar_ticks=np.linspace(0.8,2.4,5),
                         figname='p_t_v',
                         extend='both' )
         
         plot_breathing( xx, zz, pf_t_v,
                         cbar_label=r'$p^{\prime}/p_{\infty}$',
                         cbar_levels=np.linspace(-0.4,0.4,81),
+                        cbar_ticks=np.linspace(-0.4,0.4,5),
                         figname='pf_t_v',
                         extend='both' )
 
 def plot_breathing( xx, zz, v, 
-                    cbar_label, cbar_levels, 
+                    cbar_label, 
+                    cbar_levels, 
+                    cbar_ticks,
                     figname,
                     extend='both',
-                    u0=False):
+                    u0=False,
+                    twoslope=False):
     
-    fig, ax = plt.subplots( figsize=(15, 50), constrained_layout=True )
+    fig, ax = plt.subplots( figsize=(2.8,3), constrained_layout=True )
     
-    cs = ax.contourf( xx, zz, v, levels=cbar_levels, extend=extend, cmap='RdBu_r' )
+    ax.set_position([0.22,0.15,0.65,0.75])
+    
+    if twoslope:
+        norm = mcolors.TwoSlopeNorm(vmin=cbar_levels[0],vcenter=0.0,vmax=cbar_levels[-1])
+        cs = ax.contourf( xx, zz, v, levels=cbar_levels, norm=norm, extend=extend, cmap='RdBu_r' )
+    else:
+        cs = ax.contourf( xx, zz, v, levels=cbar_levels, extend=extend, cmap='RdBu_r' )
     if u0:
         u0line = ax.contour( xx, zz, v, levels=[0.0], colors='black', linewidths=0.2 )
-    cbar = fig.colorbar( cs, ax=ax, orientation='vertical', pad=0.02, shrink=0.1 )
-    cbar.set_label( cbar_label, fontsize=16 )
-    cbar.ax.tick_params( labelsize=14 )
+    cbar = fig.colorbar( cs, ax=ax, 
+                         orientation='vertical', 
+                         pad=0.02, 
+                         shrink=0.5,
+                         ticks=cbar_ticks,
+                         label=cbar_label)
+
+    ax.tick_params(which='major',
+                   axis='both',
+                   direction='out',
+                   length=5,
+                   width=1)
     
-    ax.set_xlabel( r"$x/\delta_0$", fontsize=16 )
-    ax.set_ylabel( r"$t$ (ms)", fontsize=16 )
-    ax.tick_params( axis='both', which='major', labelsize=14 )
+    ax.set_xlabel( r"$(x-x_{imp})/\delta_0$" )
+    ax.set_ylabel( r"$(t-t_0)u_{\infty}/\delta_0$" )
+    ax.tick_params( axis='both', which='major' )
     
-    plt.savefig( figname + '.png' )
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(400))
+    
+    ax.set_ylim([1200,2400])
+    
+    ax.spines[:].set_color('black')
+    ax.spines[:].set_linewidth(1)
+    
+    plt.savefig( figname + fmt, dpi=600 )
     plt.close()
-    print(f"Figure {figname}.png is saved {os.getcwd()}.")
+    print(f"Figure {figname}{fmt} is saved {os.getcwd()}.")
 
 # =============================================================================
 if __name__ == "__main__":
