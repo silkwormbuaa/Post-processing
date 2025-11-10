@@ -29,6 +29,8 @@ plt.rcParams['font.family'] = "Times New Roman"
 plt.rcParams['font.size']   = 45
 
 outpath = '/media/wencan/Expansion/temp/DataPost/midRe/psd'
+figname = 'psd_5maps_p_notnorm.png'
+normalize = False
 
 datapath0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/probes/psd_ridge'
 datapath1 = '/media/wencan/Expansion/temp/220927/postprocess/probes/psd_ridge'
@@ -51,7 +53,11 @@ label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}$', r'$\mathcal{HS}$',r'$\mathcal{
 fig       = plt.figure( figsize=(15, 30) )
 gs        = GridSpec(5,10)
 ax_range  = [0,0,0,0,0,0]
-colornorm = Normalize( vmin=0, vmax=0.3 )
+
+if normalize:
+    colornorm = Normalize( vmin=0, vmax=0.3 )
+else:
+    colornorm = Normalize( vmin=0, vmax=3000000 )
 axs       = list()
 
 for i in range(5):
@@ -68,7 +74,10 @@ for i in range(5):
         probe.read_psd( psdfile )
         st_probe = np.array( probe.psd_df['freq'] )*5.2/507.0
         x_probe  = [(probe.xyz[0]-50.4)/5.2]*len(st_probe)
-        pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
+        if normalize:
+            pmpsd_probe = np.array( probe.psd_df['pmpsd_p_fluc'] )
+        else:
+            pmpsd_probe = np.array( probe.psd_df['psd_p_fluc'] )*np.array( probe.psd_df['freq'])
 
         x.append( x_probe )
         st.append( st_probe )
@@ -130,10 +139,15 @@ for i in range(5):
     axs.append(ax)
 
 axs[4].set_xlim([-15.0, 10.0])
-    
-cbar_label = r'$f \cdot \mathcal{P}(f)/ \int \mathcal{P}(f) \mathrm{d} f$'
-cbar_ticks = np.linspace(0, 0.3, 4)
-cbar_ax = fig.add_subplot([0.3,0.03,0.6,0.1],visible=False)
+
+if normalize:
+    cbar_label = r'$f \cdot \mathcal{P}(f)/ \int \mathcal{P}(f) \mathrm{d} f$'
+    cbar_ticks = np.linspace(0, 0.3, 4)
+else:
+    cbar_label = r'$f \cdot \mathcal{P}(f)$'
+    cbar_ticks = np.linspace(0, 3000000, 4)
+
+cbar_ax = fig.add_subplot([0.3,0.04,0.6,0.1],visible=False)
 #cbar_ax.set_position([0.0, 0.0, 0.7, 0.03])
 cbar = fig.colorbar(pmpsd, ax=cbar_ax, orientation='horizontal', shrink=0.8,
                     ticks=cbar_ticks)
@@ -146,4 +160,4 @@ cbar.ax.yaxis.set_label_coords(-0.45,-0.15)
 
 plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95, wspace=0.2, hspace=0.2)
 os.chdir( create_folder(outpath) )
-plt.savefig( 'psd_5maps_p.png' )
+plt.savefig( figname )
