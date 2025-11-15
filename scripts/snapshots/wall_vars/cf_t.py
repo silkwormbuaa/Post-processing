@@ -100,6 +100,11 @@ def main():
         
         with open( dirs.pp_wall_proj+'/wall_vars_projection.pkl','rb') as f:
             df_stat = pickle.load(f)
+        
+        if roughwall:
+            with open( dirs.pp_wall_proj+'/friction_projection.pkl', 'rb') as f:
+                df_stat_f = pickle.load(f)
+            df_stat['fric']=df_stat_f['fric'] 
 
     params     = mpi.comm.bcast( params,    root=0 )
     roughwall  = mpi.comm.bcast( roughwall, root=0 )
@@ -173,24 +178,24 @@ def main():
         
         dyn_p    = 0.5*rho_ref*u_ref*u_ref
         
-        xx       = np.array( df_wall['xs'] )
-        zz       = np.array( df_wall['zs'] )
-        fric     = np.array( df_wall['fric'] )
-        cf_mean  = np.array( df_stat['Cf'])
-        p        = np.array( df_wall['p'] )
-        p_mean   = np.array( df_stat['p'] )
-        p_fluc   = p - p_mean
-        cf_fluc  = np.array(fric/dyn_p*1000 - cf_mean)
+        xx        = np.array( df_wall['xs']   )
+        zz        = np.array( df_wall['zs']   )
+        fric      = np.array( df_wall['fric'] )
+        fric_mean = np.array( df_stat['fric'] )
+        p         = np.array( df_wall['p']    )
+        p_mean    = np.array( df_stat['p']    )
+        p_fluc    = np.array( p - p_mean      )
+        fric_fluc = np.array( fric - fric_mean)
 
         npx      = len( np.unique(xx) )
         npz      = len( np.unique(zz) )
         
-        xx       = xx.     reshape( npz, npx )
-        zz       = zz.     reshape( npz, npx )
-        fric     = fric.   reshape( npz, npx )
-        p        = p.      reshape( npz, npx )
-        p_fluc   = p_fluc. reshape( npz, npx )
-        cf_fluc  = cf_fluc.reshape( npz, npx )
+        xx       = xx.       reshape( npz, npx )
+        zz       = zz.       reshape( npz, npx )
+        fric     = fric.     reshape( npz, npx )
+        p        = p.        reshape( npz, npx )
+        p_fluc   = p_fluc.   reshape( npz, npx )
+        fric_fluc= fric_fluc.reshape( npz, npx )
         
     # --- save original wall projection results
 
@@ -202,12 +207,12 @@ def main():
                         np.mean(p,axis=0) / p_ref,
                         p[npz//2,:] / p_ref,
                         np.mean(p_fluc,axis=0) / p_ref,
-                        p_fluc[npz//2,:]/p_ref,
-                        cf_fluc[npz//2,:],
-                        fric   [npz//2+int(npz/params.n_period/2),:] / dyn_p * 1000,
-                        p      [npz//2+int(npz/params.n_period/2),:] / p_ref,
-                        p_fluc [npz//2+int(npz/params.n_period/2),:] / p_ref,
-                        cf_fluc[npz//2+int(npz/params.n_period/2),:]))
+                        p_fluc   [npz//2,:]/p_ref,
+                        fric_fluc[npz//2,:]/dyn_p * 1000,
+                        fric     [npz//2+int(npz/params.n_period/2),:] / dyn_p * 1000,
+                        p        [npz//2+int(npz/params.n_period/2),:] / p_ref,
+                        p_fluc   [npz//2+int(npz/params.n_period/2),:] / p_ref,
+                        fric_fluc[npz//2+int(npz/params.n_period/2),:] / dyn_p * 1000))
         else:
             data.append((itstep, 
                         itime, 
@@ -216,8 +221,8 @@ def main():
                         np.mean(p,axis=0)/p_ref,
                         p[npz//2,:]/p_ref,
                         np.mean(p_fluc,axis=0)/p_ref,
-                        p_fluc[npz//2,:]/p_ref,
-                        cf_fluc[npz//2,:]))
+                        p_fluc   [npz//2,:]/p_ref,
+                        fric_fluc[npz//2,:]/dyn_p * 1000))
         
 
     # - print the progress
@@ -257,21 +262,21 @@ def read_plot( params:Params ):
         x_coords   = pickle.load(f)
         merged     = pickle.load(f)
         
-    itimes  = np.array( [ item[1] for item in merged ] )
-    cf_t_m  = np.array( [ item[2] for item in merged ] )
-    cf_t_0  = np.array( [ item[3] for item in merged ] )
-    p_t_m   = np.array( [ item[4] for item in merged ] )
-    p_t_0   = np.array( [ item[5] for item in merged ] )
-    pf_t_m  = np.array( [ item[6] for item in merged ] )
-    pf_t_0  = np.array( [ item[7] for item in merged ] )
-    cff_t_0 = np.array( [ item[8] for item in merged ] )
+    itimes     = np.array( [ item[1] for item in merged ] )
+    cf_t_m     = np.array( [ item[2] for item in merged ] )
+    cf_t_0     = np.array( [ item[3] for item in merged ] )
+    p_t_m      = np.array( [ item[4] for item in merged ] )
+    p_t_0      = np.array( [ item[5] for item in merged ] )
+    pf_t_m     = np.array( [ item[6] for item in merged ] )
+    pf_t_0     = np.array( [ item[7] for item in merged ] )
+    cf_f_t_0   = np.array( [ item[8] for item in merged ] )
 
     if params.roughwall:
         
-        cf_t_v  = np.array( [ item[9 ] for item in merged ] )
-        p_t_v   = np.array( [ item[10] for item in merged ] )
-        pf_t_v  = np.array( [ item[11] for item in merged ] )
-        cff_t_v = np.array( [ item[12] for item in merged ] )
+        cf_t_v     = np.array( [ item[9 ] for item in merged ] )
+        p_t_v      = np.array( [ item[10] for item in merged ] )
+        pf_t_v     = np.array( [ item[11] for item in merged ] )
+        cf_f_t_v = np.array( [ item[12] for item in merged ] )
         
     # normalize time
     
@@ -330,7 +335,7 @@ def read_plot( params:Params ):
                     figname='pf_t_0',
                     extend='both' )
 
-    plot_breathing( xx, zz, cff_t_0, 
+    plot_breathing( xx, zz, cf_f_t_0, 
                     cbar_label=r'$C_f\times 10^3$',
                     cbar_levels=np.linspace(-1.8,3.0,49),
                     cbar_ticks=np.array([-1.5,0.0,1.5,3.0]),
@@ -366,7 +371,7 @@ def read_plot( params:Params ):
                         figname='pf_t_v',
                         extend='both' )
 
-        plot_breathing( xx, zz, cff_t_v, 
+        plot_breathing( xx, zz, cf_f_t_v, 
                         cbar_label=r'$C_f\times 10^3$',
                         cbar_levels=np.linspace(-1.8,3.0,49),
                         cbar_ticks=np.array([-1.5,0.0,1.5,3.0]),
