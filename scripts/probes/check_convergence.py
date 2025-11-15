@@ -25,7 +25,7 @@ from   vista.params      import Params
 def main():
 
     case_folder = '/home/wencan/temp/241030_z2'
-    probe_file  = 'probe_00001.dat'
+    probe_file  = 'probe_00118.dat'
    
     dirs        = Directories( case_folder )
     params      = Params( dirs.case_para_file )
@@ -38,7 +38,7 @@ def main():
     probes      = ProbeFile( dirs.set_prb )
     index       = int(probe_file.split('_')[-1].split('.')[0])
     loc         = probes.probes[ index-1 ].xyz
-    # probe.cleandata( t_start=66.0 )
+#    probe.cleandata( t_start=66.0 )
     
     p     = np.array( probe.df['p'] )
     itime = np.array( probe.df['time'] )

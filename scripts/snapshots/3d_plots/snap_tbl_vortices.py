@@ -50,16 +50,19 @@ mpi = MPIenv()
 # option 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/220926'
+casefolder = '/home/wencan/temp/231124'
 
-bbox      = [-30.0, 0.0, -1.3, 31.0, -999, 999]
+bbox      = [-50.0, -10.0, -1.3, 31.0, 0.0, 999]
+gradients = ['lambda2']
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
+vars_out  = ['lambda2','p','u']
 vars_out  = ['u','Q_cr','grad_rho_mod','p']
-q_crit    = 200000.0    # for high Re boundary layer
-q_crit    = 50000.0     # for low Re boundary layer
+q_crit    = 100000.0    # for high Re boundary layer
+#q_crit    = 50000.0     # for low Re boundary layer
+lambda_crit = 20000.0
 
 dirs      = Directories( casefolder )
-snaps_dir = dirs.snp_dir
+snaps_dir = dirs.wall_dist
 gridfile  = dirs.grid
 outdir    = dirs.pp_snp_tbl + '/figs'
 
@@ -158,6 +161,7 @@ def plot_isosurface( snapfile ):
     point_data.set_active_scalars('p')
     
     vortices = point_data.contour( [q_crit], scalars='Q_cr' )
+#    vortices = point_data.contour( [lambda_crit], scalars='lambda2')
     vortices.set_active_scalars('u')
 
     if roughwall:
@@ -190,8 +194,8 @@ def plot_isosurface( snapfile ):
 # -- camera setting
 
     p.view_vector([0,0,0],viewup=[0.39,0.90,-0.20])
-    p.camera.position = (-120,50,25)
-    p.camera.focal_point = (20,-18,-5)
+    p.camera.position = (-71.48,19.0,9.0)
+    p.camera.focal_point = (16.0,-25.0,-10.0)
     
     cpos_callback( p )
     p.show()

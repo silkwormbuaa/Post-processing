@@ -45,21 +45,24 @@ OutPath  = '/home/wencan/temp/DataPost/midRe/profile_upstream_grid_study/'
 data0 = '/media/wencan/Expansion/temp/smooth_adiabatic/postprocess/statistics/profile_upstream'
 data1 = '/media/wencan/Expansion/temp/smooth_mid/postprocess/statistics/profile_upstream'
 data2 = '/media/wencan/Expansion/temp/220927/postprocess/statistics/profile_upstream'
-data3 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/profile_upstream'
-data4 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/profile_upstream'
+data3 = '/media/wencan/Expansion/temp/231124/postprocess/statistics/profile_upstream'
+data4 = '/media/wencan/Expansion/temp/241030/postprocess/statistics/profile_upstream'
 data5 = '/media/wencan/Expansion/temp/smooth_mid_x2/postprocess/statistics/profile_upstream'
+data6 = '/media/wencan/Expansion/temp/241030_z2/postprocess/statistics/profile_upstream'
 
 #data0 = '/home/wencanwu/my_simulation/temp/smooth_wall/x_-53.6.dat'
 
 data250  = source_dir + '/database/Pirozzoli/M2_Retau_250'
 data1000 = source_dir + '/database/Pirozzoli/M2_Retau_1000'
 
-datalist = [data0,          data1,         data2,   data3,   data4, data5]
-dy       = [0.0,            0.0,           0.312,   0.07921, 0.312, 0.0 ]
-color    = ['gray',         'black',       'orangered',  'yellowgreen', 'steelblue', 'black']
-label    = ['lowRe_smooth', 'midRe_smooth','lowRe_rough','midRe_0.026', 'midRe_0.1', 'mid_x2']
-lstyle   = ['-',            '--',             '-.',      (0, (3, 1, 1, 1, 1, 1)),  ':', ':']
-width    = [4.0,            4.0,           4.0,        4.0,        4.0,    4.0]
+withDNS = True
+
+datalist = [data0,          data1,         data2,        data3,       data4,             data5    , data6       ]
+dy       = [0.0,            0.0,           0.312,        0.312,       0.07921,           0.0      , 0.07921     ]
+color    = ['gray',         'red',         'orangered',  'steelblue', 'red',             'blue'   , 'blue'      ]
+label    = ['lowRe_smooth', 'midRe_smooth','lowRe_rough','midRe_0.1', 'midRe_0.026',    'mid_x2'  , 'HR2_x2'    ]
+lstyle   = ['-',            '-',            '-.',         ':',        '-',              '--'      , '--'        ]
+width    = [5.0,            5.0,            5.0,          5.0,        5.0,               5.0      , 5.0         ]
 selected = [ data1, data5 ]
 lines    = []
 
@@ -165,13 +168,14 @@ if plt_u:
                  ls    = line.lstyle,
                  linewidth = line.width)
 
-    ax.plot( line1000.df['y+'], 
-             line1000.df['u+'],
-             line1000.color, 
-             marker='s',
-             markersize=10,
-             fillstyle='none',
-             linestyle='None')
+    if withDNS:
+        ax.plot( line1000.df['y+'], 
+                line1000.df['u+'],
+                line1000.color, 
+                marker='s',
+                markersize=10,
+                fillstyle='none',
+                linestyle='None')
 
     adjust_plot( ax )
     
@@ -208,26 +212,27 @@ if plt_u_vd:
     
     fig, ax = plt.subplots(figsize=[9,8],constrained_layout=True)
 
-    # law of wall
-    
-    x1 = np.linspace(1,17,50)
-    y1 = np.linspace(1,17,50)
-    
-    x2 = np.linspace(2,3000,300)
-    y2 = np.log(x2)/0.41 + 5.2   
+    if withDNS:
+        # law of wall
+        
+        x1 = np.linspace(1,17,50)
+        y1 = np.linspace(1,17,50)
+        
+        x2 = np.linspace(2,3000,300)
+        y2 = np.log(x2)/0.41 + 5.2   
 
-    ax.plot( x1,y1,'gray',ls='-.',lw=4.0)
-    ax.plot( x2,y2,'gray',ls='-.',lw=4.0)
-    
-    text = r"$\frac{\mathrm{log}y^+}{0.41}+5.2$"
-    ax.text(2,24,text,fontsize=30)
-    ax.plot(3,np.log(3.0)/0.41+5.2,'o',40,color='black')
-    ax.plot([3,3],[np.log(3.0)/0.41+5.2,23],'black')
-    
-    ax.text(13,20,r"$y^+$",fontsize=30)
-    ax.plot(14,14,'o',40,color='black')
-    ax.plot([14,14],[14,19],'black')    
-    
+        ax.plot( x1,y1,'gray',ls='-.',lw=4.0)
+        ax.plot( x2,y2,'gray',ls='-.',lw=4.0)
+        
+        text = r"$\frac{\mathrm{log}y^+}{0.41}+5.2$"
+        ax.text(2,24,text,fontsize=30)
+        ax.plot(3,np.log(3.0)/0.41+5.2,'o',40,color='black')
+        ax.plot([3,3],[np.log(3.0)/0.41+5.2,23],'black')
+        
+        ax.text(13,20,r"$y^+$",fontsize=30)
+        ax.plot(14,14,'o',40,color='black')
+        ax.plot([14,14],[14,19],'black')    
+        
     # profiles
     
     for line in lines:
@@ -238,14 +243,15 @@ if plt_u_vd:
                  label = line.label, 
                  ls    = line.lstyle,
                  linewidth = line.width)
-
-    ax.plot( line1000.df['y+'], 
-             line1000.df['u_vd+'],
-             line1000.color, 
-             marker='s',
-             markersize=10,
-             fillstyle='none',
-             linestyle='None')
+    
+    if withDNS:
+        ax.plot( line1000.df['y+'], 
+                line1000.df['u_vd+'],
+                line1000.color, 
+                marker='s',
+                markersize=10,
+                fillstyle='none',
+                linestyle='None')
 
     adjust_plot( ax )
 
@@ -280,37 +286,38 @@ if plt_RS:
     
     fig, ax = plt.subplots( figsize=[9,8],constrained_layout=True )
 
-    ax.plot( line1000.df['y+'], 
-             line1000.df['urms+']**2*line1000.df['sqrt(rho/rho_w)']**2,
-             'black',
-             marker='s',
-             markersize=10,
-             fillstyle='none',
-             linestyle='None')
+    if withDNS:
+        ax.plot( line1000.df['y+'], 
+                line1000.df['urms+']**2*line1000.df['sqrt(rho/rho_w)']**2,
+                'black',
+                marker='s',
+                markersize=10,
+                fillstyle='none',
+                linestyle='None')
 
-    ax.plot( line1000.df['y+'], 
-             line1000.df['vrms+']**2*line1000.df['sqrt(rho/rho_w)']**2,
-             'black', 
-             marker='s',
-             markersize=10,
-             fillstyle='none',
-             linestyle='None')
-    
-    ax.plot( line1000.df['y+'], 
-             (line1000.df['wrms+'])**2*line1000.df['sqrt(rho/rho_w)']**2,
-             'black', 
-             marker='s',
-             markersize=10,
-             fillstyle='none',
-             linestyle='None')
-    
-    ax.plot( line1000.df['y+'], 
-             (line1000.df['uv+'])*line1000.df['sqrt(rho/rho_w)']**2,
-             'black', 
-             marker='s',
-             markersize=10,
-             fillstyle='none',
-             linestyle='None')
+        ax.plot( line1000.df['y+'], 
+                line1000.df['vrms+']**2*line1000.df['sqrt(rho/rho_w)']**2,
+                'black', 
+                marker='s',
+                markersize=10,
+                fillstyle='none',
+                linestyle='None')
+        
+        ax.plot( line1000.df['y+'], 
+                (line1000.df['wrms+'])**2*line1000.df['sqrt(rho/rho_w)']**2,
+                'black', 
+                marker='s',
+                markersize=10,
+                fillstyle='none',
+                linestyle='None')
+        
+        ax.plot( line1000.df['y+'], 
+                (line1000.df['uv+'])*line1000.df['sqrt(rho/rho_w)']**2,
+                'black', 
+                marker='s',
+                markersize=10,
+                fillstyle='none',
+                linestyle='None')
     
     for line in lines:
         ax.plot(line.df['y+'], 

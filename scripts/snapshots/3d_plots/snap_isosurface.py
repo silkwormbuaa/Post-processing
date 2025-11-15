@@ -12,7 +12,7 @@
 # need to install xvfbwrapper, and update 
 # /path/to/conda/env/pp/lib/libstdc++.so.6 to have GLIBCXX_3.4.30
 
-off_screen = True
+off_screen = False
 
 if off_screen:
     from xvfbwrapper import Xvfb
@@ -50,9 +50,9 @@ mpi = MPIenv()
 # option 
 # =============================================================================
 
-casefolder = '/home/wencan/temp/250710'
+casefolder = '/home/wencan/temp/220927'
 
-bbox      = [-58.0, 999, -1.3, 31.0, -999, 999]
+bbox      = [-86.5, 999, -1.3, 50.0, -999, 999]
 gradients = ['Q_cr','div','vorticity','grad_rho','grad_rho_mod']
 vars_out  = ['u','Q_cr','grad_rho_mod','p']
 
@@ -74,7 +74,12 @@ grid3d     = GridData()
 
 if mpi.is_root:
     
-    snapfiles = get_filelist( snaps_dir, 'snapshot.bin' )
+    params = Params( dirs.case_para_file )
+    u_ref     = params.u_ref
+    rho_ref   = params.rho_ref
+    p_dyn     = 0.5 * rho_ref * u_ref**2
+
+    snapfiles = get_filelist( dirs.wall_dist, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
     
     grid3d = GridData( gridfile )
@@ -82,10 +87,6 @@ if mpi.is_root:
     
     block_list = grid3d.select_blockgrids( bbox, mode='within' )
     
-    params = Params( dirs.case_para_file )
-    u_ref     = params.u_ref
-    rho_ref   = params.rho_ref
-    p_dyn     = 0.5 * rho_ref * u_ref**2
     
     if params.roughwall:
     
@@ -159,7 +160,7 @@ def plot_isosurface( snapfile ):
     sep_bubble = point_data.contour(  [0.0], scalars='u' )
     shock_front = point_data.contour( [grad_rho_limit], scalars='grad_rho_mod' )
     
-    vortices = point_data.contour( [50000.0], scalars='Q_cr' )
+    vortices = point_data.contour( [20000.0], scalars='Q_cr' )
     vortices.set_active_scalars('u')
 
     if roughwall:
@@ -198,8 +199,8 @@ def plot_isosurface( snapfile ):
     p.camera.position = (-120,50,25)
     p.camera.focal_point = (20,-18,-5)
     
-    # cpos_callback( p )
-    # p.show()
+    cpos_callback( p )
+    p.show()
     
 # -- save the figure with matplotlib
 

@@ -45,11 +45,12 @@ plt_tke            = True
 
 pure  = False
 
-fmt = '.png'
+fmt   = '.png'
+xlim  = [1,2000]
 
 # =============================================================================
 
-OutPath  = '/home/wencan/temp/DataPost/midRe/profile_local/upstream_plane/jfm_reviewer'
+OutPath  = '/home/wencan/temp/DataPost/midRe/profile_local/upstream_plane/jfm_reviewer/highRe'
 
 cases = ['smooth_adiabatic', '220927', '220927','smooth_mid', '231124','231124','241030','241030']
 
@@ -60,6 +61,32 @@ label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}_r$', r'$\mathcal{LR}_v$', r'$\mat
 locs     = ['ridge',          'ridge',           'valley',           'ridge',           'ridge'           ,'valley'          ,     'ridge'      ,'valley'          ]
 lstyle   = ['-',               '-',               '--',              '--',              '-'               ,'--'              , '-'              , '--'             ]
 width    = [4.0,               4.0,               4.0,               4.0,               4.0               ,4.0               ,4.0               ,4.0               ]
+
+# --- low Re cases
+
+cases = ['smooth_adiabatic', '220927', '220927']
+
+#dy       = [0.0,               0.312,             0.0,               0.312             ,0.07921                ]
+dy       = [0.0,               0.0,              0.0                  ]
+color    = ['gray',            'orangered',       'orangered'          ]
+label    = [r'$\mathcal{LS}$', r'$\mathcal{LR}_r$', r'$\mathcal{LR}_v$']
+locs     = ['ridge',          'ridge',           'valley'              ]
+lstyle   = ['-',               '-',               ':'                  ]
+width    = [4.0,               4.0,               4.0                  ]
+
+# --- high Re cases
+
+cases = ['smooth_mid', '231124','231124','241030','241030']
+
+#dy       = [0.0,               0.312,             0.0,               0.312             ,0.07921                ]
+dy       = [0.0,               0.0                 ,0.0                 ,0.0                 ,0.0                ]
+color    = ['black',           'steelblue'         ,'steelblue'         ,'yellowgreen'       ,'yellowgreen'       ]
+label    = [r'$\mathcal{HS}$', r'$\mathcal{HR}1_r$',r'$\mathcal{HR}1_v$',r'$\mathcal{HR}2_r$',r'$\mathcal{HR}2_v$']
+locs     = ['ridge',           'ridge'             ,'valley'            ,'ridge'             ,'valley'            ]
+lstyle   = ['--',              '-'                 ,':'                , '-'                , ':'               ]
+width    = [4.0,               4.0                 ,4.0                 ,4.0                 ,4.0                 ]
+
+
 lines = []
 
 
@@ -155,7 +182,7 @@ if plt_u_vd :
                    length=10,
                    width=1.5)
     
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [0,26] )
     
     x_minor = ticker.LogLocator( base=10.0, subs = np.arange(1.0,10.0), numticks=100 )
@@ -179,7 +206,7 @@ if plt_u_vd :
         ax.tick_params( axis='x', pad=15 )
         ax.set_ylabel( r'$\langle u \rangle ^+_{vD}$' )
         ax.tick_params( axis='y', pad=10 )
-        ax.legend( fontsize=20,frameon=False, loc='lower right' ) 
+        ax.legend( fontsize=30,frameon=False, loc='lower right' ) 
 
     # set the bounding box of axes
     ax.spines[:].set_color('black')
@@ -231,7 +258,7 @@ if plt_u :
                    length=5,
                    width=1.5)
     
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [0,25] )
     
     x_minor = matplotlib.ticker.LogLocator( 
@@ -296,7 +323,7 @@ if plt_RS_uu:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [-1,12]   )
 
     ax.minorticks_on()
@@ -360,7 +387,7 @@ if plt_RS_vv:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [-0.1,1.8]   )
 
     ax.minorticks_on()
@@ -423,7 +450,7 @@ if plt_RS_ww:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [-0.1,2.7]   )
 
     ax.minorticks_on()
@@ -500,7 +527,7 @@ if plt_RS_uv:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [-1.5,0.2] )
 
     ax.minorticks_on()
@@ -590,7 +617,7 @@ if plt_combined_RS:
                      linewidth = line.width)
     
         ax.set_xscale( "symlog", linthresh=1 )
-        ax.set_xlim( [1,3000] )
+        ax.set_xlim( xlim )
         ax.set_ylim( y_lim[i] )
         ax.minorticks_on()
         ax.tick_params( which='major',
@@ -675,7 +702,7 @@ if plt_combined_RS_sn:
                      linewidth = line.width)
     
         ax.set_xscale( "symlog", linthresh=1 )
-        ax.set_xlim( [1,3000] )
+        ax.set_xlim( xlim )
         ax.set_ylim( y_lim[i] )
         ax.minorticks_on()
         ax.tick_params( which='major',
@@ -752,7 +779,7 @@ if plt_T :
                    length=5,
                    width=1.5)
     
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
 #    ax.set_ylim( [0,25] )
     
     x_minor = matplotlib.ticker.LogLocator( 
@@ -817,7 +844,7 @@ if plt_tke:
     ax.set_xscale( "symlog", linthresh=1 )
 
 
-    ax.set_xlim( [1,3000] )
+    ax.set_xlim( xlim )
     ax.set_ylim( [-1,15]   )
 
     ax.minorticks_on()
