@@ -44,8 +44,8 @@ n_procs = comm.Get_size()
 
 # =============================================================================
 
-casepath = '/home/wencan/temp/250710' 
-bbox     = [ -17.0, 120.0, -1.3, 2.0, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
+casepath = '/home/wencan/temp/smooth_mid' 
+bbox     = [ -120.0, 120.0, -1.3, 0.5, -11.0, 11.0]     # [xmin, xmax, ymin, ymax, zmin, zmax]
 
 # =============================================================================
 # preparation
@@ -78,7 +78,7 @@ if rank == 0:
     params    = Params( dirs.case_para_file )
     roughwall = params.roughwall
     
-    snapfiles = get_filelist( dirs.snp_dir, 'snapshot.bin' )
+    snapfiles = get_filelist( dirs.wall_dist, 'snapshot.bin' )
     print(f"I am root, just found {len(snapfiles)} snapshot files.")
     
     grid3d = GridData( dirs.grid )
@@ -169,8 +169,8 @@ for i, snap_file in enumerate(snapfiles):
     dyn_p    = 0.5*rho_ref*u_ref*u_ref
     
     # drop points that before -14.5 delta or after 10.0 delta
-    df_stat  = df_stat[ (df_stat['xs']>=-14.5) &(df_stat['xs']<= 10.01)]    
-    df_wall  = df_wall[ (df_wall['xs']>=-14.5) &(df_wall['xs']<= 10.01)]
+    df_stat  = df_stat[ (df_stat['xs']>=-20.0) &(df_stat['xs']<= 10.01)]    
+    df_wall  = df_wall[ (df_wall['xs']>=-20.0) &(df_wall['xs']<= 10.01)]
 
     xx       = np.array( df_wall['xs'] )
     zz       = np.array( df_wall['zs'] )

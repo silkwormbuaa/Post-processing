@@ -22,6 +22,7 @@ sys.path.append( source_dir )
 
 from   vista.timer       import timer
 from   vista.snapshot    import Snapshot
+from   vista.directories import Directories
 from   vista.tools       import get_filelist
 from   vista.tools       import distribute_mpi_work
 from   vista.plane_analy import compute_DS
@@ -34,24 +35,26 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 n_procs = comm.Get_size()
 
-#snaps_dir = '/home/wencanwu/my_simulation/temp/220927_lowRe/snapshots/video_test/snapshots'
+case_dir = '/home/wencan/temp/smooth_mid/'
+
+dirs     = Directories( case_dir )
+
+output_folder = dirs.pos_dir + '/temporary'
 
 # -- get snapshots list
 
-snaps_dir = os.getcwd()
-
-os.chdir( snaps_dir )
+snaps_dir = dirs.snp_dir
 
 snapfiles = None
 
 if rank == 0:
-    print(f"I am root, now at {snaps_dir}.")
-    create_folder( './pkl_data' )
+    create_folder( output_folder )
+    print(f"I am root, looking for z slice in {snaps_dir}.")
     snapfiles = get_filelist( snaps_dir, 'snapshot_Z' )
 
 # wait for the root to create the directory
 comm.barrier() 
-os.chdir('./pkl_data')
+os.chdir( create_folder(output_folder + '/pkl'))
 snapfiles = comm.bcast( snapfiles, root=0 )
 
 # --- Distribute the tasks (evenly as much as possible)

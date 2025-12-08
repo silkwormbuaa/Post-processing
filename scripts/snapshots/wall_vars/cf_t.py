@@ -45,7 +45,7 @@ def main():
     mpi = MPIenv()
     set_jfm_style()
     
-    case_dir = '/home/wencan/temp/241030'
+    case_dir = '/home/wencan/temp/smooth_mid'
     
     # be careful with the range of bounding box
     bbox     = [ -30.0, 120.0, -1.3, 0.5, -11.0, 11.0]
