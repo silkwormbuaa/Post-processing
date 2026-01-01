@@ -60,9 +60,16 @@ prb_withT = True
 
 # probe groups
 
-prb_ridge_index     = [97..239],[380..518]
+prb_ridge_index     = [1..389]
 prb_valley_index    = []
 prb_upspan_index    = []
 prb_downspan_index  = []
-prb_upvline_index   = [1..96]
-prb_downvline_index = [240..379]
+prb_upvline_index   = []
+prb_downvline_index = []
+
+# prb_ridge_index     = [97..240], [380..518]
+# prb_valley_index    = []
+# prb_upspan_index    = []
+# prb_downspan_index  = []
+# prb_upvline_index   = [1..96]
+# prb_downvline_index = [240..379]
