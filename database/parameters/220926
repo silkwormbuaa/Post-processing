@@ -49,9 +49,17 @@ prb_withT = False
 
 # probe groups
 
-prb_ridge_index     = [97..240], [380..518]
-prb_valley_index    = []
+prb_ridge_index     = [1..389]
+prb_valley_index    = [390..778]
 prb_upspan_index    = []
 prb_downspan_index  = []
-prb_upvline_index   = [1..96]
-prb_downvline_index = [240..379]
+prb_upvline_index   = []
+prb_downvline_index = []
+
+# this part are the original probes distribution (results are denoted as 20-61)
+# prb_ridge_index     = [97..240], [380..518]
+# prb_valley_index    = []
+# prb_upspan_index    = []
+# prb_downspan_index  = []
+# prb_upvline_index   = [1..96]
+# prb_downvline_index = [240..379]
