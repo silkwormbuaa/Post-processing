@@ -31,7 +31,7 @@ from   vista.plot_setting import set_plt_rcparams
 set_plt_rcparams(fontsize=20)
 # =============================================================================
 
-casedir = '/home/wencan/temp/smooth_mid_x2/'
+casedir = '/home/wencan/temp/smooth_mid/'
 
 fs      = 100
 n_seg   = 8
