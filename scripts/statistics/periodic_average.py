@@ -39,11 +39,11 @@ plt.rcParams['font.size']           = 30
 def main():
 # =============================================================================
 
-    case_folder = '/home/wencan/temp/231124/'
+    case_folder = '/home/wencan/temp/smooth_adiabatic/'
     
-    stat_file   = 'stat_xslice_upstream.bin'
-    outfolder   = 'yz_planes'
-    loc         = -20.0       # normalized
+    stat_file   = 'stat_xslice_-13.bin'
+    outfolder   = 'yz_planes_-13'
+    loc         = -13.0       # normalized
     
     loc         = loc * 5.2 + 50.4
     
@@ -54,7 +54,7 @@ def main():
     vars_output = ['u',    'v',   'w',    'T',
                    'mach', 'tke', 'u`u`', 'u`v`',
                    'p`','w1']
-    cbar_range  = [[0.0,1.0],[-4.0,4.0],[-2.0,2.0], [1.0,1.8],
+    cbar_range  = [[0.0,1.0],[-5.0,5.0],[-2.0,2.0], [1.0,1.8],
                    [0,2.0],   [0,4.0],   [0,3.0],   [-3.6,0],
                    [0,0.08],[-1.0,1.0]]
     cbar_label  = [r'$\langle u \rangle / u_{\infty}$',
@@ -72,7 +72,7 @@ def main():
                    params.p_ref,params.u_ref/params.delta_0]
     bbox        = [-100,20,-2,12,-20,20]
     streamline  = False
-    D_norm      = True
+    D_norm      = False
 
 # =============================================================================
 
@@ -214,12 +214,12 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, wall=No
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
 
-    ax.text( loc_tag[0], loc_tag[1],
-            params.tag,
-            va='center',
-            ha='right',
-            zorder=12,
-            bbox={"fc":"white","alpha":0.8,"ec":"None"})    
+    # ax.text( loc_tag[0], loc_tag[1],
+    #         params.tag,
+    #         va='center',
+    #         ha='right',
+    #         zorder=12,
+    #         bbox={"fc":"white","alpha":0.8,"ec":"None"})    
 
     ax.spines[:].set_color('black')
     ax.spines[:].set_linewidth(1.5)

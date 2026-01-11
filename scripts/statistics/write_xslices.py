@@ -23,21 +23,21 @@ from   vista.directories import Directories
 
 # =============================================================================
 
-casedir   = '/home/wencan/temp/smooth_adiabatic/'
+casedir   = '/home/wencan/temp/250821/'
 slic_type = 'X'
 
 # locs      = [-14.98,-8.53,-7.33,1.89,8.0]
 #outfiles  = [f'/stat_xslice_{i:03d}.bin' for i in range(len(locs))]
 
-locs = [-12.0]
+locs = [-13.0]
 locs = np.array(locs) * 5.2 + 50.4
-outfiles  = ['/stat_xslice_-12.bin']
+outfiles  = ['/stat_xslice_-13.bin']
 
 # outfiles   = ['/stat_xslice_pwgradmax.bin']
 
 # =============================================================================
 
-os.chdir( casedir)
+os.chdir( casedir )
 dirs = Directories( casedir )
 params = Params( dirs.case_para_file )
 
