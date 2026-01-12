@@ -39,7 +39,7 @@ plt.rcParams['font.size']           = 30
 def main():
 # =============================================================================
 
-    case_folder = '/home/wencan/temp/smooth_adiabatic/'
+    case_folder = '/home/wencan/temp/250821/'
     
     stat_file   = 'stat_xslice_-13.bin'
     outfolder   = 'yz_planes_-13'
@@ -54,9 +54,9 @@ def main():
     vars_output = ['u',    'v',   'w',    'T',
                    'mach', 'tke', 'u`u`', 'u`v`',
                    'p`','w1']
-    cbar_range  = [[0.0,1.0],[-5.0,5.0],[-2.0,2.0], [1.0,1.8],
-                   [0,2.0],   [0,4.0],   [0,3.0],   [-3.6,0],
-                   [0,0.08],[-1.0,1.0]]
+    cbar_range  = [[0.0,1.0],[-5.0,5.0],[-8.0,8.0], [1.0,1.8],
+                   [0,2.0],   [0,4.0],   [0,2.0],   [-5.0,0],
+                   [0,0.08],[-1.6,1.6]]
     cbar_label  = [r'$\langle u \rangle / u_{\infty}$',
                    r'$\langle v \rangle / u_{\infty}\cdot 100$',
                    r'$\langle w \rangle / u_{\infty}\cdot 100$',
@@ -71,7 +71,7 @@ def main():
                    1.0, params.u_ref**2/100, params.u_ref**2/100, params.u_ref**2/1000,
                    params.p_ref,params.u_ref/params.delta_0]
     bbox        = [-100,20,-2,12,-20,20]
-    streamline  = False
+    streamline  = True
     D_norm      = False
 
 # =============================================================================
@@ -171,8 +171,8 @@ def output_var_fig(var, df, params:Params, norm, cbar_range, cbar_label, wall=No
     csnoic = ax.contour( z, y, mach, levels=[1.0], colors='lime', linewidths=2.0, zorder=9)
 
     if streamline:
-        ax.streamplot(z,y, w, v, color='black', linewidth=0.5, density=1.0)
-        #ax.quiver(z[::4,::4], y[::4,::4], w[::4,::4], v[::4,::4], color='black', scale=100)
+        #ax.streamplot(z,y, w, v, color='black', linewidth=0.5, density=1.0)
+        ax.quiver(z[::6,::6], y[::6,::6], w[::6,::6], v[::6,::6], color='black', scale=0.8)
 
 #    ax.fill_between( pz/length_unit, y_bottom, y2=ywall, color='gray', zorder=10 )
     ax.fill_between( wall[:,2]/length_unit, y_bottom, y2=wall[:,1]/length_unit, color='gray', zorder=10 )

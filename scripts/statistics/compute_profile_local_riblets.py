@@ -28,7 +28,7 @@ def main():
    
     case_dirs = ['smooth_adiabatic','250821','250710']
     
-    loc_norm = -13
+    loc_norm = -12
     
     for case in case_dirs:
         

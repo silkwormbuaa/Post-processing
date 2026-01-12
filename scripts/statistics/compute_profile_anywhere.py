@@ -35,11 +35,11 @@ from   vista.tools       import get_filelist
 
 def main():
     
-    case_dirs = ['smooth_adiabatic', '250821','250710'] 
+    case_dirs = ['250821'] 
     
-    x_loc     = -13.0 # normalized location
+    x_loc     = -12.0 # normalized location
     
-    outfolder = 'profile_-13'
+    outfolder = 'profile_-12'
 
     for case in case_dirs:
         
