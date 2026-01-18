@@ -30,22 +30,22 @@ plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
 plt.rcParams['font.family']         = "Times New Roman"
 plt.rcParams['font.size']           = 40
 
-OutPath  = "/media/wencan/Expansion/temp/DataPost/herringbones_patch/averaged_streamwise_vars_h10_h03"
+OutPath  = "/media/wencan/Expansion/temp/DataPost/herringbones_patch/averaged_streamwise_vars_withdivco/"
 
 # sw_pfluc_file = '/home/wencanwu/my_simulation/temp/smooth_wall/line_p_prime.dat'
 # sw_Cf_file = '/home/wencanwu/my_simulation/temp/smooth_wall/x_cf_STBLI_Wencan.dat'
 # sw_Cp_file = '/home/wencanwu/my_simulation/temp/smooth_wall/Cf_flat_new.dat'
 
-cases = ['smooth_adiabatic','250710','250821']
+cases = ['smooth_adiabatic','250821','250710']
 
 casepaths = [f'/media/wencan/Expansion/temp/{case}' for case in cases]
 datapaths = [f'{casepath}/postprocess/statistics/wall_projection/streamwise_vars.pkl' for casepath in casepaths]
 
-dy       = [0.0,       0.0, 0.0]
-color    = ['gray', 'blue', 'red']
-label    = ['smooth',   'cd1', 'cd2']
-lstyle   = [':',     '-.', '--']
-width    = [4.0,      4.0, 4.0]
+dy       = [0.0,        0.0  , 0.0   ]
+color    = ['black',    'red', 'blue']
+label    = ['smooth',   'cd2', 'cd1' ]
+lstyle   = ['-',        '-'  , '-'   ]
+width    = [4.0,        4.0  ,  4.0  ]
 
 x_sep, x_att, x_pfmax = [], [], []
 
@@ -103,7 +103,7 @@ def adjust_plotting( ax:plt.Axes ):
                     length=10,
                     width=1)
 
-    ax.set_xlim([-20,10])
+    ax.set_xlim([-13,10])
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
 
     ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
@@ -142,6 +142,19 @@ if plt_pwfluc:
                  ls = line.lstyle,
                  label = line.label,
                  linewidth = line.width)
+        
+        if i > 0:
+            
+            ax.plot( line.df['x'], 
+                     line.df['p_fluc_div'],
+                     line.color,
+                     ls = '--',
+                     linewidth = line.width)
+            ax.plot( line.df['x'], 
+                     line.df['p_fluc_con'],
+                     line.color,
+                     ls = ':',
+                     linewidth = line.width)
 
     # to avoid line overlapped on marker
     
@@ -191,6 +204,19 @@ if plt_pwfluc_ln:
                  ls = line.lstyle,
                  label = line.label,
                  linewidth = line.width)
+        
+        if i>0:
+            
+            ax.plot( line.df['x'], 
+                     line.df['p_fluc_div']/line.df['Cp_div'],
+                     line.color,
+                     ls = '--',
+                     linewidth = line.width)
+            ax.plot( line.df['x'], 
+                     line.df['p_fluc_con']/line.df['Cp_con'],
+                     line.color,
+                     ls = ':',
+                     linewidth = line.width)
     
     # to avoid line overlapped on marker
     
@@ -244,6 +270,19 @@ if plt_pw:
                 ls = line.lstyle,
                 label = line.label,
                 linewidth = line.width)
+        
+        if i > 0:
+            
+            ax.plot( line.df['x'], 
+                     line.df['Cp_div'],
+                     line.color,
+                     ls = '--',
+                     linewidth = line.width)
+            ax.plot( line.df['x'], 
+                     line.df['Cp_con'],
+                     line.color,
+                     ls = ':',
+                     linewidth = line.width)
 
     # to avoid line overlapped on marker
     
@@ -298,6 +337,21 @@ if plt_pwg:
                  ls = line.lstyle,
                  label = line.label,
                  linewidth = line.width)
+        
+        if i > 0:
+            pwg_div = np.gradient( line.df['Cp_div'], line.df['x'] )
+            pwg_con = np.gradient( line.df['Cp_con'], line.df['x'] )
+            
+            ax.plot( line.df['x'], 
+                     pwg_div,
+                     line.color,
+                     ls = '--',
+                     linewidth = line.width)
+            ax.plot( line.df['x'], 
+                     pwg_con,
+                     line.color,
+                     ls = ':',
+                     linewidth = line.width)
 
     # to avoid line overlapped on marker
     
@@ -309,7 +363,7 @@ if plt_pwg:
         ax.plot( x_att[i],   interpolator(x_att[i]),   'p', color=line.color, ms=15)
         ax.plot( x_pfmax[i], interpolator(x_pfmax[i]), '*', color=line.color, ms=20)
 
-    ax.set_ylim([-0.1,0.6])
+    ax.set_ylim([-0.1,0.4])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
     ax.set_ylabel(r"$\frac{d\langle p_w \rangle}{dx}/\frac{p_{\infty}}{\delta_0}$")
     ax.tick_params(axis='y', pad=10)
@@ -352,6 +406,19 @@ if plt_Cf:
                 ls = line.lstyle,
                 label = line.label,
                 linewidth = line.width)
+        
+        if i > 0:
+            
+            ax.plot( line.df['x'], 
+                     line.df['Cf_div'],
+                     line.color,
+                     ls = '--',
+                     linewidth = line.width)
+            ax.plot( line.df['x'], 
+                     line.df['Cf_con'],
+                     line.color,
+                     ls = ':',
+                     linewidth = line.width)
 
     # to avoid line overlapped on marker
     
@@ -367,7 +434,7 @@ if plt_Cf:
 
     ax.set_ylim([-2.5,4.5])
     ax.yaxis.set_major_locator(ticker.MultipleLocator(2.0))
-    ax.set_ylabel("$C_fx10^3$")
+    ax.set_ylabel(r"$\langle C_f\rangle \times 10^3$")
     ax.tick_params(axis='y', pad=10)
 
     if show_label:

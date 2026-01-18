@@ -28,18 +28,19 @@ from   vista.directories import create_folder
 from   vista.tools       import get_filelist
 
 from   vista.log         import Logger
-sys.stdout = Logger( os.path.basename(__file__) )
+#sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-locs_delta = np.linspace(-20,-20,1)
-y_lim      = 5.2
-outfolder  = '/yz_planes'
+case_folder  = '/home/wencan/temp/250821/'
+locs_delta   = np.linspace(-13,-13,1)
+y_lim        = 5.2
+outfolder    = '/yz_planes_-13'
 compressible = False          # if True, considering density change
 
 # =============================================================================
 
-dirs = Directories( os.getcwd() )
+dirs = Directories( case_folder )
 
 datafile = dirs.statistics
 gridfile = dirs.grid
@@ -59,6 +60,7 @@ u_ref    = params.u_ref
 casecode = params.casecode
 n_period = params.n_period
 tag      = params.tag
+rough    = params.roughwall
 
 locs = locs_delta*delta + x_imp
 
@@ -67,10 +69,10 @@ locs = locs_delta*delta + x_imp
 G = GridData( gridfile )
 G.read_grid()
 
-# - read in cutcell info
-
-cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
-cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], inplace=True )
+if rough:
+    # - read in cutcell info
+    cc_df = pd.read_csv( ccfile, delimiter=r'\s+')
+    cc_df.drop( columns=['fax0','fax1','faz0','faz1','processor'], inplace=True )
 
 # - enter outpath
 
@@ -86,22 +88,27 @@ for i,loc in enumerate(locs):
     # determine the blocks at the probing location and assign 
     block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
     print(f"selected {len(block_list)} blocks at x = {loc}.\n")
-    
-    # - read in wall distance file and assign volume fraction
 
-    wd_snap = Snapshot( snapshotfile )
-    wd_snap.read_snapshot( block_list )
+
+    if rough:    
+        # - read in wall distance file and assign volume fraction
+        wd_snap = Snapshot( snapshotfile )
+        wd_snap.read_snapshot( block_list )
     
-    for num in block_list:
-    
-        # dataframe slice for a certain block
-        temp_df = cc_df[ cc_df['block_number'] == num ]
+        for num in block_list:
         
-        wall_dist = np.array( wd_snap.snap_data[num-1].df['wd'] )
-        
-        # block number starts from 1, but python list index
-        # starts from 0
-        G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+            # dataframe slice for a certain block
+            temp_df = cc_df[ cc_df['block_number'] == num ]
+            
+            wall_dist = np.array( wd_snap.snap_data[num-1].df['wd'] )
+            
+            # block number starts from 1, but python list index
+            # starts from 0
+            G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+
+    else:
+        for num in block_list:
+            G.g[num-1].assign_vol_fra( )   # assign 1.0 for all cells
 
     # - read in statistics data
     

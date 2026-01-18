@@ -1227,12 +1227,12 @@ def plot_wall_projection( xx, zz, v,
                 ax.plot(x_sep,z_sep,'black',linewidth=1.2)
                 
     ax.set_ylim([-2.0,2.0])
-    ax.set_xlim([-20.0,10.0])
+    ax.set_xlim([-13.0,10.0])
     
     if not pure:
         cbar = plt.colorbar(cs,orientation='horizontal', shrink=0.7, ticks=cbar_ticks)
-        cbar.ax.set_ylabel(cbar_label,rotation=0,fontsize=30,labelpad=150,loc='bottom')
-        cbar.ax.tick_params(labelsize=30)
+        cbar.ax.set_ylabel(cbar_label,rotation=0,fontsize=40,labelpad=150,loc='bottom')
+        cbar.ax.tick_params(labelsize=40)
         cbar.ax.set_position([0.4,0.7,0.3,0.1])
         # cbar.ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
         
@@ -1248,17 +1248,17 @@ def plot_wall_projection( xx, zz, v,
                         length=10,
                         width=1)
 
-        ax.tick_params(axis='x',labelsize=30,pad=10)
-        ax.tick_params(axis='y',labelsize=30,pad=10)
+        ax.tick_params(axis='x',labelsize=40,pad=10)
+        ax.tick_params(axis='y',labelsize=40,pad=10)
         
         ax.set_xlabel(r"$(x-x_{imp})/\delta_0$")
         ax.set_ylabel(r"$z/\delta_0$")
         ax.spines[:].set_color('black')
         ax.spines[:].set_linewidth(1.5)
         
-        ax.text(5,-1,label)
+#        ax.text(5,-1,label)
         
-        plt.title(title,fontsize=30,pad=200)
+        plt.title(title,fontsize=40,pad=200)
         
         # set axises stay with contour and x,y unit length equal
         

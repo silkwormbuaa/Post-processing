@@ -38,12 +38,12 @@ plt.rcParams['font.size']   = 30
 independent_len = False
 figname         = 'psdlines_pfmax'
 fmat            = '.png'
-figsize         = (12,7)
+figsize         = (10,7)
 cases_nr        = [0,1,2,3,4]
 showlegend      = False
 premultiply     = True
 normalize       = False
-outpath         = '/home/wencan/temp/DataPost/midRe/psd/jfm_all_pfmax/'
+outpath         = '/home/wencan/temp/DataPost/midRe/psd/jfm_second_revision/'
 
 cases    = ['smooth_adiabatic','220927','smooth_mid','231124','241030']
 color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 

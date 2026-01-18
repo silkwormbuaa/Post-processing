@@ -1,7 +1,7 @@
 # Basic info
 
 casecode = smooth_adiabatic
-tag      = $\mathcal{LS}$
+tag      = $\mathcal{S}$
 roughwall = False
 
 # Flow setup parameters

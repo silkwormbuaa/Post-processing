@@ -37,21 +37,21 @@ plt.rcParams['font.size']   = 30
 # =============================================================================
 
 independent_len = False
-figname         = 'psdlines_by_location'
+figname         = 'psdlines_jfm_lowfreq'
 fmat            = '.png'
-figsize         = (12,6)
-cases_nr        = [0,1,2,3,4]
+figsize         = (10,7)
+cases_nr        = [0,1]
 showlegend      = False
 premultiply     = True
-normalize       = True
-outpath         = '/home/wencan/temp/DataPost/midRe/psd/'
+normalize       = False
+outpath         = '/home/wencan/temp/DataPost/midRe/psd/jfm_second_revision'
 
 cases    = ['smooth_adiabatic','220927','smooth_mid','231124','241030']
 color    = ['gray',             'orangered',       'black',           'steelblue',        'yellowgreen'          ,'red'] 
 label    = [r'$\mathcal{LS}$',  r'$\mathcal{LR}$', r'$\mathcal{HS}$', r'$\mathcal{HR}1$', r'$\mathcal{HR}2$'     ,r'$\mathcal{HR}3$']
 lstyle   = ['-',                '-.',               '--',             ':',                (0, (3, 1, 1, 1, 1, 1)),'--']
 lwidth   = [4.0,              4.0,               4.0,             4.0,                4.0,                  4.0]
-locs     = [-5.0,            -5.0,              -5.0,            -5.0,               -5.0]
+locs     = [-7.6,            -10.5,              -5.0,            -5.0,               -5.0]
 
 os.chdir( create_folder(outpath) )
 
@@ -210,9 +210,13 @@ for nr in cases_nr:
 
 ax.vlines( 0.4, -1.0, 1.0, linestyles='--', linewidth=2, color='black' )
 
+ax.set_position([0.10,0.18,0.85,0.75])
 ax.set_xscale( 'log' )
 ax.set_xlim( [0.01,100] )
-ax.set_ylim( [0.0, 0.5] )
+if normalize: 
+    ax.set_ylim( [0.0,0.5] )
+else:
+    ax.set_ylim( [0.0,8.0e6] )
 
 ax.minorticks_on()
 ax.tick_params( which='major',

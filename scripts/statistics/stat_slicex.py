@@ -31,15 +31,15 @@ from   vista.plane_analy import save_sonic_line
 from   vista.plane_analy import shift_coordinates
 from   vista.plane_analy import periodic_average
 from   vista.plot_style  import plot_slicex_stat
-sys.stdout = Logger( os.path.basename(__file__) )
+#sys.stdout = Logger( os.path.basename(__file__) )
 
 # =============================================================================
 
-case_folder = '/home/wencan/temp/220927/'
-locs_delta  = np.linspace(-20,-20,1)
+case_folder = '/home/wencan/temp/250710/'
+locs_delta  = np.linspace(-13,-13,1)
 
-outfolder  = '/yz_planes'
-periodic_ave = True
+outfolder  = '/yz_planes_-13'
+periodic_ave = False
 
 # =============================================================================
 

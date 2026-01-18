@@ -188,10 +188,10 @@ with timer("plotting"):
             ax.plot(x_sep,z_sep,'black',linewidth=1.0)
 
     ax.set_xlim([-13.0,5.0])
-    ax.set_ylim([0.0,0.50])
+    ax.set_ylim([0.0,2.0])
     ax.set_xlabel(r'$(x-x_{imp})/\delta_0$', fontsize=10)
     ax.set_ylabel(r'$z/\delta_0$', fontsize=10)
-    ax.set_aspect(4.0)
+    ax.set_aspect(1.0)
     ax.minorticks_on()
     ax.tick_params( which='major',
                     axis='both',
@@ -215,19 +215,71 @@ with timer("plotting"):
 
     print(f"separation ratio {compute_separation_ratio(fric):10.5f}.")
 #    
-#    
+    fig, ax = plt.subplots(1,1,figsize=(8.27,5))
+    cs = ax.contourf( xx, zz, p_fluc/p_ref, levels=np.linspace(0.0,0.08,81), 
+                     cmap='coolwarm', extend='both')
+    cbar = fig.colorbar( cs, ax=ax, pad=0.250, shrink=0.5, 
+                         orientation='horizontal', ticks=np.linspace(0.0,0.08,5))
+    cbar.ax.tick_params( direction='in', length=5.0, width=1.0, labelsize=10)
+    cbar.ax.set_ylabel(r"$\sqrt{\langle p' p'\rangle}/p_{\infty}$", loc='center', 
+                       labelpad=40, fontsize=15)
+
+    cbar.outline.set_linewidth(1.0)
+    
+    with open("separationline_xz_periodic.pkl",'rb') as f:
+        
+        lines = pickle.load( f )
+        for line in lines:
+            x_sep = line[:,0]
+            z_sep = line[:,1]
+            ax.plot(x_sep,z_sep,'black',linewidth=1.0)
+
+    ax.set_xlim([-13.0,5.0])
+    ax.set_ylim([0.0,2.0])
+    ax.set_xlabel(r'$(x-x_{imp})/\delta_0$', fontsize=10)
+    ax.set_ylabel(r'$z/\delta_0$', fontsize=10)
+    ax.set_aspect(1.0)
+    ax.minorticks_on()
+    ax.tick_params( which='major',
+                    axis='both',
+                    direction='out',
+                    length=5,
+                    width=1)
+    ax.tick_params( which='minor',
+                    axis='both', 
+                    direction='out',
+                    length=3,
+                    width=1)
+
+    ax.tick_params(axis='x',labelsize=10,pad=5)
+    ax.tick_params(axis='y',labelsize=10,pad=5)
+    ax.spines[:].set_linewidth(1.0)
+    ax.text(4,0.3, params.tag, fontsize=10)
+    
+    plt.savefig(f'pf_periodic_zoom_{params.casecode}.png', dpi=300)
     
 with timer("save spanwise averaged variable distribution along x"):
-    
     fric_mean   = np.mean( fric/dyn_p*1000.0, axis=0 )
     p_mean      = np.mean( p/p_ref, axis=0 )
     p_fluc_mean = np.mean( p_fluc/p_ref, axis=0 )
+    fric_div    = fric[npz//2,:]/dyn_p*1000.0
+    fric_con    = fric[npz//2+npz//(2*period),:]/dyn_p*1000.0
+    p_div       = p[npz//2,:]/p_ref
+    p_con       = p[npz//2+npz//(2*period),:]/p_ref
+    p_fluc_div  = p_fluc[npz//2,:]/p_ref
+    p_fluc_con  = p_fluc[npz//2+npz//(2*period),:]/p_ref
 
-    df_streamwise = pd.DataFrame(columns=['x','Cf','Cp','p_fluc'])
+    df_streamwise = pd.DataFrame(columns=['x','Cf','Cp','p_fluc','Cf_div','Cf_con','Cp_div','Cp_con','p_fluc_div','p_fluc_con'])
     df_streamwise['x']  = np.unique( xx )
     df_streamwise['Cf'] = np.array( fric_mean )
     df_streamwise['Cp'] = np.array( p_mean )
     df_streamwise['p_fluc'] = np.array( p_fluc_mean )
+    df_streamwise['Cf_div'] = np.array( fric_div )
+    df_streamwise['Cf_con'] = np.array( fric_con )
+    df_streamwise['Cp_div'] = np.array( p_div )
+    df_streamwise['Cp_con'] = np.array( p_con )
+    df_streamwise['p_fluc_div'] = np.array( p_fluc_div )
+    df_streamwise['p_fluc_con'] = np.array( p_fluc_con )
     
     with open('streamwise_vars.pkl','wb') as f:
         
