@@ -33,9 +33,9 @@ from   vista.log         import Logger
 # =============================================================================
 
 case_folder  = '/home/wencan/temp/250821/'
-locs_delta   = np.linspace(-13,-13,1)
+locs_delta   = np.linspace(-24,-13,23, endpoint=True)  
 y_lim        = 5.2
-outfolder    = '/yz_planes_-13'
+outfolder    = '/secondary_flow_intensity/'
 compressible = False          # if True, considering density change
 
 # =============================================================================
@@ -81,40 +81,43 @@ os.chdir(outpath)
 
 # - read in statistics data and do slicing
 
-for i,loc in enumerate(locs):
+with open('secondary_flow_intensity.txt', 'w') as f_out:
     
-    loc_delta = locs_delta[i]
-    
-    # determine the blocks at the probing location and assign 
-    block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
-    print(f"selected {len(block_list)} blocks at x = {loc}.\n")
+    f_out.write( 'x'.ljust(20) + 'x/delta_0'.ljust(20) + 'Gamma'.ljust(20) +
+                 'Gamma_w'.ljust(20) + '\n' )
 
-
-    if rough:    
-        # - read in wall distance file and assign volume fraction
-        wd_snap = Snapshot( snapshotfile )
-        wd_snap.read_snapshot( block_list )
-    
-        for num in block_list:
+    for i,loc in enumerate(locs):
         
-            # dataframe slice for a certain block
-            temp_df = cc_df[ cc_df['block_number'] == num ]
-            
-            wall_dist = np.array( wd_snap.snap_data[num-1].df['wd'] )
-            
-            # block number starts from 1, but python list index
-            # starts from 0
-            G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+        loc_delta = locs_delta[i]
+        
+        # determine the blocks at the probing location and assign 
+        block_list, indx_slic = G.select_sliced_blockgrids( 'X', loc )
+        print(f"selected {len(block_list)} blocks at x = {loc}.\n")
 
-    else:
-        for num in block_list:
-            G.g[num-1].assign_vol_fra( )   # assign 1.0 for all cells
 
-    # - read in statistics data
-    
-    S = StatisticData( datafile )
-    
-    with timer("read selected blocks and match grid"):
+        if rough:    
+            # - read in wall distance file and assign volume fraction
+            wd_snap = Snapshot( snapshotfile )
+            wd_snap.read_snapshot( block_list )
+        
+            for num in block_list:
+            
+                # dataframe slice for a certain block
+                temp_df = cc_df[ cc_df['block_number'] == num ]
+                
+                wall_dist = np.array( wd_snap.snap_data[num-1].df['wd'] )
+                
+                # block number starts from 1, but python list index
+                # starts from 0
+                G.g[num-1].assign_vol_fra( df=temp_df, wall_dist=wall_dist )
+
+        else:
+            for num in block_list:
+                G.g[num-1].assign_vol_fra( )   # assign 1.0 for all cells
+
+        # - read in statistics data
+        
+        S = StatisticData( datafile )
         
         vars = ['v','w','rho']
         
@@ -125,10 +128,9 @@ for i,loc in enumerate(locs):
         dfs = S.get_slice_df( block_list, G, indx_slic, 'X' )
         
         dfs.drop( dfs[ dfs['y'] > y_lim ].index, inplace=True )
+        dfs.drop( dfs[ dfs['y'] < 0.0   ].index, inplace=True )
     
-    # - compute secondary flow intensity
-    
-    with timer("compute secondary flow intensity"):
+        # - compute secondary flow intensity
         
         gamma = 0.0
         
@@ -142,9 +144,13 @@ for i,loc in enumerate(locs):
         if not compressible: rho = 1.0
         
         t1 = np.sum( hy*hz*vol_fra * np.sqrt(v*v+w*w) * rho / 507)
+        tw = np.sum( hy*hz*vol_fra * np.sqrt(    w*w) * rho / 507)
         t2 = np.sum( hy*hz*vol_fra * rho)
         
-        gamma = t1/t2
+        gamma   = t1/t2
+        gamma_w = tw/t2
 
-    print("=====================================================")
-    print(f"Secondary flow intensity at x = {loc} is {gamma:.4f}.\n")
+        print("=====================================================")
+        print(f"Secondary flow intensity at x = {loc}({loc_delta}) is {gamma:.4f} (w:{gamma_w:.4f}).\n")
+
+        f_out.write( f"{loc:20.8f}{loc_delta:20.8f}{gamma:20.8f}{gamma_w:20.8f}\n" )

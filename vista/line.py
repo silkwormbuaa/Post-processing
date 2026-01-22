@@ -337,7 +337,8 @@ class ProfileData( LineData ):
         self.df['y+' ] = np.array( self.df['y' ])  / self.lv
         self.df['ys+'] = np.array( self.df['ys'])  / self.lv
         self.df['u+' ] = np.array( self.df['u' ])  / self.u_tau
-        self.df['p`+'] = np.array( self.df['p`'])  / self.tau_ave
+        if 'p`' in self.df.columns:
+            self.df['p`+'] = np.array( self.df['p`'])  / self.tau_ave
         
         rho = np.array( self.df['rho'] )
         

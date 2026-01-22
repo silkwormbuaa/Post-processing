@@ -22,6 +22,7 @@ source_dir = os.path.realpath(__file__).split('plot')[0]
 sys.path.append( source_dir )
 
 from   vista.line         import ProfileData
+from   vista.directories  import create_folder
 
 plt.rcParams["text.usetex"] = True
 plt.rcParams['text.latex.preamble'] = r'\usepackage{stix}'
@@ -30,29 +31,29 @@ plt.rcParams['font.size']   = 40
 
 # =============================================================================
 
-plt_u_vd_lw        = False
+plt_u_vd_lw        = True
 plt_u_vd           = False
 plt_u              = False
 plt_RS_uu          = False
 plt_RS_vv          = False
 plt_RS_ww          = False
 plt_RS_uv          = False
-plt_RS_DNS         = False
+plt_RS_DNS         = True
 plt_combined_RS    = False
 plt_combined_RS_sn = False
 plt_rho            = False
 plt_T              = False
 plt_Mt             = False
-plt_tke            = True
-plt_tke_sn         = True
+plt_tke            = False
+plt_tke_sn         = False
 
 pure = False
 
-fmt = '.png'
+fmt = '.pdf'
 
 # =============================================================================
 
-OutPath  = '/home/wencan/temp/DataPost/lowRe/profile_upstream'
+OutPath  = '/home/wencan/temp/DataPost/lowRe/profile_upstream_thesis'
 
 data0 = '/media/wencan/Expansion/temp/smooth_isothermal/results/profile'
 data1 = '/media/wencan/Expansion/temp/221014/postprocess/statistics/profile_upstream'
@@ -68,9 +69,9 @@ dataDNS = source_dir + '/database/Pirozzoli/M2_Retau_250'
 
 datalist = [data6, data1,   data2,   data3,                   data4,        data5]
 dy       = [0,     0.494,   0.468,   0.416,                   0.312,        0.26,  0.0]
-color    = ['gray','green', 'blue', 'black',                  'red',        'purple', 'yellow']
+color    = ['black','green', 'blue', 'black',                  'red',        'purple', 'yellow']
 label    = ['',    '2.0',   '1.0',  '0.5',                    '0.25',       '0.125', 'smooth']
-lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',     'dotted']
+lstyle   = ['-',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',     'dotted']
 width    = [4.0,   4.0,      4.0,    4.0,                     4.0,          4.0,     4.0]
 lines = []
 
@@ -91,6 +92,7 @@ lines = []
 for i, datapath in enumerate(datalist):
     
     os.chdir(datapath)
+    print(f"Processing case: {datapath}")
     
     line = ProfileData('profile_mean.dat') 
     line.shift_y( dy[i] )
@@ -119,7 +121,7 @@ lineDNS.color = 'black'
 lineDNS.lstyle = 's'
 lineDNS.marker = markers.MarkerStyle(marker='s')
 
-os.chdir( OutPath )
+os.chdir( create_folder(OutPath) )
 
 # ----------------------------------------------------------------------
 # >>> plot comparison between smooth wall and law of wall        (Nr.)
