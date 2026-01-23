@@ -12,11 +12,13 @@
 
 import os
 import sys
+import numpy             as     np
 
 source_dir = os.path.realpath(__file__).split('scripts')[0]
 sys.path.append( source_dir )
 
 from   vista.line        import ProfileData
+from   vista.tools       import find_indices
 
 # cases     = ['smooth_mid', '231124', '241030','smooth_adiabatic','220927'] #
 # datapaths = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/profile_incip' for case in cases]
@@ -24,7 +26,6 @@ from   vista.line        import ProfileData
 cases       = ['smooth_adiabatic','250821','250710']
 datapaths   = [f'/media/wencan/Expansion/temp/{case}/postprocess/statistics/profile_-13' for case in cases]
 dy          = [0.0,             0.0,      0.0]
-u_ref       = 507.0
 
 # =============================================================================
 
@@ -38,6 +39,8 @@ for i, path in enumerate( datapaths ):
     # drop some values at the tail
     line.df = line.df.iloc[:-5]
     line.df.reset_index(drop=True, inplace=True)
+    
+    u_ref = line.df['u'].iloc[ find_indices( np.array(line.df['y']), 10.4, 'sequential')[1] ]
     
     delta99,delta_star,theta = line.compute_boundary_layer_property(u_ref)
     

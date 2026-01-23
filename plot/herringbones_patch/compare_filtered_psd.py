@@ -40,15 +40,15 @@ set_plt_rcparams()
 cutoff_st       = 0.4
 independent_len = False
 addmarker       = True
-cases     = ['smooth_adiabatic','250821','250821']
-colors    = ['gray',  'red', 'blue']
-lstyle    = ['-',     '-.',  '--'] 
+cases     = ['smooth_adiabatic','250710','250710']
+colors    = ['black',  'blue', 'blue']
+lstyle    = ['-',     '--',  ':'] 
 locations = ['ridge', 'ridge', 'valley']
-outdir    = '/home/wencan/temp/DataPost/herringbones_patch/psd'
+outdir    = '/home/wencan/temp/DataPost/herringbones_patch/psd/filtered_psd_250710'
 
 # =============================================================================
 
-os.chdir( outdir )
+os.chdir( create_folder(outdir) )
 
 dirs = [ Directories( os.path.join( '/home/wencan/temp', case ) ) for case in cases ]
 
@@ -86,7 +86,7 @@ def plot_style():
                     length=10,
                     width=1)
 
-    ax.set_xlim([-20,10])
+    ax.set_xlim([-13,10])
     ax.set_ylim([0.00,0.09])
     ax.set_xlabel(r"$(x-x_{imp})/\delta_0$", labelpad=-5 )  
     ax.tick_params(axis='x', pad=15)

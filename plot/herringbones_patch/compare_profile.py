@@ -31,8 +31,8 @@ plt.rcParams['font.family'] = 'Times New Roman'
 plt.rcParams['font.size']   = 20
 
 def main():
-    loc    = -12  # -12
-    outfolder = '/home/wencan/temp/DataPost/herringbones_patch/profile_-12'
+    loc    = -13  # -12
+    outfolder = '/home/wencan/temp/DataPost/herringbones_patch/profile_-13'
     cases  = ['smooth_adiabatic','250821','250710']
     colors = ['black'           ,'red'   ,'blue'  ]
     

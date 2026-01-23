@@ -53,10 +53,10 @@ def main():
     vars_read   = ['u','v','w','p','T','uu','vv','ww','uv','pp']
     vars_output = ['u',    'v',   'w',    'T',
                    'mach', 'tke', 'u`u`', 'u`v`',
-                   'p`','w1']
+                   'p`',   'w1',  'v`v`', 'w`w`']
     cbar_range  = [[0.0,1.0],[-5.0,5.0],[-8.0,8.0], [1.0,1.8],
                    [0,2.0],   [0,4.0],   [0,2.0],   [-5.0,0],
-                   [0,0.08],[-1.6,1.6]]
+                   [0,0.08],[-1.6,1.6], [0,2.0],    [0,2.0]]
     cbar_label  = [r'$\langle u \rangle / u_{\infty}$',
                    r'$\langle v \rangle / u_{\infty}\cdot 100$',
                    r'$\langle w \rangle / u_{\infty}\cdot 100$',
@@ -66,10 +66,12 @@ def main():
                    r'$\langle u^{\prime}u^{\prime}\rangle /u_{\infty}^2\cdot 100$',
                    r'$\langle u^{\prime}v^{\prime}\rangle /u_{\infty}^2\cdot 1000$',
                    r'$\sqrt{\langle p^{\prime}p^{\prime}\rangle} / p_{\infty}$',
-                   r'$\langle \omega_{x} \rangle /u_{\infty}\cdot \delta_0$']
+                   r'$\langle \omega_{x} \rangle /u_{\infty}\cdot \delta_0$',
+                   r'$\langle v^{\prime}v^{\prime}\rangle /u_{\infty}^2\cdot 100$',
+                   r'$\langle w^{\prime}w^{\prime}\rangle /u_{\infty}^2\cdot 100$']
     norm        = [params.u_ref, params.u_ref/100, params.u_ref/100, params.T_ref,
                    1.0, params.u_ref**2/100, params.u_ref**2/100, params.u_ref**2/1000,
-                   params.p_ref,params.u_ref/params.delta_0]
+                   params.p_ref,params.u_ref/params.delta_0, params.u_ref**2/100, params.u_ref**2/100]
     bbox        = [-100,20,-2,12,-20,20]
     streamline  = True
     D_norm      = False
