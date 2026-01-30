@@ -54,6 +54,7 @@ lwidth   = [4.0,                4.0,               4.0]
 locs     = ['sep',              'pfmax',          'pfmax']
 prbindex = [158,                150+i_temp,        575+i_temp]
 
+
 os.chdir( create_folder(outpath) )
 
 # =============================================================================
@@ -70,6 +71,7 @@ for nr in cases_nr:
     params   = Params( dirs.case_para_file )
     
     prbfile = dirs.fetch_prb_from_index( prbindex[nr] )
+    prbfile = dirs.fetch_prb_from_type( locs[nr] )
     print( prbfile )
 
     with timer("reading probes"):
@@ -154,6 +156,7 @@ for nr in cases_nr:
     params   = Params( dirs.case_para_file )
     
     prbfile = dirs.fetch_prb_from_index( prbindex[nr] )
+    prbfile = dirs.fetch_prb_from_type( locs[nr] )
 
     with timer("reading probes"):
     

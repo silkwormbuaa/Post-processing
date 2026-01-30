@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 '''
 @File    :   plt_psd_lines.py
-@Time    :   2026/01/26 
+@Time    :   2026/01/27
 @Author  :   Wencan WU 
 @Version :   1.0
 @Email   :   w.wu-3@tudelft.nl
@@ -39,18 +39,29 @@ independent_len = False
 figname         = f'psdlines_notnorm_pfmax'
 fmat            = '.png'
 figsize         = (12,6)
-cases_nr        = [0,1,2,3]
+cases_nr        = [0,1,2,3,4,5]
 showlegend      = False
 premultiply     = True
 normalize       = False
-outpath         = '/media/wencan/Expansion/temp/DataPost/lowRe_ridge_height/psd/unnormalized'
+outpath         = '/media/wencan/Expansion/temp/DataPost/lowRe/psd/unnormalized'
 
-cases    = ['smooth_adiabatic', '240211',          '220927'   , '240210']
-color    = ['black'            , 'black' ,          'black'   , 'black'] 
-label    = ['smooth', r'H/\delta_0=0.05', r'H/\delta_0=0.10', r'H/\delta_0=0.20']
-lstyle   = ['--',  ':',     '-.',    (0, (3, 1, 1, 1, 1, 1)) ]
-lwidth   = [4.0,                4.0,               4.0,    4.0]
-locs     = ['pfmax',              'pfmax',          'pfmax',         'pfmax']
+cases    = ['smooth_adiabatic', '221014', '220926',
+              '220825',         '220927', '221221', 
+              'smooth_isothermal']
+color    = ['gray', 'green',       'blue', 
+            'black', 'red',        'purple', 
+            'yellow']
+label    = ['smooth',              r"$D/{\delta}_0=2.0$",  r"$D/{\delta}_0=1.0$",
+               r"$D/{\delta}_0=0.5$",r"$D/{\delta}_0=0.25$", r"$D/{\delta}_0=0.125$",
+               r"$\mathrm{isothermal}$"]
+lstyle   = ['--',  ':',     '-.',    
+              (0, (3, 1, 1, 1, 1, 1)), (0, (10, 3)), '-',     
+              'dotted']
+lwidth   = [4.0, 4.0, 4.0,
+              4.0, 4.0, 4.0,
+              4.0]
+locs     = ['pfmax',  'pfmax', 'pfmax', 
+            'pfmax', 'pfmax', 'pfmax', 'pfmax']
 
 
 os.chdir( create_folder(outpath) )
@@ -71,7 +82,7 @@ for nr in cases_nr:
     prbfile = dirs.fetch_prb_from_type( locs[nr] )
     print( prbfile )
 
-    with timer("reading probes"):
+    with timer(f"reading probes of case {case}"):
     
         probe = ProbeData( prbfile, withT=params.prb_withT )
         probe.cleandata( t_start=20.0 )

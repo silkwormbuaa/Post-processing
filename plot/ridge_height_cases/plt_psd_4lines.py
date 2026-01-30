@@ -32,7 +32,7 @@ plt.rcParams['font.size']   = 30
 # option zone
 # =============================================================================
 
-loc = 'sep'
+loc = 'pf_max'
 independent_len = False
 figname = 'psd_4lines_notnorm'
 fmat = '.png'
@@ -134,7 +134,8 @@ ax.spines[:].set_linewidth(2)
 
 if showlegend: ax.legend()
 
-plt.savefig( figname + fmat )
+# plt.savefig( figname + fmat )
+plt.show()
 plt.close()
     
 # =============================================================================
@@ -196,6 +197,7 @@ ax.spines[:].set_linewidth(2)
 
 if showlegend: ax.legend()
 
-plt.savefig( figname + '_bin' + fmat )
+#plt.savefig( figname + '_bin' + fmat )
+plt.show()
 plt.close()    
     
